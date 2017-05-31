@@ -6,7 +6,10 @@ import eu.h2020.symbiote.security.token.Token;
 import java.util.HashMap;
 import java.util.Map;
 
-// TODO R3 rework
+/**
+ * @deprecated use @{@link Map} of {@link BoundCredentials} grouped by @{@link AAM} instead of this class
+ */
+@Deprecated
 public class SessionInformation {
     // todo R3 rework to have a wallet of tokens grouped by issuing AAMs and support multiple Platform (home) tokens
     private Token homeToken;

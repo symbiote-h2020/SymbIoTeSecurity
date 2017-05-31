@@ -29,9 +29,10 @@ import java.util.Map;
  *          ! \class SecurityHandler
  *          \brief This class implement the methods to be used by the component in order to integrate with the
  *          security from symbIoTe
+ *          @deprecated use @{@link ISecurityHandler} starting release 3 of SymbIoTe
  **/
-
-public class SecurityHandler {
+@Deprecated
+public class SecurityHandler implements IOldSecurityHandler {
     private static Log log = LogFactory.getLog(SecurityHandler.class);
     protected SessionInformation sessionInformation = null;
     protected TokenHandler tokenHandler = null;
@@ -56,6 +57,7 @@ public class SecurityHandler {
      * for Release 2 with Core certificate, for R3 will include Platforms' certificates
      * @throws SecurityHandlerException on operation error
      */
+    @Override
     public List<AAM> getAvailableAAMs() throws SecurityHandlerException {
         // TODO integrate with SessionInformation
         return coreMessageHandler.getAvailableAAMs();
@@ -70,6 +72,7 @@ public class SecurityHandler {
      * @param password password in Symbiote Core
      * @return Token issued for your user in Symbiote Core
      */
+    @Override
     public Token requestCoreToken(String userName, String password) {
         Token coreToken = sessionInformation.getCoreToken();
         if (coreToken == null) {
@@ -94,6 +97,7 @@ public class SecurityHandler {
      * @param aams Symbiote Authentication and Authorization Managers to request federated tokens from
      * @return
      */
+    @Override
     public Map<String, Token> requestForeignTokens(List<AAM> aams) {
         HashMap<String, Token> federatedTokens = null;
 
@@ -120,6 +124,7 @@ public class SecurityHandler {
     /**
      * Clears the token wallet (home and core)
      */
+    @Override
     public void logout() {
         sessionInformation.setHomeToken(null);
         sessionInformation.setCoreToken(null);
@@ -128,6 +133,7 @@ public class SecurityHandler {
     /**
      * @return home token from the local token wallet
      */
+    @Override
     public Token getHomeToken() {
         return sessionInformation.getHomeToken();
     }
@@ -135,6 +141,7 @@ public class SecurityHandler {
     /**
      * @return core token from the local token wallet
      */
+    @Override
     public Token getCoreToken() {
         return sessionInformation.getCoreToken();
     }
@@ -147,6 +154,7 @@ public class SecurityHandler {
      * @return true if valid
      * @throws CertificateVerificationException on validation error
      */
+    @Override
     public boolean certificateValidation(KeyStore p12Certificate) throws CertificateVerificationException {
         return certificateValidator.validate(p12Certificate);
     }
@@ -155,6 +163,7 @@ public class SecurityHandler {
      * @param token to be validated
      * @return validation status of the core token
      */
+    @Override
     public ValidationStatus verifyCoreToken(Token token) {
         return tokenHandler.validateCoreToken(token);
     }
@@ -167,6 +176,7 @@ public class SecurityHandler {
      * @param token to be validated
      * @return validation status of the core token
      */
+    @Override
     public ValidationStatus verifyPlatformToken(AAM aam, Token token) {
         return tokenHandler.validateForeignPlatformToken(aam, token);
     }

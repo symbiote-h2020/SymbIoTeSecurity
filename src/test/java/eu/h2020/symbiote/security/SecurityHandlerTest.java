@@ -69,7 +69,7 @@ public class SecurityHandlerTest {
     private static final Log log = LogFactory.getLog(SecurityHandlerTest.class);
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-    private SecurityHandler securityHandler;
+    private IOldSecurityHandler securityHandler;
     private String coreTokenString;
     private String platformTokenString;
     private String symbioteCoreInterfaceAddress;

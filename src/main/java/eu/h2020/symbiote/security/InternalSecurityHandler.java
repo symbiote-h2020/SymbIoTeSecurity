@@ -19,8 +19,9 @@ import org.apache.commons.logging.LogFactory;
  *          ! \class SecurityHandler
  *          \brief This class implement the methods to be used by the component in order to integrate with the
  *          security from symbIoTe
+ * @deprecated use @{@link ISecurityHandler} starting release 3 of SymbIoTe
  **/
-
+@Deprecated
 public class InternalSecurityHandler extends SecurityHandler {
     private static Log log = LogFactory.getLog(InternalSecurityHandler.class);
     private LocalAAMOverAMQPClient platformMessageHandler = null;
@@ -35,7 +36,7 @@ public class InternalSecurityHandler extends SecurityHandler {
      */
     public InternalSecurityHandler(String symbioteCoreInterfaceAddress, String rabbitMQHostIP, String
             rabbitMQUsername, String
-            rabbitMQPassword) {
+                                           rabbitMQPassword) {
         super(symbioteCoreInterfaceAddress);
         this.platformMessageHandler = new LocalAAMOverAMQPClient(rabbitMQHostIP, rabbitMQUsername,
                 rabbitMQPassword);

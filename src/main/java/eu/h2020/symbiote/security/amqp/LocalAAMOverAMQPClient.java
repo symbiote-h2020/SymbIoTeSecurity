@@ -16,6 +16,8 @@ import java.io.IOException;
 
 /**
  * Client used to access local/intenal AAM over AMQP by Symbiote components
+ * <p>
+ * TODO R3 rework to use Spring AMQP instead of rabbitMQ implementations
  *
  * @author Mikołaj Dobski (PSNC)
  */
@@ -53,7 +55,8 @@ public class LocalAAMOverAMQPClient {
         } catch (IOException e) {
             try {
                 // unpacking packed exception response
-                ErrorResponseContainer errorResponseContainer = mapper.readValue(response, ErrorResponseContainer.class);
+                ErrorResponseContainer errorResponseContainer = mapper.readValue(response, ErrorResponseContainer
+                        .class);
                 log.error(errorResponseContainer.getErrorMessage());
                 throw new SecurityHandlerException(errorResponseContainer.getErrorMessage());
             } catch (IOException e1) {

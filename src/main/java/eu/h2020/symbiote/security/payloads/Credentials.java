@@ -1,7 +1,7 @@
 package eu.h2020.symbiote.security.payloads;
 
 /**
- * Class that defines the structure of a plain text credentials payload
+ * Class that defines the structure of a plain text credentialsWallet payload
  *
  * @author Daniele Caldarola (CNIT)
  * @author Nemanja Ignjatov (UNIVIE)
