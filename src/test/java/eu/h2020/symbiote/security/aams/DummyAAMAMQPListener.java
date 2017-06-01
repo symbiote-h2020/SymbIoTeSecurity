@@ -4,7 +4,7 @@ import com.rabbitmq.client.*;
 import eu.h2020.symbiote.security.aams.consumers.CheckTokenRevocationRequestConsumerService;
 import eu.h2020.symbiote.security.aams.consumers.LoginRequestConsumerService;
 import eu.h2020.symbiote.security.constants.AAMConstants;
-import eu.h2020.symbiote.security.exceptions.aam.AAMMisconfigurationException;
+import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerMisconfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -54,7 +54,7 @@ public class DummyAAMAMQPListener {
     /**
      * Method gathers all of the rabbit consumer starter methods
      */
-    private void startConsumers() throws AAMMisconfigurationException {
+    private void startConsumers() throws SecurityHandlerMisconfigurationException {
         try {
             startConsumerOfCheckTokenRevocationRequestMessages();
             startConsumerOfLoginRequestMessages();
@@ -122,7 +122,7 @@ public class DummyAAMAMQPListener {
      * Method creates channel and declares Rabbit exchanges for AAM features.
      * It triggers start of all consumers used in with AAM communication.
      */
-    public void init() throws AAMMisconfigurationException {
+    public void init() throws SecurityHandlerMisconfigurationException {
         Channel channel = null;
 
         try {

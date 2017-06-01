@@ -6,7 +6,7 @@ import eu.h2020.symbiote.security.constants.AAMConstants;
 import eu.h2020.symbiote.security.enums.IssuingAuthorityType;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
 import eu.h2020.symbiote.security.exceptions.SecurityHandlerException;
-import eu.h2020.symbiote.security.exceptions.aam.TokenValidationException;
+import eu.h2020.symbiote.security.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.session.AAM;
 import eu.h2020.symbiote.security.token.Token;
 import eu.h2020.symbiote.security.token.jwt.JWTEngine;
@@ -159,15 +159,15 @@ public class SecurityHandlerTest {
             assertEquals(ValidationStatus.VALID, validationStatus);
             Assert.assertEquals("test1", token.getClaims().getSubject());
             Assert.assertEquals("test2", token.getClaims().get(AAMConstants.SYMBIOTE_ATTRIBUTES_PREFIX + "name"));
-        } catch (TokenValidationException e) {
+        } catch (ValidationException e) {
             log.error(e);
             assert (false);
         }
     }
 
     @Test
-    public void testCoreTokenValidationWithError() throws TokenValidationException {
-        thrown.expect(TokenValidationException.class);
+    public void testCoreTokenValidationWithError() throws ValidationException {
+        thrown.expect(ValidationException.class);
         String tokenString =
                 "eyJhbGciOiJSUzUxMiJ9.eyJzdWIiOiJ0ZXN0MSIsImV4cCI6MTQ5MTAzNzk5MiwibmFtZSI6InRlc3QyIn0.j8EPRRVi5L63" +
                         "-s5r8lI9vq_Pi_NoPy4Q-jn39xg8zETTpYecoC26xMo5XaE-sJjhZ1Mup" +
@@ -192,7 +192,7 @@ public class SecurityHandlerTest {
             Assert.assertTrue(token.getType() == IssuingAuthorityType.PLATFORM);
             Assert.assertEquals("test1", token.getClaims().getSubject());
             Assert.assertEquals("test2", token.getClaims().get(AAMConstants.SYMBIOTE_ATTRIBUTES_PREFIX + "name"));
-        } catch (TokenValidationException e) {
+        } catch (ValidationException e) {
             log.error(e);
             assert (false);
         }

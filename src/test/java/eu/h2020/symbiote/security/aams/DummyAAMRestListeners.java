@@ -6,9 +6,9 @@ import eu.h2020.symbiote.security.certificate.Certificate;
 import eu.h2020.symbiote.security.constants.AAMConstants;
 import eu.h2020.symbiote.security.enums.IssuingAuthorityType;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
-import eu.h2020.symbiote.security.exceptions.aam.JWTCreationException;
-import eu.h2020.symbiote.security.exceptions.aam.MalformedJWTException;
-import eu.h2020.symbiote.security.exceptions.aam.TokenValidationException;
+import eu.h2020.symbiote.security.exceptions.custom.JWTCreationException;
+import eu.h2020.symbiote.security.exceptions.custom.MalformedJWTException;
+import eu.h2020.symbiote.security.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.payloads.CheckRevocationResponse;
 import eu.h2020.symbiote.security.payloads.Credentials;
 import eu.h2020.symbiote.security.session.AAM;
@@ -95,7 +95,7 @@ public class DummyAAMRestListeners {
             /* Finally issues and return foreign_token */
             return new ResponseEntity<>(headers, HttpStatus.OK);
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException |
-                UnrecoverableKeyException | JWTCreationException | NoSuchProviderException | TokenValidationException
+                UnrecoverableKeyException | JWTCreationException | NoSuchProviderException | ValidationException
                 e) {
             log.error(e);
         }
@@ -161,7 +161,7 @@ public class DummyAAMRestListeners {
             return new ResponseEntity<>(headers, HttpStatus.OK);
         } catch (MalformedJWTException | KeyStoreException | NoSuchAlgorithmException | CertificateException |
                 IOException |
-                UnrecoverableKeyException | NoSuchProviderException | JWTCreationException | TokenValidationException
+                UnrecoverableKeyException | NoSuchProviderException | JWTCreationException | ValidationException
                 e) {
             log.error(e);
         }

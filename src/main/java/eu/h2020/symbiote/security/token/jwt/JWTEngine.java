@@ -8,8 +8,7 @@ import eu.h2020.symbiote.security.enums.IssuingAuthorityType;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
 import eu.h2020.symbiote.security.exceptions.aam.JWTCreationException;
 import eu.h2020.symbiote.security.exceptions.aam.MalformedJWTException;
-import eu.h2020.symbiote.security.exceptions.aam.TokenValidationException;
-import eu.h2020.symbiote.security.token.Token;
+import eu.h2020.symbiote.security.exceptions.custom.ValidationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.SignatureException;
 import org.apache.commons.codec.binary.Base64;
@@ -45,9 +44,9 @@ public class JWTEngine {
      * Retrieves claims from given token String
      * @param tokenString to get claims from
      * @return claims deserialized from the token
-     * @throws TokenValidationException on parse exception.
+     * @throws ValidationException on parse exception.
      */
-    public static Claims getClaims(String tokenString) throws TokenValidationException {
+    public static Claims getClaims(String tokenString) throws ValidationException {
         try {
             ECDSAHelper.enableECDSAProvider();
             JWTClaims claims = getClaimsFromToken(tokenString);
@@ -61,7 +60,7 @@ public class JWTEngine {
             // validate the token using the claims parser
         } catch (InvalidKeySpecException | MalformedJWTException | NoSuchAlgorithmException e) {
             log.error(e);
-            throw new TokenValidationException("Token could not be validated", e);
+            throw new ValidationException("Token could not be validated", e);
         }
     }
     /**
@@ -70,10 +69,10 @@ public class JWTEngine {
      * @param tokenString Token to be validated and initialized
      * @param publicKey   issuer's public key
      * @return validation status
-     * @throws TokenValidationException on other errors
+     * @throws ValidationException on other errors
      */
     public static ValidationStatus validateTokenString(String tokenString, PublicKey publicKey) throws
-            TokenValidationException {
+            ValidationException {
         try {
             ECDSAHelper.enableECDSAProvider();
 
@@ -89,7 +88,7 @@ public class JWTEngine {
             return ValidationStatus.INVALID;
         } catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
             log.error(e);
-            throw new TokenValidationException("Token could not be validated", e);
+            throw new ValidationException("Token could not be validated", e);
         }
     }
 
@@ -98,9 +97,9 @@ public class JWTEngine {
      *
      * @param tokenString JWT to be validated
      * @return validation status
-     * @throws TokenValidationException on validation error
+     * @throws ValidationException on validation error
      */
-    public static ValidationStatus validateTokenString(String tokenString) throws TokenValidationException {
+    public static ValidationStatus validateTokenString(String tokenString) throws ValidationException {
         try {
             ECDSAHelper.enableECDSAProvider();
             JWTClaims claims = getClaimsFromToken(tokenString);
@@ -114,7 +113,7 @@ public class JWTEngine {
             // validate the token using the claims parser
         } catch (InvalidKeySpecException | MalformedJWTException | NoSuchAlgorithmException e) {
             log.error(e);
-            throw new TokenValidationException("Token could not be validated", e);
+            throw new ValidationException("Token could not be validated", e);
         }
     }
 

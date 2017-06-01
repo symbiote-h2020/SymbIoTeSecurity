@@ -4,10 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.h2020.symbiote.security.constants.AAMConstants;
 import eu.h2020.symbiote.security.enums.IssuingAuthorityType;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
-import eu.h2020.symbiote.security.exceptions.aam.TokenValidationException;
+import eu.h2020.symbiote.security.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.token.jwt.JWTEngine;
 import io.jsonwebtoken.Claims;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 
 /**
@@ -24,7 +23,6 @@ import org.springframework.data.annotation.Transient;
 public class Token {
     public final static String JWT_CLAIMS_TTYPE = AAMConstants.CLAIM_NAME_TOKEN_TYPE;
 
-    @Id
     private String id = "";
     private String token = "";
     private IssuingAuthorityType type = IssuingAuthorityType.NULL;
@@ -41,7 +39,7 @@ public class Token {
      *
      * @param token compacted signed token string
      */
-    public Token(String token) throws TokenValidationException {
+    public Token(String token) throws ValidationException {
         this.setToken(token);
     }
 
@@ -52,10 +50,10 @@ public class Token {
     /**
      * @param token compacted signed token string
      */
-    public void setToken(String token) throws TokenValidationException {
+    public void setToken(String token) throws ValidationException {
         ValidationStatus validationStatus = JWTEngine.validateTokenString(token);
         if (validationStatus != ValidationStatus.VALID) {
-            throw new TokenValidationException("Provided token string is not valid: " + validationStatus);
+            throw new ValidationException("Provided token string is not valid: " + validationStatus);
         }
         this.token = token;
         this.setClaims(JWTEngine.getClaims(token));
@@ -83,5 +81,10 @@ public class Token {
 
     public String getId() {
         return id;
+    }
+
+    @Override
+    public String toString() {
+        return token;
     }
 }
