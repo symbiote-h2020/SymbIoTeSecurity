@@ -84,7 +84,7 @@ public interface ISecurityHandler {
      *                    certificate matching the one from the homeToken
      * @return validation status of the given token
      */
-    ValidationStatus validate(AAM validationAuthority, Token token, Optional<Certificate> certificate);
+    ValidationStatus validate(AAM validationAuthority, String token, Optional<Certificate> certificate);
 
 
     /**

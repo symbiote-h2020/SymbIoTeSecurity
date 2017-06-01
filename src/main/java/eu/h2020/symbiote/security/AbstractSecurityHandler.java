@@ -104,7 +104,7 @@ public class AbstractSecurityHandler implements ISecurityHandler {
     }
 
     @Override
-    public ValidationStatus validate(AAM validationAuthority, Token token, Optional<Certificate> certificate) {
+    public ValidationStatus validate(AAM validationAuthority, String token, Optional<Certificate> certificate) {
         return null;
     }
 }
