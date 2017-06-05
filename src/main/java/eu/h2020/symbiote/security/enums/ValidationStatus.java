@@ -17,7 +17,17 @@ public enum ValidationStatus {
     /**
      * it has reached its end of life
      */
-    EXPIRED,
+    EXPIRED_ISSUER_CERTIFICATE,
+
+    /**
+     * it has reached its end of life
+     */
+    EXPIRED_SUBJECT_CERTIFICATE,
+
+    /**
+     * it has reached its end of life
+     */
+    EXPIRED_TOKEN,
 
     /**
      * issuer Public Key was revoked
@@ -41,9 +51,9 @@ public enum ValidationStatus {
     WRONG_AAM,
 
     /**
-     * when e.g. the signature verification failed
+     * when e.g. the signature verification failed (e.g. the chain from the certificate doesn't match)
      */
-    INVALID,
+    INVALID_TRUST_CHAIN,
 
     /**
      * when the validation procedure failed for whatever reason (e.g. internal server error)
