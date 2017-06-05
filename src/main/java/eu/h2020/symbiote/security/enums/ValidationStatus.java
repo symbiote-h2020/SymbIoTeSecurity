@@ -20,9 +20,19 @@ public enum ValidationStatus {
     EXPIRED,
 
     /**
-     * it was revoked
+     * issuer Public Key was revoked
      */
-    REVOKED,
+    REVOKED_IPK,
+
+    /**
+     * subject Public Key was revoked
+     */
+    REVOKED_SPK,
+
+    /**
+     * token was revoked
+     */
+    REVOKED_TOKEN,
 
     /**
      * when the validation was attempted in a Token's foreign AAM
