@@ -48,10 +48,17 @@ public interface ISecurityHandler {
     Map<AAM, Token> login(List<AAM> foreignAAMs, Token homeToken, Optional<Certificate> certificate)
             throws SecurityHandlerException;
 
+
+    /**
+     * @param aam Authentication and Authorization Manager to request guest token from
+     * @return guest token that allows access to all public resources in symbIoTe
+     */
+    Token loginAsGuest(AAM aam);
+
     /**
      * Removes all the acquired tokens from memory
      */
-    void logout();
+    void clearCachedTokens();
 
     /**
      * Used to acquire a certificate for this client from the home AAM

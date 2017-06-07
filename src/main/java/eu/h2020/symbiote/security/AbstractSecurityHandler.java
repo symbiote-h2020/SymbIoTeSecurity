@@ -4,6 +4,7 @@ import eu.h2020.symbiote.security.certificate.ECDSAHelper;
 import eu.h2020.symbiote.security.exceptions.SecurityHandlerException;
 import eu.h2020.symbiote.security.session.AAM;
 import eu.h2020.symbiote.security.session.BoundCredentials;
+import eu.h2020.symbiote.security.token.Token;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,11 +14,15 @@ import java.util.Map;
  */
 public abstract class AbstractSecurityHandler implements ISecurityHandler {
 
+    // client configuration
     private final String coreAAMAddress;
     private final String keystorePassword;
     private final String clientId;
-    protected Map<AAM, BoundCredentials> credentialsWallet;
+    // credentials cache
+    protected Token guestToken = null;
+    protected Map<AAM, BoundCredentials> credentialsWallet = new HashMap<>();
     private boolean isOnline;
+
 
     /**
      * Creates a new instance of the Security Handler
@@ -46,7 +51,6 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
     }
 
     private void buildCredentialsWallet(boolean isOnline) throws SecurityHandlerException {
-        credentialsWallet = new HashMap<>();
         if (isOnline) {
             // fetch available AAMs from the SymbIoTe Core
             for (AAM aam : this.getAvailableAAMs()) {
@@ -60,7 +64,8 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
     }
 
     @Override
-    public void logout() {
+    public void clearCachedTokens() {
+        guestToken = null;
         for (BoundCredentials credentials : credentialsWallet.values()) {
             credentials.homeToken = null;
             credentials.foreignTokens.clear();
