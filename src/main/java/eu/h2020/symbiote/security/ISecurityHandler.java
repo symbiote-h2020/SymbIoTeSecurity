@@ -66,14 +66,15 @@ public interface ISecurityHandler {
      * @param username  of the user in the home AAM
      * @param password  of the user in the home AAM
      * @param clientId  that will be bound with the user and this client
-     * @param clientCSR required to issue a certificate for this client
+     * @param clientCSR Certificate Signing Request required to issue a certificate for this client, it should be
+     *                  Base64 encoded String of @{@link PKCS10CertificationRequest#getEncoded()}
      * @return certificate used by this client for challenge-response operations
      * @throws SecurityHandlerException on operation error
      */
     Certificate getCertificate(String username,
                                String password,
                                String clientId,
-                               PKCS10CertificationRequest clientCSR)
+                               String clientCSR)
             throws SecurityHandlerException;
 
 
@@ -86,9 +87,10 @@ public interface ISecurityHandler {
 
 
     /**
-     * @param token       to be validated
-     * @param certificate if the operation is in an intranet environment, then the user needs to provide the
-     *                    certificate matching the one from the homeToken
+     * @param validationAuthority where the token should be validated (ideally it should be the token issuer authority)
+     * @param token               to be validated
+     * @param certificate         if the operation is in an intranet environment, then the user needs to provide the
+     *                            certificate matching the one from the homeToken
      * @return validation status of the given token
      */
     ValidationStatus validate(AAM validationAuthority, String token, Optional<Certificate> certificate);
