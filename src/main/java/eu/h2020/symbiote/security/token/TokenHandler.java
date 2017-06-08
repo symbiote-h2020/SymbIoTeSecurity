@@ -4,7 +4,7 @@ package eu.h2020.symbiote.security.token;
 import eu.h2020.symbiote.security.SecurityHandler;
 import eu.h2020.symbiote.security.amqp.LocalAAMOverAMQPClient;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
-import eu.h2020.symbiote.security.exceptions.SecurityHandlerException;
+import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.rest.clients.AAMClient;
 import eu.h2020.symbiote.security.rest.clients.CoreAAMClient;
 import eu.h2020.symbiote.security.session.AAM;
@@ -58,7 +58,7 @@ public class TokenHandler {
             return checkRevocation(coreAAM, token);
         } catch (CertificateException ex) {
             log.error(ex);
-            return ValidationStatus.INVALID;
+            return ValidationStatus.INVALID_TRUST_CHAIN;
         }
     }
 
@@ -76,7 +76,7 @@ public class TokenHandler {
             return checkRevocation(platformAAM, token);
         } catch (CertificateException ex) {
             log.error(ex);
-            return ValidationStatus.INVALID;
+            return ValidationStatus.INVALID_TRUST_CHAIN;
         }
     }
 
@@ -91,10 +91,10 @@ public class TokenHandler {
             return ValidationStatus.VALID;
         } catch (UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
             log.debug(e);
-            return ValidationStatus.INVALID;
+            return ValidationStatus.INVALID_TRUST_CHAIN;
         } catch (ExpiredJwtException e) {
             log.debug(e);
-            return ValidationStatus.EXPIRED;
+            return ValidationStatus.EXPIRED_TOKEN;
         }
     }
 

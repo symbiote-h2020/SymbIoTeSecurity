@@ -2,7 +2,7 @@ package eu.h2020.symbiote.security;
 
 import eu.h2020.symbiote.security.certificate.Certificate;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
-import eu.h2020.symbiote.security.exceptions.SecurityHandlerException;
+import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.policy.IAccessPolicy;
 import eu.h2020.symbiote.security.session.AAM;
 import eu.h2020.symbiote.security.token.Token;

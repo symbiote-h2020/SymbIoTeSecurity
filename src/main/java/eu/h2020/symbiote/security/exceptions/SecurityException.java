@@ -9,19 +9,19 @@ import org.springframework.http.HttpStatus;
  * @author Daniele Caldarola (CNIT)
  * @author Nemanja Ignjatov (UNIVIE)
  */
-public abstract class AAMException extends Exception {
+public abstract class SecurityException extends Exception {
 
     public static final long serialVersionUID = AAMConstants.serialVersionUID;
 
-    public AAMException(String message) {
+    public SecurityException(String message) {
         super(message);
     }
 
-    public AAMException(Throwable cause) {
+    public SecurityException(Throwable cause) {
         super(cause);
     }
 
-    public AAMException(String message, Throwable cause) {
+    public SecurityException(String message, Throwable cause) {
         super(message, cause);
     }
 

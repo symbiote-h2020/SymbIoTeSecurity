@@ -1,7 +1,7 @@
-package eu.h2020.symbiote.security.exceptions.aam;
+package eu.h2020.symbiote.security.exceptions.custom;
 
 import eu.h2020.symbiote.security.constants.AAMConstants;
-import eu.h2020.symbiote.security.exceptions.AAMException;
+import eu.h2020.symbiote.security.exceptions.SecurityException;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
  * @author Daniele Caldarola (CNIT)
  * @author Nemanja Ignjatov (UNIVIE)
  */
-public class NotExistingUserException extends AAMException {
+public class NotExistingUserException extends SecurityException {
 
     private static final long serialVersionUID = AAMConstants.serialVersionUID;
     private final static String errorMessage = "USER_NOT_REGISTERED_IN_REPOSITORY";

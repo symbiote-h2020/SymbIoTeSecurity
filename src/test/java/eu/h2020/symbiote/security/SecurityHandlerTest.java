@@ -5,7 +5,7 @@ import eu.h2020.symbiote.security.certificate.CertificateVerificationException;
 import eu.h2020.symbiote.security.constants.AAMConstants;
 import eu.h2020.symbiote.security.enums.IssuingAuthorityType;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
-import eu.h2020.symbiote.security.exceptions.SecurityHandlerException;
+import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.session.AAM;
 import eu.h2020.symbiote.security.token.Token;
@@ -177,7 +177,7 @@ public class SecurityHandlerTest {
                         "-UxUvRJPl7KBydvFf564T0gHEtgmXSZMQGHwUI9x6RUFR4NuvtGeAFU2pcx";
         Token token = new Token(tokenString);
         ValidationStatus validationStatus = securityHandler.verifyCoreToken(token);
-        assertEquals(ValidationStatus.INVALID, validationStatus);
+        assertEquals(ValidationStatus.INVALID_TRUST_CHAIN, validationStatus);
     }
 
     /**

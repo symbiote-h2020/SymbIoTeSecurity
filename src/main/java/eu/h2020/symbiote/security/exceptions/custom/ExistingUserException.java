@@ -1,34 +1,34 @@
-package eu.h2020.symbiote.security.exceptions.aam;
+package eu.h2020.symbiote.security.exceptions.custom;
 
 import eu.h2020.symbiote.security.constants.AAMConstants;
-import eu.h2020.symbiote.security.exceptions.AAMException;
+import eu.h2020.symbiote.security.exceptions.SecurityException;
 import org.springframework.http.HttpStatus;
 
 /**
- * Custom exception thrown when user registration over AMQP fails
+ * Custom exception thrown when user credentials are already present in DB during registration procedure
  *
  * @author Daniele Caldarola (CNIT)
  * @author Nemanja Ignjatov (UNIVIE)
  */
-public class UserRegistrationException extends AAMException {
+public class ExistingUserException extends SecurityException {
 
-    public final static String errorMessage = "USER_REGISTRATION_ERROR";
+    public final static String errorMessage = "USER_ALREADY_REGISTERED";
     public final static HttpStatus statusCode = HttpStatus.BAD_REQUEST;
     private static final long serialVersionUID = AAMConstants.serialVersionUID;
 
-    public UserRegistrationException() {
+    public ExistingUserException() {
         super(errorMessage);
     }
 
-    public UserRegistrationException(String message) {
+    public ExistingUserException(String message) {
         super(message);
     }
 
-    public UserRegistrationException(Throwable cause) {
+    public ExistingUserException(Throwable cause) {
         super(cause);
     }
 
-    public UserRegistrationException(String message, Throwable cause) {
+    public ExistingUserException(String message, Throwable cause) {
         super(message, cause);
     }
 

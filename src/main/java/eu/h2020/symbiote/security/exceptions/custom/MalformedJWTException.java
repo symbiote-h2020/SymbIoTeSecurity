@@ -1,7 +1,7 @@
-package eu.h2020.symbiote.security.exceptions.aam;
+package eu.h2020.symbiote.security.exceptions.custom;
 
 import eu.h2020.symbiote.security.constants.AAMConstants;
-import eu.h2020.symbiote.security.exceptions.AAMException;
+import eu.h2020.symbiote.security.exceptions.SecurityException;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -10,25 +10,25 @@ import org.springframework.http.HttpStatus;
  * @author Daniele Caldarola (CNIT)
  * @author Nemanja Ignjatov (UNIVIE)
  */
-public class JWTCreationException extends AAMException {
+public class MalformedJWTException extends SecurityException {
 
     private static final long serialVersionUID = AAMConstants.serialVersionUID;
-    private final static String errorMessage = "UNABLE_CREATE_JWT_TOKEN";
-    private final static HttpStatus statusCode = HttpStatus.BAD_REQUEST;
+    private final static String errorMessage = "UNABLE_MALFORMED_JWT_TOKEN";
+    private final HttpStatus statusCode = HttpStatus.BAD_REQUEST;
 
-    public JWTCreationException() {
+    public MalformedJWTException() {
         super(errorMessage);
     }
 
-    public JWTCreationException(String message) {
+    public MalformedJWTException(String message) {
         super(message);
     }
 
-    public JWTCreationException(Throwable cause) {
+    public MalformedJWTException(Throwable cause) {
         super(cause);
     }
 
-    public JWTCreationException(String message, Throwable cause) {
+    public MalformedJWTException(String message, Throwable cause) {
         super(message, cause);
     }
 

@@ -3,7 +3,7 @@ package eu.h2020.symbiote.security;
 import eu.h2020.symbiote.security.amqp.LocalAAMOverAMQPClient;
 import eu.h2020.symbiote.security.constants.AAMConstants;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
-import eu.h2020.symbiote.security.exceptions.SecurityHandlerException;
+import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.payloads.Credentials;
 import eu.h2020.symbiote.security.token.Token;
 import eu.h2020.symbiote.security.token.TokenHandler;

@@ -5,7 +5,7 @@ import eu.h2020.symbiote.security.certificate.CertificateVerificationException;
 import eu.h2020.symbiote.security.certificate.ECDSAHelper;
 import eu.h2020.symbiote.security.constants.AAMConstants;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
-import eu.h2020.symbiote.security.exceptions.SecurityHandlerException;
+import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.payloads.Credentials;
 import eu.h2020.symbiote.security.rest.clients.CoreAAMClient;
 import eu.h2020.symbiote.security.session.AAM;

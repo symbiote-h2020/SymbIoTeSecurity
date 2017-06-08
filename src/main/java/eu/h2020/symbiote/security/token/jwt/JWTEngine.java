@@ -6,8 +6,8 @@ import eu.h2020.symbiote.security.certificate.ECDSAHelper;
 import eu.h2020.symbiote.security.constants.AAMConstants;
 import eu.h2020.symbiote.security.enums.IssuingAuthorityType;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
-import eu.h2020.symbiote.security.exceptions.aam.JWTCreationException;
-import eu.h2020.symbiote.security.exceptions.aam.MalformedJWTException;
+import eu.h2020.symbiote.security.exceptions.custom.JWTCreationException;
+import eu.h2020.symbiote.security.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.exceptions.custom.ValidationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.SignatureException;
@@ -82,10 +82,10 @@ public class JWTEngine {
             return ValidationStatus.VALID;
         } catch (ExpiredJwtException e) {
             log.error(e);
-            return ValidationStatus.EXPIRED;
+            return ValidationStatus.EXPIRED_TOKEN;
         } catch (SignatureException e) {
             log.error(e);
-            return ValidationStatus.INVALID;
+            return ValidationStatus.INVALID_TRUST_CHAIN;
         } catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
             log.error(e);
             throw new ValidationException("Token could not be validated", e);

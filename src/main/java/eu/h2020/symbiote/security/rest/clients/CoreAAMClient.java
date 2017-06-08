@@ -1,7 +1,7 @@
 package eu.h2020.symbiote.security.rest.clients;
 
 import eu.h2020.symbiote.security.constants.AAMConstants;
-import eu.h2020.symbiote.security.exceptions.SecurityHandlerException;
+import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.session.AAM;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

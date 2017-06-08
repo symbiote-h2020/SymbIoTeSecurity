@@ -1,7 +1,7 @@
-package eu.h2020.symbiote.security.exceptions.aam;
+package eu.h2020.symbiote.security.exceptions.custom;
 
 import eu.h2020.symbiote.security.constants.AAMConstants;
-import eu.h2020.symbiote.security.exceptions.AAMException;
+import eu.h2020.symbiote.security.exceptions.SecurityException;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -9,25 +9,25 @@ import org.springframework.http.HttpStatus;
  *
  * @author Mikołaj Dobski (PSNC)
  */
-public class AAMMisconfigurationException extends AAMException {
+public class SecurityMisconfigurationException extends SecurityException {
 
     private static final long serialVersionUID = AAMConstants.serialVersionUID;
     private final static String errorMessage = "AAM_MISCONFIGURED";
     private final static HttpStatus statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
 
-    public AAMMisconfigurationException() {
+    public SecurityMisconfigurationException() {
         super(errorMessage);
     }
 
-    public AAMMisconfigurationException(String message) {
+    public SecurityMisconfigurationException(String message) {
         super(message);
     }
 
-    public AAMMisconfigurationException(Throwable cause) {
+    public SecurityMisconfigurationException(Throwable cause) {
         super(cause);
     }
 
-    public AAMMisconfigurationException(String message, Throwable cause) {
+    public SecurityMisconfigurationException(String message, Throwable cause) {
         super(message, cause);
     }
 

@@ -1,7 +1,7 @@
-package eu.h2020.symbiote.security.exceptions.aam;
+package eu.h2020.symbiote.security.exceptions.custom;
 
 import eu.h2020.symbiote.security.constants.AAMConstants;
-import eu.h2020.symbiote.security.exceptions.AAMException;
+import eu.h2020.symbiote.security.exceptions.SecurityException;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
  * @author Daniele Caldarola (CNIT)
  * @author Nemanja Ignjatov (UNIVIE)
  */
-public class UnauthorizedRegistrationException extends AAMException {
+public class UnauthorizedRegistrationException extends SecurityException {
 
     public final static String errorMessage = "UNAUTHORIZED_REGISTRATION";
     public final static HttpStatus statusCode = HttpStatus.UNAUTHORIZED;

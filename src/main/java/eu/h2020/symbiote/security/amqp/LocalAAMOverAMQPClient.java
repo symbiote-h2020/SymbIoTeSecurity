@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.RpcClient;
 import eu.h2020.symbiote.security.constants.AAMConstants;
-import eu.h2020.symbiote.security.exceptions.SecurityHandlerException;
+import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.payloads.CheckRevocationResponse;
 import eu.h2020.symbiote.security.payloads.Credentials;
 import eu.h2020.symbiote.security.payloads.ErrorResponseContainer;

@@ -1,7 +1,7 @@
-package eu.h2020.symbiote.security.exceptions.aam;
+package eu.h2020.symbiote.security.exceptions.custom;
 
 import eu.h2020.symbiote.security.constants.AAMConstants;
-import eu.h2020.symbiote.security.exceptions.AAMException;
+import eu.h2020.symbiote.security.exceptions.SecurityException;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
  *
  * @author Mikołaj Dobski (PSNC)
  */
-public class ExistingPlatformException extends AAMException {
+public class ExistingPlatformException extends SecurityException {
 
     public final static String errorMessage = "PLATFORM_ALREADY_REGISTERED";
     private static final long serialVersionUID = AAMConstants.serialVersionUID;
