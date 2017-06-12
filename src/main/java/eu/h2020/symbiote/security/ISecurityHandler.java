@@ -3,16 +3,13 @@ package eu.h2020.symbiote.security;
 import eu.h2020.symbiote.security.certificate.Certificate;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
 import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
-import eu.h2020.symbiote.security.policy.IAccessPolicy;
 import eu.h2020.symbiote.security.session.AAM;
 import eu.h2020.symbiote.security.token.Token;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 
 import java.security.SignedObject;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 
 /**
@@ -24,6 +21,13 @@ import java.util.Optional;
  * @author Pietro Tedeschi (CNIT)
  */
 public interface ISecurityHandler {
+
+    /**
+     * @return list of all currently available security entrypoints to symbiote (getCertificate, login, token
+     * validation)
+     * @throws SecurityHandlerException on operation error
+     */
+    List<AAM> getAvailableAAMs() throws SecurityHandlerException;
 
     /**
      * Retrieves your home token from the given AAM you have account in.
@@ -48,7 +52,6 @@ public interface ISecurityHandler {
     Map<AAM, Token> login(List<AAM> foreignAAMs, Token homeToken, Optional<Certificate> certificate)
             throws SecurityHandlerException;
 
-
     /**
      * @param aam Authentication and Authorization Manager to request guest token from
      * @return guest token that allows access to all public resources in symbIoTe
@@ -71,20 +74,12 @@ public interface ISecurityHandler {
      * @return certificate used by this client for challenge-response operations
      * @throws SecurityHandlerException on operation error
      */
-    Certificate getCertificate(String username,
+    Certificate getCertificate(AAM homeAAM,
+                               String username,
                                String password,
                                String clientId,
                                String clientCSR)
             throws SecurityHandlerException;
-
-
-    /**
-     * @return list of all currently available security entrypoints to symbiote (getCertificate, login, token
-     * validation)
-     * @throws SecurityHandlerException on operation error
-     */
-    List<AAM> getAvailableAAMs() throws SecurityHandlerException;
-
 
     /**
      * @param validationAuthority where the token should be validated (ideally it should be the token issuer authority)
@@ -94,20 +89,4 @@ public interface ISecurityHandler {
      * @return validation status of the given token
      */
     ValidationStatus validate(AAM validationAuthority, String token, Optional<Certificate> certificate);
-
-
-    /**
-     * @param accessPolicies      of the resources that need to be checked against the tokens
-     * @param authorizationTokens that might satisfy the access policies of the resources
-     * @return list of resources (their identifiers) whose access policies are satisfied with the given tokens
-     */
-    default List<String> getAuthorizedResourcesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
-                                                           List<Token> authorizationTokens) {
-        List<String> authorizedResources = new ArrayList<>();
-        for (Entry<String, IAccessPolicy> resource : accessPolicies.entrySet()) {
-            if (resource.getValue().isSatisfiedWith(authorizationTokens))
-                authorizedResources.add(resource.getKey());
-        }
-        return authorizedResources;
-    }
 }
