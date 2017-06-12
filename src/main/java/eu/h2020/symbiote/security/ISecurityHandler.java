@@ -66,6 +66,7 @@ public interface ISecurityHandler {
     /**
      * Used to acquire a certificate for this client from the home AAM
      *
+     * @param homeAAM   the Authenticantion and Authorization Manager the user has account in
      * @param username  of the user in the home AAM
      * @param password  of the user in the home AAM
      * @param clientId  that will be bound with the user and this client
