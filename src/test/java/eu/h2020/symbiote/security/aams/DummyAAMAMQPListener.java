@@ -1,8 +1,8 @@
 package eu.h2020.symbiote.security.aams;
 
 import com.rabbitmq.client.*;
-import eu.h2020.symbiote.security.aams.consumers.CheckTokenRevocationRequestConsumerService;
 import eu.h2020.symbiote.security.aams.consumers.LoginRequestConsumerService;
+import eu.h2020.symbiote.security.aams.consumers.ValidateRequestConsumerService;
 import eu.h2020.symbiote.security.constants.AAMConstants;
 import eu.h2020.symbiote.security.exceptions.custom.SecurityMisconfigurationException;
 import org.apache.commons.logging.Log;
@@ -56,7 +56,7 @@ public class DummyAAMAMQPListener {
      */
     private void startConsumers() throws SecurityMisconfigurationException {
         try {
-            startConsumerOfCheckTokenRevocationRequestMessages();
+            startConsumerOfValidateRequestMessages();
             startConsumerOfLoginRequestMessages();
         } catch (InterruptedException | IOException e) {
             log.error(e);
@@ -96,9 +96,9 @@ public class DummyAAMAMQPListener {
      * @throws InterruptedException
      * @throws IOException
      */
-    private void startConsumerOfCheckTokenRevocationRequestMessages() throws InterruptedException, IOException {
+    private void startConsumerOfValidateRequestMessages() throws InterruptedException, IOException {
 
-        String queueName = AAMConstants.AAM_CHECK_REVOCATION_QUEUE;
+        String queueName = AAMConstants.AAM_VALIDATE_QUEUE;
 
         Channel channel;
 
@@ -106,11 +106,11 @@ public class DummyAAMAMQPListener {
             channel = this.connection.createChannel();
             channel.queueDeclare(queueName, true, false, false, null);
             channel.queueBind(queueName, AAMConstants
-                    .AAM_EXCHANGE_NAME, AAMConstants.AAM_CHECK_REVOCATION_ROUTING_KEY);
+                    .AAM_EXCHANGE_NAME, AAMConstants.AAM_VALIDATE_ROUTING_KEY);
 
             log.info("Authentication and Authorization Manager waiting for check token revocation request messages");
 
-            Consumer consumer = new CheckTokenRevocationRequestConsumerService(channel);
+            Consumer consumer = new ValidateRequestConsumerService(channel);
             channel.basicConsume(queueName, false, consumer);
         } catch (IOException e) {
             log.error(e);
@@ -163,9 +163,9 @@ public class DummyAAMAMQPListener {
             if (this.connection != null && this.connection.isOpen()) {
                 channel = connection.createChannel();
                 // check revocation
-                channel.queueUnbind(AAMConstants.AAM_CHECK_REVOCATION_QUEUE, AAMConstants.AAM_EXCHANGE_NAME,
-                        AAMConstants.AAM_CHECK_REVOCATION_ROUTING_KEY);
-                channel.queueDelete(AAMConstants.AAM_CHECK_REVOCATION_QUEUE);
+                channel.queueUnbind(AAMConstants.AAM_VALIDATE_QUEUE, AAMConstants.AAM_EXCHANGE_NAME,
+                        AAMConstants.AAM_VALIDATE_ROUTING_KEY);
+                channel.queueDelete(AAMConstants.AAM_VALIDATE_QUEUE);
                 // login
                 channel.queueUnbind(AAMConstants.AAM_LOGIN_QUEUE, AAMConstants
                                 .AAM_EXCHANGE_NAME,

@@ -20,10 +20,10 @@ public interface AAMRESTInterface {
     @Headers("Content-Type: application/json")
     Response login(Credentials credential);
 
-    @RequestLine("POST " + AAMConstants.AAM_CHECK_HOME_TOKEN_REVOCATION)
+    @RequestLine("POST " + AAMConstants.AAM_VALIDATE)
     @Headers({"Content-Type: application/json", "Accept: application/json", AAMConstants.TOKEN_HEADER_NAME + ": " +
             "{token}"})
-    CheckRevocationResponse checkTokenRevocation(@Param("token") String token);
+    CheckRevocationResponse validate(@Param("token") String token);
 
     @RequestLine("POST " + AAMConstants.AAM_REQUEST_FOREIGN_TOKEN)
     @Headers({"Content-Type: application/json", "Accept: application/json", AAMConstants.TOKEN_HEADER_NAME + ": " +

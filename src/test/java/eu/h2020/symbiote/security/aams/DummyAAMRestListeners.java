@@ -103,11 +103,11 @@ public class DummyAAMRestListeners {
     }
 
 
-    @RequestMapping(method = RequestMethod.POST, path = AAMConstants.AAM_CHECK_HOME_TOKEN_REVOCATION,
+    @RequestMapping(method = RequestMethod.POST, path = AAMConstants.AAM_VALIDATE,
             produces = "application/json;charset=UTF-8", consumes = "application/json;charset=UTF-8")
-    public ResponseEntity<CheckRevocationResponse> checkTokenRevocation(@RequestHeader(AAMConstants
+    public ResponseEntity<CheckRevocationResponse> validate(@RequestHeader(AAMConstants
             .TOKEN_HEADER_NAME) String token) {
-        log.info("Checking token revocation " + token);
+        log.info("Validating " + token);
         // todo implement... for the moment returns valid
         return new ResponseEntity<>(new CheckRevocationResponse
                 (ValidationStatus.VALID), HttpStatus.OK);

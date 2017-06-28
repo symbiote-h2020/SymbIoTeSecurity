@@ -16,9 +16,9 @@ import java.io.IOException;
 /**
  * RabbitMQ Consumer implementation used for token revocation checking actions
  */
-public class CheckTokenRevocationRequestConsumerService extends DefaultConsumer {
+public class ValidateRequestConsumerService extends DefaultConsumer {
 
-    private static Log log = LogFactory.getLog(CheckTokenRevocationRequestConsumerService.class);
+    private static Log log = LogFactory.getLog(ValidateRequestConsumerService.class);
 
 
     /**
@@ -27,7 +27,7 @@ public class CheckTokenRevocationRequestConsumerService extends DefaultConsumer 
      *
      * @param channel the channel to which this consumer is attached
      */
-    public CheckTokenRevocationRequestConsumerService(Channel channel) {
+    public ValidateRequestConsumerService(Channel channel) {
         super(channel);
     }
 

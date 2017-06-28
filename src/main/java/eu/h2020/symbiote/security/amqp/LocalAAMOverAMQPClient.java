@@ -66,10 +66,10 @@ public class LocalAAMOverAMQPClient {
         }
     }
 
-    public CheckRevocationResponse checkHomeTokenRevocation(Token token) throws SecurityHandlerException {
+    public CheckRevocationResponse validate(Token token) throws SecurityHandlerException {
         try {
             RpcClient client = new RpcClient(factory.newConnection().createChannel(), "", AAMConstants
-                    .AAM_CHECK_REVOCATION_QUEUE, 5000);
+                    .AAM_VALIDATE_QUEUE, 5000);
             byte[] amqpResponse = client.primitiveCall(mapper.writeValueAsString(token).getBytes());
 
             return mapper.readValue(amqpResponse,

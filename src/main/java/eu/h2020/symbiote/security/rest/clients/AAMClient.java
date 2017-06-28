@@ -88,11 +88,11 @@ public class AAMClient {
         return result;
     }
 
-    public ValidationStatus checkTokenRevocation(Token token) {
+    public ValidationStatus validate(Token token) {
         ValidationStatus result = null;
         try {
-            logger.info("User trying to checkTokenRevocation");
-            result = ValidationStatus.valueOf(jsonclient.checkTokenRevocation(token.getToken()).getStatus());
+            logger.info("User trying to validate");
+            result = ValidationStatus.valueOf(jsonclient.validate(token.getToken()).getStatus());
         } catch (Exception e) {
             logger.error(errorMessage + url, e);
         }

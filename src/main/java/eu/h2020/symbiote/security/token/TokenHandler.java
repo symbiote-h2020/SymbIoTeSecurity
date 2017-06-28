@@ -102,7 +102,7 @@ public class TokenHandler {
      * TODO R3 This method should automatically, using the @{@link SecurityHandler#getAvailableAAMs()} collection and the token's iss value know which AAM to use for validation.
      */
     private ValidationStatus checkRevocation(AAMClient aamClient, Token tokenForRevocation) {
-        return aamClient.checkTokenRevocation(tokenForRevocation);
+        return aamClient.validate(tokenForRevocation);
     }
 
 
@@ -130,7 +130,7 @@ public class TokenHandler {
         ValidationStatus validationStatus = ValidationStatus.NULL;
         try {
             validationStatus = ValidationStatus.valueOf(platformAAMMessageHandler
-                    .checkHomeTokenRevocation(token).getStatus());
+                    .validate(token).getStatus());
         } catch (SecurityHandlerException e) {
             log.error(e);
         }
