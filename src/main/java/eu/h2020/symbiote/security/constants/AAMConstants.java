@@ -43,6 +43,9 @@ public class AAMConstants {
     public static final String CLAIM_NAME_TOKEN_TYPE = "ttyp";
     public static final String SYMBIOTE_ATTRIBUTES_PREFIX = "SYMBIOTE_";
 
+    // certificates
+    public static final String CERTIFICATE_HEADER_NAME = "X-Auth-Cert";
+
     private AAMConstants() {
     }
 }
