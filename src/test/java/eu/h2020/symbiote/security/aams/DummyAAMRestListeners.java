@@ -9,7 +9,6 @@ import eu.h2020.symbiote.security.enums.ValidationStatus;
 import eu.h2020.symbiote.security.exceptions.custom.JWTCreationException;
 import eu.h2020.symbiote.security.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.exceptions.custom.ValidationException;
-import eu.h2020.symbiote.security.payloads.CheckRevocationResponse;
 import eu.h2020.symbiote.security.payloads.Credentials;
 import eu.h2020.symbiote.security.session.AAM;
 import eu.h2020.symbiote.security.token.Token;
@@ -105,12 +104,11 @@ public class DummyAAMRestListeners {
 
     @RequestMapping(method = RequestMethod.POST, path = AAMConstants.AAM_VALIDATE,
             produces = "application/json;charset=UTF-8", consumes = "application/json;charset=UTF-8")
-    public ResponseEntity<CheckRevocationResponse> validate(@RequestHeader(AAMConstants
+    public ResponseEntity<ValidationStatus> validate(@RequestHeader(AAMConstants
             .TOKEN_HEADER_NAME) String token) {
         log.info("Validating " + token);
         // todo implement... for the moment returns valid
-        return new ResponseEntity<>(new CheckRevocationResponse
-                (ValidationStatus.VALID), HttpStatus.OK);
+        return new ResponseEntity<>(ValidationStatus.VALID, HttpStatus.OK);
     }
 
     /**

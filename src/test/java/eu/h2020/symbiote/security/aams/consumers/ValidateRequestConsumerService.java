@@ -6,8 +6,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
-import eu.h2020.symbiote.security.payloads.CheckRevocationResponse;
-import eu.h2020.symbiote.security.token.Token;
+import eu.h2020.symbiote.security.payloads.ValidationRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -48,7 +47,7 @@ public class ValidateRequestConsumerService extends DefaultConsumer {
 
         String message = new String(body, "UTF-8");
         ObjectMapper om = new ObjectMapper();
-        Token token;
+        ValidationRequest validationRequest;
         String response;
 
         log.debug("[x] Received Check Token Revocation Request: '" + message + "'");
@@ -60,11 +59,10 @@ public class ValidateRequestConsumerService extends DefaultConsumer {
                     .correlationId(properties.getCorrelationId())
                     .build();
             try {
-                token = om.readValue(message, Token.class);
+                validationRequest = om.readValue(message, ValidationRequest.class);
 
                 // TODO it only sends valid
-                CheckRevocationResponse checkRevocationResponse = new CheckRevocationResponse(ValidationStatus.VALID);
-                response = om.writeValueAsString(checkRevocationResponse);
+                response = om.writeValueAsString(ValidationStatus.VALID);
                 this.getChannel().basicPublish("", properties.getReplyTo(), replyProps, response.getBytes());
 
             } catch (IOException e) {

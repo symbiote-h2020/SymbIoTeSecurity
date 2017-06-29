@@ -92,7 +92,7 @@ public class AAMClient {
         ValidationStatus result = null;
         try {
             logger.info("User trying to validate");
-            result = ValidationStatus.valueOf(jsonclient.validate(token.getToken()).getStatus());
+            result = jsonclient.validate(token.getToken());
         } catch (Exception e) {
             logger.error(errorMessage + url, e);
         }

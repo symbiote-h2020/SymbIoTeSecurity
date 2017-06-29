@@ -55,7 +55,7 @@ public class TokenHandler {
             status = validateToken(token, getCACert(coreAAM));
             if (status != ValidationStatus.VALID)
                 return status;
-            return checkRevocation(coreAAM, token);
+            return validate(coreAAM, token);
         } catch (CertificateException ex) {
             log.error(ex);
             return ValidationStatus.INVALID_TRUST_CHAIN;
@@ -73,7 +73,7 @@ public class TokenHandler {
             status = validateToken(token, getCACert(platformAAM));
             if (status != ValidationStatus.VALID)
                 return status;
-            return checkRevocation(platformAAM, token);
+            return validate(platformAAM, token);
         } catch (CertificateException ex) {
             log.error(ex);
             return ValidationStatus.INVALID_TRUST_CHAIN;
@@ -101,7 +101,7 @@ public class TokenHandler {
     /**
      * TODO R3 This method should automatically, using the @{@link SecurityHandler#getAvailableAAMs()} collection and the token's iss value know which AAM to use for validation.
      */
-    private ValidationStatus checkRevocation(AAMClient aamClient, Token tokenForRevocation) {
+    private ValidationStatus validate(AAMClient aamClient, Token tokenForRevocation) {
         return aamClient.validate(tokenForRevocation);
     }
 
@@ -129,8 +129,7 @@ public class TokenHandler {
     public ValidationStatus validateHomeToken(Token token) {
         ValidationStatus validationStatus = ValidationStatus.NULL;
         try {
-            validationStatus = ValidationStatus.valueOf(platformAAMMessageHandler
-                    .validate(token).getStatus());
+            validationStatus = platformAAMMessageHandler.validate(token);
         } catch (SecurityHandlerException e) {
             log.error(e);
         }

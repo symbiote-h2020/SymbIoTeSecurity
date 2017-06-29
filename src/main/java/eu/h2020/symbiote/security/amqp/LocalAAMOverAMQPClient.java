@@ -4,10 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.RpcClient;
 import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.enums.ValidationStatus;
 import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
-import eu.h2020.symbiote.security.payloads.CheckRevocationResponse;
 import eu.h2020.symbiote.security.payloads.Credentials;
 import eu.h2020.symbiote.security.payloads.ErrorResponseContainer;
+import eu.h2020.symbiote.security.payloads.ValidationRequest;
 import eu.h2020.symbiote.security.token.Token;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,14 +67,14 @@ public class LocalAAMOverAMQPClient {
         }
     }
 
-    public CheckRevocationResponse validate(Token token) throws SecurityHandlerException {
+    public ValidationStatus validate(Token token) throws SecurityHandlerException {
         try {
             RpcClient client = new RpcClient(factory.newConnection().createChannel(), "", AAMConstants
                     .AAM_VALIDATE_QUEUE, 5000);
-            byte[] amqpResponse = client.primitiveCall(mapper.writeValueAsString(token).getBytes());
+            byte[] amqpResponse = client.primitiveCall(mapper.writeValueAsString(new ValidationRequest(token.getToken(), "")).getBytes());
 
             return mapper.readValue(amqpResponse,
-                    CheckRevocationResponse.class);
+                    ValidationStatus.class);
         } catch (Exception e) {
             log.error(e);
             throw new SecurityHandlerException(e.getMessage(), e);
