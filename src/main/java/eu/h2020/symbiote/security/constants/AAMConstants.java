@@ -10,6 +10,7 @@ public class AAMConstants {
     // AAM GLOBAL
     public static final String AAM_CORE_AAM_FRIENDLY_NAME = "SymbIoTe Core AAM";
     public static final String AAM_CORE_AAM_INSTANCE_ID = "SymbIoTe_Core_AAM";
+    public static final String COMPONENT_ID = "Platform_AAM";
 
     // AAM AMQP
     public static final String AAM_EXCHANGE_NAME = "symbIoTe.AuthenticationAuthorizationManager";
