@@ -1,6 +1,6 @@
 package eu.h2020.symbiote.security.payloads;
 
-import eu.h2020.symbiote.security.certificate.Certificate;
+import eu.h2020.symbiote.security.enums.RegistrationStatus;
 
 /**
  * Describes a response for platform registration sent by AAM
@@ -9,41 +9,16 @@ import eu.h2020.symbiote.security.certificate.Certificate;
  * @author Mikołaj Dobski (PSNC)
  */
 public class PlatformRegistrationResponse {
-    private Certificate platformOwnerCertificate = new Certificate();
-    private String platformOwnerPrivateKey = "";
     private String platformId = "";
+    private RegistrationStatus registrationStatus;
 
     public PlatformRegistrationResponse() {
         // used by serializer
     }
 
-    public PlatformRegistrationResponse(Certificate platformOwnerCertificate, String platformOwnerPrivateKey, String
-            registeredPlatformId) {
-        this.platformOwnerCertificate = platformOwnerCertificate;
-        this.platformOwnerPrivateKey = platformOwnerPrivateKey;
+    public PlatformRegistrationResponse(String registeredPlatformId, RegistrationStatus registrationStatus) {
         this.platformId = registeredPlatformId;
-    }
-
-    /**
-     * @return Platform Owner certificate to be used for interaction with symbIoTe core components.
-     */
-    public Certificate getPlatformOwnerCertificate() {
-        return platformOwnerCertificate;
-    }
-
-    public void setPlatformOwnerCertificate(Certificate platformOwnerCertificate) {
-        this.platformOwnerCertificate = platformOwnerCertificate;
-    }
-
-    /**
-     * @return in PEM format
-     */
-    public String getPlatformOwnerPrivateKey() {
-        return platformOwnerPrivateKey;
-    }
-
-    public void setPlatformOwnerPrivateKey(String platformOwnerPrivateKey) {
-        this.platformOwnerPrivateKey = platformOwnerPrivateKey;
+        this.registrationStatus = registrationStatus;
     }
 
     /**
@@ -55,5 +30,13 @@ public class PlatformRegistrationResponse {
 
     public void setPlatformId(String platformId) {
         this.platformId = platformId;
+    }
+
+    public RegistrationStatus getRegistrationStatus() {
+        return registrationStatus;
+    }
+
+    public void setRegistrationStatus(RegistrationStatus registrationStatus) {
+        this.registrationStatus = registrationStatus;
     }
 }
