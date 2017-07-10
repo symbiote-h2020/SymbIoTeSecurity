@@ -1,8 +1,8 @@
 language: java
 env:
   global:
-  - GITHUB_REPO=symbiote-h2020/SymbIoTeLibraries
-  - secure: Oxej+WMxIARA3FB1d4YU5Xzwk1946dt6DNIoQzw1KnJE/Mq2qJi/U4iwN0b278k9GKJRA0JZ4mBGQi2vDo3jBIIFxJS+0z5sBjHjDN7fTf6YAJL/i7y7EshLUcR+BEm3U1frT8K92ZmHPvKfIOUk63aKhKw0eUFjDlh0FT8nUrxxvNe/Zv8fXTE0x3rLDEchP+cg9cMhRReBN7lvgF1VxurwxSuQZ1S3dkdnBJIUePqW7NpBoOY4tgaQV8WDH6OnNFrvWSP396pm6f2J0oqSlDl22GB1ByOWIKnqqz1b20Irg4OAWpxVeGOGCNVIQH3lNaIKBZQvVNR+p9CpMU2AwrzBbge53UnaXGe1Y+8nLYzJIkFK6RwftPxszKJDSkrYR6eYd6nPgEPq2W+Max+hJOLiRlSbU0kEwN+TYy/PkId7SdgXvlnqrPcdBsE5bNtLAKmyGknhuQINoC6rSdD+jBivhxyewPVzreWiJsYhsnOgUFiVecDFldf4Zw/3oU8HcO0JjnPZUMKOgQlMDDEjkAPhZlzCGEZBYbJ5EMfvsX8R1UoRxr1ObLGww/gIqGBoqKEwdy3nwRuCWUvVGK6Appx/8Ae0cqh59TznQNH6Uun26D9VXDgq+nD4VXsxu/23YrKtDam1rnvVuCeOsBYI2lR71Xe3JlpF9qraXhC/Zzk=
+  - GITHUB_REPO=symbiote-h2020/SymbIoTeSecurity
+  - secure: TODO
 jdk:
 - oraclejdk8
 services:
