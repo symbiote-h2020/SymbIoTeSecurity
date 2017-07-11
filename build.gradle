@@ -1,20 +1,36 @@
-// new plugins syntax
-plugins {
-    // code
-    id "java"
-    // spring
-    id "io.spring.dependency-management" version "1.0.3.RELEASE"
-    id 'org.springframework.boot' version '1.5.4.RELEASE'
-    // code quality
-    id "jacoco"
-    id "org.owasp.dependencycheck" version "2.0.1"
-    // IDEs
-    id "eclipse"
-    id "idea"
-    // publishing
-    id "com.cinnober.gradle.semver-git" version "2.2.2"
-    id "maven-publish"
+buildscript {
+    ext {
+        springBootVersion = '1.5.4.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
+    }
+    dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.2.2'
+        classpath 'org.owasp:dependency-check-gradle:2.0.1'
+    }
 }
+// code
+apply plugin: "io.spring.dependency-management"
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+
+// code quality
+apply plugin: 'jacoco'
+apply plugin: 'org.owasp.dependencycheck'
+
+// IDEs
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+
+// publishing
+apply plugin: 'com.cinnober.gradle.semver-git'
+apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
