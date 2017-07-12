@@ -10,9 +10,10 @@ import eu.h2020.symbiote.security.enums.UserRole;
 public class UserDetails {
 
     private Credentials userCredentials = new Credentials();
-    private String federatedId = "";
     private String recoveryMail = "";
     private UserRole role = UserRole.NULL;
+    // TODO review for R4
+    private String federatedId = "";
 
     public UserDetails() {
         // used in serialization

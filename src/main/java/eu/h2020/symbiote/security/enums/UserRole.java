@@ -7,13 +7,13 @@ public enum UserRole {
     /**
      * default symbIoTe's data consumer role
      */
-    APPLICATION,
+    USER,
     /**
      * symbIoTe-enabled platform's owner account type, used to release administration attributes
      */
     PLATFORM_OWNER,
     /**
-     * unitialized value of this enum
+     * uninitialized value of this enum
      */
     NULL
 }

@@ -10,17 +10,18 @@ public class AAMConstants {
     // AAM GLOBAL
     public static final String AAM_CORE_AAM_FRIENDLY_NAME = "SymbIoTe Core AAM";
     public static final String AAM_CORE_AAM_INSTANCE_ID = "SymbIoTe_Core_AAM";
-    public static final String COMPONENT_ID = "Platform_AAM";
+    public static final String COMPONENT_ID = "SymbIoTe_Component";
 
     // AAM AMQP
     public static final String AAM_EXCHANGE_NAME = "symbIoTe.AuthenticationAuthorizationManager";
+    public static final String AAM_VALIDATE_QUEUE = "symbIoTe-AuthenticationAuthorizationManager-validate_request";
+    public static final String AAM_VALIDATE_ROUTING_KEY = AAM_EXCHANGE_NAME +
+            ".validate_request";
+    // TODO DROP THESE 2
     public static final String AAM_LOGIN_QUEUE =
             "symbIoTe-AuthenticationAuthorizationManager-login_request";
-    public static final String AAM_LOGIN_ROUTING_KEY = "symbIoTe.AuthenticationAuthorizationManager" +
+    public static final String AAM_LOGIN_ROUTING_KEY = AAM_EXCHANGE_NAME +
             ".login_request";
-    public static final String AAM_VALIDATE_QUEUE = "symbIoTe-AuthenticationAuthorizationManager-validate_request";
-    public static final String AAM_VALIDATE_ROUTING_KEY = "symbIoTe.AuthenticationAuthorizationManager" +
-            ".validate_request";
 
     // AAM REST
     public static final String AAM_ADMIN_PATH = "/admin";

@@ -10,8 +10,7 @@ package eu.h2020.symbiote.security.payloads;
  */
 public class UserRegistrationRequest {
 
-    private Credentials AAMOwnerCredentials = new Credentials();
-    // TODO Release 3 fix to support CertificateSignRequests
+    private Credentials administratorCredentials = new Credentials();
     private UserDetails userDetails = new UserDetails();
 
     /**
@@ -20,17 +19,17 @@ public class UserRegistrationRequest {
     public UserRegistrationRequest() { // used by JSON serializer
     }
 
-    public UserRegistrationRequest(Credentials AAMOwnerCredentials, UserDetails userDetails) {
-        this.AAMOwnerCredentials = AAMOwnerCredentials;
+    public UserRegistrationRequest(Credentials administratorCredentials, UserDetails userDetails) {
+        this.administratorCredentials = administratorCredentials;
         this.userDetails = userDetails;
     }
 
-    public Credentials getAAMOwnerCredentials() {
-        return AAMOwnerCredentials;
+    public Credentials getAdministratorCredentials() {
+        return administratorCredentials;
     }
 
-    public void setAAMOwnerCredentials(Credentials AAMOwnerCredentials) {
-        this.AAMOwnerCredentials = AAMOwnerCredentials;
+    public void setAdministratorCredentials(Credentials administratorCredentials) {
+        this.administratorCredentials = administratorCredentials;
     }
 
     public UserDetails getUserDetails() {
