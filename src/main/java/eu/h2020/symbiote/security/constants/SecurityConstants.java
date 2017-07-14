@@ -3,10 +3,17 @@ package eu.h2020.symbiote.security.constants;
 /**
  * Constants related to SH-AAM communication
  *
+ * TODO R3 review to remove obsolete values
  * @author Mikołaj Dobski (PSNC)
  */
-public class AAMConstants {
+public class SecurityConstants {
     public static final long serialVersionUID = 7526472295622776147L;
+
+    // Security GLOBAL
+    public static final String CURVE_NAME = "secp256r1";
+    public static final String KEY_PAIR_GEN_ALGORITHM = "ECDSA";
+    public static final String SIGNATURE_ALGORITHM = "SHA256withECDSA";
+
     // AAM GLOBAL
     public static final String AAM_CORE_AAM_FRIENDLY_NAME = "SymbIoTe Core AAM";
     public static final String AAM_CORE_AAM_INSTANCE_ID = "SymbIoTe_Core_AAM";
@@ -19,17 +26,19 @@ public class AAMConstants {
             ".validate_request";
     // TODO DROP THESE 2
     public static final String AAM_LOGIN_QUEUE =
-            "symbIoTe-AuthenticationAuthorizationManager-login_request";
+            "symbIoTe-AuthenticationAuthorizationManager-getHomeToken_request";
     public static final String AAM_LOGIN_ROUTING_KEY = AAM_EXCHANGE_NAME +
-            ".login_request";
+            ".getHomeToken_request";
 
     // AAM REST
     public static final String AAM_ADMIN_PATH = "/admin";
     public static final String AAM_GET_AVAILABLE_AAMS = "/get_available_aams";
-    public static final String AAM_GET_CA_CERTIFICATE = "/get_ca_cert";
-    public static final String AAM_LOGIN = "/login";
+    public static final String AAM_GET_CLIENT_CERTIFICATE = "/get_client_certificate";
+    public static final String AAM_GET_COMPONENT_CERTIFICATE = "/get_component_certificate";
+    public static final String AAM_GET_GUEST_TOKEN = "/get_guest_token";
+    public static final String AAM_GET_HOME_TOKEN = "/get_home_token";
+    public static final String AAM_GET_FOREIGN_TOKEN = "/get_foreign_token";
     public static final String AAM_PUBLIC_PATH = "/public";
-    public static final String AAM_REQUEST_FOREIGN_TOKEN = "/request_foreign_token";
     public static final String AAM_VALIDATE = "/validate";
 
     // errors
@@ -48,6 +57,6 @@ public class AAMConstants {
     // certificates
     public static final String CERTIFICATE_HEADER_NAME = "X-Auth-Cert";
 
-    private AAMConstants() {
+    private SecurityConstants() {
     }
 }

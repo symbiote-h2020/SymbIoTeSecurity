@@ -8,7 +8,7 @@ package eu.h2020.symbiote.security.payloads;
  * @author Mikołaj Dobski (PSNC)
  * @author Maksymilian Marcinowski (PSNC)
  */
-public class UserRegistrationRequest {
+public class UserManagementRequest {
 
     private Credentials administratorCredentials = new Credentials();
     private UserDetails userDetails = new UserDetails();
@@ -16,10 +16,10 @@ public class UserRegistrationRequest {
     /**
      * used by JSON serializer
      */
-    public UserRegistrationRequest() { // used by JSON serializer
+    public UserManagementRequest() { // used by JSON serializer
     }
 
-    public UserRegistrationRequest(Credentials administratorCredentials, UserDetails userDetails) {
+    public UserManagementRequest(Credentials administratorCredentials, UserDetails userDetails) {
         this.administratorCredentials = administratorCredentials;
         this.userDetails = userDetails;
     }

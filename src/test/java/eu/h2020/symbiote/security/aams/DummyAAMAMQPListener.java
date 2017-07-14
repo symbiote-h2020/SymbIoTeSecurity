@@ -3,7 +3,7 @@ package eu.h2020.symbiote.security.aams;
 import com.rabbitmq.client.*;
 import eu.h2020.symbiote.security.aams.consumers.LoginRequestConsumerService;
 import eu.h2020.symbiote.security.aams.consumers.ValidateRequestConsumerService;
-import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.constants.SecurityConstants;
 import eu.h2020.symbiote.security.exceptions.custom.SecurityMisconfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -77,13 +77,13 @@ public class DummyAAMAMQPListener {
 
         try {
             channel = this.connection.createChannel();
-            channel.queueDeclare(AAMConstants.AAM_LOGIN_QUEUE, true, false, false, null);
-            channel.queueBind(AAMConstants.AAM_LOGIN_QUEUE, AAMConstants
-                    .AAM_EXCHANGE_NAME, AAMConstants.AAM_LOGIN_ROUTING_KEY);
+            channel.queueDeclare(SecurityConstants.AAM_LOGIN_QUEUE, true, false, false, null);
+            channel.queueBind(SecurityConstants.AAM_LOGIN_QUEUE, SecurityConstants
+                    .AAM_EXCHANGE_NAME, SecurityConstants.AAM_LOGIN_ROUTING_KEY);
             log.info("Authentication and Authorization Manager waiting for login request messages....");
 
             Consumer consumer = new LoginRequestConsumerService(channel);
-            channel.basicConsume(AAMConstants.AAM_LOGIN_QUEUE, false, consumer);
+            channel.basicConsume(SecurityConstants.AAM_LOGIN_QUEUE, false, consumer);
         } catch (IOException e) {
             log.error(e);
         }
@@ -98,15 +98,15 @@ public class DummyAAMAMQPListener {
      */
     private void startConsumerOfValidateRequestMessages() throws InterruptedException, IOException {
 
-        String queueName = AAMConstants.AAM_VALIDATE_QUEUE;
+        String queueName = SecurityConstants.AAM_VALIDATE_QUEUE;
 
         Channel channel;
 
         try {
             channel = this.connection.createChannel();
             channel.queueDeclare(queueName, true, false, false, null);
-            channel.queueBind(queueName, AAMConstants
-                    .AAM_EXCHANGE_NAME, AAMConstants.AAM_VALIDATE_ROUTING_KEY);
+            channel.queueBind(queueName, SecurityConstants
+                    .AAM_EXCHANGE_NAME, SecurityConstants.AAM_VALIDATE_ROUTING_KEY);
 
             log.info("Authentication and Authorization Manager waiting for check token revocation request messages");
 
@@ -135,7 +135,7 @@ public class DummyAAMAMQPListener {
             try {
                 channel = this.connection.createChannel();
 
-                channel.exchangeDeclare(AAMConstants.AAM_EXCHANGE_NAME,
+                channel.exchangeDeclare(SecurityConstants.AAM_EXCHANGE_NAME,
                         "direct",
                         true,
                         false,
@@ -163,14 +163,14 @@ public class DummyAAMAMQPListener {
             if (this.connection != null && this.connection.isOpen()) {
                 channel = connection.createChannel();
                 // check revocation
-                channel.queueUnbind(AAMConstants.AAM_VALIDATE_QUEUE, AAMConstants.AAM_EXCHANGE_NAME,
-                        AAMConstants.AAM_VALIDATE_ROUTING_KEY);
-                channel.queueDelete(AAMConstants.AAM_VALIDATE_QUEUE);
+                channel.queueUnbind(SecurityConstants.AAM_VALIDATE_QUEUE, SecurityConstants.AAM_EXCHANGE_NAME,
+                        SecurityConstants.AAM_VALIDATE_ROUTING_KEY);
+                channel.queueDelete(SecurityConstants.AAM_VALIDATE_QUEUE);
                 // login
-                channel.queueUnbind(AAMConstants.AAM_LOGIN_QUEUE, AAMConstants
+                channel.queueUnbind(SecurityConstants.AAM_LOGIN_QUEUE, SecurityConstants
                                 .AAM_EXCHANGE_NAME,
-                        AAMConstants.AAM_LOGIN_ROUTING_KEY);
-                channel.queueDelete(AAMConstants.AAM_LOGIN_QUEUE);
+                        SecurityConstants.AAM_LOGIN_ROUTING_KEY);
+                channel.queueDelete(SecurityConstants.AAM_LOGIN_QUEUE);
 
                 closeChannel(channel);
                 this.connection.close();

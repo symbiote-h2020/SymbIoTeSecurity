@@ -3,11 +3,11 @@ package eu.h2020.symbiote.security;
 import eu.h2020.symbiote.security.certificate.CertificateValidator;
 import eu.h2020.symbiote.security.certificate.CertificateVerificationException;
 import eu.h2020.symbiote.security.certificate.ECDSAHelper;
-import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.constants.SecurityConstants;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
 import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
+import eu.h2020.symbiote.security.listeners.rest.clients.CoreAAMClient;
 import eu.h2020.symbiote.security.payloads.Credentials;
-import eu.h2020.symbiote.security.rest.clients.CoreAAMClient;
 import eu.h2020.symbiote.security.session.AAM;
 import eu.h2020.symbiote.security.session.SessionInformation;
 import eu.h2020.symbiote.security.token.Token;
@@ -17,7 +17,6 @@ import org.apache.commons.logging.LogFactory;
 
 import java.security.KeyStore;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -58,7 +57,7 @@ public class SecurityHandler implements IOldSecurityHandler {
      * @throws SecurityHandlerException on operation error
      */
     @Override
-    public List<AAM> getAvailableAAMs() throws SecurityHandlerException {
+    public Map<String, AAM> getAvailableAAMs() throws SecurityHandlerException {
         // TODO integrate with SessionInformation
         return coreMessageHandler.getAvailableAAMs();
     }
@@ -83,8 +82,8 @@ public class SecurityHandler implements IOldSecurityHandler {
             coreToken = coreMessageHandler.login(credentials);
             sessionInformation.setCoreToken(coreToken);
             if (sessionInformation.getCoreToken() == null) {
-                log.error(AAMConstants.ERR_WRONG_CREDENTIALS);
-                throw new SecurityException(AAMConstants.ERR_WRONG_CREDENTIALS);
+                log.error(SecurityConstants.ERR_WRONG_CREDENTIALS);
+                throw new SecurityException(SecurityConstants.ERR_WRONG_CREDENTIALS);
             }
         }
         return coreToken;
@@ -98,14 +97,14 @@ public class SecurityHandler implements IOldSecurityHandler {
      * @return
      */
     @Override
-    public Map<String, Token> requestForeignTokens(List<AAM> aams) {
+    public Map<String, Token> requestForeignTokens(Map<String, AAM> aams) {
         HashMap<String, Token> federatedTokens = null;
 
         Token requestToken = sessionInformation.getCoreToken();
         if (requestToken != null) {
             //logged in
             federatedTokens = new HashMap<>();
-            for (AAM aam : aams) {
+            for (AAM aam : aams.values()) {
                 // the user should not request a federated token if he has a home token in that aam
                 if (aam.getAamInstanceId().equals(requestToken.getClaims().getIssuer()))
                     continue;

@@ -2,7 +2,7 @@ package eu.h2020.symbiote.security;
 
 import eu.h2020.symbiote.security.certificate.Certificate;
 import eu.h2020.symbiote.security.certificate.CertificateVerificationException;
-import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.constants.SecurityConstants;
 import eu.h2020.symbiote.security.enums.IssuingAuthorityType;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
 import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
@@ -44,7 +44,10 @@ import java.io.StringWriter;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -134,9 +137,10 @@ public class SecurityHandlerTest {
         assertNotNull(token.getToken());
         assertEquals(IssuingAuthorityType.CORE, token.getType());
 
-        List<AAM> aams = new ArrayList<>();
+        Map<String, AAM> aams = new HashMap<>();
         // stubbing a dummy platform aam
-        aams.add(new AAM(symbioteCoreInterfaceAddress, "A test platform aam", "SomePlatformAAM", new Certificate()));
+        aams.put("SomePlatformAAM", new AAM(symbioteCoreInterfaceAddress, "A test platform aam", "SomePlatformAAM",
+                new Certificate()));
         Map<String, Token> tokens = securityHandler.requestForeignTokens(aams);
         assertNotNull(tokens);
         assertTrue(tokens.containsKey("SomePlatformAAM"));
@@ -158,7 +162,7 @@ public class SecurityHandlerTest {
             ValidationStatus validationStatus = securityHandler.verifyCoreToken(token);
             assertEquals(ValidationStatus.VALID, validationStatus);
             Assert.assertEquals("test1", token.getClaims().getSubject());
-            Assert.assertEquals("test2", token.getClaims().get(AAMConstants.SYMBIOTE_ATTRIBUTES_PREFIX + "name"));
+            Assert.assertEquals("test2", token.getClaims().get(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + "name"));
         } catch (ValidationException e) {
             log.error(e);
             assert (false);
@@ -191,7 +195,7 @@ public class SecurityHandlerTest {
             assertEquals(ValidationStatus.VALID, validationStatus);
             Assert.assertTrue(token.getType() == IssuingAuthorityType.PLATFORM);
             Assert.assertEquals("test1", token.getClaims().getSubject());
-            Assert.assertEquals("test2", token.getClaims().get(AAMConstants.SYMBIOTE_ATTRIBUTES_PREFIX + "name"));
+            Assert.assertEquals("test2", token.getClaims().get(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + "name"));
         } catch (ValidationException e) {
             log.error(e);
             assert (false);
@@ -200,13 +204,13 @@ public class SecurityHandlerTest {
 
     @Test
     public void getAvailableAAMsCollectionFromCoreAAM() throws SecurityHandlerException {
-        List<AAM> aams = securityHandler.getAvailableAAMs();
+        Map<String, AAM> aams = securityHandler.getAvailableAAMs();
 
         // for this test the dummy REST service returns only the core AAM
         assertEquals(1, aams.size());
 
         // verifying the contents
-        AAM aam = aams.get(0);
+        AAM aam = (AAM) aams.values().toArray()[0];
         // this expected PlatformAAM is due to the value stored in the issued certificate in the test keystore
         assertEquals("Symbiote Core", aam.getAamInstanceId());
         assertEquals("https://localhost:8100", aam.getAamAddress());
@@ -243,8 +247,8 @@ public class SecurityHandlerTest {
 
         // Test rest template
         RestTemplate restTemplate = new RestTemplate(requestFactory);
-        ResponseEntity<String> response = restTemplate.getForEntity(symbioteCoreInterfaceAddress + AAMConstants
-                .AAM_GET_CA_CERTIFICATE, String.class);
+        ResponseEntity<String> response = restTemplate.getForEntity(symbioteCoreInterfaceAddress + SecurityConstants
+                .AAM_GET_COMPONENT_CERTIFICATE, String.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         try {
             KeyStore ks = KeyStore.getInstance("PKCS12", "BC");

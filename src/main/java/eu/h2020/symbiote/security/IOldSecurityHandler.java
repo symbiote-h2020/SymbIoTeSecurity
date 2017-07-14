@@ -7,7 +7,6 @@ import eu.h2020.symbiote.security.session.AAM;
 import eu.h2020.symbiote.security.token.Token;
 
 import java.security.KeyStore;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,7 +22,7 @@ public interface IOldSecurityHandler {
      * for Release 2 with Core certificate, for R3 will include Platforms' certificates
      * @throws SecurityHandlerException on operation error
      */
-    List<AAM> getAvailableAAMs() throws SecurityHandlerException;
+    Map<String, AAM> getAvailableAAMs() throws SecurityHandlerException;
 
     /**
      * Request core token using one's Symbiote Core Account
@@ -44,7 +43,7 @@ public interface IOldSecurityHandler {
      * @param aams Symbiote Authentication and Authorization Managers to request federated tokens from
      * @return
      */
-    Map<String, Token> requestForeignTokens(List<AAM> aams);
+    Map<String, Token> requestForeignTokens(Map<String, AAM> aams);
 
     /**
      * Clears the token wallet (home and core)

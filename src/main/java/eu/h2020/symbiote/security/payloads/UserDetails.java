@@ -15,6 +15,8 @@ public class UserDetails {
     // TODO review for R4
     private String federatedId = "";
 
+    // TODO add user's clients certificates
+
     public UserDetails() {
         // used in serialization
     }

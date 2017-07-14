@@ -1,6 +1,6 @@
 package eu.h2020.symbiote.security.certificate;
 
-import eu.h2020.symbiote.security.rest.clients.CoreAAMClient;
+import eu.h2020.symbiote.security.listeners.rest.clients.CoreAAMClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -11,6 +11,9 @@ import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 
 
+/**
+ * TODO R3 do we need this class at all, maybe move some parts to Certificate Helper
+ */
 public class CertificateValidator {
     private static final Log logger = LogFactory.getLog(CertificateValidator.class);
 

@@ -1,6 +1,6 @@
 package eu.h2020.symbiote.security.exceptions.custom;
 
-import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.constants.SecurityConstants;
 import eu.h2020.symbiote.security.exceptions.SecurityException;
 import org.springframework.http.HttpStatus;
 
@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
  */
 public class UnauthorizedUnregistrationException extends SecurityException {
 
-    private static final long serialVersionUID = AAMConstants.serialVersionUID;
+    private static final long serialVersionUID = SecurityConstants.serialVersionUID;
     private final static String errorMessage = "UNAUTHORIZED_APP_UNREGISTRATION";
     private final HttpStatus statusCode = HttpStatus.UNAUTHORIZED;
 

@@ -2,7 +2,7 @@ package eu.h2020.symbiote.security;
 
 import eu.h2020.symbiote.security.aams.DummyAAMAMQPListener;
 import eu.h2020.symbiote.security.certificate.Certificate;
-import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.constants.SecurityConstants;
 import eu.h2020.symbiote.security.enums.IssuingAuthorityType;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
 import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
@@ -35,7 +35,10 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -123,9 +126,10 @@ public class InternalSecurityHandlerTest {
         assertNotNull(token.getToken());
         assertEquals(IssuingAuthorityType.CORE, token.getType());
 
-        List<AAM> aams = new ArrayList<>();
+        Map<String, AAM> aams = new HashMap<>();
         // stubbing a dummy platform aam
-        aams.add(new AAM(symbioteCoreInterfaceAddress, "A test platform aam", "SomePlatformAAM", new Certificate()));
+        aams.put("SomePlatformAAM", new AAM(symbioteCoreInterfaceAddress, "A test platform aam", "SomePlatformAAM",
+                new Certificate()));
         Map<String, Token> tokens = securityHandler.requestForeignTokens(aams);
         assertTrue(tokens.containsKey("SomePlatformAAM"));
         assertEquals(IssuingAuthorityType.PLATFORM, tokens.get("SomePlatformAAM").getType());
@@ -138,7 +142,7 @@ public class InternalSecurityHandlerTest {
             ValidationStatus validationStatus = securityHandler.verifyHomeToken(token);
             assertEquals(ValidationStatus.VALID, validationStatus);
             Assert.assertEquals("test1", token.getClaims().getSubject());
-            Assert.assertEquals("test2", token.getClaims().get(AAMConstants.SYMBIOTE_ATTRIBUTES_PREFIX + "name"));
+            Assert.assertEquals("test2", token.getClaims().get(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + "name"));
         } catch (ValidationException e) {
             log.error(e);
             assert (false);

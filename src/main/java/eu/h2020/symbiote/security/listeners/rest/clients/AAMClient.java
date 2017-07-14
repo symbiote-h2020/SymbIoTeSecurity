@@ -1,11 +1,11 @@
-package eu.h2020.symbiote.security.rest.clients;
+package eu.h2020.symbiote.security.listeners.rest.clients;
 
 import eu.h2020.symbiote.security.SecurityHandler;
 import eu.h2020.symbiote.security.certificate.Certificate;
-import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.constants.SecurityConstants;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
+import eu.h2020.symbiote.security.listeners.rest.AAMRESTInterface;
 import eu.h2020.symbiote.security.payloads.Credentials;
-import eu.h2020.symbiote.security.rest.AAMRESTInterface;
 import eu.h2020.symbiote.security.session.AAM;
 import eu.h2020.symbiote.security.token.Token;
 import feign.Feign;
@@ -80,7 +80,8 @@ public class AAMClient {
         Token result = null;
         try {
             logger.info("User trying to login " + credential.getUsername() + " - " + credential.getPassword());
-            result = new Token(jsonclient.login(credential).headers().get(AAMConstants.TOKEN_HEADER_NAME).iterator()
+            result = new Token(jsonclient.login(credential).headers().get(SecurityConstants.TOKEN_HEADER_NAME)
+                    .iterator()
                     .next());
         } catch (Exception e) {
             logger.error(errorMessage + url, e);
@@ -103,7 +104,7 @@ public class AAMClient {
         Token result = null;
         try {
             logger.info("User trying to requestFederatedToken");
-            result = new Token(jsonclient.requestForeignToken(token.getToken()).headers().get(AAMConstants
+            result = new Token(jsonclient.requestForeignToken(token.getToken()).headers().get(SecurityConstants
                     .TOKEN_HEADER_NAME).iterator().next());
         } catch (Exception e) {
             logger.error(errorMessage + url, e);

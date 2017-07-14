@@ -1,6 +1,6 @@
 package eu.h2020.symbiote.security.exceptions.custom;
 
-import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.constants.SecurityConstants;
 import eu.h2020.symbiote.security.exceptions.SecurityException;
 import org.springframework.http.HttpStatus;
 
@@ -12,8 +12,8 @@ import org.springframework.http.HttpStatus;
  */
 public class WrongCredentialsException extends SecurityException {
 
-    private static final long serialVersionUID = AAMConstants.serialVersionUID;
-    private final static String errorMessage = AAMConstants.ERR_WRONG_CREDENTIALS;
+    private static final long serialVersionUID = SecurityConstants.serialVersionUID;
+    private final static String errorMessage = SecurityConstants.ERR_WRONG_CREDENTIALS;
     private final static HttpStatus statusCode = HttpStatus.UNAUTHORIZED;
 
     public WrongCredentialsException() {

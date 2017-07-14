@@ -3,7 +3,7 @@ package eu.h2020.symbiote.security.aams;
 
 import eu.h2020.symbiote.security.SecurityHandlerTest.DateUtil;
 import eu.h2020.symbiote.security.certificate.Certificate;
-import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.constants.SecurityConstants;
 import eu.h2020.symbiote.security.enums.IssuingAuthorityType;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
 import eu.h2020.symbiote.security.exceptions.custom.JWTCreationException;
@@ -30,10 +30,9 @@ import java.io.StringWriter;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -51,7 +50,7 @@ public class DummyAAMRestListeners {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = AAMConstants.AAM_GET_CA_CERTIFICATE)
+    @RequestMapping(method = RequestMethod.GET, path = SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE)
     public String getRootCertificate() throws NoSuchProviderException, KeyStoreException, IOException,
             UnrecoverableKeyException, NoSuchAlgorithmException, CertificateException {
         log.debug("invoked get token public");
@@ -69,7 +68,7 @@ public class DummyAAMRestListeners {
     /**
      * acts temporarily as core AAM
      */
-    @RequestMapping(method = RequestMethod.POST, path = AAMConstants.AAM_LOGIN, produces =
+    @RequestMapping(method = RequestMethod.POST, path = SecurityConstants.AAM_GET_HOME_TOKEN, produces =
             "application/json", consumes = "application/json")
     public ResponseEntity<?> doLogin(@RequestBody Credentials credential) {
         log.info("User trying to login " + credential.getUsername() + " - " + credential.getPassword());
@@ -83,13 +82,14 @@ public class DummyAAMRestListeners {
             attributes.put("name", "test2");
             String tokenString = JWTEngine.generateJWTToken(credential.getUsername(), attributes, ks.getCertificate
                     (ALIAS).getPublicKey().getEncoded(), IssuingAuthorityType.CORE, DateUtil.addDays(new Date(), 1)
-                            .getTime(), AAMConstants.AAM_CORE_AAM_INSTANCE_ID, ks.getCertificate(ALIAS).getPublicKey(),
+                            .getTime(), SecurityConstants.AAM_CORE_AAM_INSTANCE_ID, ks.getCertificate(ALIAS)
+                            .getPublicKey(),
                     (PrivateKey) key);
 
             Token coreToken = new Token(tokenString);
 
             HttpHeaders headers = new HttpHeaders();
-            headers.add(AAMConstants.TOKEN_HEADER_NAME, coreToken.getToken());
+            headers.add(SecurityConstants.TOKEN_HEADER_NAME, coreToken.getToken());
 
             /* Finally issues and return foreign_token */
             return new ResponseEntity<>(headers, HttpStatus.OK);
@@ -102,9 +102,9 @@ public class DummyAAMRestListeners {
     }
 
 
-    @RequestMapping(method = RequestMethod.POST, path = AAMConstants.AAM_VALIDATE,
+    @RequestMapping(method = RequestMethod.POST, path = SecurityConstants.AAM_VALIDATE,
             produces = "application/json;charset=UTF-8", consumes = "application/json;charset=UTF-8")
-    public ResponseEntity<ValidationStatus> validate(@RequestHeader(AAMConstants
+    public ResponseEntity<ValidationStatus> validate(@RequestHeader(SecurityConstants
             .TOKEN_HEADER_NAME) String token) {
         log.info("Validating " + token);
         // todo implement... for the moment returns valid
@@ -114,9 +114,9 @@ public class DummyAAMRestListeners {
     /**
      * Acts either as core or platform AAM depending on what token was passed.
      */
-    @RequestMapping(method = RequestMethod.POST, path = AAMConstants.AAM_REQUEST_FOREIGN_TOKEN, produces =
+    @RequestMapping(method = RequestMethod.POST, path = SecurityConstants.AAM_GET_FOREIGN_TOKEN, produces =
             "application/json;charset=UTF-8", consumes = "application/json;charset=UTF-8")
-    public ResponseEntity<?> requestForeignToken(@RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String
+    public ResponseEntity<?> requestForeignToken(@RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String
                                                          requestTokenString) {
         log.info("Requesting foreign (core or platform) token, received token " + requestTokenString);
         try {
@@ -140,7 +140,7 @@ public class DummyAAMRestListeners {
                 authorityType = IssuingAuthorityType.PLATFORM;
             } else {
                 // act as core AAM
-                authorityId = AAMConstants.AAM_CORE_AAM_INSTANCE_ID;
+                authorityId = SecurityConstants.AAM_CORE_AAM_INSTANCE_ID;
                 authorityType = IssuingAuthorityType.CORE;
             }
 
@@ -153,7 +153,7 @@ public class DummyAAMRestListeners {
 
             Token foreignToken = new Token(tokenString);
             HttpHeaders headers = new HttpHeaders();
-            headers.add(AAMConstants.TOKEN_HEADER_NAME, foreignToken.getToken());
+            headers.add(SecurityConstants.TOKEN_HEADER_NAME, foreignToken.getToken());
 
             /* Finally issues and return foreign_token */
             return new ResponseEntity<>(headers, HttpStatus.OK);
@@ -166,10 +166,10 @@ public class DummyAAMRestListeners {
         return null;
     }
 
-    @RequestMapping(value = AAMConstants.AAM_GET_AVAILABLE_AAMS, method = RequestMethod.GET, produces =
+    @RequestMapping(value = SecurityConstants.AAM_GET_AVAILABLE_AAMS, method = RequestMethod.GET, produces =
             "application/json")
-    public ResponseEntity<List<AAM>> getAvailableAAMs() {
-        List<AAM> availableAAMs = new ArrayList<>();
+    public ResponseEntity<Map<String, AAM>> getAvailableAAMs() {
+        Map<String, AAM> availableAAMs = new HashMap<>();
         try {
             // Core AAM
             Certificate coreCertificate = new Certificate("coreCertTestValue");
@@ -177,13 +177,14 @@ public class DummyAAMRestListeners {
             String coreAAMInstanceIdentifier = "Symbiote Core";
 
             // adding core aam info to the response
-            availableAAMs.add(new AAM("https://localhost:8100", "SymbIoTe Core AAM", coreAAMInstanceIdentifier,
+            availableAAMs.put("SymbIoTe Core AAM", new AAM("https://localhost:8100", "SymbIoTe Core AAM",
+                    coreAAMInstanceIdentifier,
                     coreCertificate));
 
             return new ResponseEntity<>(availableAAMs, HttpStatus.OK);
         } catch (Exception e) {
             log.error(e);
-            return new ResponseEntity<>(new ArrayList<AAM>(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new HashMap<>(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

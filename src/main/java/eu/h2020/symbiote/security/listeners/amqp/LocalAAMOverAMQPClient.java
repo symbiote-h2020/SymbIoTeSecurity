@@ -1,9 +1,9 @@
-package eu.h2020.symbiote.security.amqp;
+package eu.h2020.symbiote.security.listeners.amqp;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.RpcClient;
-import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.constants.SecurityConstants;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
 import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.payloads.Credentials;
@@ -18,7 +18,7 @@ import java.io.IOException;
 /**
  * Client used to access local/intenal AAM over AMQP by Symbiote components
  * <p>
- * TODO R3 rework to use Spring AMQP instead of rabbitMQ implementations
+ * TODO R3 do we need it anymore?
  *
  * @author Mikołaj Dobski (PSNC)
  */
@@ -40,7 +40,7 @@ public class LocalAAMOverAMQPClient {
         try {
             log.debug("Sending request of login for " + credentials.getUsername());
 
-            RpcClient client = new RpcClient(factory.newConnection().createChannel(), "", AAMConstants
+            RpcClient client = new RpcClient(factory.newConnection().createChannel(), "", SecurityConstants
                     .AAM_LOGIN_QUEUE, 5000);
 
             response = client.primitiveCall(mapper.writeValueAsString(credentials)
@@ -69,7 +69,7 @@ public class LocalAAMOverAMQPClient {
 
     public ValidationStatus validate(Token token) throws SecurityHandlerException {
         try {
-            RpcClient client = new RpcClient(factory.newConnection().createChannel(), "", AAMConstants
+            RpcClient client = new RpcClient(factory.newConnection().createChannel(), "", SecurityConstants
                     .AAM_VALIDATE_QUEUE, 5000);
             byte[] amqpResponse = client.primitiveCall(mapper.writeValueAsString(new ValidationRequest(token.getToken(), "")).getBytes());
 

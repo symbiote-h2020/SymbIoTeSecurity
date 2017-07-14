@@ -1,6 +1,6 @@
-package eu.h2020.symbiote.security.rest.clients;
+package eu.h2020.symbiote.security.listeners.rest.clients;
 
-import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.constants.SecurityConstants;
 import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.session.AAM;
 import org.apache.commons.logging.Log;
@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * Client for Core AAM services exposed over Symbiote Core Interface
@@ -35,18 +35,16 @@ public class CoreAAMClient extends AAMClient {
      * for Release 2 with Core certificate, for R3 will include Platforms' certificates
      * @throws SecurityHandlerException on operation error
      */
-    public List<AAM> getAvailableAAMs() throws SecurityHandlerException {
-        List<AAM> aams;
+    public Map<String, AAM> getAvailableAAMs() throws SecurityHandlerException {
+        Map<String, AAM> aams;
         log.debug("Trying to fetch available AAMs from Core AAM");
 
         // TODO possibly rework to use Feign client
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<List<AAM>> response = restTemplate.exchange(
-                getURL() + AAMConstants.AAM_GET_AVAILABLE_AAMS,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<AAM>>() {
-                });
+
+        ResponseEntity<Map<String, AAM>> response = restTemplate.exchange(getURL() + SecurityConstants
+                .AAM_GET_AVAILABLE_AAMS, HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, AAM>>() {
+        });
         if (response.getStatusCode() == HttpStatus.OK)
             aams = response.getBody();
         else

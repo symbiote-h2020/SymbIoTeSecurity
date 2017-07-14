@@ -3,10 +3,12 @@ package eu.h2020.symbiote.security.payloads;
 /**
  * Describes platform registration in AAM payload.
  *
+ * TODO update to contain operation enum on the platform
+ *
  * @author Mikołaj Dobski (PSNC)
  * @author Maksymilian Marcinowski (PSNC)
  */
-public class PlatformRegistrationRequest {
+public class PlatformManagementRequest {
     private Credentials AAMOwnerCredentials = new Credentials();
     private UserDetails platformOwnerDetails = new UserDetails();
     private String platformInterworkingInterfaceAddress = "";
@@ -14,7 +16,7 @@ public class PlatformRegistrationRequest {
     private String platformInstanceFriendlyName;
 
 
-    public PlatformRegistrationRequest() {
+    public PlatformManagementRequest() {
         // required for serialization
     }
 
@@ -26,10 +28,10 @@ public class PlatformRegistrationRequest {
      * @param platformInterworkingInterfaceAddress used to point symbiote users to possible login entry points
      * @param platformInstanceFriendlyName         a label for the end user to be able to identify the login entry point
      */
-    public PlatformRegistrationRequest(Credentials AAMOwnerCredentials,
-                                       UserDetails platformOwnerDetails,
-                                       String platformInterworkingInterfaceAddress,
-                                       String platformInstanceFriendlyName) {
+    public PlatformManagementRequest(Credentials AAMOwnerCredentials,
+                                     UserDetails platformOwnerDetails,
+                                     String platformInterworkingInterfaceAddress,
+                                     String platformInstanceFriendlyName) {
         this.AAMOwnerCredentials = AAMOwnerCredentials;
         this.platformOwnerDetails = platformOwnerDetails;
         this.platformInterworkingInterfaceAddress = platformInterworkingInterfaceAddress;
@@ -45,11 +47,11 @@ public class PlatformRegistrationRequest {
      * @param platformInstanceFriendlyName         a label for the end user to be able to identify the login entry point
      * @param preferredPlatformInstanceID          when a Platform Owner preferres his own platform identifier
      */
-    public PlatformRegistrationRequest(Credentials AAMOwnerCredentials,
-                                       UserDetails platformOwnerDetails,
-                                       String platformInterworkingInterfaceAddress,
-                                       String platformInstanceFriendlyName,
-                                       String preferredPlatformInstanceID) {
+    public PlatformManagementRequest(Credentials AAMOwnerCredentials,
+                                     UserDetails platformOwnerDetails,
+                                     String platformInterworkingInterfaceAddress,
+                                     String platformInstanceFriendlyName,
+                                     String preferredPlatformInstanceID) {
         this.AAMOwnerCredentials = AAMOwnerCredentials;
         this.platformInstanceFriendlyName = platformInstanceFriendlyName;
         this.platformInstanceId = preferredPlatformInstanceID;

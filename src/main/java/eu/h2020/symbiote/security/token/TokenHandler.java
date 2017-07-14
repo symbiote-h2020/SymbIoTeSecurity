@@ -2,11 +2,12 @@ package eu.h2020.symbiote.security.token;
 
 
 import eu.h2020.symbiote.security.SecurityHandler;
-import eu.h2020.symbiote.security.amqp.LocalAAMOverAMQPClient;
+import eu.h2020.symbiote.security.constants.SecurityConstants;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
 import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
-import eu.h2020.symbiote.security.rest.clients.AAMClient;
-import eu.h2020.symbiote.security.rest.clients.CoreAAMClient;
+import eu.h2020.symbiote.security.listeners.amqp.LocalAAMOverAMQPClient;
+import eu.h2020.symbiote.security.listeners.rest.clients.AAMClient;
+import eu.h2020.symbiote.security.listeners.rest.clients.CoreAAMClient;
 import eu.h2020.symbiote.security.session.AAM;
 import io.jsonwebtoken.*;
 import org.apache.commons.logging.Log;
@@ -25,7 +26,9 @@ public class TokenHandler {
     private HashMap<String, X509Certificate> publicCertificates;
 
     /**
-     * TODO R3 rework so that this is initialized with the Map built using @{@link SecurityHandler#getAvailableAAMs()}, to locate Core AAM one should use {@link eu.h2020.symbiote.security.constants.AAMConstants#AAM_CORE_AAM_INSTANCE_ID}
+     * TODO R3 rework so that this is initialized with the Map built using
+     * @{@link SecurityHandler#getAvailableAAMs()}, to locate Core AAM one should use
+     * {@link SecurityConstants#AAM_CORE_AAM_INSTANCE_ID}
      */
     public TokenHandler(CoreAAMClient coreAAM, LocalAAMOverAMQPClient platformAAMMessageHandler) {
         this.coreAAM = coreAAM;

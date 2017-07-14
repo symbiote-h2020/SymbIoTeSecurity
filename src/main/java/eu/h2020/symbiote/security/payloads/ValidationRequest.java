@@ -1,7 +1,7 @@
 package eu.h2020.symbiote.security.payloads;
 
 /**
- * Class that defines the structure of a payload used to validate over AMQP
+ * Class that defines the structure of a payload used to validate credentials over AMQP
  *
  * @author Piotr Kicki (PSNC)
  */

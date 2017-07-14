@@ -8,15 +8,15 @@ import eu.h2020.symbiote.security.enums.RegistrationStatus;
  * @author Maksymilian Marcinowski (PSNC)
  * @author Mikołaj Dobski (PSNC)
  */
-public class PlatformRegistrationResponse {
+public class PlatformManagementResponse {
     private String platformId = "";
     private RegistrationStatus registrationStatus;
 
-    public PlatformRegistrationResponse() {
+    public PlatformManagementResponse() {
         // used by serializer
     }
 
-    public PlatformRegistrationResponse(String registeredPlatformId, RegistrationStatus registrationStatus) {
+    public PlatformManagementResponse(String registeredPlatformId, RegistrationStatus registrationStatus) {
         this.platformId = registeredPlatformId;
         this.registrationStatus = registrationStatus;
     }

@@ -1,6 +1,6 @@
 package eu.h2020.symbiote.security.exceptions.custom;
 
-import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.constants.SecurityConstants;
 import eu.h2020.symbiote.security.exceptions.SecurityException;
 import org.springframework.http.HttpStatus;
 
@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus;
  */
 public class ValidationException extends SecurityException {
 
-    private static final long serialVersionUID = AAMConstants.serialVersionUID;
+    private static final long serialVersionUID = SecurityConstants.serialVersionUID;
 
     //todo review if status codes and change of parent are valid
     private final static String errorMessage = "VALIDATION_ERROR";

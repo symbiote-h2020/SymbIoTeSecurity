@@ -1,9 +1,9 @@
 package eu.h2020.symbiote.security;
 
-import eu.h2020.symbiote.security.amqp.LocalAAMOverAMQPClient;
-import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.constants.SecurityConstants;
 import eu.h2020.symbiote.security.enums.ValidationStatus;
 import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
+import eu.h2020.symbiote.security.listeners.amqp.LocalAAMOverAMQPClient;
 import eu.h2020.symbiote.security.payloads.Credentials;
 import eu.h2020.symbiote.security.token.Token;
 import eu.h2020.symbiote.security.token.TokenHandler;
@@ -61,8 +61,8 @@ public class InternalSecurityHandler extends SecurityHandler {
             homeToken = platformMessageHandler.login(credentials);
             sessionInformation.setHomeToken(homeToken);
             if (sessionInformation.getHomeToken() == null) {
-                log.error(AAMConstants.ERR_WRONG_CREDENTIALS);
-                throw new SecurityException(AAMConstants.ERR_WRONG_CREDENTIALS);
+                log.error(SecurityConstants.ERR_WRONG_CREDENTIALS);
+                throw new SecurityException(SecurityConstants.ERR_WRONG_CREDENTIALS);
             }
         }
         return homeToken;
@@ -93,8 +93,8 @@ public class InternalSecurityHandler extends SecurityHandler {
             sessionInformation.setHomeToken(homeToken);
             sessionInformation.setCoreToken(coreToken);
             if (sessionInformation.getHomeToken() == null) {
-                log.error(AAMConstants.ERR_WRONG_CREDENTIALS);
-                throw new SecurityException(AAMConstants.ERR_WRONG_CREDENTIALS);
+                log.error(SecurityConstants.ERR_WRONG_CREDENTIALS);
+                throw new SecurityException(SecurityConstants.ERR_WRONG_CREDENTIALS);
             }
 
         }

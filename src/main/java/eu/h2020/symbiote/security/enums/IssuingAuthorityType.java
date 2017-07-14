@@ -1,14 +1,13 @@
 package eu.h2020.symbiote.security.enums;
 
-import eu.h2020.symbiote.security.token.jwt.JWTClaims;
-
 /**
  * Used to define the {eu.h2020.symbiote.security.AuthenticationAuthorizationManager} deployment type:
  * CoreAAM,
  * PlatformAAM
  * or NullAAM (for tests)
- * <p>
- * Propagates as JWT token Type - {@link JWTClaims#getTtyp()}
+ *
+ * TODO @Mikołaj introduce the new enum TokenType (HOME,FOREIGN,GUEST) and fix usage of this constant in the AAM
+ * codes only
  *
  * @author Mikołaj Dobski (PSNC)
  */
