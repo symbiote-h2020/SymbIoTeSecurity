@@ -1,15 +1,16 @@
 package eu.h2020.symbiote.security;
 
-import eu.h2020.symbiote.security.aams.DummyAAMAMQPListener;
-import eu.h2020.symbiote.security.certificate.Certificate;
-import eu.h2020.symbiote.security.constants.SecurityConstants;
-import eu.h2020.symbiote.security.enums.IssuingAuthorityType;
-import eu.h2020.symbiote.security.enums.ValidationStatus;
-import eu.h2020.symbiote.security.exceptions.custom.SecurityHandlerException;
-import eu.h2020.symbiote.security.exceptions.custom.ValidationException;
-import eu.h2020.symbiote.security.session.AAM;
-import eu.h2020.symbiote.security.token.Token;
-import eu.h2020.symbiote.security.token.jwt.JWTEngine;
+import eu.h2020.symbiote.security.commons.Certificate;
+import eu.h2020.symbiote.security.commons.SecurityConstants;
+import eu.h2020.symbiote.security.commons.Token;
+import eu.h2020.symbiote.security.commons.enums.IssuingAuthorityType;
+import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
+import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
+import eu.h2020.symbiote.security.communication.interfaces.payloads.AAM;
+import eu.h2020.symbiote.security.dummies.DummyTokenIssuer;
+import eu.h2020.symbiote.security.dummies.aams.DummyAAMAMQPListener;
+import eu.h2020.symbiote.security.handler.InternalSecurityHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
@@ -88,10 +89,11 @@ public class InternalSecurityHandlerTest {
 
         HashMap<String, String> attributes = new HashMap<>();
         attributes.put("name", "test2");
-        coreTokenString = JWTEngine.generateJWTToken("test1", attributes, ks.getCertificate(ALIAS).getPublicKey()
+        coreTokenString = DummyTokenIssuer.generateJWTToken("test1", attributes, ks.getCertificate(ALIAS).getPublicKey()
                         .getEncoded(), IssuingAuthorityType.CORE, DateUtil.addDays(new Date(), 1).getTime(),
                 "securityHandlerTestCoreAAM", ks.getCertificate(ALIAS).getPublicKey(), (PrivateKey) key);
-        platformTokenString = JWTEngine.generateJWTToken("test1", attributes, ks.getCertificate(ALIAS).getPublicKey()
+        platformTokenString = DummyTokenIssuer.generateJWTToken("test1", attributes, ks.getCertificate(ALIAS)
+                        .getPublicKey()
                         .getEncoded(), IssuingAuthorityType.PLATFORM, DateUtil.addDays(new Date(), 1).getTime(),
                 "securityHandlerTestPlatformAAM", ks.getCertificate(ALIAS).getPublicKey(), (PrivateKey) key);
 
