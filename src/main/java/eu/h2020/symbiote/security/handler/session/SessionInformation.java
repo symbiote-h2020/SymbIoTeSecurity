@@ -1,6 +1,7 @@
 package eu.h2020.symbiote.security.handler.session;
 
 import eu.h2020.symbiote.security.commons.Token;
+import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.communication.interfaces.payloads.AAM;
 import eu.h2020.symbiote.security.handler.SecurityHandler;
 
