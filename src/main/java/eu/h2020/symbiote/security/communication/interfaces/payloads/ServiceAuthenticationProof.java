@@ -11,7 +11,8 @@ public class ServiceAuthenticationProof {
      */
     public final String encryptionToken;
     /**
-     * timestamp used to verify age of this proof signed by the service and ecrypted using the attached token
+     * timestamp used to verify age of this proof signed by the service and encrypted using the attached token
+     * This is basically a Base64 encoded {@link javax.crypto.SealedObject}
      */
     public final String encryptedTimestamp;
 

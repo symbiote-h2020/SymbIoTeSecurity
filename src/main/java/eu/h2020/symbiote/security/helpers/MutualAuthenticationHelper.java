@@ -3,10 +3,10 @@ package eu.h2020.symbiote.security.helpers;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
-import eu.h2020.symbiote.security.communication.interfaces.payloads.ClientAuthenticationProof;
 import eu.h2020.symbiote.security.communication.interfaces.payloads.ServiceAuthenticationProof;
 
 import java.security.PrivateKey;
+import java.security.SignedObject;
 import java.util.Set;
 
 /**
@@ -17,26 +17,26 @@ import java.util.Set;
 public class MutualAuthenticationHelper {
 
     /**
-     * Used by the client to generate a {@link ClientAuthenticationProof} to be attached to the business query so
+     * Used by the client to generate a set of {@link SignedObject} to be attached to the business query so
      * that the service can confirm that the client should posses provided tokens
      *
      * @param authorizationCredentials matching the set of tokens used in the business query
      * @return the required payload
      */
-    public static ClientAuthenticationProof getClientAuthenticationProof(Set<AuthorizationCredentials>
-                                                                                 authorizationCredentials) {
+    public static Set<SignedObject> getClientAuthenticationProof(
+            Set<AuthorizationCredentials> authorizationCredentials) {
         return null;
     }
 
     /**
-     * Used by the service to handle the {@link ClientAuthenticationProof}
+     * Used by the service to handle the set of {@link SignedObject} verification
      *
-     * @param authorizationTokens       attached to the business query
-     * @param clientAuthenticationProof attached to the business query
+     * @param authorizationTokens     attached to the business query
+     * @param tokensOwnershipProofSet attached to the business query
      * @return true if the client should be in possession of the given tokens
      */
-    public static boolean isClientAuthentic(Set<Token> authorizationTokens, ClientAuthenticationProof
-            clientAuthenticationProof) {
+    public static boolean isClientAuthentic(Set<Token> authorizationTokens,
+                                            Set<SignedObject> tokensOwnershipProofSet) {
         return true;
     }
 
@@ -48,8 +48,8 @@ public class MutualAuthenticationHelper {
      * @param clientToken       used to encrypt the payload
      * @return the required payload
      */
-    public static ServiceAuthenticationProof getServiceAuthenticationProof(PrivateKey servicePrivateKey, Token
-            clientToken) {
+    public static ServiceAuthenticationProof getServiceAuthenticationProof(PrivateKey servicePrivateKey,
+                                                                           Token clientToken) {
         return null;
     }
 
@@ -61,8 +61,9 @@ public class MutualAuthenticationHelper {
      * @param clientKey                  used to decrypt the payload
      * @return true if the service is genuine
      */
-    public static boolean isServiceAuthentic(ServiceAuthenticationProof serviceAuthenticationProof, Certificate
-            serviceCertificate, PrivateKey clientKey) {
+    public static boolean isServiceAuthentic(ServiceAuthenticationProof serviceAuthenticationProof,
+                                             Certificate serviceCertificate,
+                                             PrivateKey clientKey) {
         return true;
     }
 
