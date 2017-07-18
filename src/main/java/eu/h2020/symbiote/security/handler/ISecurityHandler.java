@@ -23,11 +23,11 @@ import java.util.Optional;
 public interface ISecurityHandler {
 
     /**
-     * @return list of all currently available security entrypoints to symbiote (getCertificate, login, token
+     * @return map of all currently available security entrypoints to symbiote (getCertificate, login, token
      * validation)
      * @throws SecurityHandlerException on operation error
      */
-    List<AAM> getAvailableAAMs() throws SecurityHandlerException;
+    Map<String, AAM> getAvailableAAMs() throws SecurityHandlerException;
 
     /**
      * Retrieves your home token from the given AAM you have account in.
