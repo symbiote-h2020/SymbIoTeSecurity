@@ -53,6 +53,7 @@ public class SecurityConstants {
     public static final int JWTPartsCount = 3; //Header, body and signature
     public static final String CLAIM_NAME_TOKEN_TYPE = "ttyp";
     public static final String SYMBIOTE_ATTRIBUTES_PREFIX = "SYMBIOTE_";
+    public static final String GUEST_NAME = "guest";
 
     // certificates
     public static final String CERTIFICATE_HEADER_NAME = "X-Auth-Cert";
