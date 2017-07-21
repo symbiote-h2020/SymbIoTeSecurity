@@ -70,4 +70,12 @@ public class CertificateHelper {
         KeyPair kp = new JcaPEMKeyConverter().setProvider(PROVIDER_NAME).getKeyPair((PEMKeyPair) o);
         return kp.getPrivate();
     }
+
+    public static PublicKey convertPEMToPublicKey(String pemPublickey) throws IOException, CertificateException {
+        StringReader reader = new StringReader(pemPublickey);
+        PEMParser pemParser = new PEMParser(reader);
+        Object o = pemParser.readObject();
+        KeyPair kp = new JcaPEMKeyConverter().setProvider(PROVIDER_NAME).getKeyPair((PEMKeyPair) o);
+        return kp.getPublic();
+    }
 }
