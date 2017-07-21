@@ -53,7 +53,7 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
     private void buildCredentialsWallet(boolean isOnline) throws SecurityHandlerException {
         if (isOnline) {
             // fetch available AAMs from the SymbIoTe Core
-            for (AAM aam : this.getAvailableAAMs()) {
+            for (AAM aam : this.getAvailableAAMs().values()) {
                 BoundCredentials boundCredentials = new BoundCredentials(aam);
                 // todo access the persistent storage, retrieve BoundCredentials for this AAM and fill them properly
                 credentialsWallet.put(aam, boundCredentials);
