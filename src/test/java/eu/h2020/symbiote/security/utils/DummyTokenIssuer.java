@@ -1,4 +1,4 @@
-package eu.h2020.symbiote.security.dummies;
+package eu.h2020.symbiote.security.utils;
 
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.enums.IssuingAuthorityType;

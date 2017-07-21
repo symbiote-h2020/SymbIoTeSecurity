@@ -1,9 +1,9 @@
 package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.commons.Token;
+import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.communication.interfaces.payloads.AAM;
-import eu.h2020.symbiote.security.handler.session.BoundCredentials;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
 
 import java.util.HashMap;
@@ -53,7 +53,7 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
     private void buildCredentialsWallet(boolean isOnline) throws SecurityHandlerException {
         if (isOnline) {
             // fetch available AAMs from the SymbIoTe Core
-            for (AAM aam : this.getAvailableAAMs()) {
+            for (AAM aam : this.getAvailableAAMs().values()) {
                 BoundCredentials boundCredentials = new BoundCredentials(aam);
                 // todo access the persistent storage, retrieve BoundCredentials for this AAM and fill them properly
                 credentialsWallet.put(aam, boundCredentials);
@@ -67,7 +67,8 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
     public void clearCachedTokens() {
         guestToken = null;
         for (BoundCredentials credentials : credentialsWallet.values()) {
-            credentials.homeToken = null;
+            if (credentials.homeCredentials != null)
+                credentials.homeCredentials.homeToken = null;
             credentials.foreignTokens.clear();
         }
 

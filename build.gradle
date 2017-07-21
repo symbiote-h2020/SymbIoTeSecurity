@@ -77,12 +77,15 @@ dependencies {
     // TODO think how to limit those dependecies...
     compile('com.fasterxml.jackson.core:jackson-annotations:2.8.7+')
     compile('org.springframework.data:spring-data-commons')
-    compile group: 'com.netflix.feign', name: 'feign-jackson', version: '8.18.0'
-    compile('org.springframework.amqp:spring-amqp')
-    compile('org.springframework.amqp:spring-rabbit')
+    compile('com.netflix.feign:feign-jackson:8.18.0')
+    compile('org.springframework:spring-web:4.3.9.RELEASE')
+    compile('commons-codec:commons-codec:1.10') // replace Base64 with JRE implementation
+
 
     // common testing
     testCompile('junit:junit:4.+')
+    //TODO do we need those in a client/pojo library... replace with mockito...
+    // we should only mock the service here and do the integration in AAM repository against real AAM codes
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testRuntime('org.springframework.boot:spring-boot-starter-web')
 }
