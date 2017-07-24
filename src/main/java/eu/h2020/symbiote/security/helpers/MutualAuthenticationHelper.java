@@ -133,12 +133,12 @@ public class MutualAuthenticationHelper {
         Iterator<Token> iteratorT = authorizationTokens.iterator();
         Iterator<SignedObject> iteratorSHS = signedHashesSet.iterator();
 
-        while (iteratorT.hasNext() & iteratorSHS.hasNext()){
+        while (iteratorT.hasNext() && iteratorSHS.hasNext()) {
             Token authorizationTokensElement = iteratorT.next();
             SignedObject signedHashesSetElement = iteratorSHS.next();
 
             String applicationPublicKeyPEM = JWTEngine.getClaimsFromToken(authorizationTokensElement.getToken()).getSpk();
-            PublicKey applicationPublicKey = CertificateHelper.convertPEMToPublicKey(applicationPublicKeyPEM);
+            PublicKey applicationPublicKey = CryptoHelper.convertPEMToPublicKey(applicationPublicKeyPEM);
 
             signedHashesSetElement.verify(applicationPublicKey, signature);
 
@@ -146,7 +146,10 @@ public class MutualAuthenticationHelper {
             String calculatedHash = hashSHA256(authorizationTokensElement.toString() + timestamp1.toString());
             Long deltaT = timestamp2 - timestamp1;
 
-            if(Objects.equals(calculatedHash, challengeHash) & (deltaT < THRESHOLD)){} else {return false;}
+            if (Objects.equals(calculatedHash, challengeHash) && (deltaT < THRESHOLD)) {
+            } else {
+                return false;
+            }
         }
 
         return true;
@@ -176,7 +179,7 @@ public class MutualAuthenticationHelper {
             IllegalBlockSizeException {
 
         String applicationPublicKeyPEM = JWTEngine.getClaimsFromToken(applicationToken.getToken()).getSpk();
-        PublicKey applicationPublicKey = CertificateHelper.convertPEMToPublicKey(applicationPublicKeyPEM);
+        PublicKey applicationPublicKey = CryptoHelper.convertPEMToPublicKey(applicationPublicKeyPEM);
 
         Cipher cipher = Cipher.getInstance("ECIES", BouncyCastleProvider.PROVIDER_NAME);
         cipher.init(Cipher.ENCRYPT_MODE, applicationPublicKey);
@@ -229,7 +232,10 @@ public class MutualAuthenticationHelper {
         String calculatedHash = hashSHA256(timestamp2.toString());
         Long deltaT = timestamp3 - timestamp2;
 
-        if(Objects.equals(calculatedHash, responseHash) & deltaT < THRESHOLD){} else {return false;}
+        if (Objects.equals(calculatedHash, responseHash) && deltaT < THRESHOLD) {
+        } else {
+            return false;
+        }
 
         return true;
     }

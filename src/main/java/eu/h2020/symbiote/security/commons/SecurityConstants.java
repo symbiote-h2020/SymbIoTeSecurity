@@ -13,6 +13,7 @@ public class SecurityConstants {
     public static final String CURVE_NAME = "secp256r1";
     public static final String KEY_PAIR_GEN_ALGORITHM = "ECDSA";
     public static final String SIGNATURE_ALGORITHM = "SHA256withECDSA";
+    public static final String ENCRYPTION_ALGORITHM = "RSA";
 
     // AAM GLOBAL
     public static final String AAM_CORE_AAM_FRIENDLY_NAME = "SymbIoTe Core AAM";
@@ -53,9 +54,11 @@ public class SecurityConstants {
     public static final int JWTPartsCount = 3; //Header, body and signature
     public static final String CLAIM_NAME_TOKEN_TYPE = "ttyp";
     public static final String SYMBIOTE_ATTRIBUTES_PREFIX = "SYMBIOTE_";
+    public static final String GUEST_NAME = "guest";
 
     // certificates
     public static final String CERTIFICATE_HEADER_NAME = "X-Auth-Cert";
+
 
     private SecurityConstants() {
     }
