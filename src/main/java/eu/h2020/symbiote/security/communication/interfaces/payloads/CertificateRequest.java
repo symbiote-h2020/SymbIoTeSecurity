@@ -1,9 +1,9 @@
 package eu.h2020.symbiote.security.communication.interfaces.payloads;
 
-import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 
 import java.io.IOException;
+import java.util.Base64;
 
 /**
  * Created by Maks on 2017-06-18.
@@ -24,7 +24,7 @@ public class CertificateRequest {
         this.username = username;
         this.password = password;
         this.clientId = clientId;
-        this.clientCSR = Base64.encodeBase64String(clientCSR.getEncoded());
+        this.clientCSR = Base64.getEncoder().encodeToString(clientCSR.getEncoded());
     }
 
     public String getUsername() {
