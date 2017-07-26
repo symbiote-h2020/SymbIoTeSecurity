@@ -13,7 +13,6 @@ public class SecurityConstants {
     public static final String CURVE_NAME = "secp256r1";
     public static final String KEY_PAIR_GEN_ALGORITHM = "ECDSA";
     public static final String SIGNATURE_ALGORITHM = "SHA256withECDSA";
-    public static final String ENCRYPTION_ALGORITHM = "RSA";
 
     // AAM GLOBAL
     public static final String AAM_CORE_AAM_FRIENDLY_NAME = "SymbIoTe Core AAM";

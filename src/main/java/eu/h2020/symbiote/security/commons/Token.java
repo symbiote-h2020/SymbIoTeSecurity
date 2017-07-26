@@ -1,7 +1,6 @@
 package eu.h2020.symbiote.security.commons;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import eu.h2020.symbiote.security.commons.enums.IssuingAuthorityType;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
@@ -24,8 +23,7 @@ public class Token {
 
     private String id = "";
     private String token = "";
-    // TODO rework it to be the HOME,FOREIGN,GUEST  enum
-    private IssuingAuthorityType type = IssuingAuthorityType.NULL;
+    private Type type = Type.NULL;
 
     @Transient
     private Claims claims;
@@ -67,7 +65,7 @@ public class Token {
     public void setClaims(Claims claims) {
         this.claims = claims;
         this.id = claims.getId();
-        this.type = IssuingAuthorityType.valueOf((String) claims.get(SecurityConstants.CLAIM_NAME_TOKEN_TYPE));
+        this.type = Type.valueOf((String) claims.get(SecurityConstants.CLAIM_NAME_TOKEN_TYPE));
     }
 
     /**
@@ -75,7 +73,7 @@ public class Token {
      *
      * @return the type of this token stating if it was issued by Core or a Platform
      */
-    public IssuingAuthorityType getType() {
+    public Type getType() {
         return type;
     }
 
@@ -86,5 +84,12 @@ public class Token {
     @Override
     public String toString() {
         return token;
+    }
+
+    public enum Type {
+        HOME,
+        FOREIGN,
+        GUEST,
+        NULL
     }
 }
