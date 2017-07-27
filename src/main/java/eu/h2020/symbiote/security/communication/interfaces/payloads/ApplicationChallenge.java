@@ -1,20 +1,19 @@
 package eu.h2020.symbiote.security.communication.interfaces.payloads;
 
-import javax.crypto.SealedObject;
 import java.security.SignedObject;
 import java.util.Set;
 
 /**
- * Utility class for containing the challenge payload to be further encapsulated in a {@link SealedObject} challenge.
+ * Utility class for containing the challenge payload in the challenge response procedure.
  *
  * @author Daniele Caldarola (CNIT)
  */
-public class ChallengePayload {
+public class ApplicationChallenge {
 
     private Set<SignedObject> signedHashesSet;
     private Long timestamp1;
 
-    public ChallengePayload(Set<SignedObject> signatureSet, Long timestamp1) {
+    public ApplicationChallenge(Set<SignedObject> signatureSet, Long timestamp1) {
         this.signedHashesSet = signatureSet;
         this.timestamp1 = timestamp1;
     }

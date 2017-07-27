@@ -5,11 +5,10 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
-import eu.h2020.symbiote.security.communication.interfaces.payloads.ChallengePayload;
-import eu.h2020.symbiote.security.communication.interfaces.payloads.ResponsePayload;
+import eu.h2020.symbiote.security.communication.interfaces.payloads.ApplicationChallenge;
+import eu.h2020.symbiote.security.communication.interfaces.payloads.ServiceResponsePayload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 
 import javax.crypto.*;
@@ -55,15 +54,15 @@ public class MutualAuthenticationHelper {
 
 
     /**
-     * Used by the application to generate the challenge as a {@link SealedObject} to be attached to the business query
+     * Used by the application to generate the challenge to be attached to the business query
      * so that the service can confirm that the client should posses provided tokens
      *
      * @param serviceCertificate certificate of the service host used to encrypt the challenge
      * @param authorizationCredentials matching the set of tokens used in the business query
      * @return the required payload (the "challenge" in the challenge-response procedure)
      */
-    public static SealedObject getApplicationChallenge(Certificate serviceCertificate,
-                                                  Set<AuthorizationCredentials> authorizationCredentials) throws
+    public static ApplicationChallenge getApplicationChallenge(Certificate serviceCertificate,
+                                                               Set<AuthorizationCredentials> authorizationCredentials) throws
             NoSuchAlgorithmException,
             NoSuchProviderException,
             NoSuchPaddingException,
@@ -78,8 +77,6 @@ public class MutualAuthenticationHelper {
         Set<SignedObject> signedHashesSet = new LinkedHashSet<SignedObject>();
 
         Signature signature = Signature.getInstance("SHA256withECDSA");
-        Cipher cipher = Cipher.getInstance("ECIES", BouncyCastleProvider.PROVIDER_NAME);
-        cipher.init(Cipher.ENCRYPT_MODE, serviceCertificate.getX509().getPublicKey());
 
         while(iteratorAC.hasNext()) {
             AuthorizationCredentials authorizationCredentialsSetElement = iteratorAC.next();
@@ -88,25 +85,20 @@ public class MutualAuthenticationHelper {
             signedHashesSet.add(new SignedObject(hexHash, authorizationCredentialsSetElement.homeCredentials.privateKey, signature));
         }
 
-        ChallengePayload challengePayload = new ChallengePayload(signedHashesSet, timestamp1);
-
-        return new SealedObject((Serializable) challengePayload, cipher);
-
+        return new ApplicationChallenge(signedHashesSet, timestamp1);
     }
 
 
     /**
-     * Used by the service to handle the challenge {@link SealedObject} verification
+     * Used by the service to handle the challenge verification
      *
-     * @param servicePrivateKey       private key of the service host
      * @param authorizationTokens     attached to the business query
      * @param applicationChallenge    to be decrypted with Ppv,p containing the signatures set and timestamp1, attached
      *                                to the business query
      * @return true if the client should be in possession of the given tokens
      */
-    public static boolean isChallengeVerified(Key servicePrivateKey,
-                                              Set<Token> authorizationTokens,
-                                              SealedObject applicationChallenge) throws
+    public static boolean isApplicationChallengeVerified(Set<Token> authorizationTokens,
+                                                         ApplicationChallenge applicationChallenge) throws
             NoSuchPaddingException,
             NoSuchAlgorithmException,
             NoSuchProviderException,
@@ -121,14 +113,10 @@ public class MutualAuthenticationHelper {
 
         Long timestamp2 = ZonedDateTime.now().toInstant().toEpochMilli();
 
-        Cipher cipher = Cipher.getInstance("ECIES", BouncyCastleProvider.PROVIDER_NAME);
-        cipher.init(Cipher.DECRYPT_MODE, servicePrivateKey);
         Signature signature = Signature.getInstance("SHA256withECDSA");
 
-        ChallengePayload challengePayload = (ChallengePayload)applicationChallenge.getObject(cipher);
-
-        Set<SignedObject> signedHashesSet = challengePayload.getSignedHashesSet();
-        Long timestamp1 = challengePayload.getTimestamp1();
+        Set<SignedObject> signedHashesSet = applicationChallenge.getSignedHashesSet();
+        Long timestamp1 = applicationChallenge.getTimestamp1();
 
         Iterator<Token> iteratorT = authorizationTokens.iterator();
         Iterator<SignedObject> iteratorSHS = signedHashesSet.iterator();
@@ -157,17 +145,15 @@ public class MutualAuthenticationHelper {
 
 
     /**
-     * Used by the service to generate the response required by the client to confirm the
-     * service authenticity
+     * Used by the service to generate the response payload to be encapsulated in a {@link SignedObject} required by
+     * the application to confirm the service authenticity.
      *
      * @param servicePrivateKey      used the sign the payload
-     * @param applicationToken       used to encrypt the payload
      * @param timestamp2             used in the response payload
      * @return the required payload
      */
-    public static SealedObject getServiceResponse(PrivateKey servicePrivateKey,
-                                            Token applicationToken,
-                                            Long timestamp2) throws
+    public static SignedObject getServiceResponse(PrivateKey servicePrivateKey,
+                                                     Long timestamp2) throws
             NoSuchAlgorithmException,
             NoSuchProviderException,
             NoSuchPaddingException,
@@ -178,30 +164,22 @@ public class MutualAuthenticationHelper {
             SignatureException,
             IllegalBlockSizeException {
 
-        String applicationPublicKeyPEM = JWTEngine.getClaimsFromToken(applicationToken.getToken()).getSpk();
-        PublicKey applicationPublicKey = CryptoHelper.convertPEMToPublicKey(applicationPublicKeyPEM);
-
-        Cipher cipher = Cipher.getInstance("ECIES", BouncyCastleProvider.PROVIDER_NAME);
-        cipher.init(Cipher.ENCRYPT_MODE, applicationPublicKey);
         Signature signature = Signature.getInstance("SHA256withECDSA");
-
         String hashedTimestamp2 = hashSHA256(timestamp2.toString());
-        SignedObject signedHashedTimestamp2 = new SignedObject(hashedTimestamp2, servicePrivateKey, signature);
-        ResponsePayload responsePayload = new ResponsePayload(signedHashedTimestamp2, timestamp2);
+        ServiceResponsePayload serviceResponsePayload = new ServiceResponsePayload(hashedTimestamp2, timestamp2);
 
-        return new SealedObject((Serializable) responsePayload, cipher);
-
+        return new SignedObject((Serializable) serviceResponsePayload, servicePrivateKey, signature);
     }
 
     /**
-     * Used by the client to handle the {@link ResponsePayload)
+     * Used by the client to handle the {@link ServiceResponsePayload encapsulated in a {@link SignedObject}.
      *
      * @param serviceResponse            that should prove the service's authenticity
      * @param serviceCertificate         used verify the payload signature
      * @param applicationPrivateKey      used to decrypt the payload
      * @return true if the service is genuine
      */
-    public static boolean isResponseVerified(SealedObject serviceResponse,
+    public static boolean isServiceResponseVerified(SignedObject serviceResponse,
                                              Certificate serviceCertificate,
                                              PrivateKey applicationPrivateKey) throws
             NoSuchPaddingException,
@@ -217,22 +195,18 @@ public class MutualAuthenticationHelper {
 
         Long timestamp3 = ZonedDateTime.now().toInstant().toEpochMilli();
 
-        Cipher cipher = Cipher.getInstance("ECIES", BouncyCastleProvider.PROVIDER_NAME);
-        cipher.init(Cipher.DECRYPT_MODE, applicationPrivateKey);
         Signature signature = Signature.getInstance("SHA256withECDSA");
 
-        ResponsePayload responsePayload = (ResponsePayload)serviceResponse.getObject(cipher);
+        serviceResponse.verify(serviceCertificate.getX509().getPublicKey(), signature);
+        ServiceResponsePayload serviceResponsePayload = (ServiceResponsePayload) serviceResponse.getObject();
 
-        Long timestamp2 = responsePayload.getTimestamp2();
-        SignedObject responseHashObject = responsePayload.getSignedHash();
+        Long timestamp2 = serviceResponsePayload.getTimestamp2();
+        String hashedTimestamp2 = serviceResponsePayload.getHashedTimestamp2();
 
-        responseHashObject.verify(serviceCertificate.getX509().getPublicKey(), signature);
-
-        String responseHash = (String) responseHashObject.getObject();
         String calculatedHash = hashSHA256(timestamp2.toString());
         Long deltaT = timestamp3 - timestamp2;
 
-        if (Objects.equals(calculatedHash, responseHash) && deltaT < THRESHOLD) {
+        if (Objects.equals(calculatedHash, hashedTimestamp2) && deltaT < THRESHOLD) {
         } else {
             return false;
         }
