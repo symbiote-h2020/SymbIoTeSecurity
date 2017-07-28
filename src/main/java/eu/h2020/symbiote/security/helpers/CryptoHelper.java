@@ -1,6 +1,10 @@
 package eu.h2020.symbiote.security.helpers;
 
 import eu.h2020.symbiote.security.commons.SecurityConstants;
+import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -11,12 +15,14 @@ import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
-import java.util.Base64;
+import java.util.Date;
 
 /**
  * Utility class containing helper methods for PKI related operation (keys, certifates, conversions)
@@ -29,52 +35,6 @@ public class CryptoHelper {
     // Provider is used from the implementation
     public static final String PROVIDER_NAME = BouncyCastleProvider.PROVIDER_NAME;
 
-    public static SignedObject objectToSignedObject(Serializable toSign, PrivateKey key) throws IOException {
-        try {
-            Signature signature = Signature.getInstance(SecurityConstants.SIGNATURE_ALGORITHM);
-            return new SignedObject(toSign, key, signature);
-        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
-            throw new SecurityException(e.getMessage(), e.getCause());
-        }
-    }
-
-    public static boolean verifySignedObject(SignedObject signedObject, PublicKey key) {
-        try {
-            Signature signature = Signature.getInstance(SecurityConstants.SIGNATURE_ALGORITHM);
-            return signedObject.verify(key, signature);
-        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
-            throw new SecurityException(e.getMessage(), e.getCause());
-        }
-    }
-
-    public static String signedObjectToString(SignedObject signedObject) throws IOException {
-        return CryptoHelper.objectToString(signedObject);
-    }
-
-    public static SignedObject stringToSignedObject(String stringObject) throws IOException {
-        return stringToObject(stringObject, SignedObject.class);
-    }
-
-    private static String objectToString(Serializable object) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-        objectOutputStream.writeObject(object);
-        objectOutputStream.close();
-        return Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray());
-    }
-
-    private static <T extends Serializable> T stringToObject(String string, Class<T> clazz) throws IOException {
-        byte[] bytes = Base64.getDecoder().decode(string.getBytes());
-        T object = null;
-        try {
-            ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(bytes));
-            object = (T) objectInputStream.readObject();
-        } catch (ClassNotFoundException | ClassCastException e) {
-            throw new SecurityException(e.getMessage(), e.getCause());
-        }
-        return object;
-    }
-
     public static KeyPair createKeyPair() throws NoSuchProviderException, NoSuchAlgorithmException,
             InvalidAlgorithmParameterException {
         ECGenParameterSpec ecGenSpec = new ECGenParameterSpec(SecurityConstants.CURVE_NAME);
@@ -82,6 +42,28 @@ public class CryptoHelper {
                 .PROVIDER_NAME);
         g.initialize(ecGenSpec, new SecureRandom());
         return g.generateKeyPair();
+    }
+
+    /**
+     * @param homeCredentials users credentials
+     * @return String loginRequest
+     * @throws SecurityException error during creation of loginRequest
+     */
+    public static String buildHomeTokenAcquisitionRequest(HomeCredentials homeCredentials) {
+        ECDSAHelper.enableECDSAProvider();
+
+        try {
+            JwtBuilder jwtBuilder = Jwts.builder();
+            jwtBuilder.setIssuer(homeCredentials.username);
+            jwtBuilder.setSubject(homeCredentials.clientIdentifier);
+            jwtBuilder.setIssuedAt(new Date());
+            jwtBuilder.setExpiration(new Date(System.currentTimeMillis() + 60000));
+            jwtBuilder.signWith(SignatureAlgorithm.ES256, homeCredentials.privateKey);
+
+            return jwtBuilder.compact();
+        } catch (Exception e) {
+            throw new SecurityException(e.getMessage(), e.getCause());
+        }
     }
 
     public static String convertX509ToPEM(X509Certificate signedCertificate) throws IOException {
@@ -108,7 +90,7 @@ public class CryptoHelper {
         return new JcaX509CertificateConverter().setProvider(PROVIDER_NAME).getCertificate(certificateHolder);
     }
 
-    public static PrivateKey convertPEMToPrivateKey(String pemPrivatekey) throws IOException, CertificateException {
+    public static PrivateKey convertPEMToPrivateKey(String pemPrivatekey) throws IOException {
         StringReader reader = new StringReader(pemPrivatekey);
         PEMParser pemParser = new PEMParser(reader);
         Object o = pemParser.readObject();
@@ -116,7 +98,7 @@ public class CryptoHelper {
         return kp.getPrivate();
     }
 
-    public static PublicKey convertPEMToPublicKey(String pemPublickey) throws IOException, CertificateException {
+    public static PublicKey convertPEMToPublicKey(String pemPublickey) throws IOException {
         StringReader reader = new StringReader(pemPublickey);
         PEMParser pemParser = new PEMParser(reader);
         Object o = pemParser.readObject();
