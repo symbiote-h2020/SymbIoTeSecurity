@@ -20,11 +20,11 @@ public interface IGetToken {
     ResponseEntity<?> getGuestToken();
 
     /**
-     * @param user
+     * @param loginRequest users loginRequest
      * @return HOME token used to access restricted resources offered in SymbIoTe
      */
     @PostMapping(value = SecurityConstants.AAM_PUBLIC_PATH + SecurityConstants.AAM_GET_HOME_TOKEN)
-    ResponseEntity<?> getHomeToken(@RequestBody String user);
+    ResponseEntity<?> getHomeToken(@RequestBody String loginRequest);
 
     /**
      * @param homeToken that an actor wants to exchange in this AAM for a FOREIGN token
