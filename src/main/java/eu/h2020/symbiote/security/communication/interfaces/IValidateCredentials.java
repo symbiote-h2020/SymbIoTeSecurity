@@ -17,7 +17,7 @@ public interface IValidateCredentials {
      * @param certificate matching the SPK from the token
      * @return validation status
      */
-    @PostMapping(value = SecurityConstants.AAM_PUBLIC_PATH + SecurityConstants.AAM_VALIDATE)
+    @PostMapping(SecurityConstants.AAM_VALIDATE)
     ValidationStatus validate(@RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
                               @RequestHeader(name = SecurityConstants.CERTIFICATE_HEADER_NAME,
                                       defaultValue = "") String certificate);
