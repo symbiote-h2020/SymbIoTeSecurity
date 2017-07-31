@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
  */
 public interface IGetComponentCertificate {
     /**
-     * @return Certificate of the component
+     * @return Certificate of the component in PEM format
      */
-    @GetMapping(value = SecurityConstants.AAM_PUBLIC_PATH + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE)
+    @GetMapping(SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE)
     ResponseEntity<String> getComponentCertificate();
 }

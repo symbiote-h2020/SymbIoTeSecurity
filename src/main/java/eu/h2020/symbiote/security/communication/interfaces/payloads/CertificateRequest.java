@@ -1,11 +1,7 @@
 package eu.h2020.symbiote.security.communication.interfaces.payloads;
 
-import org.apache.commons.codec.binary.Base64;
-import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-
-import java.io.IOException;
-
 /**
+ * TODO document properly
  * Created by Maks on 2017-06-18.
  */
 public class CertificateRequest {
@@ -13,18 +9,18 @@ public class CertificateRequest {
     private String username;
     private String password;
     private String clientId;
-    private String clientCSR;
+    private String clientCSRinPEMFormat;
 
     public CertificateRequest() {
         // required by json
     }
 
-    public CertificateRequest(String username, String password, String clientId, PKCS10CertificationRequest
-            clientCSR) throws IOException {
+    public CertificateRequest(String username, String password, String clientId, String
+            clientCSRinPEMFormat) {
         this.username = username;
         this.password = password;
         this.clientId = clientId;
-        this.clientCSR = Base64.encodeBase64String(clientCSR.getEncoded());
+        this.clientCSRinPEMFormat = clientCSRinPEMFormat;
     }
 
     public String getUsername() {
@@ -51,11 +47,11 @@ public class CertificateRequest {
         this.clientId = clientId;
     }
 
-    public String getClientCSR() {
-        return clientCSR;
+    public String getClientCSRinPEMFormat() {
+        return clientCSRinPEMFormat;
     }
 
-    public void setClientCSR(String clientCSR) {
-        this.clientCSR = clientCSR;
+    public void setClientCSRinPEMFormat(String clientCSRinPEMFormat) {
+        this.clientCSRinPEMFormat = clientCSRinPEMFormat;
     }
 }

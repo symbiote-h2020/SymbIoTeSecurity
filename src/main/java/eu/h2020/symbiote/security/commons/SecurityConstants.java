@@ -30,15 +30,12 @@ public class SecurityConstants {
     public static final String AAM_LOGIN_ROUTING_KEY = AAM_EXCHANGE_NAME +
             ".getHomeToken_request";
 
-    // AAM REST
-    public static final String AAM_ADMIN_PATH = "/admin";
     public static final String AAM_GET_AVAILABLE_AAMS = "/get_available_aams";
     public static final String AAM_GET_CLIENT_CERTIFICATE = "/get_client_certificate";
     public static final String AAM_GET_COMPONENT_CERTIFICATE = "/get_component_certificate";
     public static final String AAM_GET_GUEST_TOKEN = "/get_guest_token";
     public static final String AAM_GET_HOME_TOKEN = "/get_home_token";
     public static final String AAM_GET_FOREIGN_TOKEN = "/get_foreign_token";
-    public static final String AAM_PUBLIC_PATH = "/public";
     public static final String AAM_VALIDATE = "/validate";
 
     // errors
