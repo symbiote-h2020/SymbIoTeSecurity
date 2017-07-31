@@ -79,7 +79,6 @@ dependencies {
     compile('org.springframework.data:spring-data-commons')
     compile('com.netflix.feign:feign-jackson:8.18.0')
     compile('org.springframework:spring-web:4.3.9.RELEASE')
-    compile('commons-codec:commons-codec:1.10') // replace Base64 with JRE implementation
 
 
     // common testing

@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,10 +37,10 @@ public class DummyTokenIssuer {
 
         try {
             // Insert AAM Public Key
-            claimsMap.put("ipk", org.apache.commons.codec.binary.Base64.encodeBase64String(aamPublicKey.getEncoded()));
+            claimsMap.put("ipk", Base64.getEncoder().encodeToString(aamPublicKey.getEncoded()));
 
             //Insert issuee Public Key
-            claimsMap.put("spk", org.apache.commons.codec.binary.Base64.encodeBase64String(userPublicKey));
+            claimsMap.put("spk", Base64.getEncoder().encodeToString(userPublicKey));
 
             //Add symbIoTe related attributes to token
             if (attributes != null && !attributes.isEmpty()) {
