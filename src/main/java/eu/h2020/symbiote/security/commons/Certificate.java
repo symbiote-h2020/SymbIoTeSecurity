@@ -61,9 +61,8 @@ public class Certificate {
 
     /**
      * @param certificateString in PEM format
-     * @throws CertificateException for empty string
      */
-    public void setCertificateString(String certificateString) throws CertificateException {
+    public void setCertificateString(String certificateString) {
         /* TODO R3, once AAM knows the certificates, we can enforce this check
         if (certificateString == null || certificateString.isEmpty())
             throw new CertificateException("trying to pass empty value");
