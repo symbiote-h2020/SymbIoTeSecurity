@@ -169,8 +169,11 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
                                                            pair.getPrivate());
       
       
-      saveCertificate(pair, certificate, homeAAM, username, clientId);
-      cacheCertificate(homeAAM, clientId, username, certificate, pair.getPrivate());
+      if (saveCertificate(pair, certificate, homeAAM, username, clientId)) {
+        cacheCertificate(homeAAM, clientId, username, certificate, pair.getPrivate());
+      } else {
+        throw new SecurityHandlerException("Error saving certificate in keystore");
+      }
       
       return certificate;
       
