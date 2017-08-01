@@ -1,7 +1,7 @@
 package eu.h2020.symbiote.security.communication.interfaces;
 
 import eu.h2020.symbiote.security.commons.SecurityConstants;
-import eu.h2020.symbiote.security.communication.interfaces.payloads.Credentials;
+import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,29 +10,32 @@ import org.springframework.web.bind.annotation.RequestHeader;
 /**
  * Exposes services allowing SymbIoTe actors (users) to acquire authorization tokens
  * <p>
- * TODO @Jakub rework to return Token Strings or something like that
  *
  * @author Piotr Kicki (PSNC)
+ * @author Mikołaj Dobski (PSNC)
  */
 public interface IGetToken {
     /**
      * @return GUEST token used to access public resources offered in SymbIoTe
      */
-    @PostMapping(value = SecurityConstants.AAM_PUBLIC_PATH + SecurityConstants.AAM_GET_GUEST_TOKEN)
-    ResponseEntity<?> getGuestToken();
+    @PostMapping(SecurityConstants.AAM_GET_GUEST_TOKEN)
+    ResponseEntity<String> getGuestToken();
 
     /**
-     * @param user TODO rework for signed login request
+     * @param loginRequest JWS build in accordance to @{@link eu.h2020.symbiote.security.helpers.CryptoHelper#buildHomeTokenAcquisitionRequest(HomeCredentials)}
+     *                     and http://www.smarteremc2.eu/colab/display/SYM/Home+Authorization+Token+acquisition+%28home+login%29+request
      * @return HOME token used to access restricted resources offered in SymbIoTe
      */
-    @PostMapping(value = SecurityConstants.AAM_PUBLIC_PATH + SecurityConstants.AAM_GET_HOME_TOKEN)
-    ResponseEntity<?> getHomeToken(@RequestBody Credentials user);
+    @PostMapping(value = SecurityConstants.AAM_GET_HOME_TOKEN)
+    ResponseEntity<String> getHomeToken(@RequestBody String loginRequest);
 
     /**
-     * @param homeToken that an actor wants to exchange in this AAM for a FOREIGN token
+     * @param remoteHomeToken that an actor wants to exchange in this AAM for a FOREIGN token
+     * @param certificate     matching the SPK claim in the provided token in 'offline' (intranet) scenarios
      * @return FOREIGN token used to access restricted resources offered in SymbIoTe federations
      */
-    @PostMapping(value = SecurityConstants.AAM_PUBLIC_PATH + SecurityConstants.AAM_GET_FOREIGN_TOKEN)
-    ResponseEntity<?> getForeignToken(@RequestHeader(SecurityConstants.TOKEN_HEADER_NAME)
-                                              String homeToken);
+    @PostMapping(value = SecurityConstants.AAM_GET_FOREIGN_TOKEN)
+    ResponseEntity<String> getForeignToken(@RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String remoteHomeToken,
+                                           @RequestHeader(name = SecurityConstants.CERTIFICATE_HEADER_NAME,
+                                                   defaultValue = "") String certificate);
 }

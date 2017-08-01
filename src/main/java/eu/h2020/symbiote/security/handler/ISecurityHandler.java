@@ -2,12 +2,12 @@ package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.Token;
+import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.communication.interfaces.payloads.AAM;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 
-import java.security.SignedObject;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,24 +32,21 @@ public interface ISecurityHandler {
     /**
      * Retrieves your home token from the given AAM you have account in.
      *
-     * @param homeAAM      to request the token from
-     * @param loginRequest containing the username and client id signed with your private Key
+     * @param homeCredentials used to build loginRequest
      * @return home token
      * @throws SecurityHandlerException on operation error
      */
-    Token login(AAM homeAAM, SignedObject loginRequest) throws SecurityHandlerException;
+    Token login(HomeCredentials homeCredentials) throws SecurityHandlerException;
 
     /**
      * Login to foreign AAMs (you don't have account in) using home token.
      *
      * @param foreignAAMs to get the Tokens from
-     * @param homeToken   to use as login credentialsWallet
-     * @param certificate if the operation is in an intranet environment, then the user needs to provide the
-     *                    certificate matching the one from the homeToken
+     * @param homeCredentials  used to aquire foreignToken
      * @return map of the foreign tokens that were acquired using a given home token
      * @throws SecurityHandlerException on operation error
      */
-    Map<AAM, Token> login(List<AAM> foreignAAMs, Token homeToken, Optional<Certificate> certificate)
+    Map<AAM, Token> login(List<AAM> foreignAAMs, HomeCredentials homeCredentials)
             throws SecurityHandlerException;
 
     /**

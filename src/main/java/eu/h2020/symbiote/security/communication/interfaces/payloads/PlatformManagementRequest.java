@@ -10,7 +10,7 @@ package eu.h2020.symbiote.security.communication.interfaces.payloads;
  */
 public class PlatformManagementRequest {
     private Credentials AAMOwnerCredentials = new Credentials();
-    private UserDetails platformOwnerDetails = new UserDetails();
+    private Credentials platformOwnerCredentials = new Credentials();
     private String platformInterworkingInterfaceAddress = "";
     private String platformInstanceId = "";
     private String platformInstanceFriendlyName;
@@ -24,16 +24,16 @@ public class PlatformManagementRequest {
      * For use when a Platform Owner is fine with generated platform identifier
      *
      * @param AAMOwnerCredentials                  used to authorize this request
-     * @param platformOwnerDetails                 used to register the platform owner in the database
+     * @param platformOwnerCredentials                 used to register the platform owner in the database
      * @param platformInterworkingInterfaceAddress used to point symbiote users to possible login entry points
      * @param platformInstanceFriendlyName         a label for the end user to be able to identify the login entry point
      */
     public PlatformManagementRequest(Credentials AAMOwnerCredentials,
-                                     UserDetails platformOwnerDetails,
+                                     Credentials platformOwnerCredentials,
                                      String platformInterworkingInterfaceAddress,
                                      String platformInstanceFriendlyName) {
         this.AAMOwnerCredentials = AAMOwnerCredentials;
-        this.platformOwnerDetails = platformOwnerDetails;
+        this.platformOwnerCredentials = platformOwnerCredentials;
         this.platformInterworkingInterfaceAddress = platformInterworkingInterfaceAddress;
         this.platformInstanceFriendlyName = platformInstanceFriendlyName;
     }
@@ -42,13 +42,13 @@ public class PlatformManagementRequest {
      * For use when a Platform Owner wants a preferred platform identifier
      * * @param AAMOwnerCredentials used to authorize this request
      *
-     * @param platformOwnerDetails                 used to register the platform owner in the database
+     * @param platformOwnerCredentials             used to register the platform owner in the database
      * @param platformInterworkingInterfaceAddress used to point symbiote users to possible login entry points
      * @param platformInstanceFriendlyName         a label for the end user to be able to identify the login entry point
      * @param preferredPlatformInstanceID          when a Platform Owner preferres his own platform identifier
      */
     public PlatformManagementRequest(Credentials AAMOwnerCredentials,
-                                     UserDetails platformOwnerDetails,
+                                     Credentials platformOwnerCredentials,
                                      String platformInterworkingInterfaceAddress,
                                      String platformInstanceFriendlyName,
                                      String preferredPlatformInstanceID) {
@@ -56,15 +56,15 @@ public class PlatformManagementRequest {
         this.platformInstanceFriendlyName = platformInstanceFriendlyName;
         this.platformInstanceId = preferredPlatformInstanceID;
         this.platformInterworkingInterfaceAddress = platformInterworkingInterfaceAddress;
-        this.platformOwnerDetails = platformOwnerDetails;
+        this.platformOwnerCredentials = platformOwnerCredentials;
     }
 
-    public UserDetails getPlatformOwnerDetails() {
-        return platformOwnerDetails;
+    public Credentials getPlatformOwnerCredentials() {
+        return platformOwnerCredentials;
     }
 
-    public void setPlatformOwnerDetails(UserDetails platformOwnerDetails) {
-        this.platformOwnerDetails = platformOwnerDetails;
+    public void setPlatformOwnerDetails(Credentials platformOwnerCredentials) {
+        this.platformOwnerCredentials = platformOwnerCredentials;
     }
 
     public String getPlatformInstanceId() {
