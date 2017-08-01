@@ -143,10 +143,6 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
         certificate.orElse(new Certificate()).getCertificateString());
   }
   
-  private boolean saveCertificate(KeyPair pair, Certificate certificate, AAM aam, String username, String clientId) {
-    return true;
-  }
-  
   public Certificate getCertificate(AAM homeAAM, String username, String password,
                                     String clientId)
       throws SecurityHandlerException {
@@ -213,12 +209,16 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
     users.put(username, newCredentials);
   }
   
+  @Override
+  public void clearCachedTokens() {
+    tokenCredentials = new HashMap<>();
+  }
+  
   private void buildCredentialsWallet(boolean isOnline) throws SecurityHandlerException {
   
   }
   
-  @Override
-  public void clearCachedTokens() {
-    tokenCredentials = new HashMap<>();
+  private boolean saveCertificate(KeyPair pair, Certificate certificate, AAM aam, String username, String clientId) {
+    return true;
   }
 }
