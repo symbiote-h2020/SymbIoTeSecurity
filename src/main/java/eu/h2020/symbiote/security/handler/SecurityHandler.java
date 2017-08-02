@@ -17,9 +17,13 @@ import eu.h2020.symbiote.security.helpers.ECDSAHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
@@ -38,6 +42,7 @@ public class SecurityHandler implements ISecurityHandler {
   private static final Log logger = LogFactory.getLog(SecurityHandler.class);
   
 
+  private final String keystorePath;
   private final String keystorePassword;
   
   //In memory credentials wallet by Home AAM id -> Client ID -> User ID -> Credentials
@@ -58,13 +63,15 @@ public class SecurityHandler implements ISecurityHandler {
    * @param isOnline         if the security Handler has access to the Internet and SymbIoTe Core
    * @throws SecurityHandlerException on instantiation errors
    */
-  public SecurityHandler(String keystorePassword,
+  public SecurityHandler(String keystorePath,
+                         String keystorePassword,
                          boolean isOnline)
       throws SecurityHandlerException {
     // enabling support for elliptic curve certificates
     ECDSAHelper.enableECDSAProvider();
     
     // rest of the constructor code
+    this.keystorePath = keystorePath;
     this.keystorePassword = keystorePassword;
     this.isOnline = isOnline;
     
@@ -173,8 +180,10 @@ public class SecurityHandler implements ISecurityHandler {
       throw new SecurityHandlerException("Error generating key pair", e);
     } catch (InvalidAlgorithmParameterException e) {
       throw new SecurityHandlerException("Error generating key pair", e);
+    } catch (KeyStoreException e) {
+      throw new SecurityHandlerException("Error saving certificate in keystore", e);
     }
-    
+  
   }
   
   private void cacheCertificate(HomeCredentials credentials) {
@@ -202,38 +211,21 @@ public class SecurityHandler implements ISecurityHandler {
   private void buildCredentialsWallet(boolean isOnline) throws SecurityHandlerException {
   
   }
-  
-  // en el tag del keystore guardar codificado: amm_id|clientId|username|tipo de certificado, priv o cert
-  private boolean saveCertificate(HomeCredentials credentials) throws Throwable {
-	
-	String keystoreFilename = "C:/key/keystore.jks";
-	String keystorePassword = "123456";
-	//String MyCert = "C:/Users/es01930/OneDrive - Atos/ARI/Symbiote/jks/Example.cer";
+
+  private boolean saveCertificate(HomeCredentials credentials) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
  
-	char[] password = keystorePassword.toCharArray();
+	  char[] password = keystorePassword.toCharArray();
     Certificate cer =  credentials.certificate;
     
-    FileInputStream fIn = new FileInputStream(keystoreFilename);
+    FileInputStream fIn = new FileInputStream(keystorePath);
     KeyStore trustStore = KeyStore.getInstance("JKS");
     trustStore.load(fIn, password);
     
-    String aliastag = credentials.homeAAM.getAamInstanceId()+"|"+credentials.clientIdentifier+"|"+credentials.username;
-   
-
-//    InputStream fis = new FileInputStream(pathCert);
-//    BufferedInputStream bis = new BufferedInputStream(fis);
-//
-//    CertificateFactory cf = CertificateFactory.getInstance("X.509");
-//
-//  while (bis.available() > 0) {
-//	  System.out.println("fiddler"+bis.available());
-//      Certificate cert = cf.generateCertificate(bis);
-//      trustStore.setCertificateEntry("fiddler"+bis.available(), cert);
-//  }
+    String aliastag = credentials.homeAAM.getAamInstanceId();
   
     trustStore.setCertificateEntry(aliastag, cer.getX509());
     
-    FileOutputStream fOut = new FileOutputStream(keystoreFilename);
+    FileOutputStream fOut = new FileOutputStream(keystorePath);
     trustStore.store(fOut, password);
 	  
     return true;

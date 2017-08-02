@@ -35,7 +35,7 @@ public interface ISecurityHandler {
      * @return home token
      * @throws SecurityHandlerException on operation error
      */
-    public Token login(AAM aam) throws SecurityHandlerException, ValidationException;
+    Token login(AAM aam) throws SecurityHandlerException, ValidationException;
 
     /**
      * Login to foreign AAMs (you don't have account in) using home token.

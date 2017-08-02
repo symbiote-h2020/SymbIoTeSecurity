@@ -1,40 +1,56 @@
 package eu.h2020.symbiote.security.handler;
 
-import static org.junit.Assert.*;
+import eu.h2020.symbiote.security.clients.AAMClient;
+import eu.h2020.symbiote.security.clients.ClientFactory;
+import eu.h2020.symbiote.security.commons.Certificate;
+import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
+import eu.h2020.symbiote.security.communication.interfaces.payloads.AAM;
+import eu.h2020.symbiote.security.communication.interfaces.payloads.AvailableAAMsCollection;
+import eu.h2020.symbiote.security.communication.interfaces.payloads.CertificateRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import eu.h2020.symbiote.security.clients.AAMClient;
-import eu.h2020.symbiote.security.commons.Certificate;
-import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
-import eu.h2020.symbiote.security.communication.interfaces.payloads.AAM;
-import eu.h2020.symbiote.security.communication.interfaces.payloads.CertificateRequest;
-import eu.h2020.symbiote.security.utils.DummyTokenIssuer;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.fail;
 
 
-
-public class AbstractSecurityHandlerTest {
-
-    private AAMClient endpoint = Mockito.mock(AAMClient.class);
-	private static Log logger = LogFactory.getLog(AbstractSecurityHandlerTest.class);
-	AbstractSecurityHandler client = null;
-	 
-	public AbstractSecurityHandlerTest(String coreAAMAddress, String keystorePassword, String clientId,
-			boolean isOnline) throws SecurityHandlerException {
-		
-
-		
-	}
+@RunWith(PowerMockRunner.class)
+public class SecurityHandlerTest {
+	
+	
+	private AAMClient aamClient = Mockito.mock(AAMClient.class);
+	
+	private static Log logger = LogFactory.getLog(SecurityHandlerTest.class);
+	SecurityHandler client = null;
 
 	@Before
 	public void prepare() throws SecurityHandlerException {
-		Mockito.when(endpoint.getClientCertificate(Mockito.any(CertificateRequest.class))).thenReturn("Certificated");
-
+		
+		PowerMockito.mockStatic(ClientFactory.class);
+		
+		Mockito.when(ClientFactory.getAAMClient(Matchers.anyString())).thenReturn(aamClient);
+		
+		Mockito.when(aamClient.getClientCertificate(Mockito.any(CertificateRequest.class))).thenReturn("Certificated");
+		
+		AvailableAAMsCollection listAAMs = Mockito.mock(AvailableAAMsCollection.class);
+		
+		Map<String, AAM> aamMap = new HashMap<>();
+		
+		Mockito.when(listAAMs.getAvailableAAMs()).thenReturn(aamMap);
+		
+		Mockito.when(aamClient.getAvailableAAMs()).thenReturn(listAAMs);
+  
+		
 		String scoreAAMAddress ="";
 	    String skeystorePassword = "123456";
 	    String sclientId = "sym1";
@@ -49,7 +65,7 @@ public class AbstractSecurityHandlerTest {
 		
 		logger.info("testGetCertificate starts");
 					
-		Certificate cer = client.getCertificate(getHomeAMM(), "usu1", "pass1", "clientID", "clientCSR");
+		Certificate cer = client.getCertificate(getHomeAMM(), "usu1", "pass1", "clientID");
 
 		logger.info("TEST RESULT --> Certificate from AMM: " + cer);
 		assert cer != null;

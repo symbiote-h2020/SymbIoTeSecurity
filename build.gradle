@@ -88,6 +88,9 @@ dependencies {
     //TODO do we need those in a client/pojo library... replace with mockito...
     // we should only mock the service here and do the integration in AAM repository against real AAM codes
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('org.powermock:powermock-api-mockito:1.6.4')
+    testCompile('org.powermock:powermock-core:1.6.4')
+    testCompile('org.powermock:powermock-module-junit4:1.6.4')
     testRuntime('org.springframework.boot:spring-boot-starter-web')
 }
 
