@@ -7,6 +7,7 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTExceptio
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.commons.jwt.JWTClaims;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
+import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
@@ -14,14 +15,13 @@ import org.bouncycastle.pkcs.PKCSException;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by Jakub on 20.07.2017.
@@ -51,17 +51,37 @@ public class CryptoHelperTest {
         assertEquals(ValidationStatus.VALID, JWTEngine.validateTokenString(loginRequest, keyPair.getPublic()));
     }
 
+    private static PKCS10CertificationRequest convertPemToPKCS10CertificationRequest(String pem) {
+        PKCS10CertificationRequest csr = null;
+        ByteArrayInputStream pemStream = null;
+        try {
+            pemStream = new ByteArrayInputStream(pem.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException ex) {
+            throw new SecurityException(ex.getMessage(), ex.getCause());
+        }
+        Reader pemReader = new BufferedReader(new InputStreamReader(pemStream));
+        PEMParser pemParser = new PEMParser(pemReader);
+        try {
+            Object parsedObj = pemParser.readObject();
+
+            if (parsedObj instanceof PKCS10CertificationRequest) {
+                csr = (PKCS10CertificationRequest) parsedObj;
+            }
+        } catch (IOException ex) {
+            throw new SecurityException(ex.getMessage(), ex.getCause());
+        }
+        return csr;
+    }
+
     @Test
-    public void buildCertificateSigningRequestTest() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, IOException, CertificateException, OperatorCreationException, PKCSException {
+    public void buildCertificateSigningRequestTest() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, IOException, CertificateException, OperatorCreationException, PKCSException, SignatureException, InvalidKeyException {
         KeyPair keyPair = CryptoHelper.createKeyPair();
         KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
         ks.load(new FileInputStream(CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
         X509Certificate certificate = (X509Certificate) ks.getCertificate(CERTIFICATE_ALIAS);
-        String csr = CryptoHelper.buildCertificateSigningRequest(certificate, username, clientId, keyPair);
-        assertNotNull(csr);
-        byte[] bytes = Base64.getDecoder().decode(csr);
-        PKCS10CertificationRequest req = new PKCS10CertificationRequest(bytes);
-        assertEquals(username + "@" + clientId + "@" + certificate.getSubjectX500Principal().getName().split("CN=")[1].split(",")[0], req.getSubject().toString().split("CN=")[1]);
-        assertTrue(req.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(keyPair.getPublic())));
+        String csr = CryptoHelper.buildCertificateSigningRequestPEM(certificate, username, clientId, keyPair);
+        PKCS10CertificationRequest pkcsCSR = convertPemToPKCS10CertificationRequest(csr);
+        assertEquals(username + "@" + clientId + "@" + certificate.getSubjectX500Principal().getName().split("CN=")[1].split(",")[0], pkcsCSR.getSubject().toString().split("CN=")[1]);
+        assertTrue(pkcsCSR.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(keyPair.getPublic())));
     }
 }

@@ -8,9 +8,9 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTExceptio
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
 import io.jsonwebtoken.*;
-import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.tomcat.util.codec.binary.StringUtils;
 
 import java.io.IOException;
 import java.security.KeyFactory;

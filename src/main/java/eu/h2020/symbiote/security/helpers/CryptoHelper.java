@@ -29,7 +29,6 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
-import java.util.Base64;
 import java.util.Date;
 
 /**
@@ -122,7 +121,7 @@ public class CryptoHelper {
      * @return String certificate signing request
      * @throws IOException
      */
-    public static String buildCertificateSigningRequest(X509Certificate homeAAMCertificate, String username, String clientId, KeyPair clientKey) throws IOException {
+    public static String buildCertificateSigningRequestPEM(X509Certificate homeAAMCertificate, String username, String clientId, KeyPair clientKey) throws IOException {
         try {
             String cn = "CN=" + username + "@" + clientId + "@" + homeAAMCertificate.getSubjectX500Principal().getName().split("CN=")[1].split(",")[0];
             PKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(
@@ -130,7 +129,11 @@ public class CryptoHelper {
             JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder(SecurityConstants.SIGNATURE_ALGORITHM);
             ContentSigner signer = csBuilder.build(clientKey.getPrivate());
             PKCS10CertificationRequest csr = p10Builder.build(signer);
-            return Base64.getEncoder().encodeToString(csr.getEncoded());
+            StringWriter signedCertificatePEMDataStringWriter = new StringWriter();
+            JcaPEMWriter pemWriter = new JcaPEMWriter(signedCertificatePEMDataStringWriter);
+            pemWriter.writeObject(csr);
+            pemWriter.close();
+            return signedCertificatePEMDataStringWriter.toString();
         } catch (OperatorCreationException e) {
             throw new SecurityException(e.getMessage(), e.getCause());
         }
