@@ -40,7 +40,7 @@ public class AbstractSecurityHandlerTest {
 	    String sclientId = "sym1";
 	    boolean bisOnline = false;
 	    
-	    client = new AbstractSecurityHandler(skeystorePassword, sclientId, bisOnline);
+	    //client = new AbstractSecurityHandler(skeystorePassword, sclientId, bisOnline);
 
 	}
 
