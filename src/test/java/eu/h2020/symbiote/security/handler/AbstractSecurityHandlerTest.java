@@ -18,16 +18,15 @@ import eu.h2020.symbiote.security.utils.DummyTokenIssuer;
 
 
 
-public class AbstractSecurityHandlerTest extends AbstractSecurityHandler{
+public class AbstractSecurityHandlerTest {
 
     private AAMClient endpoint = Mockito.mock(AAMClient.class);
 	private static Log logger = LogFactory.getLog(AbstractSecurityHandlerTest.class);
-	AbstractSecurityHandlerTest client = null;
+	AbstractSecurityHandler client = null;
 	 
 	public AbstractSecurityHandlerTest(String coreAAMAddress, String keystorePassword, String clientId,
 			boolean isOnline) throws SecurityHandlerException {
-		super(coreAAMAddress, keystorePassword, clientId, isOnline);
-		// TODO Auto-generated constructor stub
+		
 
 		
 	}
@@ -41,7 +40,7 @@ public class AbstractSecurityHandlerTest extends AbstractSecurityHandler{
 	    String sclientId = "sym1";
 	    boolean bisOnline = false;
 	    
-	    client = new AbstractSecurityHandlerTest(scoreAAMAddress,skeystorePassword, sclientId, bisOnline);
+	    client = new AbstractSecurityHandler(skeystorePassword, sclientId, bisOnline);
 
 	}
 
