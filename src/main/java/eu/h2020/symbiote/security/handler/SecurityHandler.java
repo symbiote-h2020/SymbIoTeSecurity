@@ -204,7 +204,38 @@ public class SecurityHandler implements ISecurityHandler {
   }
   
   // en el tag del keystore guardar codificado: amm_id|clientId|username|tipo de certificado, priv o cert
-  private boolean saveCertificate(HomeCredentials credentials) {
+  private boolean saveCertificate(HomeCredentials credentials) throws Throwable {
+	
+	String keystoreFilename = "C:/key/keystore.jks";
+	String keystorePassword = "123456";
+	//String MyCert = "C:/Users/es01930/OneDrive - Atos/ARI/Symbiote/jks/Example.cer";
+ 
+	char[] password = keystorePassword.toCharArray();
+    Certificate cer =  credentials.certificate;
+    
+    FileInputStream fIn = new FileInputStream(keystoreFilename);
+    KeyStore trustStore = KeyStore.getInstance("JKS");
+    trustStore.load(fIn, password);
+    
+    String aliastag = credentials.homeAAM.getAamInstanceId()+"|"+credentials.clientIdentifier+"|"+credentials.username;
+   
+
+//    InputStream fis = new FileInputStream(pathCert);
+//    BufferedInputStream bis = new BufferedInputStream(fis);
+//
+//    CertificateFactory cf = CertificateFactory.getInstance("X.509");
+//
+//  while (bis.available() > 0) {
+//	  System.out.println("fiddler"+bis.available());
+//      Certificate cert = cf.generateCertificate(bis);
+//      trustStore.setCertificateEntry("fiddler"+bis.available(), cert);
+//  }
+  
+    trustStore.setCertificateEntry(aliastag, cer.getX509());
+    
+    FileOutputStream fOut = new FileOutputStream(keystoreFilename);
+    trustStore.store(fOut, password);
+	  
     return true;
   }
   

@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import eu.h2020.symbiote.security.clients.AAMClient;
@@ -13,16 +14,18 @@ import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.communication.interfaces.payloads.AAM;
 import eu.h2020.symbiote.security.communication.interfaces.payloads.CertificateRequest;
+import eu.h2020.symbiote.security.utils.DummyTokenIssuer;
 
 
-public class SecurityHandlerTest {
+
+public class AbstractSecurityHandlerTest {
 
     private AAMClient endpoint = Mockito.mock(AAMClient.class);
-	private static Log logger = LogFactory.getLog(SecurityHandlerTest.class);
-	SecurityHandler client = null;
+	private static Log logger = LogFactory.getLog(AbstractSecurityHandlerTest.class);
+	AbstractSecurityHandler client = null;
 	 
-	public SecurityHandlerTest(String coreAAMAddress, String keystorePassword, String clientId,
-                             boolean isOnline) throws SecurityHandlerException {
+	public AbstractSecurityHandlerTest(String coreAAMAddress, String keystorePassword, String clientId,
+			boolean isOnline) throws SecurityHandlerException {
 		
 
 		
@@ -37,7 +40,7 @@ public class SecurityHandlerTest {
 	    String sclientId = "sym1";
 	    boolean bisOnline = false;
 	    
-	    client = new SecurityHandler(skeystorePassword, sclientId, bisOnline);
+	    //client = new AbstractSecurityHandler(skeystorePassword, sclientId, bisOnline);
 
 	}
 
