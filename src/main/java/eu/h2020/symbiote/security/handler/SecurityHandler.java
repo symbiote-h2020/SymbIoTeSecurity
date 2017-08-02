@@ -33,9 +33,9 @@ import java.util.stream.Collectors;
  * Abstract implementation of the {@link ISecurityHandler} that all concrete implementations should
  * extend from.
  */
-public abstract class AbstractSecurityHandler implements ISecurityHandler {
+public class SecurityHandler implements ISecurityHandler {
   
-  private static final Log logger = LogFactory.getLog(AbstractSecurityHandler.class);
+  private static final Log logger = LogFactory.getLog(SecurityHandler.class);
   
 
   private final String keystorePassword;
@@ -58,8 +58,8 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
    * @param isOnline         if the security Handler has access to the Internet and SymbIoTe Core
    * @throws SecurityHandlerException on instantiation errors
    */
-  public AbstractSecurityHandler(String keystorePassword,
-                                 boolean isOnline)
+  public SecurityHandler(String keystorePassword,
+                         boolean isOnline)
       throws SecurityHandlerException {
     // enabling support for elliptic curve certificates
     ECDSAHelper.enableECDSAProvider();
