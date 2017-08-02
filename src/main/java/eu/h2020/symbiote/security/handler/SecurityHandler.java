@@ -149,7 +149,7 @@ public class SecurityHandler implements ISecurityHandler {
       request.setPassword(password);
       request.setClientId(clientId);
       
-      request.setClientCSRinPEMFormat(CryptoHelper.buildCertificateSigningRequest(
+      request.setClientCSRinPEMFormat(CryptoHelper.buildCertificateSigningRequestPEM(
           homeAAM.getCertificate().getX509(), username, clientId, pair));
       
       String certificateValue = ClientFactory.getAAMClient(homeAAM.getAamAddress())
