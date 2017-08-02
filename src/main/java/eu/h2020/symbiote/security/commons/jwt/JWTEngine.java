@@ -8,8 +8,6 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTExceptio
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
 import io.jsonwebtoken.*;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -19,6 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -49,7 +48,7 @@ public class JWTEngine {
             ECDSAHelper.enableECDSAProvider();
             JWTClaims claims = getClaimsFromToken(tokenString);
             //Convert IPK claim to publicKey for validation
-            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.decodeBase64(claims.getIpk()));
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(claims.getIpk()));
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
             PublicKey publicKey = keyFactory.generatePublic(keySpec);
 
@@ -103,7 +102,7 @@ public class JWTEngine {
             ECDSAHelper.enableECDSAProvider();
             JWTClaims claims = getClaimsFromToken(tokenString);
             //Convert IPK claim to publicKey for validation
-            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.decodeBase64(claims.getIpk()));
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(claims.getIpk()));
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
             PublicKey publicKey = keyFactory.generatePublic(keySpec);
 
@@ -125,7 +124,7 @@ public class JWTEngine {
         //Get second part of the JWT
         String jwtBody = jwtParts[1];
 
-        String claimsString = StringUtils.newStringUtf8(Base64.decodeBase64(jwtBody));
+        String claimsString = new String(Base64.getDecoder().decode(jwtBody));
 
         ObjectMapper mapper = new ObjectMapper();
 

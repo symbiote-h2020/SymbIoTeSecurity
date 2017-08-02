@@ -22,14 +22,11 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 
 import javax.security.auth.x500.X500Principal;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
-import java.util.Base64;
 import java.util.Date;
 
 /**
@@ -122,7 +119,7 @@ public class CryptoHelper {
      * @return String certificate signing request
      * @throws IOException
      */
-    public static String buildCertificateSigningRequest(X509Certificate homeAAMCertificate, String username, String clientId, KeyPair clientKey) throws IOException {
+    public static String buildCertificateSigningRequestPEM(X509Certificate homeAAMCertificate, String username, String clientId, KeyPair clientKey) throws IOException {
         try {
             String cn = "CN=" + username + "@" + clientId + "@" + homeAAMCertificate.getSubjectX500Principal().getName().split("CN=")[1].split(",")[0];
             PKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(
@@ -130,9 +127,35 @@ public class CryptoHelper {
             JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder(SecurityConstants.SIGNATURE_ALGORITHM);
             ContentSigner signer = csBuilder.build(clientKey.getPrivate());
             PKCS10CertificationRequest csr = p10Builder.build(signer);
-            return Base64.getEncoder().encodeToString(csr.getEncoded());
+            StringWriter signedCertificatePEMDataStringWriter = new StringWriter();
+            JcaPEMWriter pemWriter = new JcaPEMWriter(signedCertificatePEMDataStringWriter);
+            pemWriter.writeObject(csr);
+            pemWriter.close();
+            return signedCertificatePEMDataStringWriter.toString();
         } catch (OperatorCreationException e) {
             throw new SecurityException(e.getMessage(), e.getCause());
         }
+    }
+
+    public static PKCS10CertificationRequest convertPemToPKCS10CertificationRequest(String pem) {
+        PKCS10CertificationRequest csr = null;
+        ByteArrayInputStream pemStream = null;
+        try {
+            pemStream = new ByteArrayInputStream(pem.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException ex) {
+            throw new SecurityException(ex.getMessage(), ex.getCause());
+        }
+        Reader pemReader = new BufferedReader(new InputStreamReader(pemStream));
+        PEMParser pemParser = new PEMParser(pemReader);
+        try {
+            Object parsedObj = pemParser.readObject();
+
+            if (parsedObj instanceof PKCS10CertificationRequest) {
+                csr = (PKCS10CertificationRequest) parsedObj;
+            }
+        } catch (IOException ex) {
+            throw new SecurityException(ex.getMessage(), ex.getCause());
+        }
+        return csr;
     }
 }

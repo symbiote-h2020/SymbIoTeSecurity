@@ -1,8 +1,8 @@
 package eu.h2020.symbiote.security.communication.interfaces.payloads;
 
 /**
- * TODO document properly
- * Created by Maks on 2017-06-18.
+ * Class that defines structure of payload needed to get client certificate
+ * @author Maks Marcinowski (PSNC)
  */
 public class CertificateRequest {
 
@@ -15,6 +15,13 @@ public class CertificateRequest {
         // required by json
     }
 
+
+    /**
+     * @param username             user's name
+     * @param password             user's password
+     * @param clientId             id of the client
+     * @param clientCSRinPEMFormat certificate signing request given in PEM format
+     */
     public CertificateRequest(String username, String password, String clientId, String
             clientCSRinPEMFormat) {
         this.username = username;
@@ -47,9 +54,7 @@ public class CertificateRequest {
         this.clientId = clientId;
     }
 
-    public String getClientCSRinPEMFormat() {
-        return clientCSRinPEMFormat;
-    }
+    public String getClientCSRinPEMFormat() { return clientCSRinPEMFormat; }
 
     public void setClientCSRinPEMFormat(String clientCSRinPEMFormat) {
         this.clientCSRinPEMFormat = clientCSRinPEMFormat;

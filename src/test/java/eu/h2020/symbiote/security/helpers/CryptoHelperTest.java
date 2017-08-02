@@ -19,9 +19,10 @@ import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
 
-import static org.junit.Assert.*;
+import static eu.h2020.symbiote.security.helpers.CryptoHelper.convertPemToPKCS10CertificationRequest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by Jakub on 20.07.2017.
@@ -52,16 +53,14 @@ public class CryptoHelperTest {
     }
 
     @Test
-    public void buildCertificateSigningRequestTest() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, IOException, CertificateException, OperatorCreationException, PKCSException {
+    public void buildCertificateSigningRequestTest() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, IOException, CertificateException, OperatorCreationException, PKCSException, SignatureException, InvalidKeyException {
         KeyPair keyPair = CryptoHelper.createKeyPair();
         KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
         ks.load(new FileInputStream(CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
         X509Certificate certificate = (X509Certificate) ks.getCertificate(CERTIFICATE_ALIAS);
-        String csr = CryptoHelper.buildCertificateSigningRequest(certificate, username, clientId, keyPair);
-        assertNotNull(csr);
-        byte[] bytes = Base64.getDecoder().decode(csr);
-        PKCS10CertificationRequest req = new PKCS10CertificationRequest(bytes);
-        assertEquals(username + "@" + clientId + "@" + certificate.getSubjectX500Principal().getName().split("CN=")[1].split(",")[0], req.getSubject().toString().split("CN=")[1]);
-        assertTrue(req.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(keyPair.getPublic())));
+        String csr = CryptoHelper.buildCertificateSigningRequestPEM(certificate, username, clientId, keyPair);
+        PKCS10CertificationRequest pkcsCSR = convertPemToPKCS10CertificationRequest(csr);
+        assertEquals(username + "@" + clientId + "@" + certificate.getSubjectX500Principal().getName().split("CN=")[1].split(",")[0], pkcsCSR.getSubject().toString().split("CN=")[1]);
+        assertTrue(pkcsCSR.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(keyPair.getPublic())));
     }
 }
