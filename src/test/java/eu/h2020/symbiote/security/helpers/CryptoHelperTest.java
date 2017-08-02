@@ -7,7 +7,6 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTExceptio
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.commons.jwt.JWTClaims;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
-import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
@@ -15,11 +14,13 @@ import org.bouncycastle.pkcs.PKCSException;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+import static eu.h2020.symbiote.security.helpers.CryptoHelper.convertPemToPKCS10CertificationRequest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -49,28 +50,6 @@ public class CryptoHelperTest {
         assertEquals(homeCredentials.username, claims.getIss());
         assertEquals(homeCredentials.clientIdentifier, claims.getSub());
         assertEquals(ValidationStatus.VALID, JWTEngine.validateTokenString(loginRequest, keyPair.getPublic()));
-    }
-
-    private static PKCS10CertificationRequest convertPemToPKCS10CertificationRequest(String pem) {
-        PKCS10CertificationRequest csr = null;
-        ByteArrayInputStream pemStream = null;
-        try {
-            pemStream = new ByteArrayInputStream(pem.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException ex) {
-            throw new SecurityException(ex.getMessage(), ex.getCause());
-        }
-        Reader pemReader = new BufferedReader(new InputStreamReader(pemStream));
-        PEMParser pemParser = new PEMParser(pemReader);
-        try {
-            Object parsedObj = pemParser.readObject();
-
-            if (parsedObj instanceof PKCS10CertificationRequest) {
-                csr = (PKCS10CertificationRequest) parsedObj;
-            }
-        } catch (IOException ex) {
-            throw new SecurityException(ex.getMessage(), ex.getCause());
-        }
-        return csr;
     }
 
     @Test

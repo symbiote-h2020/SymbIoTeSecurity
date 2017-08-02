@@ -22,9 +22,7 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 
 import javax.security.auth.x500.X500Principal;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -137,5 +135,27 @@ public class CryptoHelper {
         } catch (OperatorCreationException e) {
             throw new SecurityException(e.getMessage(), e.getCause());
         }
+    }
+
+    public static PKCS10CertificationRequest convertPemToPKCS10CertificationRequest(String pem) {
+        PKCS10CertificationRequest csr = null;
+        ByteArrayInputStream pemStream = null;
+        try {
+            pemStream = new ByteArrayInputStream(pem.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException ex) {
+            throw new SecurityException(ex.getMessage(), ex.getCause());
+        }
+        Reader pemReader = new BufferedReader(new InputStreamReader(pemStream));
+        PEMParser pemParser = new PEMParser(pemReader);
+        try {
+            Object parsedObj = pemParser.readObject();
+
+            if (parsedObj instanceof PKCS10CertificationRequest) {
+                csr = (PKCS10CertificationRequest) parsedObj;
+            }
+        } catch (IOException ex) {
+            throw new SecurityException(ex.getMessage(), ex.getCause());
+        }
+        return csr;
     }
 }
