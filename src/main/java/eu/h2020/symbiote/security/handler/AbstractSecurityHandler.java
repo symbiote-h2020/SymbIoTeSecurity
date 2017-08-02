@@ -3,21 +3,25 @@ package eu.h2020.symbiote.security.handler;
 import eu.h2020.symbiote.security.clients.ClientFactory;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.Token;
+import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.communication.interfaces.payloads.AAM;
 import eu.h2020.symbiote.security.communication.interfaces.payloads.AvailableAAMsCollection;
 import eu.h2020.symbiote.security.communication.interfaces.payloads.CertificateRequest;
 import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.List;
@@ -31,18 +35,17 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractSecurityHandler implements ISecurityHandler {
   
+  private static final Log logger = LogFactory.getLog(AbstractSecurityHandler.class);
+  
 
   private final String keystorePassword;
-  private final String clientId;
-  // credentials cache
-  protected Token guestToken = null;
   
   //In memory credentials wallet by Home AAM id -> Client ID -> User ID -> Credentials
-  protected Map<String, Map<String, Map<String, Certificate>>> credentialsWallet =
+  protected Map<String, BoundCredentials> credentialsWallet =
       new HashMap<>();
   
   //Associate tokens with credentials
-  protected Map<String, Certificate> tokenCredentials = new HashMap<>();
+  protected Map<String, BoundCredentials> tokenCredentials = new HashMap<>();
   
   private boolean isOnline;
   
@@ -52,12 +55,10 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
    * Creates a new instance of the Security Handler
    *
    * @param keystorePassword required to unlock the persisted keystore for this client
-   * @param clientId         user defined identifier of this Security Handler
    * @param isOnline         if the security Handler has access to the Internet and SymbIoTe Core
    * @throws SecurityHandlerException on instantiation errors
    */
   public AbstractSecurityHandler(String keystorePassword,
-                                 String clientId,
                                  boolean isOnline)
       throws SecurityHandlerException {
     // enabling support for elliptic curve certificates
@@ -65,57 +66,53 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
     
     // rest of the constructor code
     this.keystorePassword = keystorePassword;
-    this.clientId = clientId;
     this.isOnline = isOnline;
     
     buildCredentialsWallet(isOnline);
   }
   
   
-  public Certificate getHomeCertificate(String aamInstanceId, String user, String clientId) {
-    Map<String, Map<String, Certificate>> aamClients = credentialsWallet.get(aamInstanceId);
-    if (aamClients != null) {
-      Map<String, Certificate> clientUsers = aamClients.get(clientId);
-      if (clientUsers != null) {
-    	return clientUsers.get(user);
-      }
-    }
-    
-    return null;
-  }
-  
   public Map<String, AAM> getAvailableAAMs(AAM homeAAM) throws SecurityHandlerException {
     AvailableAAMsCollection response = ClientFactory.getAAMClient(homeAAM.getAamAddress()).getAvailableAAMs();
     return response.getAvailableAAMs();
   }
   
-  public String login(AAM homeAAMId, String user, String clientId) throws SecurityHandlerException {
-    PrivateKey privateKey = getPrivateKey(homeAAMId.getAamInstanceId(), user, clientId);
+  public Token login(AAM homeAAMId) throws SecurityHandlerException, ValidationException {
+    BoundCredentials credentials =credentialsWallet.get(homeAAMId.getAamInstanceId());
     
-    if (privateKey != null) {
-      HomeCredentials credentials = new HomeCredentials(homeAAMId, user, clientId, null, privateKey);
+    if (credentials != null && credentials.homeCredentials != null &&
+            credentials.homeCredentials.privateKey != null) {
       String homeToken = ClientFactory.getAAMClient(homeAAMId.getAamAddress()).getHomeToken(
-          CryptoHelper.buildHomeTokenAcquisitionRequest(credentials));
-      tokenCredentials.put(homeToken, getHomeCertificate(homeAAMId.getAamInstanceId(), user, clientId));
+          CryptoHelper.buildHomeTokenAcquisitionRequest(credentials.homeCredentials));
+      credentials.homeToken = new Token(homeToken);
+      tokenCredentials.put(homeToken, credentials);
     } else {
-      throw new SecurityHandlerException("Can't find certificate for client id " + clientId
-                                             + " and user " + user);
+      throw new SecurityHandlerException("Can't find certificate for AAM " + homeAAMId.getAamInstanceId());
     }
     
     return null;
     
   }
   
-  public Map<AAM, String> login(List<AAM> foreignAAMs, String homeToken)
+  public Map<AAM, Token> login(List<AAM> foreignAAMs, String homeToken)
       throws SecurityHandlerException {
-    
-    Certificate certificate = tokenCredentials.get(homeToken);
-    if (certificate != null) {
+  
+    BoundCredentials credentials = tokenCredentials.get(homeToken);
+    if (credentials != null && credentials.homeCredentials != null
+            && credentials.homeCredentials.certificate != null) {
       
-      String certificateStr = certificate.getCertificateString();
-      return foreignAAMs.stream().collect(Collectors.toMap(aam -> aam, aam -> {
-        return ClientFactory.getAAMClient(aam.getAamAddress()).getForeignToken(homeToken, certificateStr);
+      String certificateStr = credentials.homeCredentials.certificate.getCertificateString();
+      Map<AAM, Token> result = foreignAAMs.stream().collect(Collectors.toMap(aam -> aam, aam -> {
+        try {
+          return new Token(ClientFactory.getAAMClient(aam.getAamAddress()).getForeignToken(homeToken, certificateStr));
+        } catch (ValidationException e) {
+          logger.error("Invalid token returned for AAM " + aam.getAamInstanceId());
+          return null;
+        }
       }));
+      
+      credentials.foreignTokens = result;
+      return result;
       
     } else {
       throw new SecurityHandlerException("Can't find credentials for token " + homeToken);
@@ -123,8 +120,8 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
     
   }
   
-  public String loginAsGuest(AAM aam) {
-    return ClientFactory.getAAMClient(aam.getAamAddress()).getGuestToken();
+  public Token loginAsGuest(AAM aam) throws ValidationException {
+    return new Token(ClientFactory.getAAMClient(aam.getAamAddress()).getGuestToken());
   }
   
   public ValidationStatus validate(AAM validationAuthority, String token, Optional<Certificate> certificate) {
@@ -182,30 +179,23 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
   
   private void cacheCertificate(HomeCredentials credentials) {
     
-    Map<String, Map<String, Certificate>> clients = credentialsWallet.get(credentials.homeAAM.getAamInstanceId());
+    BoundCredentials bound = new BoundCredentials(credentials.homeAAM);
+    bound.homeCredentials = credentials;
     
-    if (clients == null) {
-      clients = new HashMap<>();
-      credentialsWallet.put(credentials.homeAAM.getAamInstanceId(), clients);
-    }
-    
-    Map<String, Certificate> users = clients.get(clientId);
-    if (users == null) {
-      users = new HashMap<>();
-      clients.put(clientId, users);
-    }
-    
-
-    users.put(credentials.username, credentials.certificate);
+    credentialsWallet.put(credentials.homeAAM.getAamInstanceId(), bound);
   }
   
   @Override
   public void clearCachedTokens() {
     tokenCredentials = new HashMap<>();
+    credentialsWallet.values().forEach(credential -> {
+      credential.foreignTokens = new HashMap<>();
+      credential.homeToken = null;
+    });
   }
   
   /**
-   * Read all certificates in the keystore and populate the credentialsWallet object
+   * Read all certificates in the keystore and populate the credentialsWallet
    * @param isOnline
    * @throws SecurityHandlerException
    */
@@ -218,8 +208,4 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
     return true;
   }
   
-  // Private keys are read from keystore and never cached
-  private PrivateKey getPrivateKey(String aamId, String clientId, String userId) {
-    return null;
-  }
 }

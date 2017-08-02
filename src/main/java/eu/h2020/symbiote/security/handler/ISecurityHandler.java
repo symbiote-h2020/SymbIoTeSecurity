@@ -1,8 +1,10 @@
 package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.commons.Certificate;
+import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.communication.interfaces.payloads.AAM;
 
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
@@ -32,12 +34,10 @@ public interface ISecurityHandler {
      * Retrieves your home token from the given AAM you have account in.
      *
      * @param aam AAM instance to get a home token from
-     * @param user user to get the token
-     * @param clientId client id for the token
      * @return home token
      * @throws SecurityHandlerException on operation error
      */
-    public String login(AAM aam, String user, String clientId) throws SecurityHandlerException;
+    public Token login(AAM aam) throws SecurityHandlerException, ValidationException;
 
     /**
      * Login to foreign AAMs (you don't have account in) using home token.
@@ -47,14 +47,14 @@ public interface ISecurityHandler {
      * @return map of the foreign tokens that were acquired using a given home token
      * @throws SecurityHandlerException on operation error
      */
-    Map<AAM, String> login(List<AAM> foreignAAMs, String homeToken)
+    Map<AAM, Token> login(List<AAM> foreignAAMs, String homeToken)
             throws SecurityHandlerException;
 
     /**
      * @param aam Authentication and Authorization Manager to request guest token from
      * @return guest token that allows access to all public resources in symbIoTe
      */
-    String loginAsGuest(AAM aam);
+    Token loginAsGuest(AAM aam) throws ValidationException;
 
     /**
      * Removes all the acquired tokens from memory
@@ -91,4 +91,5 @@ public interface ISecurityHandler {
      * @return validation status of the given token
      */
     ValidationStatus validate(AAM validationAuthority, String token, Optional<Certificate> certificate);
+    
 }
