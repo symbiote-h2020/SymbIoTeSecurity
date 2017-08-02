@@ -36,8 +36,9 @@ public interface ISecurityHandler {
      * @param clientId client id for the token
      * @return home token
      * @throws SecurityHandlerException on operation error
+     * @throws Throwable 
      */
-    public String login(AAM aam, String user, String clientId) throws SecurityHandlerException;
+    public String login(AAM aam, String user, String clientId) throws SecurityHandlerException, Throwable;
 
     /**
      * Login to foreign AAMs (you don't have account in) using home token.

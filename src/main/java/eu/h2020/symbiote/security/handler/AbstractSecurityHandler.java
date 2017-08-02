@@ -12,13 +12,21 @@ import eu.h2020.symbiote.security.communication.interfaces.payloads.CertificateR
 import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.KeyStore.Entry;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +97,7 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
     return response.getAvailableAAMs();
   }
   
-  public String login(AAM homeAAMId, String user, String clientId) throws SecurityHandlerException {
+  public String login(AAM homeAAMId, String user, String clientId) throws Throwable {
     PrivateKey privateKey = getPrivateKey(homeAAMId.getAamInstanceId(), user, clientId);
     
     if (privateKey != null) {
@@ -134,7 +142,7 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
   
   public Certificate getCertificate(AAM homeAAM, String username, String password,
                                     String clientId)
-      throws SecurityHandlerException {
+      throws Throwable {
     
     
     try {
@@ -214,12 +222,62 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
   }
   
   // en el tag del keystore guardar codificado: amm_id|clientId|username|tipo de certificado, priv o cert
-  private boolean saveCertificate(HomeCredentials credentials) {
+  private boolean saveCertificate(HomeCredentials credentials) throws Throwable {
+	
+	String keystoreFilename = "C:/key/keystore.jks";
+	String keystorePassword = "123456";	
+	//String MyCert = "C:/Users/es01930/OneDrive - Atos/ARI/Symbiote/jks/Example.cer";
+    
+	char[] password = keystorePassword.toCharArray();
+    Certificate cer =  credentials.certificate;
+    
+    FileInputStream fIn = new FileInputStream(keystoreFilename);
+    KeyStore trustStore = KeyStore.getInstance("JKS");
+    trustStore.load(fIn, password);
+    
+    String aliastag = credentials.homeAAM.getAamInstanceId()+"|"+credentials.clientIdentifier+"|"+credentials.username;
+   
+
+//    InputStream fis = new FileInputStream(pathCert);
+//    BufferedInputStream bis = new BufferedInputStream(fis);
+//
+//    CertificateFactory cf = CertificateFactory.getInstance("X.509");
+//
+//  while (bis.available() > 0) {
+//	  System.out.println("fiddler"+bis.available());
+//      Certificate cert = cf.generateCertificate(bis);
+//      trustStore.setCertificateEntry("fiddler"+bis.available(), cert);
+//  }
+  
+    trustStore.setCertificateEntry(aliastag, cer.getX509());
+            
+    FileOutputStream fOut = new FileOutputStream(keystoreFilename);
+    trustStore.store(fOut, password);
+	  
     return true;
   }
   
   // Private keys are read from keystore and never cached
-  private PrivateKey getPrivateKey(String aamId, String clientId, String userId) {
-    return null;
+  private PrivateKey getPrivateKey(String aamId, String clientId, String userId) throws Throwable {
+	String keystoreFilename = "C:/key/keystore.jks";
+	String keystorePassword = "123456";		  
+
+	PrivateKey pk;	
+	char[] password = keystorePassword.toCharArray();
+    FileInputStream fIn = new FileInputStream(keystoreFilename);
+    KeyStore trustStore = KeyStore.getInstance("JKS");
+    trustStore.load(fIn, password);
+    
+    String aliastag = aamId+"|"+clientId+"|"+userId;
+    
+    java.security.cert.Certificate cert = trustStore.getCertificate(aliastag);
+    
+	System.out.println("cert: " + cert);
+	
+	PrivateKey pkey = (PrivateKey)trustStore.getKey(aliastag, password);	
+
+	System.out.println("pkey : " + pkey );
+	
+    return pkey;
   }
 }
