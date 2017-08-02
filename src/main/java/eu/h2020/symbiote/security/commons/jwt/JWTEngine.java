@@ -10,7 +10,6 @@ import eu.h2020.symbiote.security.helpers.ECDSAHelper;
 import io.jsonwebtoken.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.tomcat.util.codec.binary.StringUtils;
 
 import java.io.IOException;
 import java.security.KeyFactory;
@@ -125,7 +124,7 @@ public class JWTEngine {
         //Get second part of the JWT
         String jwtBody = jwtParts[1];
 
-        String claimsString = StringUtils.newStringUtf8(Base64.getDecoder().decode(jwtBody));
+        String claimsString = new String(Base64.getDecoder().decode(jwtBody));
 
         ObjectMapper mapper = new ObjectMapper();
 
