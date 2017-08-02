@@ -61,7 +61,8 @@ public interface ISecurityHandler {
     void clearCachedTokens();
 
     /**
-     * Used to acquire a certificate for this client from the home AAM
+     * Used to acquire a certificate(PKI) for this client from the home AAM
+     * This private key will be used to sign-off the request to AAM
      *
      * @param homeAAM   the Authenticantion and Authorization Manager the user has account in
      * @param username  of the user in the home AAM
@@ -80,6 +81,8 @@ public interface ISecurityHandler {
             throws SecurityHandlerException;
 
     /**
+     * Used to validate a Token to the AAM
+     * 
      * @param validationAuthority where the token should be validated (ideally it should be the token issuer authority)
      * @param token               to be validated
      * @param certificate         if the operation is in an intranet environment, then the user needs to provide the
