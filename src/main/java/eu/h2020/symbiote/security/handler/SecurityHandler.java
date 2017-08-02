@@ -26,7 +26,11 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,11 +50,11 @@ public class SecurityHandler implements ISecurityHandler {
   private final String keystorePassword;
   
   //In memory credentials wallet by Home AAM id -> Client ID -> User ID -> Credentials
-  protected Map<String, BoundCredentials> credentialsWallet =
+  private Map<String, BoundCredentials> credentialsWallet =
       new HashMap<>();
   
   //Associate tokens with credentials
-  protected Map<String, BoundCredentials> tokenCredentials = new HashMap<>();
+  private Map<String, BoundCredentials> tokenCredentials = new HashMap<>();
   
   private boolean isOnline;
   
@@ -74,8 +78,12 @@ public class SecurityHandler implements ISecurityHandler {
     this.keystorePath = keystorePath;
     this.keystorePassword = keystorePassword;
     this.isOnline = isOnline;
-    
-    buildCredentialsWallet(isOnline);
+  
+    try {
+      buildCredentialsWallet(isOnline);
+    } catch (Exception e) {
+      throw new SecurityHandlerException("Error generating credentials wallet", e);
+    }
   }
   
   
@@ -203,30 +211,71 @@ public class SecurityHandler implements ISecurityHandler {
     });
   }
   
+  private static KeyStore getKeystore(String path, String password) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+  
+    FileInputStream fIn = new FileInputStream(path);
+    KeyStore trustStore = KeyStore.getInstance("JKS");
+    trustStore.load(fIn, password.toCharArray());
+  
+    return trustStore;
+  }
+  
+  private KeyStore getKeystore() throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+    return getKeystore(keystorePath, keystorePassword);
+  }
+  
   /**
    * Read all certificates in the keystore and populate the credentialsWallet
    * @param isOnline
    * @throws SecurityHandlerException
    */
-  private void buildCredentialsWallet(boolean isOnline) throws SecurityHandlerException {
+  private void buildCredentialsWallet(boolean isOnline) throws SecurityHandlerException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, UnrecoverableEntryException {
+    
+    KeyStore trustStore = getKeystore();
   
+    Enumeration<String> aliases = trustStore.aliases();
+    while (aliases.hasMoreElements()) {
+      String alias = aliases.nextElement();
+  
+      PrivateKey pvKey = (PrivateKey) trustStore.getKey(alias, keystorePassword.toCharArray());
+      X509Certificate cert = (X509Certificate) trustStore.getCertificate(alias);
+      
+      String subject = cert.getSubjectX500Principal().getName();
+      if (subject.startsWith("CN=")) {
+        String[] elements = subject.split("CN=")[1].split("@");
+        if (elements.length > 2) {
+          String user = elements[0];
+          String client = elements[1];
+          String aamId = elements[2];
+  
+          AAM aam = new AAM();
+          aam.setAamInstanceId(aamId);
+          
+          BoundCredentials boundCredentials = new BoundCredentials(aam);
+          
+          Certificate certificate = new Certificate();
+          certificate.setCertificateString(CryptoHelper.convertX509ToPEM(cert));
+          
+          boundCredentials.homeCredentials = new HomeCredentials(aam, user, client, certificate, pvKey);
+          
+          
+          credentialsWallet.put(aamId, boundCredentials);
+        }
+      }
+    }
   }
 
   private boolean saveCertificate(HomeCredentials credentials) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
  
-	  char[] password = keystorePassword.toCharArray();
-    Certificate cer =  credentials.certificate;
-    
-    FileInputStream fIn = new FileInputStream(keystorePath);
-    KeyStore trustStore = KeyStore.getInstance("JKS");
-    trustStore.load(fIn, password);
+	  KeyStore trustStore = getKeystore();
     
     String aliastag = credentials.homeAAM.getAamInstanceId();
   
-    trustStore.setCertificateEntry(aliastag, cer.getX509());
+    trustStore.setKeyEntry(aliastag, credentials.privateKey, keystorePassword.toCharArray(),
+        new java.security.cert.Certificate[]{credentials.certificate.getX509()});
     
     FileOutputStream fOut = new FileOutputStream(keystorePath);
-    trustStore.store(fOut, password);
+    trustStore.store(fOut, keystorePassword.toCharArray());
 	  
     return true;
   }
