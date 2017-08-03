@@ -6,7 +6,6 @@ import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.communication.interfaces.payloads.AAM;
-import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -68,7 +67,7 @@ public interface ISecurityHandler {
      * @param password  of the user in the home AAM
      * @param clientId  that will be bound with the user and this client
      * @param clientCSR Certificate Signing Request required to issue a certificate for this client, it should be
-     *                  Base64 encoded String of @{@link PKCS10CertificationRequest#getEncoded()}
+     *                  PKCS10CertificationRequest in PEM format
      * @return certificate used by this client for challenge-response operations
      * @throws SecurityHandlerException on operation error
      */

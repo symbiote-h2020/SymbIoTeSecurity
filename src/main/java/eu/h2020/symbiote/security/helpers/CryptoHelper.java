@@ -12,12 +12,17 @@ import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
+import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import javax.security.auth.x500.X500Principal;
+import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -74,12 +79,12 @@ public class CryptoHelper {
         return signedCertificatePEMDataStringWriter.toString();
     }
 
-    public static String convertPrivateKeyToPEM(PrivateKey privateKey) throws IOException {
-        StringWriter privateKeyPEMDataStringWriter = new StringWriter();
-        JcaPEMWriter pemWriter = new JcaPEMWriter(privateKeyPEMDataStringWriter);
-        pemWriter.writeObject(privateKey);
+    public static String convertKeyToPEM(Key key) throws IOException {
+        StringWriter keyPEMDataStringWriter = new StringWriter();
+        JcaPEMWriter pemWriter = new JcaPEMWriter(keyPEMDataStringWriter);
+        pemWriter.writeObject(key);
         pemWriter.close();
-        return privateKeyPEMDataStringWriter.toString();
+        return keyPEMDataStringWriter.toString();
     }
 
     public static X509Certificate convertPEMToX509(String pemCertificate) throws IOException, CertificateException {
@@ -104,5 +109,53 @@ public class CryptoHelper {
         Object o = pemParser.readObject();
         KeyPair kp = new JcaPEMKeyConverter().setProvider(PROVIDER_NAME).getKeyPair((PEMKeyPair) o);
         return kp.getPublic();
+    }
+
+    /**
+     * @param homeAAMCertificate actor's homeAAM certificate
+     * @param username           actor's name
+     * @param clientId           actor's client id
+     * @param clientKey          actor's key pair
+     * @return String certificate signing request
+     * @throws IOException
+     */
+    public static String buildCertificateSigningRequestPEM(X509Certificate homeAAMCertificate, String username, String clientId, KeyPair clientKey) throws IOException {
+        try {
+            String cn = "CN=" + username + "@" + clientId + "@" + homeAAMCertificate.getSubjectX500Principal().getName().split("CN=")[1].split(",")[0];
+            PKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(
+                    new X500Principal(cn), clientKey.getPublic());
+            JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder(SecurityConstants.SIGNATURE_ALGORITHM);
+            ContentSigner signer = csBuilder.build(clientKey.getPrivate());
+            PKCS10CertificationRequest csr = p10Builder.build(signer);
+            StringWriter signedCertificatePEMDataStringWriter = new StringWriter();
+            JcaPEMWriter pemWriter = new JcaPEMWriter(signedCertificatePEMDataStringWriter);
+            pemWriter.writeObject(csr);
+            pemWriter.close();
+            return signedCertificatePEMDataStringWriter.toString();
+        } catch (OperatorCreationException e) {
+            throw new SecurityException(e.getMessage(), e.getCause());
+        }
+    }
+
+    public static PKCS10CertificationRequest convertPemToPKCS10CertificationRequest(String pem) {
+        PKCS10CertificationRequest csr = null;
+        ByteArrayInputStream pemStream = null;
+        try {
+            pemStream = new ByteArrayInputStream(pem.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException ex) {
+            throw new SecurityException(ex.getMessage(), ex.getCause());
+        }
+        Reader pemReader = new BufferedReader(new InputStreamReader(pemStream));
+        PEMParser pemParser = new PEMParser(pemReader);
+        try {
+            Object parsedObj = pemParser.readObject();
+
+            if (parsedObj instanceof PKCS10CertificationRequest) {
+                csr = (PKCS10CertificationRequest) parsedObj;
+            }
+        } catch (IOException ex) {
+            throw new SecurityException(ex.getMessage(), ex.getCause());
+        }
+        return csr;
     }
 }
