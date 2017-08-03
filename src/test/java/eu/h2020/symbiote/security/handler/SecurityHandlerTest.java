@@ -17,23 +17,31 @@ import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.fail;
 
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ClientFactory.class)
+@PowerMockIgnore({"java.net.ssl", "javax.security.auth.x500.X500Principal"})
 public class SecurityHandlerTest {
 	
 	
@@ -42,9 +50,10 @@ public class SecurityHandlerTest {
 	private static Log logger = LogFactory.getLog(SecurityHandlerTest.class);
 	SecurityHandler client = null;
 	
-	String localPath = "C:/github/Symbiote/SymbIoTeSecurity/";
+	String localPath = "C:/github/Symbiote/SymbIoTeSecurity";
     String keystorePath = localPath + "/src/test/resources/keystore.jks";
     String skeystorePassword = "123456";
+	String aamInstanceId = "id-instance-123";
     boolean bisOnline = false;
     
 	String TestkeystorePath= localPath + "/src/test/resources/core.p12";
@@ -52,13 +61,17 @@ public class SecurityHandlerTest {
     String Testalias = "client-core-1";
     
 	@Before
-	public void prepare() throws SecurityHandlerException {
+	public void prepare() throws Throwable {
+		
+	
 		
 		PowerMockito.mockStatic(ClientFactory.class);
 		
+		String validCert = getCertString(TestkeystorePath, TestkeystorePassword, Testalias);
+		Mockito.when(aamClient.getClientCertificate(Mockito.any(CertificateRequest.class))).thenReturn(validCert);
+		
 		Mockito.when(ClientFactory.getAAMClient(Matchers.anyString())).thenReturn(aamClient);
 		
-		Mockito.when(aamClient.getClientCertificate(Mockito.any(CertificateRequest.class))).thenReturn("Certificated");
 		
 		AvailableAAMsCollection listAAMs = Mockito.mock(AvailableAAMsCollection.class);
 		
@@ -78,21 +91,15 @@ public class SecurityHandlerTest {
 		
 		logger.info("testGetCertificate starts");
 		
-					
+	    deletekeystore();
+	    
 		Certificate cer = client.getCertificate(getHomeAMM(), "usu1", "pass1", "clientID");
 
 		logger.info("TEST RESULT --> Certificate from AMM: " + cer);
 		assert cer != null;	
-		assert (cer.getCertificateString()).equalsIgnoreCase(getCertString(keystorePath, skeystorePassword, Testalias ));		
+		assert (cer.getCertificateString()).equalsIgnoreCase(getCertString(keystorePath, skeystorePassword, aamInstanceId ));		
 
-				
-//		String message = client.doPost2CrmTest(getTestPlatform(), "myTestToken");
-//		logger.info("TEST RESULT --> Message from CRM: " + message);
-//		assert message != null;
-//		assert message.equalsIgnoreCase("Monitoring message received in CRM");		
 		
-		
-		//fail("Not yet implemented");
 	
 	}
 
@@ -130,9 +137,9 @@ public class SecurityHandlerTest {
 	
 	public AAM getHomeAMM() throws Throwable 
 	{
-		String aamInstanceId = "id-instance-123";
+
 	    String aamAddress = "https:\\www.aamserver";
-	    String aamInstanceFriendlyName = "name-instance-123";
+	    String aamInstanceFriendlyName = "name-friendly-xxx";
 	    Certificate certificate = new Certificate();
 	    	       
 	    InputStream fis = new FileInputStream(TestkeystorePath);
@@ -142,9 +149,9 @@ public class SecurityHandlerTest {
 	    
 	    certificate.setCertificateString(certificateString);
 	      
-	    AAM home = new AAM(aamInstanceId, aamAddress, aamInstanceFriendlyName, certificate);
+	    AAM home = new AAM(aamAddress, aamInstanceFriendlyName, aamInstanceId, certificate);
 	    
-	    return home;
+   	    return home;
 	    
 	}
 	
@@ -162,14 +169,39 @@ public class SecurityHandlerTest {
 		keystore.load(fIn, password);
 		java.security.cert.Certificate cert = keystore.getCertificate(alias);
 		System.out.println("cert:");
+		System.out.println("keystoreFilename: "+keystoreFilename);
+		System.out.println("spassword: "+spassword);
+		System.out.println("alias: "+alias);
 		System.out.println(cert);
 
-		CryptoHelper ch = new CryptoHelper();
 		
-		result = ch.convertX509ToPEM((X509Certificate)cert);
+		result = CryptoHelper.convertX509ToPEM((X509Certificate)cert);
 		
 		return result;
 	}
 	
+	public void deletekeystore() throws Throwable 
+	{
+		logger.info("deletekeystore()");		
+		FileInputStream fIn = new FileInputStream(keystorePath);
+	    KeyStore keystore = KeyStore.getInstance("JKS");
+		char[] password = skeystorePassword.toCharArray();
+	    keystore.load(fIn, password);
+	    
+	    Enumeration<String> aliasList = keystore.aliases();
+	    
+	    while(aliasList.hasMoreElements()) 
+	    {
+	    	String alias = aliasList.nextElement();
+	    	keystore.deleteEntry(alias);
+	    	logger.info("alias: [" + alias + "] deleted");
+	    }
+
+	    FileOutputStream fOut = new FileOutputStream(keystorePath);
+	    keystore.store(fOut, password);
+
+		logger.info( keystorePath + " empty");		
+		
+	}
 	
 }
