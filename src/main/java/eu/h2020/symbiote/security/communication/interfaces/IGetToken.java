@@ -4,7 +4,6 @@ import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 /**
@@ -27,7 +26,7 @@ public interface IGetToken {
      * @return HOME token used to access restricted resources offered in SymbIoTe
      */
     @PostMapping(value = SecurityConstants.AAM_GET_HOME_TOKEN)
-    ResponseEntity<String> getHomeToken(@RequestBody String loginRequest);
+    ResponseEntity<String> getHomeToken(@RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String loginRequest);
 
     /**
      * @param remoteHomeToken that an actor wants to exchange in this AAM for a FOREIGN token
