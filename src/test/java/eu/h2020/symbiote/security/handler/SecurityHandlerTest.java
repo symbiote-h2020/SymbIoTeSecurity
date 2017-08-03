@@ -17,11 +17,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.CertificateFactory;
@@ -33,6 +33,7 @@ import static org.junit.Assert.fail;
 
 
 @RunWith(PowerMockRunner.class)
+@PrepareForTest(ClientFactory.class)
 public class SecurityHandlerTest {
 	
 	
@@ -41,7 +42,7 @@ public class SecurityHandlerTest {
 	private static Log logger = LogFactory.getLog(SecurityHandlerTest.class);
 	SecurityHandler client = null;
 
-    String keystorePath = "./src/main/resources/keystore.jks";
+    String keystorePath = "./src/test/resources/keystore.jks";
     String skeystorePassword = "123456";
     boolean bisOnline = false;
     
