@@ -50,7 +50,7 @@ public class SecurityHandlerTest {
 	private static Log logger = LogFactory.getLog(SecurityHandlerTest.class);
 	SecurityHandler client = null;
 	
-	String localPath = "C:/github/Symbiote/SymbIoTeSecurity";
+	String localPath = ".";
     String keystorePath = localPath + "/src/test/resources/keystore.jks";
     String skeystorePassword = "123456";
 	String aamInstanceId = "id-instance-123";
@@ -66,27 +66,47 @@ public class SecurityHandlerTest {
 	
 		
 		PowerMockito.mockStatic(ClientFactory.class);
-		
+	    
+		client = new SecurityHandler(keystorePath, skeystorePassword, bisOnline);
+	    
+		//aamClient.getClientCertificate
 		String validCert = getCertString(TestkeystorePath, TestkeystorePassword, Testalias);
 		Mockito.when(aamClient.getClientCertificate(Mockito.any(CertificateRequest.class))).thenReturn(validCert);
 		
 		Mockito.when(ClientFactory.getAAMClient(Matchers.anyString())).thenReturn(aamClient);
 		
 		
+		//aamClient.getAvailableAAMs()
 		AvailableAAMsCollection listAAMs = Mockito.mock(AvailableAAMsCollection.class);
-		
-		Map<String, AAM> aamMap = new HashMap<>();
-		
-		Mockito.when(listAAMs.getAvailableAAMs()).thenReturn(aamMap);
-		
+		Mockito.when(listAAMs.getAvailableAAMs()).thenReturn(getAMMList());		
 		Mockito.when(aamClient.getAvailableAAMs()).thenReturn(listAAMs);
-  
-			    
-	    client = new SecurityHandler(keystorePath, skeystorePassword, bisOnline);
+  			    
+
 
 	}
 
 	@Test
+	public void testGetAvailableAAMs() throws Throwable {
+		
+		logger.info("testGetAvailableAAMs starts");
+		
+		Map<String, AAM> result = client.getAvailableAAMs(getHomeAMM());
+		
+		logger.info("TEST RESULT --> Map<String, AAM>: " + result );	
+		assert result != null;	
+
+		assert equalsId(result, getAMMList());
+		
+		
+	}
+	
+	private boolean equalsId(Map<String, AAM> result, Map<String, AAM> ammList) {
+
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	//@Test
 	public void testGetCertificate() throws Throwable {
 		
 		logger.info("testGetCertificate starts");
@@ -109,10 +129,6 @@ public class SecurityHandlerTest {
 		fail("Not yet implemented");
 	}
 
-	//@Test
-	public void testGetAvailableAAMs() {
-		fail("Not yet implemented");
-	}
 
 	//@Test
 	public void testLoginHomeCredentials() {
@@ -203,5 +219,25 @@ public class SecurityHandlerTest {
 		logger.info( keystorePath + " empty");		
 		
 	}
+	
+	
+	public Map<String, AAM> getAMMList() throws Throwable 
+	{
+		Map<String, AAM> aamMap = new HashMap<>();
+	    Certificate certificate = new Certificate();
+		
+		for(int i=0; i<3; i++)
+		{
+			String key = "ammId"+i;
+		    String aamAddress = "https:\\www.aamserver"+i;
+		    String aamInstanceFriendlyName = "name-friendly-xxx"+i;
+			String aamInstanceId = "id-instance-123"+i;
+			AAM value = new AAM(aamAddress, aamInstanceFriendlyName, aamInstanceId, certificate);
+			aamMap.put(key, value);
+		}
+		
+		return aamMap;
+	}
+
 	
 }
