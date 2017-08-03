@@ -41,12 +41,13 @@ public class SecurityHandlerTest {
 	
 	private static Log logger = LogFactory.getLog(SecurityHandlerTest.class);
 	SecurityHandler client = null;
-
-    String keystorePath = "./src/test/resources/keystore.jks";
+	
+	String localPath = "C:/github/Symbiote/SymbIoTeSecurity/";
+    String keystorePath = localPath + "/src/test/resources/keystore.jks";
     String skeystorePassword = "123456";
     boolean bisOnline = false;
     
-	String TestkeystorePath= "./src/test/resources/core.p12";
+	String TestkeystorePath= localPath + "/src/test/resources/core.p12";
     String TestkeystorePassword = "1234567";
     String Testalias = "client-core-1";
     
@@ -77,9 +78,6 @@ public class SecurityHandlerTest {
 		
 		logger.info("testGetCertificate starts");
 		
-		String TestkeystorePath= "./src/test/resources/core.p12";
-	    char[] TestkeystorePassword = "1234567".toCharArray();
-	    String alias = "client-core-1";
 					
 		Certificate cer = client.getCertificate(getHomeAMM(), "usu1", "pass1", "clientID");
 
@@ -135,19 +133,10 @@ public class SecurityHandlerTest {
 		String aamInstanceId = "id-instance-123";
 	    String aamAddress = "https:\\www.aamserver";
 	    String aamInstanceFriendlyName = "name-instance-123";
-		String pathCert = "./scr/test/resources/core.p12";
-		
-	    	       
-	    InputStream fis = new FileInputStream(pathCert);
-	    BufferedInputStream bis = new BufferedInputStream(fis);
-	    
-	    CertificateFactory cf = CertificateFactory.getInstance("X.509");
-	    java.security.cert.Certificate cert = cf.generateCertificate(bis);
-	    
-	    
 	    Certificate certificate = new Certificate();
-	    
-
+	    	       
+	    InputStream fis = new FileInputStream(TestkeystorePath);
+	    BufferedInputStream bis = new BufferedInputStream(fis);
 	    
 	    String certificateString = getCertString(TestkeystorePath, TestkeystorePassword, Testalias);
 	    
