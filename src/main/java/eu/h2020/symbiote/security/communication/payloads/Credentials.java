@@ -1,4 +1,4 @@
-package eu.h2020.symbiote.security.communication.interfaces.payloads;
+package eu.h2020.symbiote.security.communication.payloads;
 
 /**
  * Class that defines the structure of a plain text credentialsWallet payload

@@ -5,13 +5,15 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
-import eu.h2020.symbiote.security.communication.interfaces.payloads.ApplicationChallenge;
-import eu.h2020.symbiote.security.communication.interfaces.payloads.ServiceResponsePayload;
+import eu.h2020.symbiote.security.communication.payloads.ApplicationChallenge;
+import eu.h2020.symbiote.security.communication.payloads.ServiceResponsePayload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.util.encoders.Hex;
 
-import javax.crypto.*;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;

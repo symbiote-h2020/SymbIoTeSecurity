@@ -1,4 +1,4 @@
-package eu.h2020.symbiote.security.communication.interfaces.payloads;
+package eu.h2020.symbiote.security.communication.payloads;
 
 import java.util.Map;
 import java.util.TreeMap;

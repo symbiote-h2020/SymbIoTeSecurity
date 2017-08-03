@@ -1,4 +1,4 @@
-package eu.h2020.symbiote.security.communication.interfaces.payloads;
+package eu.h2020.symbiote.security.communication.payloads;
 
 /**
  * Class that defines structure of payload needed to get client certificate

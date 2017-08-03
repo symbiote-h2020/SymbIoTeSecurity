@@ -5,7 +5,7 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
-import eu.h2020.symbiote.security.communication.interfaces.payloads.AAM;
+import eu.h2020.symbiote.security.communication.payloads.AAM;
 
 import java.util.List;
 import java.util.Map;
