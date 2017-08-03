@@ -32,6 +32,7 @@ public class CryptoHelperTest {
 
     private final String username = "testusername";
     private final String clientId = "testclientid";
+    private final String platformId = "platformid";
     private static final String CERTIFICATE_ALIAS = "core-2";
     private static final String CERTIFICATE_LOCATION = "./src/test/resources/platform_1.p12";
     private static final String CERTIFICATE_PASSWORD = "1234567";
@@ -61,6 +62,18 @@ public class CryptoHelperTest {
         String csr = CryptoHelper.buildCertificateSigningRequestPEM(certificate, username, clientId, keyPair);
         PKCS10CertificationRequest pkcsCSR = convertPemToPKCS10CertificationRequest(csr);
         assertEquals(username + "@" + clientId + "@" + certificate.getSubjectX500Principal().getName().split("CN=")[1].split(",")[0], pkcsCSR.getSubject().toString().split("CN=")[1]);
+        assertTrue(pkcsCSR.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(keyPair.getPublic())));
+    }
+
+    @Test
+    public void buildPlatformCertificateSigningRequestTest() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, IOException, CertificateException, OperatorCreationException, PKCSException, SignatureException, InvalidKeyException {
+        KeyPair keyPair = CryptoHelper.createKeyPair();
+        //KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
+        //ks.load(new FileInputStream(CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
+        //X509Certificate certificate = (X509Certificate) ks.getCertificate(CERTIFICATE_ALIAS);
+        String csr = CryptoHelper.buildPlatformCertificateSigningRequestPEM(platformId, keyPair);
+        PKCS10CertificationRequest pkcsCSR = convertPemToPKCS10CertificationRequest(csr);
+        assertEquals(platformId, pkcsCSR.getSubject().toString().split("CN=")[1]);
         assertTrue(pkcsCSR.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(keyPair.getPublic())));
     }
 }
