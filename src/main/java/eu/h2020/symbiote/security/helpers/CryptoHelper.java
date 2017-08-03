@@ -137,6 +137,30 @@ public class CryptoHelper {
         }
     }
 
+    /**
+     * @param platformId platform's id
+     * @param keyPair    actor's key pair
+     * @return String platform certificate signing request
+     * @throws IOException
+     */
+    public static String buildPlatformCertificateSigningRequestPEM(String platformId, KeyPair keyPair) throws IOException {
+        try {
+            String cn = "CN=" + platformId;
+            PKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(
+                    new X500Principal(cn), keyPair.getPublic());
+            JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder(SecurityConstants.SIGNATURE_ALGORITHM);
+            ContentSigner signer = csBuilder.build(keyPair.getPrivate());
+            PKCS10CertificationRequest csr = p10Builder.build(signer);
+            StringWriter signedCertificatePEMDataStringWriter = new StringWriter();
+            JcaPEMWriter pemWriter = new JcaPEMWriter(signedCertificatePEMDataStringWriter);
+            pemWriter.writeObject(csr);
+            pemWriter.close();
+            return signedCertificatePEMDataStringWriter.toString();
+        } catch (OperatorCreationException e) {
+            throw new SecurityException(e.getMessage(), e.getCause());
+        }
+    }
+
     public static PKCS10CertificationRequest convertPemToPKCS10CertificationRequest(String pem) {
         PKCS10CertificationRequest csr = null;
         ByteArrayInputStream pemStream = null;
