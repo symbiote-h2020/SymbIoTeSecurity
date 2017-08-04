@@ -8,8 +8,6 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTExceptio
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
 import io.jsonwebtoken.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.security.KeyFactory;
@@ -30,8 +28,6 @@ import java.util.Set;
  * @author Mikołaj Dobski (PSNC)
  */
 public class JWTEngine {
-
-    private static Log log = LogFactory.getLog(JWTEngine.class);
 
     private JWTEngine() {
     }
@@ -56,7 +52,6 @@ public class JWTEngine {
             return Jwts.parser().setSigningKey(publicKey).parseClaimsJws(tokenString).getBody();
             // validate the token using the claims parser
         } catch (InvalidKeySpecException | MalformedJWTException | NoSuchAlgorithmException e) {
-            log.error(e);
             throw new ValidationException("Token could not be validated", e);
         }
     }
@@ -79,13 +74,10 @@ public class JWTEngine {
                     .parseClaimsJws(tokenString);
             return ValidationStatus.VALID;
         } catch (ExpiredJwtException e) {
-            log.error(e);
             return ValidationStatus.EXPIRED_TOKEN;
         } catch (SignatureException e) {
-            log.error(e);
             return ValidationStatus.INVALID_TRUST_CHAIN;
         } catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
-            log.error(e);
             throw new ValidationException("Token could not be validated", e);
         }
     }
@@ -110,7 +102,6 @@ public class JWTEngine {
             return validateTokenString(tokenString, publicKey);
             // validate the token using the claims parser
         } catch (InvalidKeySpecException | MalformedJWTException | NoSuchAlgorithmException e) {
-            log.error(e);
             throw new ValidationException("Token could not be validated", e);
         }
     }
@@ -151,7 +142,6 @@ public class JWTEngine {
                     .get("iat"), retMap.get("exp"), retMap.get("ipk"), retMap.get("spk"), retMap.get("ttyp"),
                     attributes);
         } catch (IOException | NumberFormatException e) {
-            log.error(e);
             throw new MalformedJWTException(e);
         }
     }
