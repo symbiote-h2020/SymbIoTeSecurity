@@ -69,7 +69,6 @@ dependencies {
 
     // todo get rid of those
     compile('com.fasterxml.jackson.core:jackson-annotations:2.8.7+')
-    compile group: 'org.springframework.data', name: 'spring-data-commons', version: '1.13.6.RELEASE'
 
     // common testing
     testCompile('junit:junit:4.+')
