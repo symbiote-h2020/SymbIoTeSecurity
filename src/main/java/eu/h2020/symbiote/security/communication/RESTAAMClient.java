@@ -1,9 +1,11 @@
 package eu.h2020.symbiote.security.communication;
 
 import eu.h2020.symbiote.security.commons.SecurityConstants;
+import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.JWTCreationException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
 import eu.h2020.symbiote.security.communication.interfaces.FeignAAMRESTInterface;
 import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
 import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
@@ -21,10 +23,7 @@ public class RESTAAMClient {
 
     private String serverAddress;
     private FeignAAMRESTInterface aamClient;
-    private int status;
-    private Response.Body body;
 
-    //*********
     public RESTAAMClient(String serverAddress) {
         this.serverAddress = serverAddress;
         this.aamClient = getJsonClient();
@@ -35,36 +34,43 @@ public class RESTAAMClient {
                 .target(FeignAAMRESTInterface.class, serverAddress);
     }
 
-    public int getStatus() {
-        return status;
-    }
-
+    /**
+     * @return Certificate of the component in PEM format
+     */
     public String getComponentCertificate() {
         Response response = aamClient.getComponentCertificate();
-        this.status = response.status();
         return response.body().toString();
     }
 
-    public Response.Body getBody() {
-        return body;
-    }
-
-    public String getClientCertificate(CertificateRequest certRequest) {
-        Response response = aamClient.getClientCertificate(certRequest);
-        this.status = response.status();
-        this.body = response.body();
+    /**
+     * Exposes a service that allows users to acquire their client certificates.
+     *
+     * @param certificateRequest required to issue a certificate for given (username, clientId) tupple.
+     * @return the certificate issued using the provided CSR in PEM format
+     */
+    public String getClientCertificate(CertificateRequest certificateRequest) {
+        Response response = aamClient.getClientCertificate(certificateRequest);
         return response.body().toString();
     }
 
+    /**
+     * @return GUEST token used to access public resources offered in SymbIoTe
+     */
     public String getGuestToken() {
         Response response = aamClient.getGuestToken();
-        this.status = response.status();
         return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toString();
     }
 
-    public String getHomeToken(String loginRequest) {
+    /**
+     * @param loginRequest JWS build in accordance to @{@link eu.h2020.symbiote.security.helpers.CryptoHelper#buildHomeTokenAcquisitionRequest(HomeCredentials)}
+     *                     and http://www.smarteremc2.eu/colab/display/SYM/Home+Authorization+Token+acquisition+%28home+login%29+request
+     * @return HOME token used to access restricted resources offered in SymbIoTe
+     */
+    public String getHomeToken(String loginRequest) throws WrongCredentialsException {
         Response response = aamClient.getHomeToken(loginRequest);
-        this.status = response.status();
+        if (response.status() == 401) {
+            throw new WrongCredentialsException(response.status() + " ERR_WRONG_CREDENTIALS");
+        }
         try {
             return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
         } catch (NullPointerException e) {
@@ -84,15 +90,22 @@ public class RESTAAMClient {
         if (response.status() >= 400 && response.status() < 500)
             throw new ValidationException("Failed to validate homeToken");
         else if (response.status() >= 500) throw new JWTCreationException("Server failed to create a foreign token");
-        this.status = response.status();
         return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
 
     }
 
+    /**
+     * @return collection of AAMs available in the SymbIoTe ecosystem
+     */
     public AvailableAAMsCollection getAvailableAAMs() {
         return aamClient.getAvailableAAMs();
     }
 
+    /**
+     * @param token       that is to be validated
+     * @param certificate matching the SPK from the token
+     * @return validation status
+     */
     public ValidationStatus validate(String token, String certificate) {
         return aamClient.validate(token, certificate);
     }
