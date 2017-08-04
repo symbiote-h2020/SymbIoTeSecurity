@@ -2,18 +2,15 @@ package eu.h2020.symbiote.security.communication;
 
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
+import eu.h2020.symbiote.security.commons.exceptions.custom.JWTCreationException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.communication.interfaces.FeignAAMRESTInterface;
 import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
 import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
 import feign.Feign;
-import feign.Headers;
 import feign.Response;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 
 /**
  * For response handling (WIP)
@@ -22,22 +19,20 @@ import org.springframework.web.client.HttpServerErrorException;
  */
 public class RESTAAMClient {
 
-    private String serveraddress;
-    private FeignAAMRESTInterface restaamClient;
+    private String serverAddress;
+    private FeignAAMRESTInterface aamClient;
     private int status;
-    //  Required by some tests
-    private Headers headers;
     private Response.Body body;
 
     //*********
-    public RESTAAMClient(String serveraddress) {
-        this.serveraddress = serveraddress;
-        this.restaamClient = getJsonClient();
+    public RESTAAMClient(String serverAddress) {
+        this.serverAddress = serverAddress;
+        this.aamClient = getJsonClient();
     }
 
     private FeignAAMRESTInterface getJsonClient() {
         return Feign.builder().encoder(new JacksonEncoder()).decoder(new JacksonDecoder())
-                .target(FeignAAMRESTInterface.class, serveraddress);
+                .target(FeignAAMRESTInterface.class, serverAddress);
     }
 
     public int getStatus() {
@@ -45,7 +40,7 @@ public class RESTAAMClient {
     }
 
     public String getComponentCertificate() {
-        Response response = restaamClient.getComponentCertificate();
+        Response response = aamClient.getComponentCertificate();
         this.status = response.status();
         return response.body().toString();
     }
@@ -55,20 +50,20 @@ public class RESTAAMClient {
     }
 
     public String getClientCertificate(CertificateRequest certRequest) {
-        Response response = restaamClient.getClientCertificate(certRequest);
+        Response response = aamClient.getClientCertificate(certRequest);
         this.status = response.status();
         this.body = response.body();
         return response.body().toString();
     }
 
     public String getGuestToken() {
-        Response response = restaamClient.getGuestToken();
+        Response response = aamClient.getGuestToken();
         this.status = response.status();
         return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toString();
     }
 
     public String getHomeToken(String loginRequest) {
-        Response response = restaamClient.getHomeToken(loginRequest);
+        Response response = aamClient.getHomeToken(loginRequest);
         this.status = response.status();
         try {
             return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
@@ -77,24 +72,29 @@ public class RESTAAMClient {
         }
     }
 
-    public String getForeignToken(HttpEntity<String> entity, String certificate) throws HttpClientErrorException, HttpServerErrorException {
-        Response response = restaamClient.getForeignToken(entity.getHeaders()
-                .get(SecurityConstants.TOKEN_HEADER_NAME)
-                .toArray()[0].toString(), certificate);
+    /**
+     * @param remoteHomeToken that an actor wants to exchange in this AAM for a FOREIGN token
+     * @param certificate     matching the SPK claim in the provided token in 'offline' (intranet) scenarios
+     * @return FOREIGN token used to access restricted resources offered in SymbIoTe federations
+     */
+    public String getForeignToken(String remoteHomeToken, String certificate) throws ValidationException,
+            JWTCreationException {
+        Response response = aamClient.getForeignToken(remoteHomeToken, certificate);
+        // todo check what exceptions are thrown with what codes and handle them explicitly
         if (response.status() >= 400 && response.status() < 500)
-            throw new HttpClientErrorException(HttpStatus.valueOf(response.status()));
-        else if (response.status() >= 500) throw new HttpServerErrorException(HttpStatus.valueOf(response.status()));
+            throw new ValidationException("Failed to validate homeToken");
+        else if (response.status() >= 500) throw new JWTCreationException("Server failed to create a foreign token");
         this.status = response.status();
         return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
 
     }
 
     public AvailableAAMsCollection getAvailableAAMs() {
-        return restaamClient.getAvailableAAMs();
+        return aamClient.getAvailableAAMs();
     }
 
     public ValidationStatus validate(String token, String certificate) {
-        return restaamClient.validate(token, certificate);
+        return aamClient.validate(token, certificate);
     }
 
 }

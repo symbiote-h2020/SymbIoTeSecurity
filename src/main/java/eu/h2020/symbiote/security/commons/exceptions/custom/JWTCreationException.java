@@ -14,7 +14,7 @@ public class JWTCreationException extends SecurityException {
 
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
     private final static String errorMessage = "UNABLE_CREATE_JWT_TOKEN";
-    private final static HttpStatus statusCode = HttpStatus.BAD_REQUEST;
+    private final static HttpStatus statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
 
     public JWTCreationException() {
         super(errorMessage);

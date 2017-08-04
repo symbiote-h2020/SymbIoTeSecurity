@@ -5,30 +5,31 @@ import eu.h2020.symbiote.security.commons.exceptions.SecurityException;
 import org.springframework.http.HttpStatus;
 
 /**
- * Custom exception thrown when username and/or password credentials are missing during login procedure
+ * Custom exception thrown when arguments a invalid or missing
  *
  * @author Daniele Caldarola (CNIT)
  * @author Nemanja Ignjatov (UNIVIE)
+ * @author Mikolaj Dobski (PSNC)
  */
-public class MissingArgumentsException extends SecurityException {
+public class InvalidArgumentsException extends SecurityException {
 
-    public final static String errorMessage = "ERR_MISSING_ARGUMENTS";
+    public final static String errorMessage = "ERR_INVALID_ARGUMENTS";
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
     private final static HttpStatus statusCode = HttpStatus.BAD_REQUEST;
 
-    public MissingArgumentsException() {
+    public InvalidArgumentsException() {
         super(errorMessage);
     }
 
-    public MissingArgumentsException(String message) {
+    public InvalidArgumentsException(String message) {
         super(message);
     }
 
-    public MissingArgumentsException(Throwable cause) {
+    public InvalidArgumentsException(Throwable cause) {
         super(cause);
     }
 
-    public MissingArgumentsException(String message, Throwable cause) {
+    public InvalidArgumentsException(String message, Throwable cause) {
         super(message, cause);
     }
 
