@@ -61,20 +61,14 @@ artifacts {
 }
 
 dependencies {
-    compile('io.jsonwebtoken:jjwt:0.7.0')
-    compile('org.bouncycastle:bcprov-jdk15on:1.56')
-    compile('org.bouncycastle:bcpkix-jdk15on:1.56')
-    compile group: 'io.github.openfeign', name: 'feign-jackson', version: '9.5.1'
-    compile group: 'commons-logging', name: 'commons-logging', version: '1.2'
-
-    // todo get rid of those
-    compile('com.fasterxml.jackson.core:jackson-annotations:2.8.7+')
-    compile group: 'org.springframework.data', name: 'spring-data-commons', version: '1.13.6.RELEASE'
-    // todo needed for HttpStatus!!!, get rid!
-    compile group: 'org.springframework', name: 'spring-web', version: '4.3.10.RELEASE'
+    compile('io.jsonwebtoken:jjwt:0.7+')
+    compile('org.bouncycastle:bcprov-jdk15on:1.56+')
+    compile('org.bouncycastle:bcpkix-jdk15on:1.56+')
+    compile('io.github.openfeign:feign-jackson:9.5+')
 
     // common testing
     testCompile('junit:junit:4.+')
+    testCompile('commons-logging:commons-logging:1.2+')
 }
 
 // code quality below

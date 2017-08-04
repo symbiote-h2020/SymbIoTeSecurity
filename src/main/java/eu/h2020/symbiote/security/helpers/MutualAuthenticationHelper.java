@@ -7,13 +7,8 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTExceptio
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
 import eu.h2020.symbiote.security.communication.payloads.ApplicationChallenge;
 import eu.h2020.symbiote.security.communication.payloads.ServiceResponsePayload;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.util.encoders.Hex;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -29,12 +24,12 @@ import java.util.Set;
 /**
  * Provides helper methods to handle client-service authentication procedure.
  * <p>
+ *
  * @author Daniele Caldarola (CNIT)
  * @author Mikołaj Dobski (PSNC)
  */
 public class MutualAuthenticationHelper {
 
-    private static final Log logger = LogFactory.getLog(MutualAuthenticationHelper.class);
     private static final Long THRESHOLD = new Long(3600000); // XXX: has to be reduced and put on a proper container or in the boostrap
 
     /**
@@ -59,20 +54,16 @@ public class MutualAuthenticationHelper {
      * Used by the application to generate the challenge to be attached to the business query
      * so that the service can confirm that the client should posses provided tokens
      *
-     * @param serviceCertificate certificate of the service host used to encrypt the challenge
+     * @param serviceCertificate       certificate of the service host used to encrypt the challenge
      * @param authorizationCredentials matching the set of tokens used in the business query
      * @return the required payload (the "challenge" in the challenge-response procedure)
      */
     public static ApplicationChallenge getApplicationChallenge(Certificate serviceCertificate,
                                                                Set<AuthorizationCredentials> authorizationCredentials) throws
             NoSuchAlgorithmException,
-            NoSuchProviderException,
-            NoSuchPaddingException,
-            CertificateException,
             InvalidKeyException,
             IOException,
-            SignatureException,
-            IllegalBlockSizeException {
+            SignatureException {
 
         Long timestamp1 = ZonedDateTime.now().toInstant().toEpochMilli(); // the number of milliseconds since the epoch of 1970-01-01T00:00:00Z
         Iterator<AuthorizationCredentials> iteratorAC = authorizationCredentials.iterator();
@@ -80,7 +71,7 @@ public class MutualAuthenticationHelper {
 
         Signature signature = Signature.getInstance("SHA256withECDSA");
 
-        while(iteratorAC.hasNext()) {
+        while (iteratorAC.hasNext()) {
             AuthorizationCredentials authorizationCredentialsSetElement = iteratorAC.next();
             String hashString = authorizationCredentialsSetElement.authorizationToken.toString() + timestamp1.toString();
             String hexHash = hashSHA256(hashString);
@@ -94,24 +85,19 @@ public class MutualAuthenticationHelper {
     /**
      * Used by the service to handle the challenge verification
      *
-     * @param authorizationTokens     attached to the business query
-     * @param applicationChallenge    to be decrypted with Ppv,p containing the signatures set and timestamp1, attached
-     *                                to the business query
+     * @param authorizationTokens  attached to the business query
+     * @param applicationChallenge to be decrypted with Ppv,p containing the signatures set and timestamp1, attached
+     *                             to the business query
      * @return true if the client should be in possession of the given tokens
      */
     public static boolean isApplicationChallengeVerified(Set<Token> authorizationTokens,
                                                          ApplicationChallenge applicationChallenge) throws
-            NoSuchPaddingException,
             NoSuchAlgorithmException,
-            NoSuchProviderException,
-            InvalidKeyException,
-            ClassNotFoundException,
-            BadPaddingException,
-            IllegalBlockSizeException,
-            IOException,
             MalformedJWTException,
-            CertificateException,
-            SignatureException {
+            IOException,
+            SignatureException,
+            InvalidKeyException,
+            ClassNotFoundException {
 
         Long timestamp2 = ZonedDateTime.now().toInstant().toEpochMilli();
 
@@ -136,8 +122,7 @@ public class MutualAuthenticationHelper {
             String calculatedHash = hashSHA256(authorizationTokensElement.toString() + timestamp1.toString());
             Long deltaT = timestamp2 - timestamp1;
 
-            if (Objects.equals(calculatedHash, challengeHash) && (deltaT < THRESHOLD)) {
-            } else {
+            if (!Objects.equals(calculatedHash, challengeHash) || (deltaT >= THRESHOLD)) {
                 return false;
             }
         }
@@ -150,21 +135,16 @@ public class MutualAuthenticationHelper {
      * Used by the service to generate the response payload to be encapsulated in a {@link SignedObject} required by
      * the application to confirm the service authenticity.
      *
-     * @param servicePrivateKey      used the sign the payload
-     * @param timestamp2             used in the response payload
+     * @param servicePrivateKey used the sign the payload
+     * @param timestamp2        used in the response payload
      * @return the required payload
      */
     public static SignedObject getServiceResponse(PrivateKey servicePrivateKey,
-                                                     Long timestamp2) throws
+                                                  Long timestamp2) throws
             NoSuchAlgorithmException,
-            NoSuchProviderException,
-            NoSuchPaddingException,
             InvalidKeyException,
-            MalformedJWTException,
             IOException,
-            CertificateException,
-            SignatureException,
-            IllegalBlockSizeException {
+            SignatureException {
 
         Signature signature = Signature.getInstance("SHA256withECDSA");
         String hashedTimestamp2 = hashSHA256(timestamp2.toString());
@@ -176,24 +156,20 @@ public class MutualAuthenticationHelper {
     /**
      * Used by the client to handle the {@link ServiceResponsePayload encapsulated in a {@link SignedObject}.
      *
-     * @param serviceResponse            that should prove the service's authenticity
-     * @param serviceCertificate         used verify the payload signature
-     * @param applicationPrivateKey      used to decrypt the payload
+     * @param serviceResponse       that should prove the service's authenticity
+     * @param serviceCertificate    used verify the payload signature
+     * @param applicationPrivateKey used to decrypt the payload
      * @return true if the service is genuine
      */
     public static boolean isServiceResponseVerified(SignedObject serviceResponse,
-                                             Certificate serviceCertificate,
-                                             PrivateKey applicationPrivateKey) throws
-            NoSuchPaddingException,
+                                                    Certificate serviceCertificate,
+                                                    PrivateKey applicationPrivateKey) throws
             NoSuchAlgorithmException,
-            NoSuchProviderException,
-            InvalidKeyException,
-            ClassNotFoundException,
-            BadPaddingException,
-            IllegalBlockSizeException,
-            IOException,
             CertificateException,
-            SignatureException {
+            SignatureException,
+            InvalidKeyException,
+            IOException,
+            ClassNotFoundException {
 
         Long timestamp3 = ZonedDateTime.now().toInstant().toEpochMilli();
 
@@ -208,12 +184,7 @@ public class MutualAuthenticationHelper {
         String calculatedHash = hashSHA256(timestamp2.toString());
         Long deltaT = timestamp3 - timestamp2;
 
-        if (Objects.equals(calculatedHash, hashedTimestamp2) && deltaT < THRESHOLD) {
-        } else {
-            return false;
-        }
-
-        return true;
+        return Objects.equals(calculatedHash, hashedTimestamp2) && deltaT < THRESHOLD;
     }
 
 }
