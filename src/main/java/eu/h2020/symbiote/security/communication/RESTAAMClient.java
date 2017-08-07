@@ -3,9 +3,7 @@ package eu.h2020.symbiote.security.communication;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
-import eu.h2020.symbiote.security.commons.exceptions.custom.JWTCreationException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.*;
 import eu.h2020.symbiote.security.communication.interfaces.FeignAAMRESTInterface;
 import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
 import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
@@ -48,16 +46,21 @@ public class RESTAAMClient {
      * @param certificateRequest required to issue a certificate for given (username, clientId) tupple.
      * @return the certificate issued using the provided CSR in PEM format
      */
-    public String getClientCertificate(CertificateRequest certificateRequest) {
+    public String getClientCertificate(CertificateRequest certificateRequest) throws WrongCredentialsException, NotExistingUserException,
+            ValidationException, InvalidArgumentsException, SecurityException {
         Response response = aamClient.getClientCertificate(certificateRequest);
+        if (response.status() == 400)
+            throw new InvalidArgumentsException(response.body().toString());
         return response.body().toString();
     }
 
     /**
      * @return GUEST token used to access public resources offered in SymbIoTe
      */
-    public String getGuestToken() {
+    public String getGuestToken() throws JWTCreationException {
         Response response = aamClient.getGuestToken();
+        if (response.status() == 500)
+            throw new JWTCreationException("Server failed to create a foreign token");
         return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toString();
     }
 
@@ -66,10 +69,13 @@ public class RESTAAMClient {
      *                     and http://www.smarteremc2.eu/colab/display/SYM/Home+Authorization+Token+acquisition+%28home+login%29+request
      * @return HOME token used to access restricted resources offered in SymbIoTe
      */
-    public String getHomeToken(String loginRequest) throws WrongCredentialsException {
+    public String getHomeToken(String loginRequest) throws WrongCredentialsException, JWTCreationException {
         Response response = aamClient.getHomeToken(loginRequest);
-        if (response.status() == 401) {
-            throw new WrongCredentialsException(response.status() + " ERR_WRONG_CREDENTIALS");
+        switch (response.status()) {
+            case 401:
+                throw new WrongCredentialsException("Could not validate token with incorrect credentials");
+            case 500:
+                throw new WrongCredentialsException("Server failed to create a foreign token");
         }
         try {
             return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
@@ -87,11 +93,13 @@ public class RESTAAMClient {
             JWTCreationException {
         Response response = aamClient.getForeignToken(remoteHomeToken, certificate);
         // todo check what exceptions are thrown with what codes and handle them explicitly
-        if (response.status() >= 400 && response.status() < 500)
-            throw new ValidationException("Failed to validate homeToken");
-        else if (response.status() >= 500) throw new JWTCreationException("Server failed to create a foreign token");
+        switch (response.status()) {
+            case 401:
+                throw new ValidationException("Failed to validate homeToken");
+            case 500:
+                throw new JWTCreationException("Server failed to create a foreign token");
+        }
         return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
-
     }
 
     /**
