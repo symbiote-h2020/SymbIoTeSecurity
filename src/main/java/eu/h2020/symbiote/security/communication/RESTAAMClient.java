@@ -35,8 +35,10 @@ public class RESTAAMClient {
     /**
      * @return Certificate of the component in PEM format
      */
-    public String getComponentCertificate() {
+    public String getComponentCertificate() throws AAMException {
         Response response = aamClient.getComponentCertificate();
+        if (response.status() == 500)
+            throw new AAMException(response.body().toString());
         return response.body().toString();
     }
 
@@ -47,12 +49,17 @@ public class RESTAAMClient {
      * @return the certificate issued using the provided CSR in PEM format
      */
     public String getClientCertificate(CertificateRequest certificateRequest) throws WrongCredentialsException, NotExistingUserException,
-            ValidationException, InvalidArgumentsException, SecurityException {
+            ValidationException,
+            InvalidArgumentsException {
         Response response = aamClient.getClientCertificate(certificateRequest);
         switch (response.status()) {
             case 400:
-                throw new InvalidArgumentsException(response.body().toString());
+                if (response.body().toString().contains("INVALID_ARGUMENTS"))
+                    throw new InvalidArgumentsException(response.body().toString());
+                throw new NotExistingUserException(response.body().toString());
             case 401:
+                if (response.body().toString().contains("WRONG_CREDENTIALS"))
+                    throw new WrongCredentialsException(response.body().toString());
                 throw new ValidationException(response.body().toString());
         }
         return response.body().toString();
@@ -81,7 +88,7 @@ public class RESTAAMClient {
             case 500:
                 throw new JWTCreationException("Server failed to create a foreign token");
         }
-            return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
+        return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
     }
 
     /**
@@ -92,7 +99,6 @@ public class RESTAAMClient {
     public String getForeignToken(String remoteHomeToken, String certificate) throws ValidationException,
             JWTCreationException {
         Response response = aamClient.getForeignToken(remoteHomeToken, certificate);
-        // todo check what exceptions are thrown with what codes and handle them explicitly
         switch (response.status()) {
             case 401:
                 throw new ValidationException("Failed to validate homeToken");
