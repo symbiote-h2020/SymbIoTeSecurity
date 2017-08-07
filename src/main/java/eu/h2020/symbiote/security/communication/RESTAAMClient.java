@@ -49,8 +49,12 @@ public class RESTAAMClient {
     public String getClientCertificate(CertificateRequest certificateRequest) throws WrongCredentialsException, NotExistingUserException,
             ValidationException, InvalidArgumentsException, SecurityException {
         Response response = aamClient.getClientCertificate(certificateRequest);
-        if (response.status() == 400)
-            throw new InvalidArgumentsException(response.body().toString());
+        switch (response.status()) {
+            case 400:
+                throw new InvalidArgumentsException(response.body().toString());
+            case 401:
+                throw new ValidationException(response.body().toString());
+        }
         return response.body().toString();
     }
 
@@ -75,13 +79,9 @@ public class RESTAAMClient {
             case 401:
                 throw new WrongCredentialsException("Could not validate token with incorrect credentials");
             case 500:
-                throw new WrongCredentialsException("Server failed to create a foreign token");
+                throw new JWTCreationException("Server failed to create a foreign token");
         }
-        try {
             return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
-        } catch (NullPointerException e) {
-            return response.headers().toString();
-        }
     }
 
     /**
