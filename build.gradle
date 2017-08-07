@@ -95,4 +95,4 @@ dependencyCheck {
 }
 
 // including code quality extensions into the build
-check.dependsOn(jacocoTestReport, 'dependencyCheckAnalyze')
+check.dependsOn(jacocoTestReport)//, 'dependencyCheckAnalyze')
