@@ -5,30 +5,29 @@ import eu.h2020.symbiote.security.commons.exceptions.SecurityException;
 import org.springframework.http.HttpStatus;
 
 /**
- * Custom exception thrown when user credentials are already present in DB during registration procedure
+ * Custom exception thrown when AAM fails to do some operation
  *
- * @author Daniele Caldarola (CNIT)
- * @author Nemanja Ignjatov (UNIVIE)
+ * @author Mikolaj Dobski (PSNC)
  */
-public class ExistingUserException extends SecurityException {
+public class AAMException extends SecurityException {
 
-    public final static String errorMessage = "USER_ALREADY_REGISTERED";
-    public final static HttpStatus statusCode = HttpStatus.BAD_REQUEST;
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
+    private final static String errorMessage = "AAM_SERVER_ERROR";
+    private final static HttpStatus statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
 
-    public ExistingUserException() {
+    public AAMException() {
         super(errorMessage);
     }
 
-    public ExistingUserException(String message) {
+    public AAMException(String message) {
         super(message);
     }
 
-    public ExistingUserException(Throwable cause) {
+    public AAMException(Throwable cause) {
         super(cause);
     }
 
-    public ExistingUserException(String message, Throwable cause) {
+    public AAMException(String message, Throwable cause) {
         super(message, cause);
     }
 
