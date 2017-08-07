@@ -2,6 +2,7 @@ package eu.h2020.symbiote.security.helpers;
 
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
+import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -39,6 +40,7 @@ import java.util.Date;
 public class CryptoHelper {
     // Provider is used from the implementation
     public static final String PROVIDER_NAME = BouncyCastleProvider.PROVIDER_NAME;
+    public static final String illegalSign = "@";
 
     public static KeyPair createKeyPair() throws NoSuchProviderException, NoSuchAlgorithmException,
             InvalidAlgorithmParameterException {
@@ -119,7 +121,10 @@ public class CryptoHelper {
      * @return String certificate signing request
      * @throws IOException
      */
-    public static String buildCertificateSigningRequestPEM(X509Certificate homeAAMCertificate, String username, String clientId, KeyPair clientKey) throws IOException {
+    public static String buildCertificateSigningRequestPEM(X509Certificate homeAAMCertificate, String username, String clientId, KeyPair clientKey) throws IOException, InvalidArgumentsException {
+        if (username.contains(illegalSign) || clientId.contains(illegalSign))
+            throw new InvalidArgumentsException();
+
         try {
             String cn = "CN=" + username + "@" + clientId + "@" + homeAAMCertificate.getSubjectX500Principal().getName().split("CN=")[1].split(",")[0];
             PKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(
@@ -143,7 +148,10 @@ public class CryptoHelper {
      * @return String platform certificate signing request
      * @throws IOException
      */
-    public static String buildPlatformCertificateSigningRequestPEM(String platformId, KeyPair keyPair) throws IOException {
+    public static String buildPlatformCertificateSigningRequestPEM(String platformId, KeyPair keyPair) throws IOException, InvalidArgumentsException {
+        if (platformId.contains(illegalSign))
+            throw new InvalidArgumentsException();
+
         try {
             String cn = "CN=" + platformId;
             PKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(
@@ -163,7 +171,7 @@ public class CryptoHelper {
 
     public static PKCS10CertificationRequest convertPemToPKCS10CertificationRequest(String pem) {
         PKCS10CertificationRequest csr = null;
-        ByteArrayInputStream pemStream = null;
+        ByteArrayInputStream pemStream;
         try {
             pemStream = new ByteArrayInputStream(pem.getBytes("UTF-8"));
         } catch (UnsupportedEncodingException ex) {
