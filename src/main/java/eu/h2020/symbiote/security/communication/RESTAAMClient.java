@@ -18,8 +18,13 @@ import feign.jackson.JacksonEncoder;
  * @author Dariusz Krajewski (PSNC)
  */
 public class RESTAAMClient {
-
+    /**
+     * Address of a server to which the client will connect
+     */
     private String serverAddress;
+    /**
+     * Instance of interface the client uses to communicate with server
+     */
     private FeignAAMRESTInterface aamClient;
 
     public RESTAAMClient(String serverAddress) {
@@ -27,6 +32,9 @@ public class RESTAAMClient {
         this.aamClient = getJsonClient();
     }
 
+    /**
+     * @return Instance of feign client with all necessary parameters set
+     */
     private FeignAAMRESTInterface getJsonClient() {
         return Feign.builder().encoder(new JacksonEncoder()).decoder(new JacksonDecoder())
                 .target(FeignAAMRESTInterface.class, serverAddress);
@@ -58,9 +66,8 @@ public class RESTAAMClient {
                     throw new InvalidArgumentsException(response.body().toString());
                 throw new NotExistingUserException(response.body().toString());
             case 401:
-                if (response.body().toString().contains("WRONG_CREDENTIALS"))
-                    throw new WrongCredentialsException(response.body().toString());
-                throw new ValidationException(response.body().toString());
+                //TODO: Find a way to differentiate ValidationException from WrongCredentialsException since response's body is empty on error
+                throw new ValidationException("Could not validate - Invalid certificate / credentials");
         }
         return response.body().toString();
     }
@@ -71,7 +78,7 @@ public class RESTAAMClient {
     public String getGuestToken() throws JWTCreationException {
         Response response = aamClient.getGuestToken();
         if (response.status() == 500)
-            throw new JWTCreationException("Server failed to create a foreign token");
+            throw new JWTCreationException("Server failed to create a guest token");
         return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toString();
     }
 
@@ -80,13 +87,15 @@ public class RESTAAMClient {
      *                     and http://www.smarteremc2.eu/colab/display/SYM/Home+Authorization+Token+acquisition+%28home+login%29+request
      * @return HOME token used to access restricted resources offered in SymbIoTe
      */
-    public String getHomeToken(String loginRequest) throws WrongCredentialsException, JWTCreationException {
+    public String getHomeToken(String loginRequest) throws WrongCredentialsException, JWTCreationException, MalformedJWTException {
         Response response = aamClient.getHomeToken(loginRequest);
         switch (response.status()) {
+            case 400:
+                throw new MalformedJWTException("Unable to read malformed token");
             case 401:
                 throw new WrongCredentialsException("Could not validate token with incorrect credentials");
             case 500:
-                throw new JWTCreationException("Server failed to create a foreign token");
+                throw new JWTCreationException("Server failed to create a home token");
         }
         return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
     }
