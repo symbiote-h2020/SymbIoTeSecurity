@@ -40,8 +40,8 @@ public interface ISecurityHandler {
     /**
      * Login to foreign AAMs (you don't have account in) using home token.
      *
-     * @param foreignAAMs to get the Tokens from
-     * @param homeCredentials  used to aquire foreignToken
+     * @param foreignAAMs     to get the Tokens from
+     * @param homeCredentials used to aquire foreignToken
      * @return map of the foreign tokens that were acquired using a given home token
      * @throws SecurityHandlerException on operation error
      */
@@ -81,9 +81,11 @@ public interface ISecurityHandler {
     /**
      * @param validationAuthority where the token should be validated (ideally it should be the token issuer authority)
      * @param token               to be validated
-     * @param certificate         if the operation is in an intranet environment, then the user needs to provide the
-     *                            certificate matching the one from the homeToken
+     * @param clientCertificate   if the operation is in an intranet environment, then the user needs to provide the
+     *                            clientCertificate matching the one from the validated token
+     * @param aamCertificate      if the operation is in an intranet environment, then the user needs to provide the
+     *                            aamCertificate matching the one that was used to sign the client certificate
      * @return validation status of the given token
      */
-    ValidationStatus validate(AAM validationAuthority, String token, Optional<Certificate> certificate);
+    ValidationStatus validate(AAM validationAuthority, String token, Optional<Certificate> clientCertificate, Optional<Certificate> aamCertificate);
 }

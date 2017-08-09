@@ -12,21 +12,21 @@ import feign.Response;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 
+import java.util.Optional;
+
 /**
- * For response handling (WIP)
+ * Crude RMI-like client to the AAM module that communicates with it over REST.
  *
  * @author Dariusz Krajewski (PSNC)
  */
 public class RESTAAMClient {
-    /**
-     * Address of a server to which the client will connect
-     */
+
     private String serverAddress;
-    /**
-     * Instance of interface the client uses to communicate with server
-     */
     private FeignAAMRESTInterface aamClient;
 
+    /**
+     * @param serverAddress of the AAM server the client wants to interact with.
+     */
     public RESTAAMClient(String serverAddress) {
         this.serverAddress = serverAddress;
         this.aamClient = getJsonClient();
@@ -41,7 +41,7 @@ public class RESTAAMClient {
     }
 
     /**
-     * @return Certificate of the component in PEM format
+     * @return Certificate of the component in PEM format. In this case the AAM certificate.
      */
     public String getComponentCertificate() throws AAMException {
         Response response = aamClient.getComponentCertificate();
@@ -51,12 +51,14 @@ public class RESTAAMClient {
     }
 
     /**
-     * Exposes a service that allows users to acquire their client certificates.
+     * Allows the user to acquire their client's certificate.
      *
      * @param certificateRequest required to issue a certificate for given (username, clientId) tupple.
-     * @return the certificate issued using the provided CSR in PEM format
+     * @return the signed certificate from the provided CSR in PEM format
      */
-    public String getClientCertificate(CertificateRequest certificateRequest) throws WrongCredentialsException, NotExistingUserException,
+    public String getClientCertificate(CertificateRequest certificateRequest) throws
+            WrongCredentialsException,
+            NotExistingUserException,
             ValidationException,
             InvalidArgumentsException {
         Response response = aamClient.getClientCertificate(certificateRequest);
@@ -87,7 +89,10 @@ public class RESTAAMClient {
      *                     and http://www.smarteremc2.eu/colab/display/SYM/Home+Authorization+Token+acquisition+%28home+login%29+request
      * @return HOME token used to access restricted resources offered in SymbIoTe
      */
-    public String getHomeToken(String loginRequest) throws WrongCredentialsException, JWTCreationException, MalformedJWTException {
+    public String getHomeToken(String loginRequest) throws
+            WrongCredentialsException,
+            JWTCreationException,
+            MalformedJWTException {
         Response response = aamClient.getHomeToken(loginRequest);
         switch (response.status()) {
             case 400:
@@ -101,13 +106,15 @@ public class RESTAAMClient {
     }
 
     /**
-     * @param remoteHomeToken that an actor wants to exchange in this AAM for a FOREIGN token
-     * @param certificate     matching the SPK claim in the provided token in 'offline' (intranet) scenarios
+     * @param remoteHomeToken   that an actor wants to exchange in this AAM for a FOREIGN token
+     * @param clientCertificate in PEM with key matching the SPK claim in the provided token in 'offline' (intranet) scenarios
+     * @param aamCertificate    in PEM with key matching the IPK claim in the provided token in 'offline' (intranet) scenarios
      * @return FOREIGN token used to access restricted resources offered in SymbIoTe federations
      */
-    public String getForeignToken(String remoteHomeToken, String certificate) throws ValidationException,
+    public String getForeignToken(String remoteHomeToken, Optional<String> clientCertificate, Optional<String> aamCertificate) throws
+            ValidationException,
             JWTCreationException {
-        Response response = aamClient.getForeignToken(remoteHomeToken, certificate);
+        Response response = aamClient.getForeignToken(remoteHomeToken, clientCertificate.orElse(""), aamCertificate.orElse(""));
         switch (response.status()) {
             case 401:
                 throw new ValidationException("Failed to validate homeToken");
@@ -125,12 +132,13 @@ public class RESTAAMClient {
     }
 
     /**
-     * @param token       that is to be validated
-     * @param certificate matching the SPK from the token
+     * @param token             that is to be validated
+     * @param clientCertificate in PEM with key matching the SPK claim in the provided token in 'offline' (intranet) scenarios
+     * @param aamCertificate    in PEM with key matching the IPK claim in the provided token in 'offline' (intranet) scenarios
      * @return validation status
      */
-    public ValidationStatus validate(String token, String certificate) {
-        return aamClient.validate(token, certificate);
+    public ValidationStatus validate(String token, Optional<String> clientCertificate, Optional<String> aamCertificate) {
+        return aamClient.validate(token, clientCertificate.orElse(""), aamCertificate.orElse(""));
     }
 
 }

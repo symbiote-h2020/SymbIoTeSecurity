@@ -53,7 +53,8 @@ public class SecurityConstants {
     public static final String GUEST_NAME = "guest";
 
     // certificates
-    public static final String CERTIFICATE_HEADER_NAME = "X-Auth-Cert";
+    public static final String CLIENT_CERTIFICATE_HEADER_NAME = "X-Auth-Client-Cert";
+    public static final String AAM_CERTIFICATE_HEADER_NAME = "X-Auth-AAM-Cert";
 
 
     private SecurityConstants() {
