@@ -22,6 +22,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import static eu.h2020.symbiote.security.helpers.CryptoHelper.convertPemToPKCS10CertificationRequest;
+import static eu.h2020.symbiote.security.helpers.CryptoHelper.illegalSign;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -34,6 +35,7 @@ public class CryptoHelperTest {
     private final String username = "testusername";
     private final String clientId = "testclientid";
     private final String platformId = "platformid";
+    private final String componentId = "componentid";
     private static final String CERTIFICATE_ALIAS = "core-2";
     private static final String CERTIFICATE_LOCATION = "./src/test/resources/platform_1.p12";
     private static final String CERTIFICATE_PASSWORD = "1234567";
@@ -62,7 +64,7 @@ public class CryptoHelperTest {
         X509Certificate certificate = (X509Certificate) ks.getCertificate(CERTIFICATE_ALIAS);
         String csr = CryptoHelper.buildCertificateSigningRequestPEM(certificate, username, clientId, keyPair);
         PKCS10CertificationRequest pkcsCSR = convertPemToPKCS10CertificationRequest(csr);
-        assertEquals(username + "@" + clientId + "@" + certificate.getSubjectX500Principal().getName().split("CN=")[1].split(",")[0], pkcsCSR.getSubject().toString().split("CN=")[1]);
+        assertEquals(username + illegalSign + clientId + illegalSign + certificate.getSubjectX500Principal().getName().split("CN=")[1].split(",")[0], pkcsCSR.getSubject().toString().split("CN=")[1]);
         assertTrue(pkcsCSR.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(keyPair.getPublic())));
     }
 
@@ -77,4 +79,18 @@ public class CryptoHelperTest {
         assertEquals(platformId, pkcsCSR.getSubject().toString().split("CN=")[1]);
         assertTrue(pkcsCSR.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(keyPair.getPublic())));
     }
+
+    @Test
+    public void buildComponentCertificateSigningRequestTest() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, IOException, CertificateException, OperatorCreationException, PKCSException, SignatureException, InvalidKeyException, InvalidArgumentsException {
+        KeyPair keyPair = CryptoHelper.createKeyPair();
+        //KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
+        //ks.load(new FileInputStream(CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
+        //X509Certificate certificate = (X509Certificate) ks.getCertificate(CERTIFICATE_ALIAS);
+        String csr = CryptoHelper.buildComponentCertificateSigningRequestPEM(componentId, platformId, keyPair);
+        PKCS10CertificationRequest pkcsCSR = convertPemToPKCS10CertificationRequest(csr);
+        assertEquals(componentId + illegalSign + platformId, pkcsCSR.getSubject().toString().split("CN=")[1]);
+        assertTrue(pkcsCSR.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(keyPair.getPublic())));
+    }
+
+
 }
