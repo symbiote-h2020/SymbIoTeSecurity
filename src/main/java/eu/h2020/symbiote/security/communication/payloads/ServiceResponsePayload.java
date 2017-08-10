@@ -1,6 +1,4 @@
-package eu.h2020.symbiote.security.communication.interfaces.payloads;
-
-import java.security.SignedObject;
+package eu.h2020.symbiote.security.communication.payloads;
 
 /**
  * Utility class for containing the service response payload in the challenge-response procedure.
