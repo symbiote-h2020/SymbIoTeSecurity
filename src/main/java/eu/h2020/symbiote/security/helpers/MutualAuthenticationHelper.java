@@ -93,7 +93,7 @@ public class MutualAuthenticationHelper {
         return new SecurityRequest(securityCredentialsSet, timestamp1);
     }
 
-    // TODO @Mikolaj: How to handle the related isSecurityRequestVerified() foro guest tokens?
+    // TODO @Mikolaj: How to handle the related isSecurityRequestVerified() for guest tokens?
     public static SecurityRequest getSecurityRequest(Token guestToken) throws
             NoSuchAlgorithmException {
 
@@ -186,8 +186,8 @@ public class MutualAuthenticationHelper {
         Long timestamp3 = ZonedDateTime.now().toInstant().toEpochMilli();
         PublicKey servicePublicKey = serviceCertificate.getX509().getPublicKey();
 
-        Long timestamp2 = Long.valueOf(Jwts.parser().setSigningKey(servicePublicKey).parseClaimsJws(serviceResponse).getBody().get("hash").toString());
-        String hashedTimestamp2 = Jwts.parser().setSigningKey(servicePublicKey).parseClaimsJws(serviceResponse).getBody().get("timestamp").toString();
+        Long timestamp2 = Long.valueOf(Jwts.parser().setSigningKey(servicePublicKey).parseClaimsJws(serviceResponse).getBody().get("timestamp").toString());
+        String hashedTimestamp2 = Jwts.parser().setSigningKey(servicePublicKey).parseClaimsJws(serviceResponse).getBody().get("hash").toString();
 
         String calculatedHash = hashSHA256(timestamp2.toString());
         Long deltaT = timestamp3 - timestamp2;
