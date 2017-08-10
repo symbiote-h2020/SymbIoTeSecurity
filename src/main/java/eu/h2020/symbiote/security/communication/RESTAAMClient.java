@@ -12,8 +12,10 @@ import feign.Response;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 
+import java.util.Optional;
+
 /**
- * For response handling (WIP)
+ * Crude RMI-like client to the AAM module that communicates with it over REST.
  *
  * @author Dariusz Krajewski (PSNC)
  */
@@ -22,18 +24,24 @@ public class RESTAAMClient {
     private String serverAddress;
     private FeignAAMRESTInterface aamClient;
 
+    /**
+     * @param serverAddress of the AAM server the client wants to interact with.
+     */
     public RESTAAMClient(String serverAddress) {
         this.serverAddress = serverAddress;
         this.aamClient = getJsonClient();
     }
 
+    /**
+     * @return Instance of feign client with all necessary parameters set
+     */
     private FeignAAMRESTInterface getJsonClient() {
         return Feign.builder().encoder(new JacksonEncoder()).decoder(new JacksonDecoder())
                 .target(FeignAAMRESTInterface.class, serverAddress);
     }
 
     /**
-     * @return Certificate of the component in PEM format
+     * @return Certificate of the component in PEM format. In this case the AAM certificate.
      */
     public String getComponentCertificate() throws AAMException {
         Response response = aamClient.getComponentCertificate();
@@ -43,12 +51,14 @@ public class RESTAAMClient {
     }
 
     /**
-     * Exposes a service that allows users to acquire their client certificates.
+     * Allows the user to acquire their client's certificate.
      *
      * @param certificateRequest required to issue a certificate for given (username, clientId) tupple.
-     * @return the certificate issued using the provided CSR in PEM format
+     * @return the signed certificate from the provided CSR in PEM format
      */
-    public String getClientCertificate(CertificateRequest certificateRequest) throws WrongCredentialsException, NotExistingUserException,
+    public String getClientCertificate(CertificateRequest certificateRequest) throws
+            WrongCredentialsException,
+            NotExistingUserException,
             ValidationException,
             InvalidArgumentsException {
         Response response = aamClient.getClientCertificate(certificateRequest);
@@ -58,9 +68,8 @@ public class RESTAAMClient {
                     throw new InvalidArgumentsException(response.body().toString());
                 throw new NotExistingUserException(response.body().toString());
             case 401:
-                if (response.body().toString().contains("WRONG_CREDENTIALS"))
-                    throw new WrongCredentialsException(response.body().toString());
-                throw new ValidationException(response.body().toString());
+                //TODO: Find a way to differentiate ValidationException from WrongCredentialsException since response's body is empty on error
+                throw new ValidationException("Could not validate - Invalid certificate / credentials");
         }
         return response.body().toString();
     }
@@ -71,7 +80,7 @@ public class RESTAAMClient {
     public String getGuestToken() throws JWTCreationException {
         Response response = aamClient.getGuestToken();
         if (response.status() == 500)
-            throw new JWTCreationException("Server failed to create a foreign token");
+            throw new JWTCreationException("Server failed to create a guest token");
         return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toString();
     }
 
@@ -80,25 +89,32 @@ public class RESTAAMClient {
      *                     and http://www.smarteremc2.eu/colab/display/SYM/Home+Authorization+Token+acquisition+%28home+login%29+request
      * @return HOME token used to access restricted resources offered in SymbIoTe
      */
-    public String getHomeToken(String loginRequest) throws WrongCredentialsException, JWTCreationException {
+    public String getHomeToken(String loginRequest) throws
+            WrongCredentialsException,
+            JWTCreationException,
+            MalformedJWTException {
         Response response = aamClient.getHomeToken(loginRequest);
         switch (response.status()) {
+            case 400:
+                throw new MalformedJWTException("Unable to read malformed token");
             case 401:
                 throw new WrongCredentialsException("Could not validate token with incorrect credentials");
             case 500:
-                throw new JWTCreationException("Server failed to create a foreign token");
+                throw new JWTCreationException("Server failed to create a home token");
         }
         return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
     }
 
     /**
-     * @param remoteHomeToken that an actor wants to exchange in this AAM for a FOREIGN token
-     * @param certificate     matching the SPK claim in the provided token in 'offline' (intranet) scenarios
+     * @param remoteHomeToken   that an actor wants to exchange in this AAM for a FOREIGN token
+     * @param clientCertificate in PEM with key matching the SPK claim in the provided token in 'offline' (intranet) scenarios
+     * @param aamCertificate    in PEM with key matching the IPK claim in the provided token in 'offline' (intranet) scenarios
      * @return FOREIGN token used to access restricted resources offered in SymbIoTe federations
      */
-    public String getForeignToken(String remoteHomeToken, String certificate) throws ValidationException,
+    public String getForeignToken(String remoteHomeToken, Optional<String> clientCertificate, Optional<String> aamCertificate) throws
+            ValidationException,
             JWTCreationException {
-        Response response = aamClient.getForeignToken(remoteHomeToken, certificate);
+        Response response = aamClient.getForeignToken(remoteHomeToken, clientCertificate.orElse(""), aamCertificate.orElse(""));
         switch (response.status()) {
             case 401:
                 throw new ValidationException("Failed to validate homeToken");
@@ -116,12 +132,13 @@ public class RESTAAMClient {
     }
 
     /**
-     * @param token       that is to be validated
-     * @param certificate matching the SPK from the token
+     * @param token             that is to be validated
+     * @param clientCertificate in PEM with key matching the SPK claim in the provided token in 'offline' (intranet) scenarios
+     * @param aamCertificate    in PEM with key matching the IPK claim in the provided token in 'offline' (intranet) scenarios
      * @return validation status
      */
-    public ValidationStatus validate(String token, String certificate) {
-        return aamClient.validate(token, certificate);
+    public ValidationStatus validate(String token, Optional<String> clientCertificate, Optional<String> aamCertificate) {
+        return aamClient.validate(token, clientCertificate.orElse(""), aamCertificate.orElse(""));
     }
 
 }

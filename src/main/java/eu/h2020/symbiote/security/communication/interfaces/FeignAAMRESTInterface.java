@@ -38,15 +38,19 @@ public interface FeignAAMRESTInterface {
 
     @RequestLine("POST " + SecurityConstants.AAM_GET_FOREIGN_TOKEN)
     @Headers({SecurityConstants.TOKEN_HEADER_NAME + ": {token}",
-            SecurityConstants.CERTIFICATE_HEADER_NAME + ": {certificate}",
+            SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME + ": {clientCertificate}",
+            SecurityConstants.AAM_CERTIFICATE_HEADER_NAME + ": {aamCertificate}",
             "Accept: application/json"})
     Response getForeignToken(@Param("token") String homeToken,
-                             @Param("certificate") String certificate);
+                             @Param("clientCertificate") String clientCertificate,
+                             @Param("aamCertificate") String aamCertificate);
 
     @RequestLine("POST " + SecurityConstants.AAM_VALIDATE)
     @Headers({SecurityConstants.TOKEN_HEADER_NAME + ": {token}",
-            SecurityConstants.CERTIFICATE_HEADER_NAME + ": {certificate}",
+            SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME + ": {clientCertificate}",
+            SecurityConstants.AAM_CERTIFICATE_HEADER_NAME + ": {aamCertificate}",
             "Accept: application/json"})
     ValidationStatus validate(@Param("token") String token,
-                              @Param("certificate") String certificate);
+                              @Param("clientCertificate") String clientCertificate,
+                              @Param("aamCertificate") String aamCertificate);
 }

@@ -1,8 +1,7 @@
 package eu.h2020.symbiote.security.utils;
 
 import eu.h2020.symbiote.security.commons.SecurityConstants;
-import eu.h2020.symbiote.security.commons.enums.IssuingAuthorityType;
-import eu.h2020.symbiote.security.commons.exceptions.custom.JWTCreationException;
+import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -19,62 +18,46 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by Mikołaj on 17.07.2017.
+ * R3 compliant Authorization token (JWS) builder.
  */
 public class DummyTokenIssuer {
 
     private static Log log = LogFactory.getLog(DummyTokenIssuer.class);
     private static SecureRandom random = new SecureRandom();
 
-    public static String generateJWTToken(String userId, Map<String, String> attributes, byte[] userPublicKey,
-                                          IssuingAuthorityType deploymentType, Long tokenValidity, String
-                                                  deploymentID, PublicKey aamPublicKey, PrivateKey aamPrivateKey)
-            throws JWTCreationException {
+    public static String buildAuthorizationToken(String userId, Map<String, String> attributes, byte[] userPublicKey,
+                                                 Token.Type tokenType, Long tokenValidity, String
+                                                         deploymentID, PublicKey aamPublicKey, PrivateKey aamPrivateKey) {
         ECDSAHelper.enableECDSAProvider();
 
         String jti = String.valueOf(random.nextInt());
         Map<String, Object> claimsMap = new HashMap<>();
 
-        try {
-            // Insert AAM Public Key
-            claimsMap.put("ipk", Base64.getEncoder().encodeToString(aamPublicKey.getEncoded()));
+        // Insert AAM Public Key
+        claimsMap.put("ipk", Base64.getEncoder().encodeToString(aamPublicKey.getEncoded()));
 
-            //Insert issuee Public Key
-            claimsMap.put("spk", Base64.getEncoder().encodeToString(userPublicKey));
+        //Insert issuee Public Key
+        claimsMap.put("spk", Base64.getEncoder().encodeToString(userPublicKey));
 
-            //Add symbIoTe related attributes to token
-            if (attributes != null && !attributes.isEmpty()) {
-                for (Map.Entry<String, String> entry : attributes.entrySet()) {
-                    claimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + entry.getKey(), entry.getValue());
-                }
+        //Add symbIoTe related attributes to token
+        if (attributes != null && !attributes.isEmpty()) {
+            for (Map.Entry<String, String> entry : attributes.entrySet()) {
+                claimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + entry.getKey(), entry.getValue());
             }
-
-            //Insert token type based on AAM deployment type (Core or Platform)
-            switch (deploymentType) {
-                case CORE:
-                    claimsMap.put(SecurityConstants.CLAIM_NAME_TOKEN_TYPE, IssuingAuthorityType.CORE);
-                    break;
-                case PLATFORM:
-                    claimsMap.put(SecurityConstants.CLAIM_NAME_TOKEN_TYPE, IssuingAuthorityType.PLATFORM);
-                    break;
-                case NULL:
-                    throw new JWTCreationException("uninitialized deployment type, must be CORE or PLATFORM");
-            }
-
-            JwtBuilder jwtBuilder = Jwts.builder();
-            jwtBuilder.setClaims(claimsMap);
-            jwtBuilder.setId(jti);
-            jwtBuilder.setIssuer(deploymentID);
-            jwtBuilder.setSubject(userId);
-            jwtBuilder.setIssuedAt(new Date());
-            jwtBuilder.setExpiration(new Date(System.currentTimeMillis() + tokenValidity));
-            jwtBuilder.signWith(SignatureAlgorithm.ES256, aamPrivateKey);
-
-            return jwtBuilder.compact();
-        } catch (Exception e) {
-            String message = "JWT creation error";
-            log.error(message, e);
-            throw new JWTCreationException(message, e);
         }
+
+        //Insert token type
+        claimsMap.put(SecurityConstants.CLAIM_NAME_TOKEN_TYPE, tokenType);
+
+        JwtBuilder jwtBuilder = Jwts.builder();
+        jwtBuilder.setClaims(claimsMap);
+        jwtBuilder.setId(jti);
+        jwtBuilder.setIssuer(deploymentID);
+        jwtBuilder.setSubject(userId);
+        jwtBuilder.setIssuedAt(new Date());
+        jwtBuilder.setExpiration(new Date(System.currentTimeMillis() + tokenValidity));
+        jwtBuilder.signWith(SignatureAlgorithm.ES256, aamPrivateKey);
+
+        return jwtBuilder.compact();
     }
 }
