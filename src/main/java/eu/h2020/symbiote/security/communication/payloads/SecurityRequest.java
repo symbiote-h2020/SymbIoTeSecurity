@@ -11,8 +11,8 @@ import java.util.Set;
  */
 public class SecurityRequest {
 
-    private Set<SecurityCredentials> securityCredentials;
-    private final Long timestamp;
+    private final Set<SecurityCredentials> securityCredentials;
+    private final long timestamp;
 
     public SecurityRequest(Set<SecurityCredentials> securityCredentials, Long timestamp) {
         this.securityCredentials = securityCredentials;
@@ -21,10 +21,6 @@ public class SecurityRequest {
 
     public Set<SecurityCredentials> getSecurityCredentials() {
         return securityCredentials;
-    }
-
-    public void setSecurityCredentials(Set<SecurityCredentials> securityCredentials) {
-        this.securityCredentials = securityCredentials;
     }
 
     public Long getTimestamp() {

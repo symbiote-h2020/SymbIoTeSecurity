@@ -1,5 +1,9 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
+import eu.h2020.symbiote.security.commons.Token.Type;
+
+import java.util.Optional;
+
 /**
  * Utility class for containing a token (used for authorization and access polices), the authentication challenge used
  * in the challenge-response procedure ({@link eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper}) for
@@ -8,60 +12,49 @@ package eu.h2020.symbiote.security.communication.payloads;
  *
  * @author Daniele Caldarola (CNIT)
  * @author Mikołaj Dobski (PSNC)
- *
  */
 public class SecurityCredentials {
 
-    private String token;
-    private String authenticationChallenge = "";
-    private String clientCertificate = "";
-    private String signingAAMCertificate = "";
+    private final String token;
+    private final String authenticationChallenge;
+    private final String clientCertificate;
+    private final String signingAAMCertificate;
 
-    public SecurityCredentials(String token, String authenticationChallenge, String clientCertificate, String signingAAMCertificate) {
+    public SecurityCredentials(String token,
+                               Optional<String> authenticationChallenge,
+                               Optional<String> clientCertificate,
+                               Optional<String> signingAAMCertificate) {
         this.token = token;
-        this.authenticationChallenge = authenticationChallenge;
-        this.clientCertificate = clientCertificate;
-        this.signingAAMCertificate = signingAAMCertificate;
+        this.authenticationChallenge = authenticationChallenge.orElse("");
+        this.clientCertificate = clientCertificate.orElse("");
+        this.signingAAMCertificate = signingAAMCertificate.orElse("");
     }
 
-    public SecurityCredentials(String token, String authenticationChallenge) {
-        this.token = token;
-        this.authenticationChallenge = authenticationChallenge;
-    }
-
-    public SecurityCredentials(String token) {
-        this.token = token;
+    /**
+     * Used only for @{@link Type#GUEST}
+     *
+     * @param guestToken to generate the service required payload.
+     */
+    public SecurityCredentials(String guestToken) {
+        this.token = guestToken;
+        this.authenticationChallenge = "";
+        this.clientCertificate = "";
+        this.signingAAMCertificate = "";
     }
 
     public String getToken() {
         return token;
     }
 
-    public void setToken(String token) {
-        this.token = token;
-    }
-
     public String getAuthenticationChallenge() {
         return authenticationChallenge;
-    }
-
-    public void setAuthenticationChallenge(String authenticationChallenge) {
-        this.authenticationChallenge = authenticationChallenge;
     }
 
     public String getClientCertificate() {
         return clientCertificate;
     }
 
-    public void setClientCertificate(String clientCertificate) {
-        this.clientCertificate = clientCertificate;
-    }
-
     public String getSigningAAMCertificate() {
         return signingAAMCertificate;
-    }
-
-    public void setSigningAAMCertificate(String signingAAMCertificate) {
-        this.signingAAMCertificate = signingAAMCertificate;
     }
 }

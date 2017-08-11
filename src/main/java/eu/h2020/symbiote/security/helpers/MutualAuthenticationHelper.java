@@ -2,6 +2,7 @@ package eu.h2020.symbiote.security.helpers;
 
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.Token;
+import eu.h2020.symbiote.security.commons.Token.Type;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
@@ -16,7 +17,10 @@ import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -31,7 +35,8 @@ import java.util.*;
  */
 public class MutualAuthenticationHelper {
 
-    private static final Long THRESHOLD = new Long(3600000); // XXX: has to be reduced and put on a proper container or in the boostrap
+    // TODO @Daniele by Mikołaj -> I think it should be param of the validator as SS doesn't have support for properties. It should be integrated as the exp claim timestamp which by RFC self-invalidates the challenge
+    private static final long THRESHOLD = 3600000;
 
     /**
      * Utility class to hash a string with SHA-256
@@ -57,48 +62,53 @@ public class MutualAuthenticationHelper {
      * @param authorizationCredentials matching the set of tokens used in the business query
      * @param attachCertificates       true if application and signing platform certificates must be sent along with the
      *                                 security credentials
-     * @return the required payload (the "challenge" in the challenge-response procedure)
+     * @return the required payload for client's authentication and authorization
      */
     public static SecurityRequest getSecurityRequest(Set<AuthorizationCredentials> authorizationCredentials,
                                                      boolean attachCertificates) throws
             NoSuchAlgorithmException {
 
-        Long timestamp1 = ZonedDateTime.now().toInstant().toEpochMilli();
+        long timestamp1 = ZonedDateTime.now().toInstant().toEpochMilli();
         Iterator<AuthorizationCredentials> iteratorAC = authorizationCredentials.iterator();
-        Set<SecurityCredentials> securityCredentialsSet = new LinkedHashSet<SecurityCredentials>();
+        Set<SecurityCredentials> securityCredentialsSet = new HashSet<>();
 
         while (iteratorAC.hasNext()) {
-            AuthorizationCredentials authorizationCredentialsSetElement = iteratorAC.next();
+            AuthorizationCredentials credentials = iteratorAC.next();
 
-            String token = authorizationCredentialsSetElement.authorizationToken.toString();
-            String hexHash = hashSHA256(authorizationCredentialsSetElement.authorizationToken.toString() + timestamp1.toString());
+            String token = credentials.authorizationToken.toString();
+            String hexHash = hashSHA256(credentials.authorizationToken.toString() + timestamp1);
 
             JwtBuilder jwtBuilder = Jwts.builder();
-            jwtBuilder.setId(authorizationCredentialsSetElement.authorizationToken.getClaims().getId()); // jti
-            jwtBuilder.setIssuer(authorizationCredentialsSetElement.authorizationToken.getClaims().getIssuer()); // iss
-            jwtBuilder.claim("ipk", authorizationCredentialsSetElement.authorizationToken.getClaims().get("spk"));
+            jwtBuilder.setId(credentials.authorizationToken.getClaims().getId()); // jti
+            jwtBuilder.setIssuer(credentials.authorizationToken.getClaims().getIssuer()); // iss
+            jwtBuilder.claim("ipk", credentials.authorizationToken.getClaims().get("spk"));
             jwtBuilder.claim("hash", hexHash);
-            jwtBuilder.signWith(SignatureAlgorithm.ES256, authorizationCredentialsSetElement.homeCredentials.privateKey);
+            jwtBuilder.signWith(SignatureAlgorithm.ES256, credentials.homeCredentials.privateKey);
             String authenticationChallenge = jwtBuilder.compact();
 
             if (attachCertificates) {
-                String clientCertificate = authorizationCredentialsSetElement.homeCredentials.certificate.getCertificateString();
-                String signingAAMCertificate = authorizationCredentialsSetElement.homeCredentials.homeAAM.getCertificate().getCertificateString();
-                securityCredentialsSet.add(new SecurityCredentials(token, authenticationChallenge, clientCertificate, signingAAMCertificate));
+                String clientCertificate = credentials.homeCredentials.certificate.getCertificateString();
+                String signingAAMCertificate = credentials.homeCredentials.homeAAM.getCertificate().getCertificateString();
+                securityCredentialsSet.add(new SecurityCredentials(token, Optional.of(authenticationChallenge), Optional.of(clientCertificate), Optional.of(signingAAMCertificate)));
             } else {
-                securityCredentialsSet.add(new SecurityCredentials(token, authenticationChallenge));
+                securityCredentialsSet.add(new SecurityCredentials(token));
             }
         }
 
         return new SecurityRequest(securityCredentialsSet, timestamp1);
     }
 
-    // TODO @Mikolaj: How to handle the related isSecurityRequestVerified() for guest tokens?
-    public static SecurityRequest getSecurityRequest(Token guestToken) throws
-            NoSuchAlgorithmException {
+    /**
+     * Used to generate the security request needed to access public resources
+     *
+     * @param guestToken acquired from whichever symbIoTe AAM
+     * @return the required payload for client's authentication and authorization
+     * @throws NoSuchAlgorithmException
+     */
+    public static SecurityRequest getSecurityRequest(Token guestToken) {
 
         Long timestamp1 = ZonedDateTime.now().toInstant().toEpochMilli();
-        Set<SecurityCredentials> securityCredentialsSet = new LinkedHashSet<SecurityCredentials>();
+        Set<SecurityCredentials> securityCredentialsSet = new HashSet<>();
         securityCredentialsSet.add(new SecurityCredentials(guestToken.toString()));
 
         return new SecurityRequest(securityCredentialsSet, timestamp1);
@@ -117,12 +127,19 @@ public class MutualAuthenticationHelper {
             ValidationException {
 
         Long timestamp2 = ZonedDateTime.now().toInstant().toEpochMilli();
-
-        Set<SecurityCredentials> securityCredentialsSet = securityRequest.getSecurityCredentials();
         Long timestamp1 = securityRequest.getTimestamp();
 
+        Set<SecurityCredentials> securityCredentialsSet = securityRequest.getSecurityCredentials();
         Iterator<SecurityCredentials> iteratorSCS = securityCredentialsSet.iterator();
 
+        // guest token scenario
+        if (securityCredentialsSet.size() == 1) {
+            Type tokenType = Type.valueOf(JWTEngine.getClaimsFromToken(securityCredentialsSet.iterator().next().getToken()).getTtyp());
+            if (tokenType.equals(Type.GUEST))
+                return true;
+        }
+
+        // proper tokens scenario
         while (iteratorSCS.hasNext()) {
             SecurityCredentials securityCredentialsSetElement = iteratorSCS.next();
 
@@ -158,14 +175,14 @@ public class MutualAuthenticationHelper {
      * @return the required payload
      */
     public static String getServiceResponse(PrivateKey servicePrivateKey,
-                                            Long timestamp2) throws
+                                            long timestamp2) throws
             NoSuchAlgorithmException {
 
-        String hashedTimestamp2 = hashSHA256(timestamp2.toString());
+        String hashedTimestamp2 = hashSHA256(Long.toString(timestamp2));
 
-        JwtBuilder jwtBuilder = Jwts.builder(); // TODO @Mikolay: some other fields here?
+        JwtBuilder jwtBuilder = Jwts.builder();
         jwtBuilder.claim("hash", hashedTimestamp2);
-        jwtBuilder.claim("timestamp", timestamp2.toString());
+        jwtBuilder.claim("timestamp", Long.toString(timestamp2)); // TODO @Daniele: why not in the standard iat claim?
         jwtBuilder.signWith(SignatureAlgorithm.ES256, servicePrivateKey);
 
         return jwtBuilder.compact();
@@ -174,8 +191,8 @@ public class MutualAuthenticationHelper {
     /**
      * Used by the client to handle the service response encapsulated in a JWS.
      *
-     * @param serviceResponse       that should prove the service's authenticity
-     * @param serviceCertificate    used verify the payload signature
+     * @param serviceResponse    that should prove the service's authenticity
+     * @param serviceCertificate used verify the payload signature
      * @return true if the service is genuine
      */
     public static boolean isServiceResponseVerified(String serviceResponse,
