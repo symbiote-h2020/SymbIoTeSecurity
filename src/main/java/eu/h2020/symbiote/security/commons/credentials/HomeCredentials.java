@@ -2,7 +2,7 @@ package eu.h2020.symbiote.security.commons.credentials;
 
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.Token;
-import eu.h2020.symbiote.security.communication.interfaces.payloads.AAM;
+import eu.h2020.symbiote.security.communication.payloads.AAM;
 
 import java.security.PrivateKey;
 

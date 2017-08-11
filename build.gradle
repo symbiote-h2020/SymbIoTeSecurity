@@ -1,25 +1,18 @@
 buildscript {
-    ext {
-        springBootVersion = '1.5.4.RELEASE'
-    }
+
     repositories {
         mavenCentral()
-        mavenLocal()
-		maven {
-			url "https://plugins.gradle.org/m2/"
-		}
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
-        classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
         classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.2.2'
-        classpath 'org.owasp:dependency-check-gradle:2.0.1'
+        classpath 'org.owasp:dependency-check-gradle:2.1.0'
     }
 }
 // code
-apply plugin: "io.spring.dependency-management"
 apply plugin: 'java'
-apply plugin: 'org.springframework.boot'
 
 // code quality
 apply plugin: 'jacoco'
@@ -51,9 +44,6 @@ repositories {
     mavenCentral()
 }
 
-// this is a library, not a runnable spring-boot jar, therefore
-bootRepackage.enabled = false
-
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier 'sources'
     from sourceSets.main.allSource
@@ -71,26 +61,17 @@ artifacts {
 }
 
 dependencies {
-    compile('io.jsonwebtoken:jjwt:0.7.0')
-    compile('org.bouncycastle:bcprov-jdk15on:1.56')
-    compile('org.bouncycastle:bcpkix-jdk15on:1.56')
-
-    // TODO think how to limit those dependecies...
-    compile('com.fasterxml.jackson.core:jackson-annotations:2.8.7+')
-    compile('org.springframework.data:spring-data-commons')
-    compile('com.netflix.feign:feign-jackson:8.18.0')
-    compile('org.springframework:spring-web:4.3.9.RELEASE')
-
+    compile('io.jsonwebtoken:jjwt:0.7+')
+    compile('org.bouncycastle:bcprov-jdk15on:1.56+')
+    compile('org.bouncycastle:bcpkix-jdk15on:1.56+')
+    compile('io.github.openfeign:feign-jackson:9.5+')
+    compile('commons-logging:commons-logging:1.2+')
 
     // common testing
     testCompile('junit:junit:4.+')
-    //TODO do we need those in a client/pojo library... replace with mockito...
-    // we should only mock the service here and do the integration in AAM repository against real AAM codes
-    testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.powermock:powermock-api-mockito:1.6.4')
     testCompile('org.powermock:powermock-core:1.6.4')
     testCompile('org.powermock:powermock-module-junit4:1.6.4')
-    testRuntime('org.springframework.boot:spring-boot-starter-web')
 }
 
 // code quality below
@@ -102,7 +83,6 @@ task generateJavaDocs(type: Javadoc) {
 // jacoco configuration section
 jacoco {
     toolVersion = "0.7.9"
-    
 }
 
 jacocoTestReport {

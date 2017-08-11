@@ -15,7 +15,6 @@ public class AuthorizationCredentials {
     /**
      * used on client side only to support:
      * - generation of signed objects for tokens ownership proof (client authentication)
-     * - {@link eu.h2020.symbiote.security.communication.interfaces.payloads.ServiceAuthenticationProof} decryption
      */
     public final HomeCredentials homeCredentials;
 

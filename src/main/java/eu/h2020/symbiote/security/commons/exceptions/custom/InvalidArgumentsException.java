@@ -5,29 +5,31 @@ import eu.h2020.symbiote.security.commons.exceptions.SecurityException;
 import org.springframework.http.HttpStatus;
 
 /**
- * Custom exception thrown when platform is already present in DB during registration procedure
+ * Custom exception thrown when arguments a invalid or missing
  *
- * @author Mikołaj Dobski (PSNC)
+ * @author Daniele Caldarola (CNIT)
+ * @author Nemanja Ignjatov (UNIVIE)
+ * @author Mikolaj Dobski (PSNC)
  */
-public class ExistingPlatformException extends SecurityException {
+public class InvalidArgumentsException extends SecurityException {
 
-    public final static String errorMessage = "PLATFORM_ALREADY_REGISTERED";
+    public final static String errorMessage = "ERR_INVALID_ARGUMENTS";
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
     private final static HttpStatus statusCode = HttpStatus.BAD_REQUEST;
 
-    public ExistingPlatformException() {
+    public InvalidArgumentsException() {
         super(errorMessage);
     }
 
-    public ExistingPlatformException(String message) {
+    public InvalidArgumentsException(String message) {
         super(message);
     }
 
-    public ExistingPlatformException(Throwable cause) {
+    public InvalidArgumentsException(Throwable cause) {
         super(cause);
     }
 
-    public ExistingPlatformException(String message, Throwable cause) {
+    public InvalidArgumentsException(String message, Throwable cause) {
         super(message, cause);
     }
 
@@ -40,4 +42,5 @@ public class ExistingPlatformException extends SecurityException {
     public String getErrorMessage() {
         return errorMessage;
     }
+
 }

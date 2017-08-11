@@ -4,13 +4,17 @@ import feign.Feign;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 
+/**
+ * use @{@link eu.h2020.symbiote.security.communication.RESTAAMClient} instead of this one
+ */
+@Deprecated
 public class ClientFactory {
-  
-  public static AAMClient getAAMClient(String baseUrl) {
-    
-    return Feign.builder().encoder(new JacksonEncoder()).decoder(new JacksonDecoder())
-        .target(AAMClient.class, baseUrl);
-    
-  }
-  
+
+    public static AAMClient getAAMClient(String baseUrl) {
+
+        return Feign.builder().encoder(new JacksonEncoder()).decoder(new JacksonDecoder())
+                .target(AAMClient.class, baseUrl);
+
+    }
+
 }

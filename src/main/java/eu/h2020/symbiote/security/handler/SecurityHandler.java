@@ -6,35 +6,24 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
+import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
-import eu.h2020.symbiote.security.communication.interfaces.payloads.AAM;
-import eu.h2020.symbiote.security.communication.interfaces.payloads.AvailableAAMsCollection;
-import eu.h2020.symbiote.security.communication.interfaces.payloads.CertificateRequest;
+import eu.h2020.symbiote.security.communication.payloads.AAM;
+import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
+import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
 import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyPair;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.UnrecoverableEntryException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -93,20 +82,18 @@ public class SecurityHandler implements ISecurityHandler {
   }
   
   public Token login(AAM homeAAMId) throws SecurityHandlerException, ValidationException {
-    BoundCredentials credentials =credentialsWallet.get(homeAAMId.getAamInstanceId());
+      BoundCredentials credentials = credentialsWallet.get(homeAAMId.getAamInstanceId());
     
     if (credentials != null && credentials.homeCredentials != null &&
             credentials.homeCredentials.privateKey != null) {
       String homeToken = ClientFactory.getAAMClient(homeAAMId.getAamAddress()).getHomeToken(
           CryptoHelper.buildHomeTokenAcquisitionRequest(credentials.homeCredentials));
-      credentials.homeToken = new Token(homeToken);
+        credentials.homeCredentials.homeToken = new Token(homeToken);
       tokenCredentials.put(homeToken, credentials);
+        return credentials.homeCredentials.homeToken = new Token(homeToken);
     } else {
       throw new SecurityHandlerException("Can't find certificate for AAM " + homeAAMId.getAamInstanceId());
     }
-    
-    return null;
-    
   }
   
   public Map<AAM, Token> login(List<AAM> foreignAAMs, String homeToken)
@@ -138,47 +125,77 @@ public class SecurityHandler implements ISecurityHandler {
   public Token loginAsGuest(AAM aam) throws ValidationException {
     return new Token(ClientFactory.getAAMClient(aam.getAamAddress()).getGuestToken());
   }
-  
-  public ValidationStatus validate(AAM validationAuthority, String token, Optional<Certificate> certificate) {
+
+    private static KeyStore getKeystore(String path, String password) throws
+            KeyStoreException,
+            IOException,
+            CertificateException,
+            NoSuchAlgorithmException {
+        KeyStore trustStore = KeyStore.getInstance("JKS");
+        try (
+                FileInputStream fIn = new FileInputStream(path)) {
+            trustStore.load(fIn, password.toCharArray());
+        }
+        return trustStore;
+    }
+
+    public ValidationStatus validate(AAM validationAuthority, String token, Optional<Certificate> clientCertificate, Optional<Certificate> aamCertificate) {
     return ClientFactory.getAAMClient(validationAuthority.getAamAddress()).validate(token,
-        certificate.orElse(new Certificate()).getCertificateString());
+            clientCertificate.orElse(new Certificate()).getCertificateString());
+    }
+
+    private void cacheCertificate(HomeCredentials credentials) {
+
+        BoundCredentials bound = new BoundCredentials(credentials.homeAAM);
+        bound.homeCredentials = credentials;
+
+        credentialsWallet.put(credentials.homeAAM.getAamInstanceId(), bound);
+    }
+
+    @Override
+    public void clearCachedTokens() {
+        tokenCredentials = new HashMap<>();
+        credentialsWallet.values().forEach(credential -> {
+            credential.foreignTokens = new HashMap<>();
+            credential.homeCredentials.homeToken = null;
+        });
   }
   
   public Certificate getCertificate(AAM homeAAM, String username, String password,
                                     String clientId)
       throws SecurityHandlerException {
-    
-    
-    try {
+
+
+      try {
       KeyPair pair = CryptoHelper.createKeyPair();
-      
+
       CertificateRequest request = new CertificateRequest();
       request.setUsername(username);
       request.setPassword(password);
       request.setClientId(clientId);
-      
+
       request.setClientCSRinPEMFormat(CryptoHelper.buildCertificateSigningRequestPEM(
           homeAAM.getCertificate().getX509(), username, clientId, pair));
-      
-      String certificateValue = ClientFactory.getAAMClient(homeAAM.getAamAddress())
+
+          String certificateValue = ClientFactory.getAAMClient(homeAAM.getAamAddress())
                                     .getClientCertificate(request);
-      
-      Certificate certificate = new Certificate();
+
+          Certificate certificate = new Certificate();
       certificate.setCertificateString(certificateValue);
-      
-      HomeCredentials credentials = new HomeCredentials(homeAAM, username, clientId, certificate,
+
+          HomeCredentials credentials = new HomeCredentials(homeAAM, username, clientId, certificate,
                                                            pair.getPrivate());
-      
-      
-      if (saveCertificate(credentials)) {
+
+
+          if (saveCertificate(credentials)) {
         cacheCertificate(credentials);
       } else {
         throw new SecurityHandlerException("Error saving certificate in keystore");
       }
-      
-      return certificate;
-      
-    } catch (CertificateException e) {
+
+          return certificate;
+
+      } catch (CertificateException e) {
       throw new SecurityHandlerException("Error getting AAM certificate", e);
     } catch (IOException e) {
       throw new SecurityHandlerException("Error signing certificate request", e);
@@ -188,36 +205,12 @@ public class SecurityHandler implements ISecurityHandler {
       throw new SecurityHandlerException("Error generating key pair", e);
     } catch (InvalidAlgorithmParameterException e) {
       throw new SecurityHandlerException("Error generating key pair", e);
-    } catch (KeyStoreException e) {
-      throw new SecurityHandlerException("Error saving certificate in keystore", e);
-    }
-  
-  }
-  
-  private void cacheCertificate(HomeCredentials credentials) {
-    
-    BoundCredentials bound = new BoundCredentials(credentials.homeAAM);
-    bound.homeCredentials = credentials;
-    
-    credentialsWallet.put(credentials.homeAAM.getAamInstanceId(), bound);
-  }
-  
-  @Override
-  public void clearCachedTokens() {
-    tokenCredentials = new HashMap<>();
-    credentialsWallet.values().forEach(credential -> {
-      credential.foreignTokens = new HashMap<>();
-      credential.homeToken = null;
-    });
-  }
-  
-  private static KeyStore getKeystore(String path, String password) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
-  
-    FileInputStream fIn = new FileInputStream(path);
-    KeyStore trustStore = KeyStore.getInstance("JKS");
-    trustStore.load(fIn, password.toCharArray());
-  
-    return trustStore;
+      } catch (KeyStoreException e) {
+          throw new SecurityHandlerException("Error saving certificate in keystore", e);
+      } catch (InvalidArgumentsException e) {
+          throw new SecurityHandlerException(e.getMessage(), e);
+      }
+
   }
   
   private KeyStore getKeystore() throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {

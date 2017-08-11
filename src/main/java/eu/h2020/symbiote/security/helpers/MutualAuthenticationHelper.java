@@ -2,38 +2,41 @@ package eu.h2020.symbiote.security.helpers;
 
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.Token;
+import eu.h2020.symbiote.security.commons.Token.Type;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
+import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
-import eu.h2020.symbiote.security.communication.interfaces.payloads.ApplicationChallenge;
-import eu.h2020.symbiote.security.communication.interfaces.payloads.ServiceResponsePayload;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
+import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.bouncycastle.util.encoders.Hex;
 
-import javax.crypto.*;
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.time.ZonedDateTime;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 
 /**
  * Provides helper methods to handle client-service authentication procedure.
  * <p>
+ *
  * @author Daniele Caldarola (CNIT)
  * @author Mikołaj Dobski (PSNC)
  */
 public class MutualAuthenticationHelper {
 
-    private static final Log logger = LogFactory.getLog(MutualAuthenticationHelper.class);
-    private static final Long THRESHOLD = new Long(3600000); // XXX: has to be reduced and put on a proper container or in the boostrap
+    // TODO @Daniele by Mikołaj -> I think it should be param of the validator as SS doesn't have support for properties. It should be integrated as the exp claim timestamp which by RFC self-invalidates the challenge
+    private static final long THRESHOLD = 3600000;
 
     /**
      * Utility class to hash a string with SHA-256
@@ -52,90 +55,110 @@ public class MutualAuthenticationHelper {
         return hexHash;
     }
 
-
     /**
      * Used by the application to generate the challenge to be attached to the business query
      * so that the service can confirm that the client should posses provided tokens
      *
-     * @param serviceCertificate certificate of the service host used to encrypt the challenge
      * @param authorizationCredentials matching the set of tokens used in the business query
-     * @return the required payload (the "challenge" in the challenge-response procedure)
+     * @param attachCertificates       true if application and signing platform certificates must be sent along with the
+     *                                 security credentials
+     * @return the required payload for client's authentication and authorization
      */
-    public static ApplicationChallenge getApplicationChallenge(Certificate serviceCertificate,
-                                                               Set<AuthorizationCredentials> authorizationCredentials) throws
-            NoSuchAlgorithmException,
-            NoSuchProviderException,
-            NoSuchPaddingException,
-            CertificateException,
-            InvalidKeyException,
-            IOException,
-            SignatureException,
-            IllegalBlockSizeException {
+    public static SecurityRequest getSecurityRequest(Set<AuthorizationCredentials> authorizationCredentials,
+                                                     boolean attachCertificates) throws
+            NoSuchAlgorithmException {
 
-        Long timestamp1 = ZonedDateTime.now().toInstant().toEpochMilli(); // the number of milliseconds since the epoch of 1970-01-01T00:00:00Z
+        long timestamp1 = ZonedDateTime.now().toInstant().toEpochMilli();
         Iterator<AuthorizationCredentials> iteratorAC = authorizationCredentials.iterator();
-        Set<SignedObject> signedHashesSet = new LinkedHashSet<SignedObject>();
+        Set<SecurityCredentials> securityCredentialsSet = new HashSet<>();
 
-        Signature signature = Signature.getInstance("SHA256withECDSA");
+        while (iteratorAC.hasNext()) {
+            AuthorizationCredentials credentials = iteratorAC.next();
 
-        while(iteratorAC.hasNext()) {
-            AuthorizationCredentials authorizationCredentialsSetElement = iteratorAC.next();
-            String hashString = authorizationCredentialsSetElement.authorizationToken.toString() + timestamp1.toString();
-            String hexHash = hashSHA256(hashString);
-            signedHashesSet.add(new SignedObject(hexHash, authorizationCredentialsSetElement.homeCredentials.privateKey, signature));
+            String token = credentials.authorizationToken.toString();
+            String hexHash = hashSHA256(credentials.authorizationToken.toString() + timestamp1);
+
+            JwtBuilder jwtBuilder = Jwts.builder();
+            jwtBuilder.setId(credentials.authorizationToken.getClaims().getId()); // jti
+            jwtBuilder.setIssuer(credentials.authorizationToken.getClaims().getIssuer()); // iss
+            jwtBuilder.claim("ipk", credentials.authorizationToken.getClaims().get("spk"));
+            jwtBuilder.claim("hash", hexHash);
+            jwtBuilder.signWith(SignatureAlgorithm.ES256, credentials.homeCredentials.privateKey);
+            String authenticationChallenge = jwtBuilder.compact();
+
+            if (attachCertificates) {
+                String clientCertificate = credentials.homeCredentials.certificate.getCertificateString();
+                String signingAAMCertificate = credentials.homeCredentials.homeAAM.getCertificate().getCertificateString();
+                securityCredentialsSet.add(new SecurityCredentials(token, Optional.of(authenticationChallenge), Optional.of(clientCertificate), Optional.of(signingAAMCertificate)));
+            } else {
+                securityCredentialsSet.add(new SecurityCredentials(token));
+            }
         }
 
-        return new ApplicationChallenge(signedHashesSet, timestamp1);
+        return new SecurityRequest(securityCredentialsSet, timestamp1);
     }
 
+    /**
+     * Used to generate the security request needed to access public resources
+     *
+     * @param guestToken acquired from whichever symbIoTe AAM
+     * @return the required payload for client's authentication and authorization
+     * @throws NoSuchAlgorithmException
+     */
+    public static SecurityRequest getSecurityRequest(Token guestToken) {
+
+        Long timestamp1 = ZonedDateTime.now().toInstant().toEpochMilli();
+        Set<SecurityCredentials> securityCredentialsSet = new HashSet<>();
+        securityCredentialsSet.add(new SecurityCredentials(guestToken.toString()));
+
+        return new SecurityRequest(securityCredentialsSet, timestamp1);
+    }
 
     /**
      * Used by the service to handle the challenge verification
      *
-     * @param authorizationTokens     attached to the business query
-     * @param applicationChallenge    to be decrypted with Ppv,p containing the signatures set and timestamp1, attached
-     *                                to the business query
+     * @param securityRequest contains client tokens and "challenge" for client authentication
      * @return true if the client should be in possession of the given tokens
      */
-    public static boolean isApplicationChallengeVerified(Set<Token> authorizationTokens,
-                                                         ApplicationChallenge applicationChallenge) throws
-            NoSuchPaddingException,
+    public static boolean isSecurityRequestVerified(SecurityRequest securityRequest) throws
             NoSuchAlgorithmException,
-            NoSuchProviderException,
-            InvalidKeyException,
-            ClassNotFoundException,
-            BadPaddingException,
-            IllegalBlockSizeException,
-            IOException,
             MalformedJWTException,
-            CertificateException,
-            SignatureException {
+            IOException,
+            ValidationException {
 
         Long timestamp2 = ZonedDateTime.now().toInstant().toEpochMilli();
+        Long timestamp1 = securityRequest.getTimestamp();
 
-        Signature signature = Signature.getInstance("SHA256withECDSA");
+        Set<SecurityCredentials> securityCredentialsSet = securityRequest.getSecurityCredentials();
+        Iterator<SecurityCredentials> iteratorSCS = securityCredentialsSet.iterator();
 
-        Set<SignedObject> signedHashesSet = applicationChallenge.getSignedHashesSet();
-        Long timestamp1 = applicationChallenge.getTimestamp1();
+        // guest token scenario
+        if (securityCredentialsSet.size() == 1) {
+            Type tokenType = Type.valueOf(JWTEngine.getClaimsFromToken(securityCredentialsSet.iterator().next().getToken()).getTtyp());
+            if (tokenType.equals(Type.GUEST))
+                return true;
+        }
 
-        Iterator<Token> iteratorT = authorizationTokens.iterator();
-        Iterator<SignedObject> iteratorSHS = signedHashesSet.iterator();
+        // proper tokens scenario
+        while (iteratorSCS.hasNext()) {
+            SecurityCredentials securityCredentialsSetElement = iteratorSCS.next();
 
-        while (iteratorT.hasNext() && iteratorSHS.hasNext()) {
-            Token authorizationTokensElement = iteratorT.next();
-            SignedObject signedHashesSetElement = iteratorSHS.next();
-
-            String applicationPublicKeyPEM = JWTEngine.getClaimsFromToken(authorizationTokensElement.getToken()).getSpk();
+            String applicationToken = securityCredentialsSetElement.getToken();
+            String applicationPublicKeyPEM = JWTEngine.getClaimsFromToken(applicationToken).getSpk();
             PublicKey applicationPublicKey = CryptoHelper.convertPEMToPublicKey(applicationPublicKeyPEM);
 
-            signedHashesSetElement.verify(applicationPublicKey, signature);
-
-            String challengeHash = (String) signedHashesSetElement.getObject();
-            String calculatedHash = hashSHA256(authorizationTokensElement.toString() + timestamp1.toString());
+            String challengeJWS = securityCredentialsSetElement.getAuthenticationChallenge();
+            String challengeHash = Jwts.parser().setSigningKey(applicationPublicKey).parseClaimsJws(challengeJWS).getBody().get("hash").toString();
+            String calculatedHash = hashSHA256(securityCredentialsSetElement.getToken() + timestamp1.toString());
             Long deltaT = timestamp2 - timestamp1;
 
-            if (Objects.equals(calculatedHash, challengeHash) && (deltaT < THRESHOLD)) {
-            } else {
+            // check challenge is ok
+            if (!Objects.equals(calculatedHash, challengeHash) || (deltaT >= THRESHOLD)) {
+                return false;
+            }
+
+            // check token is ok
+            if (JWTEngine.validateTokenString(applicationToken, applicationPublicKey) != ValidationStatus.VALID) {
                 return false;
             }
         }
@@ -143,75 +166,50 @@ public class MutualAuthenticationHelper {
         return true;
     }
 
-
     /**
-     * Used by the service to generate the response payload to be encapsulated in a {@link SignedObject} required by
+     * Used by the service to generate the response payload to be encapsulated in a JWS required by
      * the application to confirm the service authenticity.
      *
-     * @param servicePrivateKey      used the sign the payload
-     * @param timestamp2             used in the response payload
+     * @param servicePrivateKey used the sign the JWS response
+     * @param timestamp2        used in the response payload
      * @return the required payload
      */
-    public static SignedObject getServiceResponse(PrivateKey servicePrivateKey,
-                                                     Long timestamp2) throws
-            NoSuchAlgorithmException,
-            NoSuchProviderException,
-            NoSuchPaddingException,
-            InvalidKeyException,
-            MalformedJWTException,
-            IOException,
-            CertificateException,
-            SignatureException,
-            IllegalBlockSizeException {
+    public static String getServiceResponse(PrivateKey servicePrivateKey,
+                                            long timestamp2) throws
+            NoSuchAlgorithmException {
 
-        Signature signature = Signature.getInstance("SHA256withECDSA");
-        String hashedTimestamp2 = hashSHA256(timestamp2.toString());
-        ServiceResponsePayload serviceResponsePayload = new ServiceResponsePayload(hashedTimestamp2, timestamp2);
+        String hashedTimestamp2 = hashSHA256(Long.toString(timestamp2));
 
-        return new SignedObject((Serializable) serviceResponsePayload, servicePrivateKey, signature);
+        JwtBuilder jwtBuilder = Jwts.builder();
+        jwtBuilder.claim("hash", hashedTimestamp2);
+        jwtBuilder.claim("timestamp", Long.toString(timestamp2)); // TODO @Daniele: why not in the standard iat claim?
+        jwtBuilder.signWith(SignatureAlgorithm.ES256, servicePrivateKey);
+
+        return jwtBuilder.compact();
     }
 
     /**
-     * Used by the client to handle the {@link ServiceResponsePayload encapsulated in a {@link SignedObject}.
+     * Used by the client to handle the service response encapsulated in a JWS.
      *
-     * @param serviceResponse            that should prove the service's authenticity
-     * @param serviceCertificate         used verify the payload signature
-     * @param applicationPrivateKey      used to decrypt the payload
+     * @param serviceResponse    that should prove the service's authenticity
+     * @param serviceCertificate used verify the payload signature
      * @return true if the service is genuine
      */
-    public static boolean isServiceResponseVerified(SignedObject serviceResponse,
-                                             Certificate serviceCertificate,
-                                             PrivateKey applicationPrivateKey) throws
-            NoSuchPaddingException,
+    public static boolean isServiceResponseVerified(String serviceResponse,
+                                                    Certificate serviceCertificate) throws
             NoSuchAlgorithmException,
-            NoSuchProviderException,
-            InvalidKeyException,
-            ClassNotFoundException,
-            BadPaddingException,
-            IllegalBlockSizeException,
-            IOException,
-            CertificateException,
-            SignatureException {
+            CertificateException {
 
         Long timestamp3 = ZonedDateTime.now().toInstant().toEpochMilli();
+        PublicKey servicePublicKey = serviceCertificate.getX509().getPublicKey();
 
-        Signature signature = Signature.getInstance("SHA256withECDSA");
-
-        serviceResponse.verify(serviceCertificate.getX509().getPublicKey(), signature);
-        ServiceResponsePayload serviceResponsePayload = (ServiceResponsePayload) serviceResponse.getObject();
-
-        Long timestamp2 = serviceResponsePayload.getTimestamp2();
-        String hashedTimestamp2 = serviceResponsePayload.getHashedTimestamp2();
+        Long timestamp2 = Long.valueOf(Jwts.parser().setSigningKey(servicePublicKey).parseClaimsJws(serviceResponse).getBody().get("timestamp").toString());
+        String hashedTimestamp2 = Jwts.parser().setSigningKey(servicePublicKey).parseClaimsJws(serviceResponse).getBody().get("hash").toString();
 
         String calculatedHash = hashSHA256(timestamp2.toString());
         Long deltaT = timestamp3 - timestamp2;
 
-        if (Objects.equals(calculatedHash, hashedTimestamp2) && deltaT < THRESHOLD) {
-        } else {
-            return false;
-        }
-
-        return true;
+        return Objects.equals(calculatedHash, hashedTimestamp2) && deltaT < THRESHOLD;
     }
 
 }
