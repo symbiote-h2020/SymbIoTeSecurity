@@ -17,11 +17,10 @@ import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -124,7 +123,8 @@ public class MutualAuthenticationHelper {
             NoSuchAlgorithmException,
             MalformedJWTException,
             IOException,
-            ValidationException {
+            ValidationException,
+            InvalidKeySpecException {
 
         Long timestamp2 = ZonedDateTime.now().toInstant().toEpochMilli();
         Long timestamp1 = securityRequest.getTimestamp();
@@ -141,11 +141,14 @@ public class MutualAuthenticationHelper {
 
         // proper tokens scenario
         while (iteratorSCS.hasNext()) {
+
             SecurityCredentials securityCredentialsSetElement = iteratorSCS.next();
+            KeyFactory keyFactory = KeyFactory.getInstance("EC");
 
             String applicationToken = securityCredentialsSetElement.getToken();
-            String applicationPublicKeyPEM = JWTEngine.getClaimsFromToken(applicationToken).getSpk();
-            PublicKey applicationPublicKey = CryptoHelper.convertPEMToPublicKey(applicationPublicKeyPEM);
+
+            X509EncodedKeySpec keySpecSpk = new X509EncodedKeySpec(Base64.getDecoder().decode(JWTEngine.getClaimsFromToken(applicationToken).getSpk()));
+            PublicKey applicationPublicKey = keyFactory.generatePublic(keySpecSpk);
 
             String challengeJWS = securityCredentialsSetElement.getAuthenticationChallenge();
             String challengeHash = Jwts.parser().setSigningKey(applicationPublicKey).parseClaimsJws(challengeJWS).getBody().get("hash").toString();
@@ -157,8 +160,11 @@ public class MutualAuthenticationHelper {
                 return false;
             }
 
+            X509EncodedKeySpec keySpecIpk = new X509EncodedKeySpec(Base64.getDecoder().decode(JWTEngine.getClaimsFromToken(applicationToken).getIpk()));
+            PublicKey applicationTokenIssuerPublicKey = keyFactory.generatePublic(keySpecIpk);
+
             // check token is ok
-            if (JWTEngine.validateTokenString(applicationToken, applicationPublicKey) != ValidationStatus.VALID) {
+            if (JWTEngine.validateTokenString(applicationToken, applicationTokenIssuerPublicKey) != ValidationStatus.VALID) {
                 return false;
             }
         }
@@ -182,7 +188,7 @@ public class MutualAuthenticationHelper {
 
         JwtBuilder jwtBuilder = Jwts.builder();
         jwtBuilder.claim("hash", hashedTimestamp2);
-        jwtBuilder.claim("timestamp", Long.toString(timestamp2)); // TODO @Daniele: why not in the standard iat claim?
+        jwtBuilder.claim("timestamp", Long.toString(timestamp2));// TODO @Daniele: why not in the standard iat claim?
         jwtBuilder.signWith(SignatureAlgorithm.ES256, servicePrivateKey);
 
         return jwtBuilder.compact();

@@ -15,7 +15,7 @@ import feign.Response;
  * @author Dariusz Krajewski (PSNC)
  * @author Mikołaj Dobski (PSNC)
  */
-public interface FeignAAMRESTInterface {
+public interface IFeignAAMClient {
 
     @RequestLine("GET " + SecurityConstants.AAM_GET_AVAILABLE_AAMS)
     @Headers("Content-Type: application/json")
