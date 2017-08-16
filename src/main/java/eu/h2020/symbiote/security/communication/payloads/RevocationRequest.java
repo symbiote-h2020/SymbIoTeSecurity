@@ -3,8 +3,7 @@ package eu.h2020.symbiote.security.communication.payloads;
 public class RevocationRequest {
 
 
-    private Credentials userCredentials = new Credentials();
-    private Credentials adminCredentials = new Credentials();
+    private Credentials credentials = new Credentials();
     private String homeTokenString = "";
     private String foreignTokenString = "";
     private String certificatePEMString = "";
@@ -23,22 +22,12 @@ public class RevocationRequest {
         this.credentialType = credentialType;
     }
 
-    public Credentials getAdminCredentials() {
-        return adminCredentials;
+    public Credentials getCredentials() {
+        return credentials;
     }
 
-    public void setAdminCredentials(Credentials adminCredentials) {
-        this.credentialType = CredentialType.ADMIN;
-        this.adminCredentials = adminCredentials;
-    }
-
-    public Credentials getUserCredentials() {
-        return userCredentials;
-    }
-
-    public void setUserCredentials(Credentials userCredentials) {
-        this.credentialType = CredentialType.USER;
-        this.userCredentials = userCredentials;
+    public void setCredentials(Credentials credentials) {
+        this.credentials = credentials;
     }
 
     public String getCertificateCommonName() {

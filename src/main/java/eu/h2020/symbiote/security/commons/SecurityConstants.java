@@ -37,6 +37,7 @@ public class SecurityConstants {
     public static final String AAM_GET_HOME_TOKEN = "/get_home_token";
     public static final String AAM_GET_FOREIGN_TOKEN = "/get_foreign_token";
     public static final String AAM_VALIDATE = "/validate";
+    public static final String AAM_REVOKE = "/revoke";
 
     // errors
     public static final String ERR_MISSING_ARGUMENTS = "ERR_MISSING_ARGUMENTS";
@@ -55,7 +56,6 @@ public class SecurityConstants {
     // certificates
     public static final String CLIENT_CERTIFICATE_HEADER_NAME = "X-Auth-Client-Cert";
     public static final String AAM_CERTIFICATE_HEADER_NAME = "X-Auth-AAM-Cert";
-
 
     private SecurityConstants() {
     }

@@ -7,6 +7,7 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.*;
 import eu.h2020.symbiote.security.communication.interfaces.FeignAAMRESTInterface;
 import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
 import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
+import eu.h2020.symbiote.security.communication.payloads.RevocationRequest;
 import feign.Feign;
 import feign.Response;
 import feign.jackson.JacksonDecoder;
@@ -73,6 +74,28 @@ public class RESTAAMClient {
         }
         return response.body().toString();
     }
+
+    /**
+     * Allows the user to revoke their client's certificate.
+     * TODO
+     *
+     * @param revocationRequest required to revoke a certificate or token.
+     * @return the signed certificate from the provided CSR in PEM format
+     */
+    public String revoke(RevocationRequest revocationRequest) throws InvalidArgumentsException, NotExistingUserException, ValidationException {
+        Response response = aamClient.revoke(revocationRequest);
+        switch (response.status()) {
+            case 400:
+                if (response.body().toString().contains("INVALID_ARGUMENTS"))
+                    throw new InvalidArgumentsException(response.body().toString());
+                throw new NotExistingUserException(response.body().toString());
+            case 401:
+                //TODO: Find a way to differentiate ValidationException from WrongCredentialsException since response's body is empty on error
+                throw new ValidationException("Could not validate - Invalid certificate / credentials");
+        }
+        return response.body().toString();
+    }
+
 
     /**
      * @return GUEST token used to access public resources offered in SymbIoTe
