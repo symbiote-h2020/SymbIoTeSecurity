@@ -7,32 +7,51 @@ package eu.h2020.symbiote.security.communication.payloads;
  */
 public class ValidationRequest {
 
-    private String tokenString = "";
-    private String certificateString = "";
+    private String token = "";
+    private String clientCertificate = "";
+    private String clientCertificateSigningAAMCertificate = "";
+    private String foreignTokenIssuingAAMCertificate = "";
 
-    public ValidationRequest(String tokenString, String certificateString) {
-        this.tokenString = tokenString;
-        this.certificateString = certificateString;
+    public ValidationRequest(String token, String clientCertificate, String clientCertificateSigningAAMCertificate, String foreignTokenIssuingAAMCertificate) {
+        this.token = token;
+        this.clientCertificate = clientCertificate;
+        this.clientCertificateSigningAAMCertificate = clientCertificateSigningAAMCertificate;
+        this.foreignTokenIssuingAAMCertificate = foreignTokenIssuingAAMCertificate;
     }
 
     public ValidationRequest() {
         // empty payload might appear in communication
     }
 
-    public String getTokenString() {
-        return tokenString;
+    public String getToken() {
+        return token;
     }
 
-    public void setTokenString(String tokenString) {
-        this.tokenString = tokenString;
+    public void setToken(String token) {
+        this.token = token;
     }
 
-    public String getCertificateString() {
-        return certificateString;
+    public String getClientCertificate() {
+        return clientCertificate;
     }
 
-    public void setCertificateString(String certificateString) {
-        this.certificateString = certificateString;
+    public void setClientCertificate(String clientCertificate) {
+        this.clientCertificate = clientCertificate;
     }
 
+    public String getClientCertificateSigningAAMCertificate() {
+        return clientCertificateSigningAAMCertificate;
+    }
+
+    public void setClientCertificateSigningAAMCertificate(String clientCertificateSigningAAMCertificate) {
+        this.clientCertificateSigningAAMCertificate = clientCertificateSigningAAMCertificate;
+    }
+
+    public String getForeignTokenIssuingAAMCertificate() {
+        return foreignTokenIssuingAAMCertificate;
+    }
+
+    public void setForeignTokenIssuingAAMCertificate(String foreignTokenIssuingAAMCertificate) {
+        this.foreignTokenIssuingAAMCertificate = foreignTokenIssuingAAMCertificate;
+    }
 }

@@ -72,8 +72,10 @@ public class AAMClient implements IAAMClient {
             case 401:
                 //TODO: Find a way to differentiate ValidationException from WrongCredentialsException since response's body is empty on error
                 throw new ValidationException("Could not validate - Invalid certificate / credentials");
+            default:
+                return response.body().toString();
         }
-        return response.body().toString();
+
     }
 
     /**
@@ -105,8 +107,9 @@ public class AAMClient implements IAAMClient {
                 throw new WrongCredentialsException("Could not validate token with incorrect credentials");
             case 500:
                 throw new JWTCreationException("Server failed to create a home token");
+            default:
+                return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
         }
-        return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
     }
 
     /**
@@ -125,8 +128,10 @@ public class AAMClient implements IAAMClient {
                 throw new ValidationException("Failed to validate homeToken");
             case 500:
                 throw new JWTCreationException("Server failed to create a foreign token");
+            default:
+                return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
         }
-        return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
+
     }
 
     /**
@@ -138,14 +143,15 @@ public class AAMClient implements IAAMClient {
     }
 
     /**
-     * @param token             that is to be validated
-     * @param clientCertificate in PEM with key matching the SPK claim in the provided token in 'offline' (intranet) scenarios
-     * @param aamCertificate    in PEM with key matching the IPK claim in the provided token in 'offline' (intranet) scenarios
+     * @param token                                  that is to be validated
+     * @param clientCertificate                      in PEM with key matching the SPK claim in the provided token in 'offline' (intranet) scenarios
+     * @param clientCertificateSigningAAMCertificate in PEM being the AAM that signed the clientCertificate  in 'offline' (intranet) scenarios
+     * @param foreignTokenIssuingAAMCertificate      in PEM with key matching the IPK claim in the provided FOREIGN token in 'offline' (intranet) scenarios
      * @return validation status
      */
     @Override
-    public ValidationStatus validate(String token, Optional<String> clientCertificate, Optional<String> aamCertificate) {
-        return feignClient.validate(token, clientCertificate.orElse(""), aamCertificate.orElse(""));
+    public ValidationStatus validate(String token, Optional<String> clientCertificate, Optional<String> clientCertificateSigningAAMCertificate, Optional<String> foreignTokenIssuingAAMCertificate) {
+        return feignClient.validate(token, clientCertificate.orElse(""), clientCertificateSigningAAMCertificate.orElse(""), foreignTokenIssuingAAMCertificate.orElse(""));
     }
 
 }

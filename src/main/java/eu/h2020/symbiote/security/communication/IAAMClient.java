@@ -63,10 +63,11 @@ public interface IAAMClient {
     AvailableAAMsCollection getAvailableAAMs();
 
     /**
-     * @param token             that is to be validated
-     * @param clientCertificate in PEM with key matching the SPK claim in the provided token in 'offline' (intranet) scenarios
-     * @param aamCertificate    in PEM with key matching the IPK claim in the provided token in 'offline' (intranet) scenarios
+     * @param token                                  that is to be validated
+     * @param clientCertificate                      in PEM with key matching the SPK claim in the provided token in 'offline' (intranet) scenarios
+     * @param clientCertificateSigningAAMCertificate in PEM being the AAM that signed the clientCertificate  in 'offline' (intranet) scenarios
+     * @param foreignTokenIssuingAAMCertificate      in PEM with key matching the IPK claim in the provided FOREIGN token in 'offline' (intranet) scenarios
      * @return validation status
      */
-    ValidationStatus validate(String token, Optional<String> clientCertificate, Optional<String> aamCertificate);
+    ValidationStatus validate(String token, Optional<String> clientCertificate, Optional<String> clientCertificateSigningAAMCertificate, Optional<String> foreignTokenIssuingAAMCertificate);
 }

@@ -48,9 +48,11 @@ public interface IFeignAAMClient {
     @RequestLine("POST " + SecurityConstants.AAM_VALIDATE)
     @Headers({SecurityConstants.TOKEN_HEADER_NAME + ": {token}",
             SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME + ": {clientCertificate}",
-            SecurityConstants.AAM_CERTIFICATE_HEADER_NAME + ": {aamCertificate}",
+            SecurityConstants.AAM_CERTIFICATE_HEADER_NAME + ": {clientCertificateSigningAAMCertificate}",
+            SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE + ": {foreignTokenIssuingAAMCertificate}",
             "Accept: application/json"})
     ValidationStatus validate(@Param("token") String token,
                               @Param("clientCertificate") String clientCertificate,
-                              @Param("aamCertificate") String aamCertificate);
+                              @Param("clientCertificateSigningAAMCertificate") String clientCertificateSigningAAMCertificate,
+                              @Param("foreignTokenIssuingAAMCertificate") String foreignTokenIssuingAAMCertificate);
 }

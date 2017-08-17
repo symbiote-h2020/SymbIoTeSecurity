@@ -109,7 +109,7 @@ public class JWTEngine {
     public static JWTClaims getClaimsFromToken(String jwtToken) throws MalformedJWTException {
         HashMap<String, Object> retMap = new HashMap<>();
         String[] jwtParts = jwtToken.split("\\.");
-        if (jwtParts.length < SecurityConstants.JWTPartsCount) {
+        if (jwtParts.length < SecurityConstants.JWT_PARTS_COUNT) {
             throw new MalformedJWTException();
         }
         //Get second part of the JWT

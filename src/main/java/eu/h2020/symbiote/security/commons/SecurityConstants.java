@@ -2,8 +2,9 @@ package eu.h2020.symbiote.security.commons;
 
 /**
  * Constants related to SH-AAM communication
- *
+ * <p>
  * TODO R3 review to remove obsolete values
+ *
  * @author Mikołaj Dobski (PSNC)
  */
 public class SecurityConstants {
@@ -47,7 +48,7 @@ public class SecurityConstants {
 
     // tokens
     public static final String TOKEN_HEADER_NAME = "X-Auth-Token";
-    public static final int JWTPartsCount = 3; //Header, body and signature
+    public static final int JWT_PARTS_COUNT = 3; //Header, body and signature
     public static final String CLAIM_NAME_TOKEN_TYPE = "ttyp";
     public static final String SYMBIOTE_ATTRIBUTES_PREFIX = "SYMBIOTE_";
     public static final String GUEST_NAME = "guest";
@@ -55,6 +56,7 @@ public class SecurityConstants {
     // certificates
     public static final String CLIENT_CERTIFICATE_HEADER_NAME = "X-Auth-Client-Cert";
     public static final String AAM_CERTIFICATE_HEADER_NAME = "X-Auth-AAM-Cert";
+    public static final String FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE = "X-Auth-ISS-Cert";
 
 
     private SecurityConstants() {

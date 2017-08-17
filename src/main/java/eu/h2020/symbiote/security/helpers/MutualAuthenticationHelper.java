@@ -15,7 +15,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.bouncycastle.util.encoders.Hex;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -88,7 +87,13 @@ public class MutualAuthenticationHelper {
             if (attachCertificates) {
                 String clientCertificate = credentials.homeCredentials.certificate.getCertificateString();
                 String signingAAMCertificate = credentials.homeCredentials.homeAAM.getCertificate().getCertificateString();
-                securityCredentialsSet.add(new SecurityCredentials(token, Optional.of(authenticationChallenge), Optional.of(clientCertificate), Optional.of(signingAAMCertificate)));
+                String tokenIssuingAAMCertificate = credentials.tokenIssuingAAM.getCertificate().getCertificateString();
+                securityCredentialsSet.add(new SecurityCredentials(
+                        token,
+                        Optional.of(authenticationChallenge),
+                        Optional.of(clientCertificate),
+                        Optional.of(signingAAMCertificate),
+                        Optional.of(tokenIssuingAAMCertificate)));
             } else {
                 securityCredentialsSet.add(new SecurityCredentials(token));
             }
@@ -122,7 +127,6 @@ public class MutualAuthenticationHelper {
     public static boolean isSecurityRequestVerified(SecurityRequest securityRequest) throws
             NoSuchAlgorithmException,
             MalformedJWTException,
-            IOException,
             ValidationException,
             InvalidKeySpecException {
 
