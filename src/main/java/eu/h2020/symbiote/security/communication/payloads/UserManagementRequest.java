@@ -13,6 +13,7 @@ import eu.h2020.symbiote.security.commons.enums.OperationType;
 public class UserManagementRequest {
 
     private Credentials administratorCredentials = new Credentials();
+    private Credentials userCredentials = new Credentials();
     private UserDetails userDetails = new UserDetails();
     private OperationType operationType;
 
@@ -22,9 +23,10 @@ public class UserManagementRequest {
     public UserManagementRequest() { // used by JSON serializer
     }
 
-    public UserManagementRequest(Credentials administratorCredentials, UserDetails userDetails,
-                                 OperationType operationType) {
+    public UserManagementRequest(Credentials administratorCredentials, Credentials userCredentials,
+                                 UserDetails userDetails, OperationType operationType) {
         this.administratorCredentials = administratorCredentials;
+        this.userCredentials = userCredentials;
         this.userDetails = userDetails;
         this.operationType = operationType;
     }
@@ -51,5 +53,13 @@ public class UserManagementRequest {
 
     public void setOperationType(OperationType operationType) {
         this.operationType = operationType;
+    }
+
+    public Credentials getUserCredentials() {
+        return userCredentials;
+    }
+
+    public void setUserCredentials(Credentials userCredentials) {
+        this.userCredentials = userCredentials;
     }
 }

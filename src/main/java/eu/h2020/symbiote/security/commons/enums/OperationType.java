@@ -12,5 +12,5 @@ public enum OperationType {
     /**
      * deleting actor
      */
-    DELETE,
+    DELETE
 }
