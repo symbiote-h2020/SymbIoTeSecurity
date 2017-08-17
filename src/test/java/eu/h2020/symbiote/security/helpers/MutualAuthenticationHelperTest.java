@@ -39,16 +39,15 @@ import static org.junit.Assert.*;
  */
 public class MutualAuthenticationHelperTest {
 
-    private static Log log = LogFactory.getLog(MutualAuthenticationHelperTest.class);
-
-    private final String username = "testusername";
-    private final String clientId = "testclientid";
     private static final String ISSUING_AAM_CERTIFICATE_ALIAS = "core-1";
     private static final String CLIENT_CERTIFICATE_ALIAS = "client-core-1";
     private static final String CERTIFICATE_LOCATION = "./src/test/resources/core.p12";
     private static final String CERTIFICATE_PASSWORD = "1234567";
     private static final String SERVICE_CERTIFICATE_ALIAS = "platform-1-1-c1"; // let's suppose it
     private static final String SERVICE_CERTIFICATE_LOCATION = "./src/test/resources/platform_1.p12"; // let's suppose it
+    private static Log log = LogFactory.getLog(MutualAuthenticationHelperTest.class);
+    private final String username = "testusername";
+    private final String clientId = "testclientid";
     private HashSet<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<AuthorizationCredentials>();
     private Token guestToken;
 
@@ -70,7 +69,7 @@ public class MutualAuthenticationHelperTest {
         PrivateKey clientPrivateKey = (PrivateKey) ks.getKey(CLIENT_CERTIFICATE_ALIAS, CERTIFICATE_PASSWORD.toCharArray());
 
         // client home credentials
-        AAM issuingAAM = new AAM("","","", new Certificate(CryptoHelper.convertX509ToPEM(issuingAAMCertificate)));
+        AAM issuingAAM = new AAM("", "", "", new Certificate(CryptoHelper.convertX509ToPEM(issuingAAMCertificate)));
         HomeCredentials homeCredentials = new HomeCredentials(issuingAAM, username, clientId, new Certificate(CryptoHelper.convertX509ToPEM(clientCertificate)), clientPrivateKey);
 
         String authorizationToken = DummyTokenIssuer.buildAuthorizationToken(clientId,
@@ -91,7 +90,7 @@ public class MutualAuthenticationHelperTest {
                 issuingAAMPublicKey,
                 issuingAAMPrivateKey));
 
-        AuthorizationCredentials authorizationCredentials = new AuthorizationCredentials(new Token(authorizationToken), homeCredentials);
+        AuthorizationCredentials authorizationCredentials = new AuthorizationCredentials(new Token(authorizationToken), homeCredentials.homeAAM, homeCredentials);
         this.authorizationCredentialsSet.add(authorizationCredentials);
     }
 
@@ -109,7 +108,7 @@ public class MutualAuthenticationHelperTest {
         try {
             SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
             SecurityRequest securityRequestCertsAttached = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, true);
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.info(e.getMessage());
             throw e;
         }
@@ -150,7 +149,7 @@ public class MutualAuthenticationHelperTest {
 
             MutualAuthenticationHelper.getServiceResponse(servicePrivateKey, securityRequestCertsAttached.getTimestamp());
 
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.info(e.getMessage());
             throw e;
         }
@@ -170,7 +169,7 @@ public class MutualAuthenticationHelperTest {
         X509Certificate serviceCertificate = (X509Certificate) ks.getCertificate(SERVICE_CERTIFICATE_ALIAS);
         PrivateKey servicePrivateKey = (PrivateKey) ks.getKey(SERVICE_CERTIFICATE_ALIAS, CERTIFICATE_PASSWORD.toCharArray());
         SecurityRequest securityRequestCertsAttached = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, true);
-        String serviceResponse = MutualAuthenticationHelper.getServiceResponse(servicePrivateKey,securityRequestCertsAttached.getTimestamp());
+        String serviceResponse = MutualAuthenticationHelper.getServiceResponse(servicePrivateKey, securityRequestCertsAttached.getTimestamp());
 
         assertTrue(MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, new Certificate(CryptoHelper.convertX509ToPEM(serviceCertificate))));
     }
@@ -227,7 +226,7 @@ public class MutualAuthenticationHelperTest {
         String signingAAMCertificate = homeCredentials.homeAAM.getCertificate().getCertificateString();
 
         Set<SecurityCredentials> securityCredentialsSet = new HashSet<>();
-        securityCredentialsSet.add(new SecurityCredentials(authToken.toString(), Optional.of(authenticationChallenge), Optional.of(clientCertificateString), Optional.of(signingAAMCertificate)));
+        securityCredentialsSet.add(new SecurityCredentials(authToken.toString(), Optional.of(authenticationChallenge), Optional.of(clientCertificateString), Optional.of(signingAAMCertificate), Optional.empty()));
 
         SecurityRequest securityRequest = new SecurityRequest(securityCredentialsSet, (long) 12);
         assertFalse(MutualAuthenticationHelper.isSecurityRequestVerified(securityRequest));
@@ -274,7 +273,7 @@ public class MutualAuthenticationHelperTest {
                 issuingAAMPublicKey,
                 issuingAAMPrivateKey);
 
-        AuthorizationCredentials authorizationCredentials = new AuthorizationCredentials(new Token(wrongAuthorizationToken), homeCredentials);
+        AuthorizationCredentials authorizationCredentials = new AuthorizationCredentials(new Token(wrongAuthorizationToken), homeCredentials.homeAAM, homeCredentials);
         Set<AuthorizationCredentials> wrongAuthorizationCredentialsSet = new HashSet<>();
         wrongAuthorizationCredentialsSet.add(authorizationCredentials);
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(wrongAuthorizationCredentialsSet, true);
@@ -283,7 +282,12 @@ public class MutualAuthenticationHelperTest {
     }
 
     @Test
-    public void getSecurityRequestForGuestSuccess() throws MalformedJWTException, ValidationException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+    public void getSecurityRequestForGuestSuccess() throws
+            MalformedJWTException,
+            ValidationException,
+            NoSuchAlgorithmException,
+            InvalidKeySpecException,
+            IOException {
         try {
 
             SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.guestToken);
@@ -296,7 +300,12 @@ public class MutualAuthenticationHelperTest {
     }
 
     @Test
-    public void isSecurityRequestForGuestVerifiedSuccess() throws MalformedJWTException, ValidationException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+    public void isSecurityRequestForGuestVerifiedSuccess() throws
+            MalformedJWTException,
+            ValidationException,
+            NoSuchAlgorithmException,
+            InvalidKeySpecException,
+            IOException {
         try {
 
             SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.guestToken);
