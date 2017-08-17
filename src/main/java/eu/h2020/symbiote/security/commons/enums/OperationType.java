@@ -1,6 +1,6 @@
 package eu.h2020.symbiote.security.commons.enums;
 
-public enum Operation {
+public enum OperationType {
     /**
      * creating actor
      */
