@@ -1,5 +1,7 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
+import eu.h2020.symbiote.security.commons.enums.OperationType;
+
 /**
  * Describes user registration in AAM payload.
  *
@@ -11,7 +13,9 @@ package eu.h2020.symbiote.security.communication.payloads;
 public class UserManagementRequest {
 
     private Credentials administratorCredentials = new Credentials();
+    private Credentials userCredentials = new Credentials();
     private UserDetails userDetails = new UserDetails();
+    private OperationType operationType;
 
     /**
      * used by JSON serializer
@@ -19,9 +23,12 @@ public class UserManagementRequest {
     public UserManagementRequest() { // used by JSON serializer
     }
 
-    public UserManagementRequest(Credentials administratorCredentials, UserDetails userDetails) {
+    public UserManagementRequest(Credentials administratorCredentials, Credentials userCredentials,
+                                 UserDetails userDetails, OperationType operationType) {
         this.administratorCredentials = administratorCredentials;
+        this.userCredentials = userCredentials;
         this.userDetails = userDetails;
+        this.operationType = operationType;
     }
 
     public Credentials getAdministratorCredentials() {
@@ -38,5 +45,21 @@ public class UserManagementRequest {
 
     public void setUserDetails(UserDetails userDetails) {
         this.userDetails = userDetails;
+    }
+
+    public OperationType getOperationType() {
+        return operationType;
+    }
+
+    public void setOperationType(OperationType operationType) {
+        this.operationType = operationType;
+    }
+
+    public Credentials getUserCredentials() {
+        return userCredentials;
+    }
+
+    public void setUserCredentials(Credentials userCredentials) {
+        this.userCredentials = userCredentials;
     }
 }
