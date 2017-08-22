@@ -4,7 +4,6 @@ package eu.h2020.symbiote.security.communication.payloads;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper;
 
-import java.security.PrivateKey;
 import java.util.Map;
 
 /**
@@ -25,7 +24,7 @@ public class AAM {
      * @param aamInstanceFriendlyName a label for the end user to be able to identify the login endrypoint
      * @param aamInstanceId           SymbIoTe-unique identifier (the same as the platform instance it is bound to)
      * @param aamCACertificate        CA aamCACertificate used by the AAM for its users and issued tokens
-     * @param componentCertificates   contains the certificates used by SymbIoTe components to sign the @{@link MutualAuthenticationHelper#getServiceResponse(PrivateKey, long)}
+     * @param componentCertificates   contains the certificates used by SymbIoTe components for @{@link MutualAuthenticationHelper#isServiceResponseVerified(String, Certificate)}
      */
     public AAM(
             String aamAddress,
@@ -88,7 +87,7 @@ public class AAM {
     }
 
     /**
-     * @return the certificates used by SymbIoTe components to sign the @{@link MutualAuthenticationHelper#getServiceResponse(PrivateKey, long)}
+     * @return the certificates used by SymbIoTe components for @{@link MutualAuthenticationHelper#isServiceResponseVerified(String, Certificate)}
      */
     public Map<String, Certificate> getComponentCertificates() {
         return componentCertificates;
