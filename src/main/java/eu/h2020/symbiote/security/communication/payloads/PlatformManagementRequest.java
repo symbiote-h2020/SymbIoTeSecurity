@@ -5,7 +5,6 @@ import eu.h2020.symbiote.security.commons.enums.OperationType;
 /**
  * Describes platform registration in AAM payload.
  *
- * TODO update to contain operation enum on the platform
  *
  * @author Mikołaj Dobski (PSNC)
  * @author Maksymilian Marcinowski (PSNC)
