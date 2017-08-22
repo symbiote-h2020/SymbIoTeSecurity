@@ -98,11 +98,11 @@ public class MutualAuthenticationHelper {
 
             if (attachCertificates) {
                 String clientCertificate = credentials.homeCredentials.certificate.getCertificateString();
-                String signingAAMCertificate = credentials.homeCredentials.homeAAM.getCertificate().getCertificateString();
+                String signingAAMCertificate = credentials.homeCredentials.homeAAM.getAamCACertificate().getCertificateString();
                 String foreignTokenIssuingAAMCertificate = "";
                 // FOREIGN tokens needs extra information
                 if (credentials.authorizationToken.getType().equals(Type.FOREIGN))
-                    foreignTokenIssuingAAMCertificate = credentials.tokenIssuingAAM.getCertificate().getCertificateString();
+                    foreignTokenIssuingAAMCertificate = credentials.tokenIssuingAAM.getAamCACertificate().getCertificateString();
 
                 securityCredentialsSet.add(new SecurityCredentials(
                         token,

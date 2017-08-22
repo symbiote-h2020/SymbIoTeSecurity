@@ -22,6 +22,7 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -66,7 +67,7 @@ public class MutualAuthenticationHelperTest {
         PrivateKey clientPrivateKey = (PrivateKey) ks.getKey(CLIENT_CERTIFICATE_ALIAS, CERTIFICATE_PASSWORD.toCharArray());
 
         // client home credentials
-        AAM issuingAAM = new AAM("", "", "", new Certificate(CryptoHelper.convertX509ToPEM(issuingAAMCertificate)));
+        AAM issuingAAM = new AAM("", "", "", new Certificate(CryptoHelper.convertX509ToPEM(issuingAAMCertificate)), new HashMap<>());
         HomeCredentials homeCredentials = new HomeCredentials(issuingAAM, username, clientId, new Certificate(CryptoHelper.convertX509ToPEM(clientCertificate)), clientPrivateKey);
 
         String authorizationToken = DummyTokenIssuer.buildAuthorizationToken(clientId,
@@ -206,7 +207,7 @@ public class MutualAuthenticationHelperTest {
         PrivateKey clientPrivateKey = (PrivateKey) ks.getKey(CLIENT_CERTIFICATE_ALIAS, CERTIFICATE_PASSWORD.toCharArray());
 
         // client home credentials
-        AAM issuingAAM = new AAM("", "", "", new Certificate(CryptoHelper.convertX509ToPEM(issuingAAMCertificate)));
+        AAM issuingAAM = new AAM("", "", "", new Certificate(CryptoHelper.convertX509ToPEM(issuingAAMCertificate)), new HashMap<>());
         HomeCredentials homeCredentials = new HomeCredentials(issuingAAM, username, clientId, new Certificate(CryptoHelper.convertX509ToPEM(clientCertificate)), clientPrivateKey);
 
         String authorizationToken = DummyTokenIssuer.buildAuthorizationToken(clientId,
@@ -228,7 +229,7 @@ public class MutualAuthenticationHelperTest {
         jwtBuilder.signWith(SignatureAlgorithm.ES256, homeCredentials.privateKey);
         String authenticationChallenge = jwtBuilder.compact();
         String clientCertificateString = homeCredentials.certificate.getCertificateString();
-        String signingAAMCertificate = homeCredentials.homeAAM.getCertificate().getCertificateString();
+        String signingAAMCertificate = homeCredentials.homeAAM.getAamCACertificate().getCertificateString();
 
         Set<SecurityCredentials> securityCredentialsSet = new HashSet<>();
         securityCredentialsSet.add(new SecurityCredentials(authToken.toString(), Optional.of(authenticationChallenge), Optional.of(clientCertificateString), Optional.of(signingAAMCertificate), Optional.empty()));
@@ -264,7 +265,7 @@ public class MutualAuthenticationHelperTest {
         PrivateKey clientPrivateKey = (PrivateKey) ks.getKey(CLIENT_CERTIFICATE_ALIAS, CERTIFICATE_PASSWORD.toCharArray());
 
         // client home credentials
-        AAM issuingAAM = new AAM("", "", "", new Certificate(CryptoHelper.convertX509ToPEM(issuingAAMCertificate)));
+        AAM issuingAAM = new AAM("", "", "", new Certificate(CryptoHelper.convertX509ToPEM(issuingAAMCertificate)), new HashMap<>());
         HomeCredentials homeCredentials = new HomeCredentials(issuingAAM, username, clientId, new Certificate(CryptoHelper.convertX509ToPEM(clientCertificate)), clientPrivateKey);
 
         KeyPair a = CryptoHelper.createKeyPair();
