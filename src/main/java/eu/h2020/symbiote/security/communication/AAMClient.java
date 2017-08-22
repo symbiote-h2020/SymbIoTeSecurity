@@ -85,18 +85,17 @@ public class AAMClient implements IAAMClient {
      * @return the signed certificate from the provided CSR in PEM format
      */
     @Override
-    public String revoke(RevocationRequest revocationRequest) throws InvalidArgumentsException, NotExistingUserException, ValidationException {
+    public String revoke(RevocationRequest revocationRequest) throws InvalidArgumentsException, WrongCredentialsException {
         Response response = feignClient.revoke(revocationRequest);
         switch (response.status()) {
             case 400:
-                if (response.body().toString().contains("INVALID_ARGUMENTS"))
-                    throw new InvalidArgumentsException(response.body().toString());
-                throw new NotExistingUserException(response.body().toString());
+                throw new InvalidArgumentsException(response.body().toString());
             case 401:
-                //TODO: Find a way to differentiate ValidationException from WrongCredentialsException since response's body is empty on error
-                throw new ValidationException("Could not validate - Invalid certificate / credentials");
+                throw new WrongCredentialsException();
+            default:
+                return response.body().toString();
         }
-        return response.body().toString();
+
     }
 
 

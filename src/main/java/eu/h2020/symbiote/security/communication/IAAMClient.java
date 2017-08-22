@@ -39,7 +39,7 @@ public interface IAAMClient {
      * @param revocationRequest required to revoke a certificate or token.
      * @return the signed certificate from the provided CSR in PEM format
      */
-    String revoke(RevocationRequest revocationRequest) throws InvalidArgumentsException, NotExistingUserException, ValidationException;
+    String revoke(RevocationRequest revocationRequest) throws InvalidArgumentsException, WrongCredentialsException;
 
     /**
      * @return GUEST token used to access public resources offered in SymbIoTe
