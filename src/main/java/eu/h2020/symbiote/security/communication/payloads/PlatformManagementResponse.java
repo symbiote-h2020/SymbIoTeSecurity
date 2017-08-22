@@ -1,6 +1,6 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
-import eu.h2020.symbiote.security.commons.enums.RegistrationStatus;
+import eu.h2020.symbiote.security.commons.enums.ManagementStatus;
 
 /**
  * Describes a response for platform registration sent by AAM
@@ -10,13 +10,13 @@ import eu.h2020.symbiote.security.commons.enums.RegistrationStatus;
  */
 public class PlatformManagementResponse {
     private String platformId = "";
-    private RegistrationStatus registrationStatus;
+    private ManagementStatus registrationStatus;
 
     public PlatformManagementResponse() {
         // used by serializer
     }
 
-    public PlatformManagementResponse(String registeredPlatformId, RegistrationStatus registrationStatus) {
+    public PlatformManagementResponse(String registeredPlatformId, ManagementStatus registrationStatus) {
         this.platformId = registeredPlatformId;
         this.registrationStatus = registrationStatus;
     }
@@ -32,11 +32,11 @@ public class PlatformManagementResponse {
         this.platformId = platformId;
     }
 
-    public RegistrationStatus getRegistrationStatus() {
+    public ManagementStatus getRegistrationStatus() {
         return registrationStatus;
     }
 
-    public void setRegistrationStatus(RegistrationStatus registrationStatus) {
+    public void setRegistrationStatus(ManagementStatus registrationStatus) {
         this.registrationStatus = registrationStatus;
     }
 }

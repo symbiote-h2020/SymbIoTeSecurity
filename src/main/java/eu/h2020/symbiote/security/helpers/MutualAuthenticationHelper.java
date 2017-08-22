@@ -7,6 +7,7 @@ import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
+import eu.h2020.symbiote.security.commons.jwt.JWTClaims;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -20,8 +21,11 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.*;
+
+import static java.time.temporal.ChronoField.INSTANT_SECONDS;
 
 
 /**
@@ -34,7 +38,9 @@ import java.util.*;
 public class MutualAuthenticationHelper {
 
     // TODO @Daniele by Mikołaj -> I think it should be param of the validator as SS doesn't have support for properties. It should be integrated as the exp claim timestamp which by RFC self-invalidates the challenge
-    private static final long THRESHOLD = 3600000;
+    // in seconds
+    private static final long THRESHOLD_SECONDS = 10;
+    private static SecureRandom random = new SecureRandom();
 
     /**
      * Utility class to hash a string with SHA-256
@@ -66,7 +72,10 @@ public class MutualAuthenticationHelper {
                                                      boolean attachCertificates) throws
             NoSuchAlgorithmException {
 
-        long timestamp1 = ZonedDateTime.now().toInstant().toEpochMilli();
+        ZonedDateTime timestampDate = ZonedDateTime.now();
+        long timestamp1Seconds = timestampDate.getLong(INSTANT_SECONDS) * 1000;
+        Date expiryDate = Date.from(Instant.ofEpochMilli(timestamp1Seconds + THRESHOLD_SECONDS * 1000));
+
         Iterator<AuthorizationCredentials> iteratorAC = authorizationCredentials.iterator();
         Set<SecurityCredentials> securityCredentialsSet = new HashSet<>();
 
@@ -74,32 +83,44 @@ public class MutualAuthenticationHelper {
             AuthorizationCredentials credentials = iteratorAC.next();
 
             String token = credentials.authorizationToken.toString();
-            String hexHash = hashSHA256(credentials.authorizationToken.toString() + timestamp1);
+            String hexHash = hashSHA256(credentials.authorizationToken.toString() + timestamp1Seconds);
 
             JwtBuilder jwtBuilder = Jwts.builder();
-            jwtBuilder.setId(credentials.authorizationToken.getClaims().getId()); // jti
-            jwtBuilder.setIssuer(credentials.authorizationToken.getClaims().getIssuer()); // iss
-            jwtBuilder.claim("ipk", credentials.authorizationToken.getClaims().get("spk"));
-            jwtBuilder.claim("hash", hexHash);
+            jwtBuilder.setId(String.valueOf(random.nextInt())); // random -> jti
+            jwtBuilder.setSubject(credentials.authorizationToken.getClaims().getId()); // token jti -> sub
+            jwtBuilder.setIssuer(credentials.authorizationToken.getClaims().getSubject()); // token sub -> iss
+            jwtBuilder.claim("ipk", credentials.authorizationToken.getClaims().get("spk")); // token spk -> ipk
+            jwtBuilder.claim("hash", hexHash); // SHA256(token+timestamp)
+            jwtBuilder.setIssuedAt(Date.from(timestampDate.toInstant())); // iat
+            jwtBuilder.setExpiration(expiryDate);  // exp
             jwtBuilder.signWith(SignatureAlgorithm.ES256, credentials.homeCredentials.privateKey);
             String authenticationChallenge = jwtBuilder.compact();
 
             if (attachCertificates) {
                 String clientCertificate = credentials.homeCredentials.certificate.getCertificateString();
                 String signingAAMCertificate = credentials.homeCredentials.homeAAM.getCertificate().getCertificateString();
-                String tokenIssuingAAMCertificate = credentials.tokenIssuingAAM.getCertificate().getCertificateString();
+                String foreignTokenIssuingAAMCertificate = "";
+                // FOREIGN tokens needs extra information
+                if (credentials.authorizationToken.getType().equals(Type.FOREIGN))
+                    foreignTokenIssuingAAMCertificate = credentials.tokenIssuingAAM.getCertificate().getCertificateString();
+
                 securityCredentialsSet.add(new SecurityCredentials(
                         token,
                         Optional.of(authenticationChallenge),
                         Optional.of(clientCertificate),
                         Optional.of(signingAAMCertificate),
-                        Optional.of(tokenIssuingAAMCertificate)));
+                        Optional.of(foreignTokenIssuingAAMCertificate)));
             } else {
-                securityCredentialsSet.add(new SecurityCredentials(token));
+                securityCredentialsSet.add(new SecurityCredentials(
+                        token,
+                        Optional.of(authenticationChallenge),
+                        Optional.empty(),
+                        Optional.empty(),
+                        Optional.empty()));
             }
         }
 
-        return new SecurityRequest(securityCredentialsSet, timestamp1);
+        return new SecurityRequest(securityCredentialsSet, timestamp1Seconds);
     }
 
     /**
@@ -107,7 +128,6 @@ public class MutualAuthenticationHelper {
      *
      * @param guestToken acquired from whichever symbIoTe AAM
      * @return the required payload for client's authentication and authorization
-     * @throws NoSuchAlgorithmException
      */
     public static SecurityRequest getSecurityRequest(Token guestToken) {
 
@@ -149,26 +169,52 @@ public class MutualAuthenticationHelper {
             SecurityCredentials securityCredentialsSetElement = iteratorSCS.next();
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
 
-            String applicationToken = securityCredentialsSetElement.getToken();
+            // tokens' sanity check
+            ValidationStatus authorizationTokenValidationStatus = JWTEngine.validateTokenString(securityCredentialsSetElement.getToken());
+            ValidationStatus challengeValidationStatus = JWTEngine.validateTokenString(securityCredentialsSetElement.getAuthenticationChallenge());
+            if (authorizationTokenValidationStatus != ValidationStatus.VALID || challengeValidationStatus != ValidationStatus.VALID)
+                return false;
 
-            X509EncodedKeySpec keySpecSpk = new X509EncodedKeySpec(Base64.getDecoder().decode(JWTEngine.getClaimsFromToken(applicationToken).getSpk()));
+            // claims extraction
+            JWTClaims claimsFromAuthorizationToken = JWTEngine.getClaimsFromToken(securityCredentialsSetElement.getToken());
+            JWTClaims claimsFromChallengeToken = JWTEngine.getClaimsFromToken(securityCredentialsSetElement.getAuthenticationChallenge());
+
+            X509EncodedKeySpec keySpecSpk = new X509EncodedKeySpec(Base64.getDecoder().decode(claimsFromAuthorizationToken.getSpk()));
             PublicKey applicationPublicKey = keyFactory.generatePublic(keySpecSpk);
 
             String challengeJWS = securityCredentialsSetElement.getAuthenticationChallenge();
             String challengeHash = Jwts.parser().setSigningKey(applicationPublicKey).parseClaimsJws(challengeJWS).getBody().get("hash").toString();
             String calculatedHash = hashSHA256(securityCredentialsSetElement.getToken() + timestamp1.toString());
             Long deltaT = timestamp2 - timestamp1;
+            Long thresholdMilis = THRESHOLD_SECONDS * 1000;
 
-            // check challenge is ok
-            if (!Objects.equals(calculatedHash, challengeHash) || (deltaT >= THRESHOLD)) {
+            // check that challengeJWS matches the authorization token
+
+            // token jti -> sub
+            if (!claimsFromAuthorizationToken.getJti().equals(claimsFromChallengeToken.getSub()))
+                return false;
+            // token sub -> iss
+            if (!claimsFromAuthorizationToken.getSub().equals(claimsFromChallengeToken.getIss()))
+                return false;
+            // timestamp1 in iat
+            if (!claimsFromChallengeToken.getIat().equals(timestamp1))
+                return false;
+            // threshold included in exp
+            if (!claimsFromChallengeToken.getExp().equals(timestamp1 + thresholdMilis))
+                return false;
+            // token spk -> ipk
+            if (!claimsFromAuthorizationToken.getSpk().equals(claimsFromChallengeToken.getIpk()))
+                return false;
+
+            // check challenge is ok SHA256(token+timestamp)
+            if (!Objects.equals(calculatedHash, challengeHash) || (deltaT >= thresholdMilis)) {
                 return false;
             }
 
-            X509EncodedKeySpec keySpecIpk = new X509EncodedKeySpec(Base64.getDecoder().decode(JWTEngine.getClaimsFromToken(applicationToken).getIpk()));
-            PublicKey applicationTokenIssuerPublicKey = keyFactory.generatePublic(keySpecIpk);
-
-            // check token is ok
-            if (JWTEngine.validateTokenString(applicationToken, applicationTokenIssuerPublicKey) != ValidationStatus.VALID) {
+            // signature match - token SPK -> challenge IPK & sign
+            X509EncodedKeySpec keySpecIpk = new X509EncodedKeySpec(Base64.getDecoder().decode(claimsFromAuthorizationToken.getSpk()));
+            PublicKey challengeIssuerPublicKey = keyFactory.generatePublic(keySpecIpk);
+            if (JWTEngine.validateTokenString(challengeJWS, challengeIssuerPublicKey) != ValidationStatus.VALID) {
                 return false;
             }
         }
@@ -192,7 +238,7 @@ public class MutualAuthenticationHelper {
 
         JwtBuilder jwtBuilder = Jwts.builder();
         jwtBuilder.claim("hash", hashedTimestamp2);
-        jwtBuilder.claim("timestamp", Long.toString(timestamp2));// TODO @Daniele: why not in the standard iat claim?
+        jwtBuilder.claim("timestamp", Long.toString(timestamp2));
         jwtBuilder.signWith(SignatureAlgorithm.ES256, servicePrivateKey);
 
         return jwtBuilder.compact();
@@ -219,7 +265,7 @@ public class MutualAuthenticationHelper {
         String calculatedHash = hashSHA256(timestamp2.toString());
         Long deltaT = timestamp3 - timestamp2;
 
-        return Objects.equals(calculatedHash, hashedTimestamp2) && deltaT < THRESHOLD;
+        return Objects.equals(calculatedHash, hashedTimestamp2) && deltaT < THRESHOLD_SECONDS * 1000;
     }
 
 }

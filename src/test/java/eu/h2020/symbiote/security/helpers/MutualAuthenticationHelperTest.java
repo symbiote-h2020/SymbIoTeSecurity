@@ -13,8 +13,6 @@ import eu.h2020.symbiote.security.utils.DummyTokenIssuer;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,10 +43,9 @@ public class MutualAuthenticationHelperTest {
     private static final String CERTIFICATE_PASSWORD = "1234567";
     private static final String SERVICE_CERTIFICATE_ALIAS = "platform-1-1-c1"; // let's suppose it
     private static final String SERVICE_CERTIFICATE_LOCATION = "./src/test/resources/platform_1.p12"; // let's suppose it
-    private static Log log = LogFactory.getLog(MutualAuthenticationHelperTest.class);
     private final String username = "testusername";
     private final String clientId = "testclientid";
-    private HashSet<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<AuthorizationCredentials>();
+    private HashSet<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<>();
     private Token guestToken;
 
     @Before
@@ -105,13 +102,26 @@ public class MutualAuthenticationHelperTest {
             UnrecoverableKeyException,
             ValidationException {
 
-        try {
-            SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
-            SecurityRequest securityRequestCertsAttached = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, true);
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            throw e;
-        }
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
+        // check online request
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+        SecurityCredentials securityCredentials = securityRequest.getSecurityCredentials().iterator().next();
+        assertFalse(securityCredentials.getAuthenticationChallenge().isEmpty());
+        assertFalse(securityCredentials.getToken().isEmpty());
+        assertTrue(securityCredentials.getClientCertificate().isEmpty());
+        assertTrue(securityCredentials.getClientCertificateSigningAAMCertificate().isEmpty());
+        assertTrue(securityCredentials.getForeignTokenIssuingAAMCertificate().isEmpty());
+        SecurityRequest securityRequestCertsAttached = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, true);
+
+        // check offline request for Home Token
+        assertFalse(securityRequestCertsAttached.getSecurityCredentials().isEmpty());
+        securityCredentials = securityRequestCertsAttached.getSecurityCredentials().iterator().next();
+        assertFalse(securityCredentials.getAuthenticationChallenge().isEmpty());
+        assertFalse(securityCredentials.getToken().isEmpty());
+        assertFalse(securityCredentials.getClientCertificate().isEmpty());
+        assertFalse(securityCredentials.getClientCertificateSigningAAMCertificate().isEmpty());
+        // empty for home token
+        assertTrue(securityCredentials.getForeignTokenIssuingAAMCertificate().isEmpty());
     }
 
     @Test
@@ -128,7 +138,6 @@ public class MutualAuthenticationHelperTest {
             InvalidKeySpecException {
 
         SecurityRequest securityRequestCertsAttached = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, true);
-
         assertTrue(MutualAuthenticationHelper.isSecurityRequestVerified(securityRequestCertsAttached));
     }
 
@@ -141,18 +150,14 @@ public class MutualAuthenticationHelperTest {
             KeyStoreException,
             IOException {
 
-        try {
-            KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
-            ks.load(new FileInputStream(SERVICE_CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
-            PrivateKey servicePrivateKey = (PrivateKey) ks.getKey(SERVICE_CERTIFICATE_ALIAS, CERTIFICATE_PASSWORD.toCharArray());
-            SecurityRequest securityRequestCertsAttached = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, true);
+        KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
+        ks.load(new FileInputStream(SERVICE_CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
+        PrivateKey servicePrivateKey = (PrivateKey) ks.getKey(SERVICE_CERTIFICATE_ALIAS, CERTIFICATE_PASSWORD.toCharArray());
+        SecurityRequest securityRequestCertsAttached = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, true);
 
-            MutualAuthenticationHelper.getServiceResponse(servicePrivateKey, securityRequestCertsAttached.getTimestamp());
+        String serviceResponse = MutualAuthenticationHelper.getServiceResponse(servicePrivateKey, securityRequestCertsAttached.getTimestamp());
+        assertFalse(serviceResponse.isEmpty());
 
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            throw e;
-        }
     }
 
     @Test
@@ -174,7 +179,7 @@ public class MutualAuthenticationHelperTest {
         assertTrue(MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, new Certificate(CryptoHelper.convertX509ToPEM(serviceCertificate))));
     }
 
-    @Test
+    @Test(expected = ValidationException.class)
     public void isSecurityRequestVerifiedFailsWrongAuthenticationChallenge() throws
             InvalidAlgorithmParameterException,
             NoSuchAlgorithmException,
@@ -288,15 +293,9 @@ public class MutualAuthenticationHelperTest {
             NoSuchAlgorithmException,
             InvalidKeySpecException,
             IOException {
-        try {
 
-            SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.guestToken);
-            assertEquals(this.guestToken.toString(), securityRequest.getSecurityCredentials().iterator().next().getToken());
-
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            throw e;
-        }
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.guestToken);
+        assertEquals(this.guestToken.toString(), securityRequest.getSecurityCredentials().iterator().next().getToken());
     }
 
     @Test
@@ -306,16 +305,9 @@ public class MutualAuthenticationHelperTest {
             NoSuchAlgorithmException,
             InvalidKeySpecException,
             IOException {
-        try {
 
-            SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.guestToken);
-            assertEquals(this.guestToken.toString(), securityRequest.getSecurityCredentials().iterator().next().getToken());
-            assertTrue(MutualAuthenticationHelper.isSecurityRequestVerified(securityRequest));
-
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            throw e;
-        }
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.guestToken);
+        assertEquals(this.guestToken.toString(), securityRequest.getSecurityCredentials().iterator().next().getToken());
+        assertTrue(MutualAuthenticationHelper.isSecurityRequestVerified(securityRequest));
     }
-
 }
