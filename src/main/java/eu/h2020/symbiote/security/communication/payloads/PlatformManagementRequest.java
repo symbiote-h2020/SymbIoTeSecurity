@@ -1,5 +1,7 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
+import eu.h2020.symbiote.security.commons.enums.OperationType;
+
 /**
  * Describes platform registration in AAM payload.
  *
@@ -14,7 +16,7 @@ public class PlatformManagementRequest {
     private String platformInterworkingInterfaceAddress = "";
     private String platformInstanceId = "";
     private String platformInstanceFriendlyName;
-
+    private OperationType operationType;
 
     public PlatformManagementRequest() {
         // required for serialization
@@ -31,11 +33,13 @@ public class PlatformManagementRequest {
     public PlatformManagementRequest(Credentials AAMOwnerCredentials,
                                      Credentials platformOwnerCredentials,
                                      String platformInterworkingInterfaceAddress,
-                                     String platformInstanceFriendlyName) {
+                                     String platformInstanceFriendlyName,
+                                     OperationType operationType) {
         this.AAMOwnerCredentials = AAMOwnerCredentials;
         this.platformOwnerCredentials = platformOwnerCredentials;
         this.platformInterworkingInterfaceAddress = platformInterworkingInterfaceAddress;
         this.platformInstanceFriendlyName = platformInstanceFriendlyName;
+        this.operationType = operationType;
     }
 
     /**
@@ -51,12 +55,14 @@ public class PlatformManagementRequest {
                                      Credentials platformOwnerCredentials,
                                      String platformInterworkingInterfaceAddress,
                                      String platformInstanceFriendlyName,
-                                     String preferredPlatformInstanceID) {
+                                     String preferredPlatformInstanceID,
+                                     OperationType operationType) {
         this.AAMOwnerCredentials = AAMOwnerCredentials;
         this.platformInstanceFriendlyName = platformInstanceFriendlyName;
         this.platformInstanceId = preferredPlatformInstanceID;
         this.platformInterworkingInterfaceAddress = platformInterworkingInterfaceAddress;
         this.platformOwnerCredentials = platformOwnerCredentials;
+        this.operationType = operationType;
     }
 
     public Credentials getPlatformOwnerCredentials() {
@@ -97,5 +103,13 @@ public class PlatformManagementRequest {
 
     public void setPlatformInstanceFriendlyName(String platformInstanceFriendlyName) {
         this.platformInstanceFriendlyName = platformInstanceFriendlyName;
+    }
+
+    public OperationType getOperationType() {
+        return operationType;
+    }
+
+    public void setOperationType(OperationType operationType) {
+        this.operationType = operationType;
     }
 }

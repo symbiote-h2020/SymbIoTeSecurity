@@ -39,6 +39,7 @@ public class SecurityConstants {
     public static final String AAM_GET_FOREIGN_TOKEN = "/get_foreign_token";
     public static final String AAM_VALIDATE = "/validate";
     public static final String AAM_MANAGE_USERS = "/manage_users";
+    public static final String AAM_MANAGE_PLATFORMS = "/manage_platforms";
 
     // errors
     public static final String ERR_MISSING_ARGUMENTS = "ERR_MISSING_ARGUMENTS";
