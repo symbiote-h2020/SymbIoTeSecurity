@@ -2,9 +2,9 @@ package eu.h2020.symbiote.security.accesspolicies;
 
 import eu.h2020.symbiote.security.commons.Token;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * SymbIoTe Access Policy that needs to be satisfied by a single Token
@@ -26,7 +26,7 @@ public class SingleTokenAccessPolicy implements IAccessPolicy {
 
 
     @Override
-    public boolean isSatisfiedWith(List<Token> authorizationTokens) {
+    public boolean isSatisfiedWith(Set<Token> authorizationTokens) {
         // trying to find token satisfying this policy
         for (Token token : authorizationTokens) {
             if (isSatisfiedWith(token))

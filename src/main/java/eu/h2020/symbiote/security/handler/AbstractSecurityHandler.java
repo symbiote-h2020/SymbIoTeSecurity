@@ -71,6 +71,10 @@ public abstract class AbstractSecurityHandler implements ISecurityHandler {
                 credentials.homeCredentials.homeToken = null;
             credentials.foreignTokens.clear();
         }
+    }
 
+    @Override
+    public Map<AAM, BoundCredentials> getAcquiredCredentials() throws SecurityHandlerException {
+        return credentialsWallet;
     }
 }

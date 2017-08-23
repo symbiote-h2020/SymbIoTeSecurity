@@ -2,7 +2,7 @@ package eu.h2020.symbiote.security.accesspolicies;
 
 import eu.h2020.symbiote.security.commons.Token;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Interface that all access policies in SymbIoTe policies need to implement
@@ -15,5 +15,5 @@ public interface IAccessPolicy {
      * @param authorizationTokens that might satisfy the policy
      * @return true if the given tokens satisfy the policy
      */
-    boolean isSatisfiedWith(List<Token> authorizationTokens);
+    boolean isSatisfiedWith(Set<Token> authorizationTokens);
 }

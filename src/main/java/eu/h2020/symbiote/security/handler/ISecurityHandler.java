@@ -2,6 +2,7 @@ package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.Token;
+import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
@@ -12,12 +13,13 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Security Handler interface proposed for Release 3 of SymbIoTe.
+ * End user Security Handler interface proposed for Release 3 of SymbIoTe.
  *
  * @author Daniele Caldarola (CNIT)
  * @author Mikołaj Dobski (PSNC)
  * @author Nemanja Ignjatov (UNIVIE)
  * @author Pietro Tedeschi (CNIT)
+ * @author Jose Antonio Sanchez Murillo (Atos)
  */
 public interface ISecurityHandler {
 
@@ -27,6 +29,12 @@ public interface ISecurityHandler {
      * @throws SecurityHandlerException on operation error
      */
     Map<String, AAM> getAvailableAAMs() throws SecurityHandlerException;
+
+    /**
+     * @return map of all credentials available to use in authentication and authorization operations
+     * @throws SecurityHandlerException on error
+     */
+    Map<AAM, BoundCredentials> getAcquiredCredentials() throws SecurityHandlerException;
 
     /**
      * Retrieves your home token from the given AAM you have account in.
@@ -79,13 +87,12 @@ public interface ISecurityHandler {
             throws SecurityHandlerException;
 
     /**
-     * @param validationAuthority where the token should be validated (ideally it should be the token issuer authority)
-     * @param token               to be validated
-     * @param clientCertificate   if the operation is in an intranet environment, then the user needs to provide the
-     *                            clientCertificate matching the one from the validated token
-     * @param aamCertificate      if the operation is in an intranet environment, then the user needs to provide the
-     *                            aamCertificate matching the one that was used to sign the client certificate
+     * @param validationAuthority                    where the token should be validated (ideally it should be the token issuer authority)
+     * @param token                                  that is to be validated
+     * @param clientCertificate                      in PEM with key matching the SPK claim in the provided token in 'offline' (intranet) scenarios
+     * @param clientCertificateSigningAAMCertificate in PEM being the AAM that signed the clientCertificate  in 'offline' (intranet) scenarios
+     * @param foreignTokenIssuingAAMCertificate      in PEM with key matching the IPK claim in the provided FOREIGN token in 'offline' (intranet) scenarios
      * @return validation status of the given token
      */
-    ValidationStatus validate(AAM validationAuthority, String token, Optional<Certificate> clientCertificate, Optional<Certificate> aamCertificate);
+    ValidationStatus validate(AAM validationAuthority, String token, Optional<String> clientCertificate, Optional<String> clientCertificateSigningAAMCertificate, Optional<String> foreignTokenIssuingAAMCertificate);
 }

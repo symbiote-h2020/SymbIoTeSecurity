@@ -18,7 +18,6 @@ public class SecurityConstants {
     // AAM GLOBAL
     public static final String AAM_CORE_AAM_FRIENDLY_NAME = "SymbIoTe Core AAM";
     public static final String AAM_CORE_AAM_INSTANCE_ID = "SymbIoTe_Core_AAM";
-    public static final String COMPONENT_ID = "SymbIoTe_Component";
 
     // AAM AMQP
     public static final String AAM_EXCHANGE_NAME = "symbIoTe.AuthenticationAuthorizationManager";
@@ -43,11 +42,7 @@ public class SecurityConstants {
     public static final String AAM_REVOKE = "/revoke";
 
     // errors
-    public static final String ERR_MISSING_ARGUMENTS = "ERR_MISSING_ARGUMENTS";
-    public static final String ERR_TOKEN_EXPIRED = "TOKEN_EXPIRED";
     public static final String ERR_WRONG_CREDENTIALS = "ERR_WRONG_CREDENTIALS";
-    public static final String ERR_TOKEN_WRONG_ISSUER = "TOKEN_WRONG_ISSUER";
-    public static final String ERROR_WRONG_TOKEN = "ERR_WRONG_TOKEN";
 
     // tokens
     public static final String TOKEN_HEADER_NAME = "X-Auth-Token";
