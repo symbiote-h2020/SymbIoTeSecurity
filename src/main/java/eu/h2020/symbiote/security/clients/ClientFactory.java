@@ -1,20 +1,14 @@
 package eu.h2020.symbiote.security.clients;
 
-import feign.Feign;
-import feign.jackson.JacksonDecoder;
-import feign.jackson.JacksonEncoder;
+import eu.h2020.symbiote.security.communication.AAMClient;
 
 /**
- * use @{@link eu.h2020.symbiote.security.communication.RESTAAMClient} instead of this one
+ * Factory class to allow easy testing
  */
-@Deprecated
 public class ClientFactory {
 
     public static AAMClient getAAMClient(String baseUrl) {
-
-        return Feign.builder().encoder(new JacksonEncoder()).decoder(new JacksonDecoder())
-                .target(AAMClient.class, baseUrl);
-
+        return new AAMClient(baseUrl);
     }
 
 }

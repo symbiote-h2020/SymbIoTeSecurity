@@ -9,7 +9,6 @@ import eu.h2020.symbiote.security.communication.payloads.AAM;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Security Handler interface proposed for Release 3 of SymbIoTe.
@@ -53,7 +52,7 @@ public interface ISecurityHandler {
      * @param aam Authentication and Authorization Manager to request guest token from
      * @return guest token that allows access to all public resources in symbIoTe
      */
-    Token loginAsGuest(AAM aam) throws ValidationException;
+    Token loginAsGuest(AAM aam) throws ValidationException, SecurityHandlerException;
 
     /**
      * Removes all the acquired tokens from memory
@@ -82,11 +81,7 @@ public interface ISecurityHandler {
      *
      * @param validationAuthority where the token should be validated (ideally it should be the token issuer authority)
      * @param token               to be validated
-     * @param clientCertificate   if the operation is in an intranet environment, then the user needs to provide the
-     *                            clientCertificate matching the one from the validated token
-     * @param aamCertificate      if the operation is in an intranet environment, then the user needs to provide the
-     *                            aamCertificate matching the one that was used to sign the client certificate
      * @return validation status of the given token
      */
-    ValidationStatus validate(AAM validationAuthority, String token, Optional<Certificate> clientCertificate, Optional<Certificate> aamCertificate);
+    ValidationStatus validate(AAM validationAuthority, String token);
 }

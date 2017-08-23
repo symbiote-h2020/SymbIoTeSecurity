@@ -7,23 +7,39 @@ import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.JWTCreationException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.NotExistingUserException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
 import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
 import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -34,9 +50,10 @@ public class SecurityHandler implements ISecurityHandler {
   
   private static final Log logger = LogFactory.getLog(SecurityHandler.class);
   
-
+  
   private final String keystorePath;
   private final String keystorePassword;
+  private final String homeAAMAddress;
   
   //In memory credentials wallet by Home AAM id -> Client ID -> User ID -> Credentials
   private Map<String, BoundCredentials> credentialsWallet =
@@ -45,8 +62,8 @@ public class SecurityHandler implements ISecurityHandler {
   //Associate tokens with credentials
   private Map<String, BoundCredentials> tokenCredentials = new HashMap<>();
   
-  private boolean isOnline;
   
+  private boolean isOnline;
   
   
   /**
@@ -58,7 +75,8 @@ public class SecurityHandler implements ISecurityHandler {
    */
   public SecurityHandler(String keystorePath,
                          String keystorePassword,
-                         boolean isOnline)
+                         boolean isOnline,
+                         String homeAAMAddress)
       throws SecurityHandlerException {
     // enabling support for elliptic curve certificates
     ECDSAHelper.enableECDSAProvider();
@@ -67,7 +85,8 @@ public class SecurityHandler implements ISecurityHandler {
     this.keystorePath = keystorePath;
     this.keystorePassword = keystorePassword;
     this.isOnline = isOnline;
-  
+    this.homeAAMAddress = homeAAMAddress;
+    
     try {
       buildCredentialsWallet(isOnline);
     } catch (Exception e) {
@@ -77,20 +96,29 @@ public class SecurityHandler implements ISecurityHandler {
   
   
   public Map<String, AAM> getAvailableAAMs(AAM homeAAM) throws SecurityHandlerException {
-    AvailableAAMsCollection response = ClientFactory.getAAMClient(homeAAM.getAamAddress()).getAvailableAAMs();
+    AvailableAAMsCollection response = ClientFactory.getAAMClient(homeAAM.getAamAddress())
+                                           .getAvailableAAMs();
     return response.getAvailableAAMs();
   }
   
   public Token login(AAM homeAAMId) throws SecurityHandlerException, ValidationException {
-      BoundCredentials credentials = credentialsWallet.get(homeAAMId.getAamInstanceId());
+    BoundCredentials credentials = credentialsWallet.get(homeAAMId.getAamInstanceId());
     
     if (credentials != null && credentials.homeCredentials != null &&
             credentials.homeCredentials.privateKey != null) {
-      String homeToken = ClientFactory.getAAMClient(homeAAMId.getAamAddress()).getHomeToken(
-          CryptoHelper.buildHomeTokenAcquisitionRequest(credentials.homeCredentials));
+      try {
+        String homeToken = ClientFactory.getAAMClient(homeAAMId.getAamAddress()).getHomeToken(
+            CryptoHelper.buildHomeTokenAcquisitionRequest(credentials.homeCredentials));
         credentials.homeCredentials.homeToken = new Token(homeToken);
-      tokenCredentials.put(homeToken, credentials);
+        tokenCredentials.put(homeToken, credentials);
         return credentials.homeCredentials.homeToken = new Token(homeToken);
+      } catch (WrongCredentialsException e) {
+        throw new SecurityHandlerException("Wrong credentials provided for log in", e);
+      } catch (JWTCreationException e) {
+        throw new SecurityHandlerException("Error creating log in token", e);
+      } catch (MalformedJWTException e) {
+        throw new SecurityHandlerException("Malformed token sent", e);
+      }
     } else {
       throw new SecurityHandlerException("Can't find certificate for AAM " + homeAAMId.getAamInstanceId());
     }
@@ -98,7 +126,7 @@ public class SecurityHandler implements ISecurityHandler {
   
   public Map<AAM, Token> login(List<AAM> foreignAAMs, String homeToken)
       throws SecurityHandlerException {
-  
+    
     BoundCredentials credentials = tokenCredentials.get(homeToken);
     if (credentials != null && credentials.homeCredentials != null
             && credentials.homeCredentials.certificate != null) {
@@ -106,9 +134,14 @@ public class SecurityHandler implements ISecurityHandler {
       String certificateStr = credentials.homeCredentials.certificate.getCertificateString();
       Map<AAM, Token> result = foreignAAMs.stream().collect(Collectors.toMap(aam -> aam, aam -> {
         try {
-          return new Token(ClientFactory.getAAMClient(aam.getAamAddress()).getForeignToken(homeToken, certificateStr));
+          return new Token(ClientFactory.getAAMClient(aam.getAamAddress()).getForeignToken(homeToken,
+              Optional.ofNullable(certificateStr),
+              Optional.ofNullable(credentials.homeCredentials.homeAAM.getCertificate().getCertificateString())));
         } catch (ValidationException e) {
-          logger.error("Invalid token returned for AAM " + aam.getAamInstanceId());
+          logger.error("Invalid token returned for AAM " + aam.getAamInstanceId(), e);
+          return null;
+        } catch (JWTCreationException e) {
+          logger.error("Error creating log in token", e);
           return null;
         }
       }));
@@ -122,80 +155,118 @@ public class SecurityHandler implements ISecurityHandler {
     
   }
   
-  public Token loginAsGuest(AAM aam) throws ValidationException {
-    return new Token(ClientFactory.getAAMClient(aam.getAamAddress()).getGuestToken());
+  public Token loginAsGuest(AAM aam) throws ValidationException, SecurityHandlerException {
+    try {
+      return new Token(ClientFactory.getAAMClient(aam.getAamAddress()).getGuestToken());
+    } catch (JWTCreationException e) {
+      throw new SecurityHandlerException("Error creating log in token", e);
+    }
   }
-
-    private static KeyStore getKeystore(String path, String password) throws
-            KeyStoreException,
-            IOException,
-            CertificateException,
-            NoSuchAlgorithmException {
-        KeyStore trustStore = KeyStore.getInstance("JKS");
-        try (
-                FileInputStream fIn = new FileInputStream(path)) {
-            trustStore.load(fIn, password.toCharArray());
+  
+  private static KeyStore getKeystore(String path, String password) throws
+      KeyStoreException,
+          IOException,
+          CertificateException,
+          NoSuchAlgorithmException {
+    KeyStore trustStore = KeyStore.getInstance("JKS");
+    try (
+            FileInputStream fIn = new FileInputStream(path)) {
+      trustStore.load(fIn, password.toCharArray());
+    }
+    return trustStore;
+  }
+  
+  public ValidationStatus validate(AAM validationAuthority, String token) {
+    
+    //Check if it's a home token
+    final BoundCredentials[] tokenOwner = {tokenCredentials.get(token)};
+    final AAM[] issuingAAM = {null};
+    if (tokenOwner[0] == null) {
+      // It might be a foreing token. We'll have to iterate
+      tokenCredentials.values().stream().filter(credentials -> {
+        Map.Entry<AAM, Token> found = credentials.foreignTokens.entrySet().stream()
+                        .filter(entry -> entry.getValue().equals(token)).findFirst().orElse(null);
+        if (found != null) {
+          tokenOwner[0] = credentials;
+          issuingAAM[0] = found.getKey();
+          return true;
+        } else {
+          return false;
         }
-        return trustStore;
+      }).findFirst().orElse(null);
+    } else {
+      issuingAAM[0] = tokenOwner[0].homeCredentials.homeAAM;
     }
-
-    public ValidationStatus validate(AAM validationAuthority, String token, Optional<Certificate> clientCertificate, Optional<Certificate> aamCertificate) {
+    
+    String clientCertificate = (tokenOwner[0] != null)?
+                                   tokenOwner[0].homeCredentials.certificate.getCertificateString():
+                                   null;
+    String clientSigningCertificate = (tokenOwner[0] != null)?
+                                          tokenOwner[0].homeCredentials.homeAAM.getCertificate().getCertificateString()
+                                          :null;
+    String foreingTokenCertificate = (issuingAAM[0] != null)?
+                                         issuingAAM[0].getCertificate().getCertificateString()
+                                         :null;
+  
+  
     return ClientFactory.getAAMClient(validationAuthority.getAamAddress()).validate(token,
-            clientCertificate.orElse(new Certificate()).getCertificateString());
-    }
-
-    private void cacheCertificate(HomeCredentials credentials) {
-
-        BoundCredentials bound = new BoundCredentials(credentials.homeAAM);
-        bound.homeCredentials = credentials;
-
-        credentialsWallet.put(credentials.homeAAM.getAamInstanceId(), bound);
-    }
-
-    @Override
-    public void clearCachedTokens() {
-        tokenCredentials = new HashMap<>();
-        credentialsWallet.values().forEach(credential -> {
-            credential.foreignTokens = new HashMap<>();
-            credential.homeCredentials.homeToken = null;
-        });
+        Optional.ofNullable(clientCertificate),
+        Optional.ofNullable(clientSigningCertificate),
+        Optional.ofNullable(foreingTokenCertificate));
+  }
+  
+  private void cacheCertificate(HomeCredentials credentials) {
+    
+    BoundCredentials bound = new BoundCredentials(credentials);
+    bound.homeCredentials = credentials;
+    
+    credentialsWallet.put(credentials.homeAAM.getAamInstanceId(), bound);
+  }
+  
+  @Override
+  public void clearCachedTokens() {
+    tokenCredentials = new HashMap<>();
+    credentialsWallet.values().forEach(credential -> {
+      credential.foreignTokens = new HashMap<>();
+      credential.homeCredentials.homeToken = null;
+    });
   }
   
   public Certificate getCertificate(AAM homeAAM, String username, String password,
                                     String clientId)
       throws SecurityHandlerException {
-
-
-      try {
+    
+    
+    try {
       KeyPair pair = CryptoHelper.createKeyPair();
-
+      
       CertificateRequest request = new CertificateRequest();
       request.setUsername(username);
       request.setPassword(password);
       request.setClientId(clientId);
-
+      
       request.setClientCSRinPEMFormat(CryptoHelper.buildCertificateSigningRequestPEM(
           homeAAM.getCertificate().getX509(), username, clientId, pair));
-
-          String certificateValue = ClientFactory.getAAMClient(homeAAM.getAamAddress())
+      
+      String certificateValue = ClientFactory.getAAMClient(homeAAM.getAamAddress())
                                     .getClientCertificate(request);
-
-          Certificate certificate = new Certificate();
+      
+      Certificate certificate = new Certificate();
       certificate.setCertificateString(certificateValue);
-
-          HomeCredentials credentials = new HomeCredentials(homeAAM, username, clientId, certificate,
+      
+      HomeCredentials credentials = new HomeCredentials(homeAAM, username, clientId, certificate,
                                                            pair.getPrivate());
-
-
-          if (saveCertificate(credentials)) {
+      
+      
+      if (saveCertificate(credentials)) {
         cacheCertificate(credentials);
       } else {
         throw new SecurityHandlerException("Error saving certificate in keystore");
       }
-
-          return certificate;
-
-      } catch (CertificateException e) {
+      
+      return certificate;
+      
+    } catch (CertificateException e) {
       throw new SecurityHandlerException("Error getting AAM certificate", e);
     } catch (IOException e) {
       throw new SecurityHandlerException("Error signing certificate request", e);
@@ -205,12 +276,18 @@ public class SecurityHandler implements ISecurityHandler {
       throw new SecurityHandlerException("Error generating key pair", e);
     } catch (InvalidAlgorithmParameterException e) {
       throw new SecurityHandlerException("Error generating key pair", e);
-      } catch (KeyStoreException e) {
-          throw new SecurityHandlerException("Error saving certificate in keystore", e);
-      } catch (InvalidArgumentsException e) {
-          throw new SecurityHandlerException(e.getMessage(), e);
-      }
-
+    } catch (KeyStoreException e) {
+      throw new SecurityHandlerException("Error saving certificate in keystore", e);
+    } catch (InvalidArgumentsException e) {
+      throw new SecurityHandlerException(e.getMessage(), e);
+    } catch (WrongCredentialsException e) {
+      throw new SecurityHandlerException(e.getMessage(), e);
+    } catch (ValidationException e) {
+      throw new SecurityHandlerException(e.getMessage(), e);
+    } catch (NotExistingUserException e) {
+      throw new SecurityHandlerException(e.getMessage(), e);
+    }
+    
   }
   
   private KeyStore getKeystore() throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
@@ -219,17 +296,20 @@ public class SecurityHandler implements ISecurityHandler {
   
   /**
    * Read all certificates in the keystore and populate the credentialsWallet
-   * @param isOnline
-   * @throws SecurityHandlerException
    */
   private void buildCredentialsWallet(boolean isOnline) throws SecurityHandlerException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, UnrecoverableEntryException {
     
     KeyStore trustStore = getKeystore();
-  
+    
+    AAM homeAAM = new AAM();
+    homeAAM.setAamAddress(homeAAMAddress);
+    
+    Map<String, AAM> aamList = getAvailableAAMs(homeAAM);
+    
     Enumeration<String> aliases = trustStore.aliases();
     while (aliases.hasMoreElements()) {
       String alias = aliases.nextElement();
-  
+      
       PrivateKey pvKey = (PrivateKey) trustStore.getKey(alias, keystorePassword.toCharArray());
       X509Certificate cert = (X509Certificate) trustStore.getCertificate(alias);
       
@@ -240,36 +320,35 @@ public class SecurityHandler implements ISecurityHandler {
           String user = elements[0];
           String client = elements[1];
           String aamId = elements[2];
+          
+          AAM aam = aamList.get(aamId);
+          
+          if (aam != null) {
+            Certificate certificate = new Certificate();
+            certificate.setCertificateString(CryptoHelper.convertX509ToPEM(cert));
   
-          AAM aam = new AAM();
-          aam.setAamInstanceId(aamId);
-          
-          BoundCredentials boundCredentials = new BoundCredentials(aam);
-          
-          Certificate certificate = new Certificate();
-          certificate.setCertificateString(CryptoHelper.convertX509ToPEM(cert));
-          
-          boundCredentials.homeCredentials = new HomeCredentials(aam, user, client, certificate, pvKey);
-          
-          
-          credentialsWallet.put(aamId, boundCredentials);
+            BoundCredentials boundCredentials =
+                new BoundCredentials(new HomeCredentials(aam, user, client, certificate, pvKey));
+  
+            credentialsWallet.put(aamId, boundCredentials);
+          }
         }
       }
     }
   }
-
+  
   private boolean saveCertificate(HomeCredentials credentials) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
- 
-	  KeyStore trustStore = getKeystore();
+    
+    KeyStore trustStore = getKeystore();
     
     String aliastag = credentials.homeAAM.getAamInstanceId();
-  
+    
     trustStore.setKeyEntry(aliastag, credentials.privateKey, keystorePassword.toCharArray(),
         new java.security.cert.Certificate[]{credentials.certificate.getX509()});
     
     FileOutputStream fOut = new FileOutputStream(keystorePath);
     trustStore.store(fOut, keystorePassword.toCharArray());
-	  
+    
     return true;
   }
   

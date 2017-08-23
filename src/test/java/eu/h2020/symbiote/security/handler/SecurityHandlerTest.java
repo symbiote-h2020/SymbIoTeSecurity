@@ -1,17 +1,19 @@
 package eu.h2020.symbiote.security.handler;
 
-import eu.h2020.symbiote.security.clients.AAMClient;
 import eu.h2020.symbiote.security.clients.ClientFactory;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
+import eu.h2020.symbiote.security.communication.AAMClient;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
 import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
 import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.utils.DummyTokenIssuer;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +25,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -31,8 +34,14 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ClientFactory.class)
@@ -43,20 +52,22 @@ public class SecurityHandlerTest {
     private AAMClient aamClient = Mockito.mock(AAMClient.class);
 
     private static Log logger = LogFactory.getLog(SecurityHandlerTest.class);
-    SecurityHandler client = null;
-    SecurityHandler Testclient = null;
+    SecurityHandler testclient = null;
 
     String localPath = ".";
     String keystorePath = localPath + "/src/test/resources/keystore.jks";
-    String skeystorePassword = "123456";
+    String keystorePassword = "123456";
     String aamInstanceId = "id-instance-123";
 
     boolean bisOnline = false;
 
-    String TestkeystorePath = localPath + "/src/test/resources/core.p12";
-    String TestkeystorePassword = "1234567";
-    String Testalias = "client-core-1";
-    String TestaamInstanceId = "SymbIoTe_Core_AAM";
+    String serverkeystorePath = localPath + "/src/test/resources/core.p12";
+    String serverkeystorePassword = "1234567";
+    String serveralias = "client-core-1";
+    String testaamInstanceId = "SymbIoTe_Core_AAM";
+    
+    String serverCertString = null;
+    AAM homeAAM = null;
 
     @Before
     public void prepare() throws Throwable {
@@ -64,37 +75,58 @@ public class SecurityHandlerTest {
 
         PowerMockito.mockStatic(ClientFactory.class);
 
-        client = new SecurityHandler(keystorePath, skeystorePassword, bisOnline);
-
-        Testclient = new SecurityHandler(TestkeystorePath, TestkeystorePassword, bisOnline);
-
+        homeAAM = getHomeAMM(aamInstanceId);
         //aamClient.getClientCertificate
-        String validCert = getCertString(TestkeystorePath, TestkeystorePassword, Testalias);
-        Mockito.when(aamClient.getClientCertificate(Mockito.any(CertificateRequest.class))).thenReturn(validCert);
+        serverCertString = getCertString(serverkeystorePath, serverkeystorePassword, serveralias);
+        Mockito.when(aamClient.getClientCertificate(Mockito.any(CertificateRequest.class))).thenReturn(serverCertString);
 
         Mockito.when(ClientFactory.getAAMClient(Matchers.anyString())).thenReturn(aamClient);
 
-
-        //aamClient.getAvailableAAMs()
-        AvailableAAMsCollection listAAMs = Mockito.mock(AvailableAAMsCollection.class);
-        Mockito.when(listAAMs.getAvailableAAMs()).thenReturn(getAMMMap());
-        Mockito.when(aamClient.getAvailableAAMs()).thenReturn(listAAMs);
+        //aamClient.getAvailableAAMs
+        Mockito.when(aamClient.getAvailableAAMs()).thenReturn(new AvailableAAMsCollection(getAMMMap()));
 
         //aamClient.getHomeToken
-
-
-        Mockito.when(aamClient.getHomeToken(Matchers.anyString())).thenReturn(getTokenString(TestkeystorePath, TestkeystorePassword, Testalias));
+        Mockito.when(aamClient.getHomeToken(Matchers.anyString())).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
 
         //aamClient.getForeignToken
-        Mockito.when(aamClient.getForeignToken(Matchers.anyString(), Matchers.anyString())).thenReturn(getTokenString(TestkeystorePath, TestkeystorePassword, Testalias));
+        Mockito.when(aamClient.getForeignToken(Matchers.anyString(), Matchers.any(), Matchers.any())).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
 
         //aamClient.getGuestToken
-        Mockito.when(aamClient.getGuestToken()).thenReturn(getTokenString(TestkeystorePath, TestkeystorePassword, Testalias));
+        Mockito.when(aamClient.getGuestToken()).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
 
         //aamClient.getGuestToken
-        Mockito.when(aamClient.validate(Matchers.anyString(), Matchers.anyString())).thenReturn(ValidationStatus.VALID);
+        Mockito.when(aamClient.validate(Matchers.anyString(), Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(ValidationStatus.VALID);
+    
+    
+        
+        createEmptyKeystore();
+        testclient = new SecurityHandler(keystorePath, keystorePassword, bisOnline, "http://test");
+    
+    
+    }
+    
+    @After
+    private void clean() {
+        deleteKeystore();
+    }
+    
+    private void deleteKeystore(){
+        File file = new File(keystorePath);
+        file.delete();
+    }
+    
+    private void createEmptyKeystore() throws Exception {
+        deleteKeystore();
+    
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+    
+        char[] password = keystorePassword.toCharArray();
+        ks.load(null, password);
 
-
+        // Store away the keystore.
+        FileOutputStream fos = new FileOutputStream(keystorePath);
+        ks.store(fos, password);
+        fos.close();
     }
 
     @Test
@@ -103,7 +135,7 @@ public class SecurityHandlerTest {
         logger.info("----------------------------");
         logger.info("testGetAvailableAAMs starts");
         String aamInstanceId = "id-instance-123";
-        Map<String, AAM> result = client.getAvailableAAMs(getHomeAMM(aamInstanceId));
+        Map<String, AAM> result = testclient.getAvailableAAMs(getHomeAMM(aamInstanceId));
 
         logger.info("TEST RESULT --> Map<String, AAM>: " + result);
         assert result != null;
@@ -137,26 +169,14 @@ public class SecurityHandlerTest {
         logger.info("----------------------------");
         logger.info("testGetCertificate starts");
 
-        deletekeystore();
         String aamInstanceId = "id-instance-123";
-        Certificate cer = client.getCertificate(getHomeAMM(aamInstanceId), "usu1", "pass1", "clientID");
+        Certificate cer = testclient.getCertificate(getHomeAMM(aamInstanceId), "usu1", "pass1", "clientID");
 
         logger.info("TEST RESULT --> Certificate from AMM: " + cer);
         assert cer != null;
-        assert (cer.getCertificateString()).equalsIgnoreCase(getCertString(keystorePath, skeystorePassword, aamInstanceId));
-
-
+        assert (cer.getCertificateString()).equalsIgnoreCase(getCertString(keystorePath, keystorePassword, aamInstanceId));
     }
-
-
-    @Test
-    public void testClearCachedTokens() {
-
-        logger.info("----------------------------");
-        logger.info("testClearCachedTokens starts");
-        client.clearCachedTokens();
-
-    }
+    
 
 
     @Test
@@ -164,8 +184,8 @@ public class SecurityHandlerTest {
         logger.info("----------------------------");
         logger.info("testLoginHomeCredentials starts");
 
-        Token tk = Testclient.login(getHomeAMM(TestaamInstanceId));
-        String validToken = getTokenString(TestkeystorePath, TestkeystorePassword, Testalias);
+        Token tk = testclient.login(getHomeAMM(testaamInstanceId));
+        String validToken = getTokenString(serverkeystorePath, serverkeystorePassword, serveralias);
 
         logger.info("TEST RESULT --> Token from AMM: " + tk);
         assert tk != null;
@@ -182,16 +202,19 @@ public class SecurityHandlerTest {
         logger.info("----------------------------");
         logger.info("testLoginListOfAAMHomeCredentials starts");
 
-        Token tk = Testclient.login(getHomeAMM(TestaamInstanceId));
+        AAM homeAAM = getHomeAMM(testaamInstanceId);
+        
+        Token tk = testclient.login(homeAAM);
         String validToken = tk.getToken();
-        //String validToken = getTokenString(TestkeystorePath, TestkeystorePassword, Testalias);
-        List<AAM> ammlist = getAMMList(TestaamInstanceId);
-        Map<AAM, Token> maptk = Testclient.login(ammlist, validToken);
+        //String validToken = getTokenString(serverkeystorePath, serverkeystorePassword, serveralias);
+        List<AAM> ammlist = testclient.getAvailableAAMs(homeAAM).values().stream().collect(Collectors.toList());
+        
+        Map<AAM, Token> maptk = testclient.login(ammlist, validToken);
 
         logger.info("TEST RESULT --> Map Token from AMM: " + maptk);
 
         assert maptk != null;
-        AAM oamm = getAMMfromList(ammlist, TestaamInstanceId);
+        AAM oamm = getAMMfromList(ammlist, testaamInstanceId);
         logger.info(maptk.get(oamm));
         logger.info(validToken);
         logger.info("validToken.length(): " + validToken.length());
@@ -204,9 +227,9 @@ public class SecurityHandlerTest {
         logger.info("----------------------------");
         logger.info("testLoginAsGuest starts");
 
-        Token tk = Testclient.loginAsGuest(getHomeAMM(TestaamInstanceId));
+        Token tk = testclient.loginAsGuest(getHomeAMM(testaamInstanceId));
         String sToken = tk.getToken();
-        String validToken = getTokenString(TestkeystorePath, TestkeystorePassword, Testalias);
+        String validToken = getTokenString(serverkeystorePath, serverkeystorePassword, serveralias);
 
         logger.info("TEST RESULT --> Token from AMM as Guest: " + tk);
 
@@ -223,20 +246,18 @@ public class SecurityHandlerTest {
         logger.info("----------------------------");
         logger.info("testValidate starts");
 
-        String validToken = getTokenString(TestkeystorePath, TestkeystorePassword, Testalias);
+        String validToken = getTokenString(serverkeystorePath, serverkeystorePassword, serveralias);
 
-        FileInputStream fIn = new FileInputStream(TestkeystorePath);
+        FileInputStream fIn = new FileInputStream(serverkeystorePath);
         KeyStore keystore = KeyStore.getInstance("JKS");
 
 //	    //Leer
-//		char[] password = TestkeystorePassword.toCharArray();
+//		char[] password = serverkeystorePassword.toCharArray();
 //		keystore.load(fIn, password);
-//		java.security.cert.Certificate cert = keystore.getCertificate(Testalias);
-//		
+//		java.security.cert.Certificate cert = keystore.getCertificate(serveralias);
+//
 
-        Optional<Certificate> clientCertificate = Optional.empty();
-
-        ValidationStatus val = Testclient.validate(getHomeAMM(TestaamInstanceId), validToken, clientCertificate, Optional.empty());
+        ValidationStatus val = testclient.validate(getHomeAMM(testaamInstanceId), validToken);
 
         logger.info("TEST RESULT --> ValidationStatus from AMM and Token: " + val);
         assert val != null;
@@ -259,13 +280,13 @@ public class SecurityHandlerTest {
     public AAM getHomeAMM(String aamInstanceId) throws Throwable {
 
         String aamAddress = "https:\\www.aamserver";
-        String aamInstanceFriendlyName = "name-friendly-xxx";
+        String aamInstanceFriendlyName = "name-friendly-" + aamInstanceId;
         Certificate certificate = new Certificate();
 
-        InputStream fis = new FileInputStream(TestkeystorePath);
+        InputStream fis = new FileInputStream(serverkeystorePath);
         BufferedInputStream bis = new BufferedInputStream(fis);
 
-        String certificateString = getCertString(TestkeystorePath, TestkeystorePassword, Testalias);
+        String certificateString = serverCertString;
 
         certificate.setCertificateString(certificateString);
 
@@ -274,65 +295,31 @@ public class SecurityHandlerTest {
         return home;
 
     }
+    
+    public java.security.cert.Certificate getCertificate(String keystoreFilename, String spassword, String alias) throws Throwable {
+        
+        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+    
+        //Leer
+        keystore.load(new FileInputStream(keystoreFilename), spassword.toCharArray());
+        return keystore.getCertificate(alias);
+    }
 
     public String getCertString(String keystoreFilename, String spassword, String alias) throws Throwable {
-
-        String result = null;
-
-        char[] password = spassword.toCharArray();
-
-        FileInputStream fIn = new FileInputStream(keystoreFilename);
-        KeyStore keystore = KeyStore.getInstance("JKS");
-
-        //Leer
-        keystore.load(fIn, password);
-        java.security.cert.Certificate cert = keystore.getCertificate(alias);
-//		System.out.println("cert:");
-//		System.out.println("keystoreFilename: "+keystoreFilename);
-//		System.out.println("spassword: "+spassword);
-//		System.out.println("alias: "+alias);
-//		System.out.println(cert);
-
-
-        result = CryptoHelper.convertX509ToPEM((X509Certificate) cert);
-
-        return result;
+        return CryptoHelper.convertX509ToPEM((X509Certificate) getCertificate(keystoreFilename, keystorePassword, alias));
     }
-
-    public void deletekeystore() throws Throwable {
-        logger.info("deletekeystore()");
-        FileInputStream fIn = new FileInputStream(keystorePath);
-        KeyStore keystore = KeyStore.getInstance("JKS");
-        char[] password = skeystorePassword.toCharArray();
-        keystore.load(fIn, password);
-
-        Enumeration<String> aliasList = keystore.aliases();
-
-        while (aliasList.hasMoreElements()) {
-            String alias = aliasList.nextElement();
-            keystore.deleteEntry(alias);
-            logger.info("alias: [" + alias + "] deleted");
-        }
-
-        FileOutputStream fOut = new FileOutputStream(keystorePath);
-        keystore.store(fOut, password);
-
-        logger.info(keystorePath + " empty");
-
-    }
-
-
+    
     public Map<String, AAM> getAMMMap() throws Throwable {
         Map<String, AAM> aamMap = new HashMap<>();
+        
+        aamMap.put(testaamInstanceId, getHomeAMM(aamInstanceId));
+        
         Certificate certificate = new Certificate();
+        certificate.setCertificateString(getCertString(serverkeystorePath, serverkeystorePassword, serveralias));
 
         for (int i = 0; i < 3; i++) {
             String key = "ammId" + i;
-            String aamAddress = "https:\\www.aamserver" + i;
-            String aamInstanceFriendlyName = "name-friendly-xxx" + i;
-            String aamInstanceId = "id-instance-123" + i;
-            AAM value = new AAM(aamAddress, aamInstanceFriendlyName, aamInstanceId, certificate);
-            aamMap.put(key, value);
+            aamMap.put(key, getHomeAMM(key));
         }
 
         return aamMap;
@@ -374,27 +361,6 @@ public class SecurityHandlerTest {
 
 
         return result;
-    }
-
-    public List<AAM> getAMMList(String aamInsId) throws Throwable {
-
-        ArrayList<AAM> listamm = new ArrayList<AAM>();
-
-        Certificate certificate = new Certificate();
-        String aamInstanceId = aamInsId;
-        for (int i = 0; i < 3; i++) {
-            String aamAddress = "https:\\www.aamserver" + i;
-
-            String aamInstanceFriendlyName = "name-friendly-xxx" + i;
-
-            if (i > 0)
-                aamInstanceId = "id-instance-123" + i;
-
-            AAM value = new AAM(aamAddress, aamInstanceFriendlyName, aamInstanceId, certificate);
-            listamm.add(value);
-        }
-
-        return listamm;
     }
 
     static public class DateUtil {
