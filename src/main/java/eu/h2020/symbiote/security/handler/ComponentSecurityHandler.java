@@ -12,6 +12,7 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsExce
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
+import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -159,6 +160,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
             SecurityHandlerException {
         Set<AuthorizationCredentials> authorizationCredentials = new HashSet<>();
         HomeCredentials coreCredentials = getCoreAAMCredentials().homeCredentials;
+
         authorizationCredentials.add(new AuthorizationCredentials(coreCredentials.homeToken, coreCredentials.homeAAM, coreCredentials));
         try {
             return MutualAuthenticationHelper.getSecurityRequest(authorizationCredentials, false);
@@ -223,6 +225,25 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
             coreAAMBoundCredentials = new BoundCredentials(coreAAM);
             coreAAMBoundCredentials.homeCredentials = coreAAMCredentials;
             // TODO @JASM review if it is ok to just put the credentials there
+            securityHandler.getAcquiredCredentials().put(coreAAM, coreAAMBoundCredentials);
+        }
+
+        // check that we have a valid token
+        boolean isCoreTokenRefreshNeeded = false;
+        try {
+            if (coreAAMBoundCredentials.homeCredentials.homeToken == null
+                    || JWTEngine.validateTokenString(coreAAMBoundCredentials.homeCredentials.homeToken.getToken()) != ValidationStatus.VALID) {
+                isCoreTokenRefreshNeeded = true;
+            }
+        } catch (ValidationException e) {
+            isCoreTokenRefreshNeeded = true;
+        }
+
+        // fetching the core token using the security handler
+        // TODO @JASM review if it is ok to just put the credentials there
+        if (isCoreTokenRefreshNeeded) {
+            coreAAMBoundCredentials.homeCredentials.homeToken = securityHandler.login(coreAAMBoundCredentials.homeCredentials);
+            // storing it in the wallet
             securityHandler.getAcquiredCredentials().put(coreAAM, coreAAMBoundCredentials);
         }
         return coreAAMBoundCredentials;
