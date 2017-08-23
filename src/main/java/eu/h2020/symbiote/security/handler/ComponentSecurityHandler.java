@@ -126,14 +126,9 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         }
     }
 
-    /**
-     * TODO @Nemanja ABAC review and update
-     *
-     * @param accessPolicies  of the resources that need to be checked against the tokens
-     * @param securityRequest that might satisfy the access policies of the resources
-     * @return set of resources (their identifiers) whose access policies are satisfied with the given tokens
-     */
-    Set<String> getAuthorizedResourcesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
+
+    @Override
+    public Set<String> getAuthorizedResourcesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
                                                   SecurityRequest securityRequest) throws SecurityHandlerException {
         // extracting tokens from the security request
         Set<Token> authorizationTokens = new HashSet<>(securityRequest.getSecurityCredentials().size());
@@ -211,6 +206,8 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                         componentOwnerPassword,
                         combinedClientIdentifier,
                         componentCertificateCSR);
+                // fetching updated from the wallet
+                coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM);
             } catch (NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException | IOException | InvalidArgumentsException e) {
                 e.printStackTrace();
                 throw new SecurityHandlerException("Security Handler failed to acquire component certificate from the core AAM");
@@ -224,7 +221,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                     componentKeyPair.getPrivate());
             coreAAMBoundCredentials = new BoundCredentials(coreAAM);
             coreAAMBoundCredentials.homeCredentials = coreAAMCredentials;
-            // TODO @JASM review if it is ok to just put the credentials there
+            // TODO @JASM review if it is ok to just put the credentials there, as discussed, duplicated, the SH does it :)
             securityHandler.getAcquiredCredentials().put(coreAAM, coreAAMBoundCredentials);
         }
 
@@ -240,11 +237,11 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         }
 
         // fetching the core token using the security handler
-        // TODO @JASM review if it is ok to just put the credentials there
         if (isCoreTokenRefreshNeeded) {
-            coreAAMBoundCredentials.homeCredentials.homeToken = securityHandler.login(coreAAMBoundCredentials.homeCredentials);
-            // storing it in the wallet
-            securityHandler.getAcquiredCredentials().put(coreAAM, coreAAMBoundCredentials);
+            // gets the token and puts it in the wallet
+            securityHandler.login(coreAAMBoundCredentials.homeCredentials);
+            // fetching updated token from the wallet
+            coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM);
         }
         return coreAAMBoundCredentials;
     }

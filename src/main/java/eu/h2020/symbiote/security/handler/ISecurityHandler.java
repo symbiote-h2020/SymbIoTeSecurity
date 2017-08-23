@@ -94,5 +94,9 @@ public interface ISecurityHandler {
      * @param foreignTokenIssuingAAMCertificate      in PEM with key matching the IPK claim in the provided FOREIGN token in 'offline' (intranet) scenarios
      * @return validation status of the given token
      */
-    ValidationStatus validate(AAM validationAuthority, String token, Optional<String> clientCertificate, Optional<String> clientCertificateSigningAAMCertificate, Optional<String> foreignTokenIssuingAAMCertificate);
+    ValidationStatus validate(AAM validationAuthority,
+                              String token,
+                              Optional<String> clientCertificate,
+                              Optional<String> clientCertificateSigningAAMCertificate,
+                              Optional<String> foreignTokenIssuingAAMCertificate);
 }
