@@ -24,11 +24,9 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -57,14 +55,13 @@ public class SecurityHandlerTest {
     String localPath = ".";
     String keystorePath = localPath + "/src/test/resources/keystore.jks";
     String keystorePassword = "123456";
-    String aamInstanceId = "id-instance-123";
 
     boolean bisOnline = false;
 
     String serverkeystorePath = localPath + "/src/test/resources/core.p12";
     String serverkeystorePassword = "1234567";
     String serveralias = "client-core-1";
-    String testaamInstanceId = "SymbIoTe_Core_AAM";
+    String homeAAMId = "SymbIoTe_Core_AAM";
     
     String serverCertString = null;
     AAM homeAAM = null;
@@ -74,10 +71,12 @@ public class SecurityHandlerTest {
 
 
         PowerMockito.mockStatic(ClientFactory.class);
-
-        homeAAM = getHomeAMM(aamInstanceId);
-        //aamClient.getClientCertificate
+        
         serverCertString = getCertString(serverkeystorePath, serverkeystorePassword, serveralias);
+    
+        homeAAM = getHomeAMM(homeAAMId);
+    
+        //aamClient.getClientCertificate
         Mockito.when(aamClient.getClientCertificate(Mockito.any(CertificateRequest.class))).thenReturn(serverCertString);
 
         Mockito.when(ClientFactory.getAAMClient(Matchers.anyString())).thenReturn(aamClient);
@@ -106,7 +105,7 @@ public class SecurityHandlerTest {
     }
     
     @After
-    private void clean() {
+    public void clean() {
         deleteKeystore();
     }
     
@@ -170,11 +169,11 @@ public class SecurityHandlerTest {
         logger.info("testGetCertificate starts");
 
         String aamInstanceId = "id-instance-123";
-        Certificate cer = testclient.getCertificate(getHomeAMM(aamInstanceId), "usu1", "pass1", "clientID");
+        Certificate cer = testclient.getCertificate(homeAAM, "usu1", "pass1", "clientID");
 
         logger.info("TEST RESULT --> Certificate from AMM: " + cer);
         assert cer != null;
-        assert (cer.getCertificateString()).equalsIgnoreCase(getCertString(keystorePath, keystorePassword, aamInstanceId));
+        assert (cer.getCertificateString()).equals(serverCertString);
     }
     
 
@@ -183,8 +182,10 @@ public class SecurityHandlerTest {
     public void testLoginHomeCredentials() throws Throwable {
         logger.info("----------------------------");
         logger.info("testLoginHomeCredentials starts");
-
-        Token tk = testclient.login(getHomeAMM(testaamInstanceId));
+    
+        testclient.getCertificate(homeAAM, "usu1", "pass1", "clientID");
+    
+        Token tk = testclient.login(homeAAM);
         String validToken = getTokenString(serverkeystorePath, serverkeystorePassword, serveralias);
 
         logger.info("TEST RESULT --> Token from AMM: " + tk);
@@ -201,8 +202,8 @@ public class SecurityHandlerTest {
     public void testLoginListOfAAMHomeCredentials() throws Throwable {
         logger.info("----------------------------");
         logger.info("testLoginListOfAAMHomeCredentials starts");
-
-        AAM homeAAM = getHomeAMM(testaamInstanceId);
+    
+        testclient.getCertificate(homeAAM, "usu1", "pass1", "clientID");
         
         Token tk = testclient.login(homeAAM);
         String validToken = tk.getToken();
@@ -214,7 +215,7 @@ public class SecurityHandlerTest {
         logger.info("TEST RESULT --> Map Token from AMM: " + maptk);
 
         assert maptk != null;
-        AAM oamm = getAMMfromList(ammlist, testaamInstanceId);
+        AAM oamm = getAMMfromList(ammlist, homeAAMId);
         logger.info(maptk.get(oamm));
         logger.info(validToken);
         logger.info("validToken.length(): " + validToken.length());
@@ -227,7 +228,7 @@ public class SecurityHandlerTest {
         logger.info("----------------------------");
         logger.info("testLoginAsGuest starts");
 
-        Token tk = testclient.loginAsGuest(getHomeAMM(testaamInstanceId));
+        Token tk = testclient.loginAsGuest(getHomeAMM(homeAAMId));
         String sToken = tk.getToken();
         String validToken = getTokenString(serverkeystorePath, serverkeystorePassword, serveralias);
 
@@ -257,7 +258,7 @@ public class SecurityHandlerTest {
 //		java.security.cert.Certificate cert = keystore.getCertificate(serveralias);
 //
 
-        ValidationStatus val = testclient.validate(getHomeAMM(testaamInstanceId), validToken);
+        ValidationStatus val = testclient.validate(getHomeAMM(homeAAMId), validToken);
 
         logger.info("TEST RESULT --> ValidationStatus from AMM and Token: " + val);
         assert val != null;
@@ -282,18 +283,9 @@ public class SecurityHandlerTest {
         String aamAddress = "https:\\www.aamserver";
         String aamInstanceFriendlyName = "name-friendly-" + aamInstanceId;
         Certificate certificate = new Certificate();
+        certificate.setCertificateString(serverCertString);
 
-        InputStream fis = new FileInputStream(serverkeystorePath);
-        BufferedInputStream bis = new BufferedInputStream(fis);
-
-        String certificateString = serverCertString;
-
-        certificate.setCertificateString(certificateString);
-
-        AAM home = new AAM(aamAddress, aamInstanceFriendlyName, aamInstanceId, certificate);
-
-        return home;
-
+        return new AAM(aamAddress, aamInstanceFriendlyName, aamInstanceId, certificate);
     }
     
     public java.security.cert.Certificate getCertificate(String keystoreFilename, String spassword, String alias) throws Throwable {
@@ -306,13 +298,13 @@ public class SecurityHandlerTest {
     }
 
     public String getCertString(String keystoreFilename, String spassword, String alias) throws Throwable {
-        return CryptoHelper.convertX509ToPEM((X509Certificate) getCertificate(keystoreFilename, keystorePassword, alias));
+        return CryptoHelper.convertX509ToPEM((X509Certificate) getCertificate(keystoreFilename, spassword, alias));
     }
     
     public Map<String, AAM> getAMMMap() throws Throwable {
         Map<String, AAM> aamMap = new HashMap<>();
         
-        aamMap.put(testaamInstanceId, getHomeAMM(aamInstanceId));
+        aamMap.put(homeAAMId, homeAAM);
         
         Certificate certificate = new Certificate();
         certificate.setCertificateString(getCertString(serverkeystorePath, serverkeystorePassword, serveralias));
