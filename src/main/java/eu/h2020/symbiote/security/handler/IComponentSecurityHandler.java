@@ -39,13 +39,13 @@ public interface IComponentSecurityHandler {
                                               Certificate serviceCertificate) throws SecurityHandlerException;
 
     /**
-     * TODO @Nemanja ABAC review and update
      *
+     * @param deploymentId  identificator of the platform where Symbiote Security is instatiated
      * @param accessPolicies  of the resources that need to be checked against the tokens
      * @param securityRequest that might satisfy the access policies of the resources
      * @return set of resources (their identifiers) whose access policies are satisfied with the given tokens
      */
-    Set<String> getAuthorizedResourcesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
+    Set<String> getAuthorizedResourcesIdentifiers(String deploymentId, Map<String, IAccessPolicy> accessPolicies,
                                                   SecurityRequest securityRequest) throws SecurityHandlerException;
 
     /**

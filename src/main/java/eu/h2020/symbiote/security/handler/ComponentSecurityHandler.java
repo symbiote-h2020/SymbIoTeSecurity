@@ -16,6 +16,7 @@ import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
+import eu.h2020.symbiote.security.helpers.ABACPolicyHelper;
 import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper;
 
@@ -32,6 +33,7 @@ import java.util.*;
  * used by SymbIoTe Components to integrate with the security layer
  *
  * @author Mikolaj Dobski (PSNC)
+ * @author Nemanja Ignjatov (UNIVIE)
  * @author Jose Antonio Sanchez Murillo (Atos)
  */
 public class ComponentSecurityHandler implements IComponentSecurityHandler {
@@ -128,26 +130,9 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
 
 
     @Override
-    public Set<String> getAuthorizedResourcesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
-                                                  SecurityRequest securityRequest) throws SecurityHandlerException {
-        // extracting tokens from the security request
-        Set<Token> authorizationTokens = new HashSet<>(securityRequest.getSecurityCredentials().size());
-        for (SecurityCredentials securityCredentials : securityRequest.getSecurityCredentials()) {
-            try {
-                authorizationTokens.add(new Token(securityCredentials.getToken()));
-            } catch (ValidationException e) {
-                e.printStackTrace();
-                throw new SecurityHandlerException("Failed to recreate tokens for ABAC resolution, they got expired or corrupted: " + e.getMessage());
-            }
-        }
-
-        // doing the magic per each resource
-        Set<String> authorizedResourcesIdentifiers = new HashSet<>();
-        for (Map.Entry<String, IAccessPolicy> resource : accessPolicies.entrySet()) {
-            if (resource.getValue().isSatisfiedWith(authorizationTokens))
-                authorizedResourcesIdentifiers.add(resource.getKey());
-        }
-        return authorizedResourcesIdentifiers;
+    public Set<String> getAuthorizedResourcesIdentifiers(String deploymentId, Map<String, IAccessPolicy> accessPolicies,
+                                                         SecurityRequest securityRequest) throws SecurityHandlerException {
+        return ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, accessPolicies, securityRequest);
     }
 
     @Override

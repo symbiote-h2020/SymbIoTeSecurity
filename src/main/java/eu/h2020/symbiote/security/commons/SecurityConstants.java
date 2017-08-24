@@ -6,6 +6,7 @@ package eu.h2020.symbiote.security.commons;
  * TODO R3 review to remove obsolete values
  *
  * @author Mikołaj Dobski (PSNC)
+ * @author Nemanja Ignjatov (UNIVIE)
  */
 public class SecurityConstants {
     public static final long serialVersionUID = 7526472295622776147L;
@@ -48,6 +49,7 @@ public class SecurityConstants {
     public static final String TOKEN_HEADER_NAME = "X-Auth-Token";
     public static final int JWT_PARTS_COUNT = 3; //Header, body and signature
     public static final String CLAIM_NAME_TOKEN_TYPE = "ttyp";
+    public static final String SUB_NAME_TOKEN_TYPE = "sub";
     public static final String SYMBIOTE_ATTRIBUTES_PREFIX = "SYMBIOTE_";
     public static final String GUEST_NAME = "guest";
 
