@@ -73,7 +73,7 @@ public class CryptoHelperTest {
         KeyPair keyPair = CryptoHelper.createKeyPair();
         //KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
         //ks.load(new FileInputStream(CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
-        //X509Certificate certificate = (X509Certificate) ks.getCertificate(CERTIFICATE_ALIAS);
+        //X509Certificate certificate = (X509Certificate) ks.getAamCACertificate(CERTIFICATE_ALIAS);
         String csr = CryptoHelper.buildPlatformCertificateSigningRequestPEM(platformId, keyPair);
         PKCS10CertificationRequest pkcsCSR = convertPemToPKCS10CertificationRequest(csr);
         assertEquals(platformId, pkcsCSR.getSubject().toString().split("CN=")[1]);
@@ -85,7 +85,7 @@ public class CryptoHelperTest {
         KeyPair keyPair = CryptoHelper.createKeyPair();
         //KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
         //ks.load(new FileInputStream(CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
-        //X509Certificate certificate = (X509Certificate) ks.getCertificate(CERTIFICATE_ALIAS);
+        //X509Certificate certificate = (X509Certificate) ks.getAamCACertificate(CERTIFICATE_ALIAS);
         String csr = CryptoHelper.buildComponentCertificateSigningRequestPEM(componentId, platformId, keyPair);
         PKCS10CertificationRequest pkcsCSR = convertPemToPKCS10CertificationRequest(csr);
         assertEquals(componentId + illegalSign + platformId, pkcsCSR.getSubject().toString().split("CN=")[1]);

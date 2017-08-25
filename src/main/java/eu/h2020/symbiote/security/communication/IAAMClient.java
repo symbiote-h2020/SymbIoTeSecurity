@@ -5,6 +5,7 @@ import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.*;
 import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
 import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
+import eu.h2020.symbiote.security.communication.payloads.RevocationRequest;
 
 import java.util.Optional;
 
@@ -31,6 +32,14 @@ public interface IAAMClient {
             NotExistingUserException,
             ValidationException,
             InvalidArgumentsException;
+
+    /**
+     * Allows the user to revoke their credentials
+     *
+     * @param revocationRequest required to revoke a certificate or token.
+     * @return the signed certificate from the provided CSR in PEM format
+     */
+    String revoke(RevocationRequest revocationRequest) throws InvalidArgumentsException, WrongCredentialsException;
 
     /**
      * @return GUEST token used to access public resources offered in SymbIoTe

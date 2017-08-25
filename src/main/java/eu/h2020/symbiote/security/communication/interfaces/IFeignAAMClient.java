@@ -4,6 +4,7 @@ import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
 import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
+import eu.h2020.symbiote.security.communication.payloads.RevocationRequest;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -27,6 +28,10 @@ public interface IFeignAAMClient {
     @RequestLine("POST " + SecurityConstants.AAM_GET_CLIENT_CERTIFICATE)
     @Headers("Content-Type: application/json")
     Response getClientCertificate(CertificateRequest certificateRequest);
+
+    @RequestLine("POST " + SecurityConstants.AAM_REVOKE)
+    @Headers("Content-Type: application/json")
+    Response revoke(RevocationRequest revocationRequest);
 
     @RequestLine("POST " + SecurityConstants.AAM_GET_GUEST_TOKEN)
     Response getGuestToken();
