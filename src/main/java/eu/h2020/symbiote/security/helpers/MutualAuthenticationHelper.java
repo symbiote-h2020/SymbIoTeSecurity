@@ -60,7 +60,7 @@ public class MutualAuthenticationHelper {
     }
 
     /**
-     * Used by the application to generate the challenge to be attached to the business query
+     * Used by the application to generate the security request to be attached to the business query
      * so that the service can confirm that the client should posses provided tokens
      *
      * @param authorizationCredentials matching the set of tokens used in the business query
