@@ -2,6 +2,7 @@ package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.Token;
+import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
@@ -9,6 +10,7 @@ import eu.h2020.symbiote.security.communication.payloads.AAM;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Security Handler interface proposed for Release 3 of SymbIoTe.
@@ -83,5 +85,10 @@ public interface ISecurityHandler {
      * @param token               to be validated
      * @return validation status of the given token
      */
-    ValidationStatus validate(AAM validationAuthority, String token);
+    ValidationStatus validate(AAM validationAuthority, String token,
+                              Optional<String> clientCertificate,
+                              Optional<String> clientCertificateSigningAAMCertificate,
+                              Optional<String> foreignTokenIssuingAAMCertificate);
+    
+    Map<String, BoundCredentials> getAcquiredCredentials();
 }

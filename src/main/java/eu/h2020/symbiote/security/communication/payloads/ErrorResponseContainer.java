@@ -15,7 +15,6 @@ public class ErrorResponseContainer {
     private int errorCode;
 
     public ErrorResponseContainer() {
-        // TODO Auto-generated constructor stub
     }
 
     /**

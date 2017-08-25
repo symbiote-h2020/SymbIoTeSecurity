@@ -56,8 +56,6 @@ public class SecurityHandlerTest {
     String keystorePath = localPath + "/src/test/resources/keystore.jks";
     String keystorePassword = "123456";
 
-    boolean bisOnline = false;
-
     String serverkeystorePath = localPath + "/src/test/resources/core.p12";
     String serverkeystorePassword = "1234567";
     String serveralias = "client-core-1";
@@ -99,7 +97,7 @@ public class SecurityHandlerTest {
     
         
         createEmptyKeystore();
-        testclient = new SecurityHandler(keystorePath, keystorePassword, bisOnline, "http://test");
+        testclient = new SecurityHandler(keystorePath, keystorePassword, "http://test");
     
     
     }
@@ -258,7 +256,7 @@ public class SecurityHandlerTest {
 //		java.security.cert.Certificate cert = keystore.getCertificate(serveralias);
 //
 
-        ValidationStatus val = testclient.validate(getHomeAMM(homeAAMId), validToken);
+        ValidationStatus val = testclient.validate(getHomeAMM(homeAAMId), validToken, null, null, null);
 
         logger.info("TEST RESULT --> ValidationStatus from AMM and Token: " + val);
         assert val != null;
@@ -266,9 +264,6 @@ public class SecurityHandlerTest {
     }
 
     private AAM getAMMfromList(List<AAM> ammlist, String testaamInstanceId2) {
-        // TODO Auto-generated method stub
-
-
         for (int x = 0; x < ammlist.size(); x++) {
 
             AAM a = (AAM) ammlist.get(x);
@@ -285,7 +280,7 @@ public class SecurityHandlerTest {
         Certificate certificate = new Certificate();
         certificate.setCertificateString(serverCertString);
 
-        return new AAM(aamAddress, aamInstanceFriendlyName, aamInstanceId, certificate);
+        return new AAM(aamAddress, aamInstanceFriendlyName, aamInstanceId, certificate, new HashMap<>());
     }
     
     public java.security.cert.Certificate getCertificate(String keystoreFilename, String spassword, String alias) throws Throwable {

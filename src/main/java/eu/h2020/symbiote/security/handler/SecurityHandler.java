@@ -70,12 +70,10 @@ public class SecurityHandler implements ISecurityHandler {
    * Creates a new instance of the Security Handler
    *
    * @param keystorePassword required to unlock the persisted keystore for this client
-   * @param isOnline         if the security Handler has access to the Internet and SymbIoTe Core
    * @throws SecurityHandlerException on instantiation errors
    */
   public SecurityHandler(String keystorePath,
                          String keystorePassword,
-                         boolean isOnline,
                          String homeAAMAddress)
       throws SecurityHandlerException {
     // enabling support for elliptic curve certificates
@@ -84,7 +82,6 @@ public class SecurityHandler implements ISecurityHandler {
     // rest of the constructor code
     this.keystorePath = keystorePath;
     this.keystorePassword = keystorePassword;
-    this.isOnline = isOnline;
     this.homeAAMAddress = homeAAMAddress;
     
     try {
@@ -136,7 +133,7 @@ public class SecurityHandler implements ISecurityHandler {
         try {
           return new Token(ClientFactory.getAAMClient(aam.getAamAddress()).getForeignToken(homeToken,
               Optional.ofNullable(certificateStr),
-              Optional.ofNullable(credentials.homeCredentials.homeAAM.getCertificate().getCertificateString())));
+              Optional.ofNullable(credentials.homeCredentials.homeAAM.getAamCACertificate().getCertificateString())));
         } catch (ValidationException e) {
           logger.error("Invalid token returned for AAM " + aam.getAamInstanceId(), e);
           return null;
@@ -176,43 +173,21 @@ public class SecurityHandler implements ISecurityHandler {
     return trustStore;
   }
   
-  public ValidationStatus validate(AAM validationAuthority, String token) {
-    
-    //Check if it's a home token
-    final BoundCredentials[] tokenOwner = {tokenCredentials.get(token)};
-    final AAM[] issuingAAM = {null};
-    if (tokenOwner[0] == null) {
-      // It might be a foreing token. We'll have to iterate
-      tokenCredentials.values().stream().filter(credentials -> {
-        Map.Entry<AAM, Token> found = credentials.foreignTokens.entrySet().stream()
-                        .filter(entry -> entry.getValue().equals(token)).findFirst().orElse(null);
-        if (found != null) {
-          tokenOwner[0] = credentials;
-          issuingAAM[0] = found.getKey();
-          return true;
-        } else {
-          return false;
-        }
-      }).findFirst().orElse(null);
-    } else {
-      issuingAAM[0] = tokenOwner[0].homeCredentials.homeAAM;
-    }
-    
-    String clientCertificate = (tokenOwner[0] != null)?
-                                   tokenOwner[0].homeCredentials.certificate.getCertificateString():
-                                   null;
-    String clientSigningCertificate = (tokenOwner[0] != null)?
-                                          tokenOwner[0].homeCredentials.homeAAM.getCertificate().getCertificateString()
-                                          :null;
-    String foreingTokenCertificate = (issuingAAM[0] != null)?
-                                         issuingAAM[0].getCertificate().getCertificateString()
-                                         :null;
+  public ValidationStatus validate(AAM validationAuthority, String token,
+                                   Optional<String> clientCertificate,
+                                   Optional<String> clientCertificateSigningAAMCertificate,
+                                   Optional<String> foreignTokenIssuingAAMCertificate) {
   
   
     return ClientFactory.getAAMClient(validationAuthority.getAamAddress()).validate(token,
-        Optional.ofNullable(clientCertificate),
-        Optional.ofNullable(clientSigningCertificate),
-        Optional.ofNullable(foreingTokenCertificate));
+        clientCertificate,
+        clientCertificateSigningAAMCertificate,
+        foreignTokenIssuingAAMCertificate);
+  }
+  
+  @Override
+  public Map<String, BoundCredentials> getAcquiredCredentials() {
+    return credentialsWallet;
   }
   
   private void cacheCertificate(HomeCredentials credentials) {
@@ -246,7 +221,7 @@ public class SecurityHandler implements ISecurityHandler {
       request.setClientId(clientId);
       
       request.setClientCSRinPEMFormat(CryptoHelper.buildCertificateSigningRequestPEM(
-          homeAAM.getCertificate().getX509(), username, clientId, pair));
+          homeAAM.getAamCACertificate().getX509(), username, clientId, pair));
       
       String certificateValue = ClientFactory.getAAMClient(homeAAM.getAamAddress())
                                     .getClientCertificate(request);
