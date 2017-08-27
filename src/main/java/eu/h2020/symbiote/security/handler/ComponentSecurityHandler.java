@@ -132,7 +132,8 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
     @Override
     public Set<String> getAuthorizedResourcesIdentifiers(String deploymentId, Map<String, IAccessPolicy> accessPolicies,
                                                          SecurityRequest securityRequest) throws SecurityHandlerException {
-        return ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, accessPolicies, securityRequest);
+        //TODO Mikolaj - do your magic
+        return ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, accessPolicies, securityRequest).getAvailableResources();
     }
 
     @Override

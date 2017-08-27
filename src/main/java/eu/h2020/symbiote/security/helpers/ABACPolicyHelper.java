@@ -5,6 +5,7 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
+import eu.h2020.symbiote.security.communication.payloads.ABACResolverResponse;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 
@@ -25,9 +26,9 @@ public class ABACPolicyHelper {
      * @param securityRequest container for tokens and user credentials which will be checked against access policies
      * @return set of resources (their identifiers) whose access policies are satisfied with the given tokens
      */
-    public static Set<String> checkRequestedOperationAccess(String deploymentId, Map<String, IAccessPolicy> accessPolicies,
-                                                            SecurityRequest securityRequest) throws SecurityHandlerException {
-
+    public static ABACResolverResponse checkRequestedOperationAccess(String deploymentId, Map<String, IAccessPolicy> accessPolicies,
+                                                                     SecurityRequest securityRequest) throws SecurityHandlerException {
+        ABACResolverResponse abacResp = new ABACResolverResponse();
         // extracting tokens from the security request
         Set<Token> authorizationTokens = new HashSet<>(securityRequest.getSecurityCredentials().size());
         Set<String> authorizedResourcesIdentifiers = new HashSet<String>();
@@ -43,14 +44,19 @@ public class ABACPolicyHelper {
         if (accessPolicies != null) {
             for (Map.Entry<String, IAccessPolicy> resource : accessPolicies.entrySet()) {
                 if (resource.getValue() != null) {
-                    if (resource.getValue().isSatisfiedWith(deploymentId, authorizationTokens))
-                        authorizedResourcesIdentifiers.add(resource.getKey());
+                    Set<Token> validTokens = resource.getValue().isSatisfiedWith(deploymentId, authorizationTokens);
+                    //Check if any valid token is found for the access policy
+                    if ((validTokens != null) && (validTokens.size() > 0)) {
+                        abacResp.getAvailableResources().add(resource.getKey());
+                        abacResp.getValidTokens().addAll(validTokens);
+                    }
                 } else {
-                    authorizedResourcesIdentifiers.add(resource.getKey());
+                    abacResp.getAvailableResources().add(resource.getKey());
+                    abacResp.getValidTokens().addAll(authorizationTokens);
                 }
             }
         }
-        return authorizedResourcesIdentifiers;
+        return abacResp;
 
     }
 }

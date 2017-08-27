@@ -3,6 +3,7 @@ package eu.h2020.symbiote.security.accesspolicies;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -28,21 +29,18 @@ public class SingleTokenAccessPolicy implements IAccessPolicy {
 
 
     @Override
-    public boolean isSatisfiedWith(String deploymentId, Set<Token> authorizationTokens) {
+    public Set<Token> isSatisfiedWith(String deploymentId, Set<Token> authorizationTokens) {
         // trying to find token satisfying this policy
         // presume that none of the tokens could satisfy the policy
-        boolean result = false;
+        Set<Token> validTokens = new HashSet<Token>();
         for (Token token : authorizationTokens) {
-            if (!result) {
                 //verify if token is HOME ttyp and if token is issued by this platform and if the token satisfies the policy
                 if (token.getType().equals(Token.Type.HOME) && token.getClaims().getIssuer().equals(deploymentId) && isSatisfiedWith(token)) {
-                    result = true;
-                }
+                    validTokens.add(token);
             }
         }
 
-
-        return result;
+        return validTokens;
     }
 
     private boolean isSatisfiedWith(Token token) {

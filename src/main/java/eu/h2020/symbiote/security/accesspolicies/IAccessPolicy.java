@@ -15,7 +15,7 @@ public interface IAccessPolicy {
     /**
      * @param deploymentId id of the Security libraries deployment
      * @param authorizationTokens that might satisfy the policy
-     * @return true if the given tokens satisfy the policy
+     * @return Set of tokens that satisfied access policy
      */
-    boolean isSatisfiedWith(String deploymentId, Set<Token> authorizationTokens);
+    Set<Token> isSatisfiedWith(String deploymentId, Set<Token> authorizationTokens);
 }
