@@ -9,12 +9,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 /**
- * SymbIoTe Access Policy that needs to be satisfied by a single Token
+ * SymbIoTe Access Policy that needs to be satisfied by a single Token issued by local home platform
  *
  * @author Mikołaj Dobski (PSNC)
  * @author Nemanja Ignjatov (UNIVIE)
  */
-public class SingleTokenAccessPolicy implements IAccessPolicy {
+public class SingleLocalHomeTokenAccessPolicy implements IAccessPolicy {
     private Map<String, String> requiredClaims;
 
     /**
@@ -23,7 +23,7 @@ public class SingleTokenAccessPolicy implements IAccessPolicy {
      * @param requiredClaims map with all the claims that need to be contained in a single token to satisfy the
      *                       access policy
      */
-    public SingleTokenAccessPolicy(Map<String, String> requiredClaims) {
+    public SingleLocalHomeTokenAccessPolicy(Map<String, String> requiredClaims) {
         this.requiredClaims = requiredClaims;
     }
 
@@ -34,8 +34,8 @@ public class SingleTokenAccessPolicy implements IAccessPolicy {
         // presume that none of the tokens could satisfy the policy
         Set<Token> validTokens = new HashSet<Token>();
         for (Token token : authorizationTokens) {
-            //verify if token satisfies the policy
-            if (isSatisfiedWith(token)) {
+            //verify if token is HOME ttyp and if token is issued by this platform and if the token satisfies the policy
+            if (token.getType().equals(Token.Type.HOME) && token.getClaims().getIssuer().equals(deploymentId) && isSatisfiedWith(token)) {
                 return token;
             }
         }

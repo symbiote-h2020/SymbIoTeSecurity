@@ -13,16 +13,16 @@ import java.util.Set;
 public class ABACResolverResponse {
 
     private Set<String> availableResources;
-    private Set<Token> validTokens;
+    private Set<SecurityCredentials> validCredentials;
 
     public ABACResolverResponse() {
         this.availableResources = new HashSet<String>();
-        this.validTokens = new HashSet<Token>();
+        this.validCredentials = new HashSet<SecurityCredentials>();
     }
 
-    public ABACResolverResponse(Set<String> availableResources, Set<Token> validTokens) {
+    public ABACResolverResponse(Set<String> availableResources, Set<SecurityCredentials> validCredentials) {
         this.availableResources = availableResources;
-        this.validTokens = validTokens;
+        this.validCredentials = validCredentials;
     }
 
     public Set<String> getAvailableResources() {
@@ -33,11 +33,11 @@ public class ABACResolverResponse {
         this.availableResources = availableResources;
     }
 
-    public Set<Token> getValidTokens() {
-        return validTokens;
+    public Set<SecurityCredentials> getValidCredentials() {
+        return validCredentials;
     }
 
-    public void setValidTokens(Set<Token> validTokens) {
-        this.validTokens = validTokens;
+    public void setValidCredentials(Set<SecurityCredentials> validCredentials) {
+        this.validCredentials = validCredentials;
     }
 }

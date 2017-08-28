@@ -24,17 +24,17 @@ public class ABACPolicyHelper {
     /**
      * @param accessPolicies  of the resources that need to be checked against the tokens
      * @param securityRequest container for tokens and user credentials which will be checked against access policies
-     * @return set of resources (their identifiers) whose access policies are satisfied with the given tokens
+     * @return set of resources (their identifiers) whose access policies are satisfied with the given credentials
      */
     public static ABACResolverResponse checkRequestedOperationAccess(String deploymentId, Map<String, IAccessPolicy> accessPolicies,
                                                                      SecurityRequest securityRequest) throws SecurityHandlerException {
         ABACResolverResponse abacResp = new ABACResolverResponse();
-        // extracting tokens from the security request
-        Set<Token> authorizationTokens = new HashSet<>(securityRequest.getSecurityCredentials().size());
+        // extracting credentials from the security request
+        Map<Token, SecurityCredentials> authzCredentials = new HashMap<Token, SecurityCredentials>(securityRequest.getSecurityCredentials().size());
         Set<String> authorizedResourcesIdentifiers = new HashSet<String>();
         for (SecurityCredentials securityCredentials : securityRequest.getSecurityCredentials()) {
             try {
-                authorizationTokens.add(new Token(securityCredentials.getToken()));
+                authzCredentials.put(new Token(securityCredentials.getToken()), securityCredentials);
             } catch (ValidationException e) {
                 e.printStackTrace();
                 throw new SecurityHandlerException("Failed to recreate tokens for ABAC resolution, they got expired or corrupted: " + e.getMessage());
@@ -44,15 +44,15 @@ public class ABACPolicyHelper {
         if (accessPolicies != null) {
             for (Map.Entry<String, IAccessPolicy> resource : accessPolicies.entrySet()) {
                 if (resource.getValue() != null) {
-                    Set<Token> validTokens = resource.getValue().isSatisfiedWith(deploymentId, authorizationTokens);
+                    Token validToken = resource.getValue().isSatisfiedWith(deploymentId, authzCredentials.keySet());
                     //Check if any valid token is found for the access policy
-                    if ((validTokens != null) && (validTokens.size() > 0)) {
+                    if (validToken != null) {
                         abacResp.getAvailableResources().add(resource.getKey());
-                        abacResp.getValidTokens().addAll(validTokens);
+                        abacResp.getValidCredentials().add(authzCredentials.get(validToken));
                     }
                 } else {
                     abacResp.getAvailableResources().add(resource.getKey());
-                    abacResp.getValidTokens().addAll(authorizationTokens);
+                    abacResp.getValidCredentials().addAll(authzCredentials.values());
                 }
             }
         }
