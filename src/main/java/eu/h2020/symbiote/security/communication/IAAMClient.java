@@ -1,11 +1,10 @@
 package eu.h2020.symbiote.security.communication;
 
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
+import eu.h2020.symbiote.security.commons.enums.ManagementStatus;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.*;
-import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
-import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
-import eu.h2020.symbiote.security.communication.payloads.RevocationRequest;
+import eu.h2020.symbiote.security.communication.payloads.*;
 
 import java.util.Optional;
 
@@ -79,4 +78,8 @@ public interface IAAMClient {
      * @return validation status
      */
     ValidationStatus validate(String token, Optional<String> clientCertificate, Optional<String> clientCertificateSigningAAMCertificate, Optional<String> foreignTokenIssuingAAMCertificate);
+
+    ManagementStatus manage(PlatformManagementRequest platformManagementRequest) throws AAMException;
+
+    ManagementStatus manage(UserManagementRequest userManagementRequest) throws AAMException;
 }

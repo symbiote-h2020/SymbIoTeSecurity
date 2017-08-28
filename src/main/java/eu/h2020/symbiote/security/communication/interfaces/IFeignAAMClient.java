@@ -1,10 +1,9 @@
 package eu.h2020.symbiote.security.communication.interfaces;
 
 import eu.h2020.symbiote.security.commons.SecurityConstants;
+import eu.h2020.symbiote.security.commons.enums.ManagementStatus;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
-import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
-import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
-import eu.h2020.symbiote.security.communication.payloads.RevocationRequest;
+import eu.h2020.symbiote.security.communication.payloads.*;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -60,4 +59,12 @@ public interface IFeignAAMClient {
                               @Param("clientCertificate") String clientCertificate,
                               @Param("clientCertificateSigningAAMCertificate") String clientCertificateSigningAAMCertificate,
                               @Param("foreignTokenIssuingAAMCertificate") String foreignTokenIssuingAAMCertificate);
+
+    @RequestLine("POST " + SecurityConstants.AAM_MANAGE_PLATFORMS)
+    @Headers("Content-Type: application/json")
+    PlatformManagementResponse manage(PlatformManagementRequest platformManagementRequest);
+
+    @RequestLine("POST " + SecurityConstants.AAM_MANAGE_USERS)
+    @Headers("Content-Type: application/json")
+    ManagementStatus manage(UserManagementRequest userManagementRequest);
 }

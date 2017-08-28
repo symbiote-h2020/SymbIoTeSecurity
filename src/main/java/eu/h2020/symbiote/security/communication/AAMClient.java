@@ -2,12 +2,11 @@ package eu.h2020.symbiote.security.communication;
 
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
+import eu.h2020.symbiote.security.commons.enums.ManagementStatus;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.*;
 import eu.h2020.symbiote.security.communication.interfaces.IFeignAAMClient;
-import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
-import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
-import eu.h2020.symbiote.security.communication.payloads.RevocationRequest;
+import eu.h2020.symbiote.security.communication.payloads.*;
 import feign.Feign;
 import feign.Response;
 import feign.jackson.JacksonDecoder;
@@ -98,7 +97,6 @@ public class AAMClient implements IAAMClient {
 
     }
 
-
     /**
      * @return GUEST token used to access public resources offered in SymbIoTe
      */
@@ -173,6 +171,32 @@ public class AAMClient implements IAAMClient {
     @Override
     public ValidationStatus validate(String token, Optional<String> clientCertificate, Optional<String> clientCertificateSigningAAMCertificate, Optional<String> foreignTokenIssuingAAMCertificate) {
         return feignClient.validate(token, clientCertificate.orElse(""), clientCertificateSigningAAMCertificate.orElse(""), foreignTokenIssuingAAMCertificate.orElse(""));
+    }
+
+    /**
+     * @param platformManagementRequest
+     * @return Platform Management Status
+     */
+    @Override
+    public ManagementStatus manage(PlatformManagementRequest platformManagementRequest) throws AAMException {
+        try {
+            return feignClient.manage(platformManagementRequest).getRegistrationStatus();
+        } catch (Exception e) {
+            throw new AAMException("Internal Platform Management Error");
+        }
+    }
+
+    /**
+     * @param userManagementRequest
+     * @return User Management Status
+     */
+    @Override
+    public ManagementStatus manage(UserManagementRequest userManagementRequest) throws AAMException {
+        try {
+            return feignClient.manage(userManagementRequest);
+        } catch (Exception e) {
+            throw new AAMException("Internal User Management Error");
+        }
     }
 
 }
