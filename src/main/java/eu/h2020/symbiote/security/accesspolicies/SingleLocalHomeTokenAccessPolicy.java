@@ -29,18 +29,19 @@ public class SingleLocalHomeTokenAccessPolicy implements IAccessPolicy {
 
 
     @Override
-    public Token isSatisfiedWith(String deploymentId, Set<Token> authorizationTokens) {
+    public Set<Token> isSatisfiedWith(String deploymentId, Set<Token> authorizationTokens) {
         // trying to find token satisfying this policy
         // presume that none of the tokens could satisfy the policy
         Set<Token> validTokens = new HashSet<Token>();
         for (Token token : authorizationTokens) {
             //verify if token is HOME ttyp and if token is issued by this platform and if the token satisfies the policy
             if (token.getType().equals(Token.Type.HOME) && token.getClaims().getIssuer().equals(deploymentId) && isSatisfiedWith(token)) {
-                return token;
+                validTokens.add(token);
+                return validTokens;
             }
         }
 
-        return null;
+        return validTokens;
     }
 
     private boolean isSatisfiedWith(Token token) {

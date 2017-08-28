@@ -44,11 +44,13 @@ public class ABACPolicyHelper {
         if (accessPolicies != null) {
             for (Map.Entry<String, IAccessPolicy> resource : accessPolicies.entrySet()) {
                 if (resource.getValue() != null) {
-                    Token validToken = resource.getValue().isSatisfiedWith(deploymentId, authzCredentials.keySet());
+                    Set<Token> validTokens = resource.getValue().isSatisfiedWith(deploymentId, authzCredentials.keySet());
                     //Check if any valid token is found for the access policy
-                    if (validToken != null) {
+                    if ((validTokens != null) && (validTokens.size() > 0)) {
                         abacResp.getAvailableResources().add(resource.getKey());
-                        abacResp.getValidCredentials().add(authzCredentials.get(validToken));
+                        for (Token t : validTokens) {
+                            abacResp.getValidCredentials().add(authzCredentials.get(t));
+                        }
                     }
                 } else {
                     abacResp.getAvailableResources().add(resource.getKey());
