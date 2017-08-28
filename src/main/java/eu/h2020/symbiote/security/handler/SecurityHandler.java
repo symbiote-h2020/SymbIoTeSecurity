@@ -63,9 +63,6 @@ public class SecurityHandler implements ISecurityHandler {
   private Map<String, BoundCredentials> tokenCredentials = new HashMap<>();
   
   
-  private boolean isOnline;
-  
-  
   /**
    * Creates a new instance of the Security Handler
    *
@@ -85,7 +82,7 @@ public class SecurityHandler implements ISecurityHandler {
     this.homeAAMAddress = homeAAMAddress;
     
     try {
-      buildCredentialsWallet(isOnline);
+      buildCredentialsWallet();
     } catch (Exception e) {
       throw new SecurityHandlerException("Error generating credentials wallet", e);
     }
@@ -220,8 +217,17 @@ public class SecurityHandler implements ISecurityHandler {
       request.setPassword(password);
       request.setClientId(clientId);
       
-      request.setClientCSRinPEMFormat(CryptoHelper.buildCertificateSigningRequestPEM(
-          homeAAM.getAamCACertificate().getX509(), username, clientId, pair));
+      String csr = null;
+      if (username.contains("@")) {
+        String[] componentInfo = username.split("@");
+        csr = CryptoHelper.buildComponentCertificateSigningRequestPEM(
+            componentInfo[0], componentInfo[1], pair);
+      } else {
+        csr = CryptoHelper.buildCertificateSigningRequestPEM(
+            homeAAM.getAamCACertificate().getX509(), username, clientId, pair);
+      }
+      
+      request.setClientCSRinPEMFormat(csr);
       
       String certificateValue = ClientFactory.getAAMClient(homeAAM.getAamAddress())
                                     .getClientCertificate(request);
@@ -272,7 +278,7 @@ public class SecurityHandler implements ISecurityHandler {
   /**
    * Read all certificates in the keystore and populate the credentialsWallet
    */
-  private void buildCredentialsWallet(boolean isOnline) throws SecurityHandlerException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, UnrecoverableEntryException {
+  private void buildCredentialsWallet() throws SecurityHandlerException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, UnrecoverableEntryException {
     
     KeyStore trustStore = getKeystore();
     
@@ -292,9 +298,20 @@ public class SecurityHandler implements ISecurityHandler {
       if (subject.startsWith("CN=")) {
         String[] elements = subject.split("CN=")[1].split("@");
         if (elements.length > 2) {
-          String user = elements[0];
-          String client = elements[1];
-          String aamId = elements[2];
+          
+          String user = null;
+          String client = null;
+          String aamId = null;
+          
+          if (elements.length > 3) {
+            user = elements[0] + "@" + elements [1];
+            client = elements[2];
+            aamId = elements[3];
+          } else {
+            user = elements[0];
+            client = elements[1];
+            aamId = elements[2];
+          }
           
           AAM aam = aamList.get(aamId);
           
