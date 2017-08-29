@@ -13,9 +13,8 @@ import java.util.Set;
 public interface IAccessPolicy {
 
     /**
-     * @param deploymentId id of the Security libraries deployment
      * @param authorizationTokens that might satisfy the policy
-     * @return Set of tokens that satisfied access policy
+     * @return Set of tokens that satisfied access policy, if the result set is empty then the policy is NOT satisfied!
      */
-    Set<Token> isSatisfiedWith(String deploymentId, Set<Token> authorizationTokens);
+    Set<Token> isSatisfiedWith(Set<Token> authorizationTokens);
 }

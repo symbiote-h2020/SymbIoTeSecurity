@@ -29,10 +29,10 @@ public class SingleTokenAccessPolicy implements IAccessPolicy {
 
 
     @Override
-    public Set<Token> isSatisfiedWith(String deploymentId, Set<Token> authorizationTokens) {
+    public Set<Token> isSatisfiedWith(Set<Token> authorizationTokens) {
         // trying to find token satisfying this policy
         // presume that none of the tokens could satisfy the policy
-        Set<Token> validTokens = new HashSet<Token>();
+        Set<Token> validTokens = new HashSet<>();
         for (Token token : authorizationTokens) {
             //verify if token satisfies the policy
             if (isSatisfiedWith(token)) {
@@ -40,7 +40,6 @@ public class SingleTokenAccessPolicy implements IAccessPolicy {
                 return validTokens;
             }
         }
-
         return validTokens;
     }
 
@@ -48,17 +47,14 @@ public class SingleTokenAccessPolicy implements IAccessPolicy {
         // need to verify that all the required claims are in the token
         if (requiredClaims != null) {
             for (Entry<String, String> requiredClaim : requiredClaims.entrySet()) {
-                //support for IBAC
-                if (requiredClaim.getKey().equals(SecurityConstants.SUB_NAME_TOKEN_TYPE)) {
-                    return token.getClaims().getSubject() != null ? requiredClaim.getValue().equals(token.getClaims().getSubject()) : false;
-                } else {
-                    // try to find requiredClaim in token attributes
-                    String claimValue = (String) token.getClaims().get(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + requiredClaim.getKey());
-                    //Validate presence of the attribute and matching of required value
-                    return claimValue != null ? requiredClaim.getValue().equals(claimValue) : false;
-                }
+                // try to find requiredClaim in token attributes
+                String claimValue = (String) token.getClaims().get(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + requiredClaim.getKey());
+                //Validate presence of the attribute and matching of required value
+                // TODO review so that is covers all required attributes!
+                return claimValue != null ? requiredClaim.getValue().equals(claimValue) : false;
             }
         }
+
         // token passes the satisfaction procedure
         return true;
     }

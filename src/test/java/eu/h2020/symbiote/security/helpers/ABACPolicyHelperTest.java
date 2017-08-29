@@ -3,13 +3,12 @@ package eu.h2020.symbiote.security.helpers;
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.SingleTokenAccessPolicy;
-import eu.h2020.symbiote.security.commons.*;
 import eu.h2020.symbiote.security.commons.Certificate;
+import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.ABACResolverResponse;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -18,12 +17,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.FileInputStream;
-import java.security.*;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -146,7 +147,7 @@ public class ABACPolicyHelperTest {
 
         resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
         assertTrue(resp.getAvailableResources().contains(goodResourceID));
     }
@@ -164,7 +165,7 @@ public class ABACPolicyHelperTest {
 
         resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
         assertFalse(resp.getAvailableResources().contains(badResourceID));
 
@@ -184,7 +185,7 @@ public class ABACPolicyHelperTest {
 
         resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
         assertFalse(resp.getAvailableResources().contains(badResourceID));
 
@@ -209,7 +210,7 @@ public class ABACPolicyHelperTest {
         badResourceAccessPolicyClaimsMap.put(ageAttr, ageAttrOKValue);
         resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(badResourceAccessPolicyClaimsMap));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
         assertTrue(resp.getAvailableResources().contains(goodResourceID));
         assertFalse(resp.getAvailableResources().contains(badResourceID));
@@ -235,7 +236,7 @@ public class ABACPolicyHelperTest {
         badResourceAccessPolicyClaimsMap.put(ageAttr, ageAttrOKValue);
         resourceAccessPolicyMap.put(goodResourceID2, new SingleTokenAccessPolicy(badResourceAccessPolicyClaimsMap));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
         assertTrue(resp.getAvailableResources().contains(goodResourceID));
         assertTrue(resp.getAvailableResources().contains(goodResourceID2));
@@ -261,7 +262,7 @@ public class ABACPolicyHelperTest {
         badResourceAccessPolicyClaimsMap.put(ageAttr, ageAttrOKValue);
         resourceAccessPolicyMap.put(badResourceID2, new SingleTokenAccessPolicy(badResourceAccessPolicyClaimsMap));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
         assertFalse(resp.getAvailableResources().contains(badResourceID));
         assertFalse(resp.getAvailableResources().contains(badResourceID2));
@@ -281,7 +282,7 @@ public class ABACPolicyHelperTest {
 
         resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
         //TODO Nemanja check if attribtues accumulation for access policy should be supported, then uncomment
         //assertTrue(allowedResources.contains(goodResourceID));
 
@@ -300,7 +301,7 @@ public class ABACPolicyHelperTest {
 
         resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
 
         assertFalse(resp.getAvailableResources().contains(badResourceID));
@@ -317,7 +318,7 @@ public class ABACPolicyHelperTest {
 
         resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(null));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
         assertTrue(resp.getAvailableResources().contains(goodResourceID));
 
