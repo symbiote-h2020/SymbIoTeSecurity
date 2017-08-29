@@ -79,7 +79,15 @@ public interface IAAMClient {
      */
     ValidationStatus validate(String token, Optional<String> clientCertificate, Optional<String> clientCertificateSigningAAMCertificate, Optional<String> foreignTokenIssuingAAMCertificate);
 
+    /**
+     * @param platformManagementRequest related to associated platforms' management operation.
+     * @return Management Status informing about a result of completing requested management operation
+     */
     ManagementStatus manage(PlatformManagementRequest platformManagementRequest) throws AAMException;
 
+    /**
+     * @param userManagementRequest related to associated users' management operation.
+     * @return Management Status informing about a result of completing requested management operation
+     */
     ManagementStatus manage(UserManagementRequest userManagementRequest) throws AAMException;
 }

@@ -174,8 +174,8 @@ public class AAMClient implements IAAMClient {
     }
 
     /**
-     * @param platformManagementRequest
-     * @return Platform Management Status
+     * @param platformManagementRequest related to associated platforms' management operation.
+     * @return Management Status informing about a result of completing requested management operation
      */
     @Override
     public ManagementStatus manage(PlatformManagementRequest platformManagementRequest) throws AAMException {
@@ -187,8 +187,8 @@ public class AAMClient implements IAAMClient {
     }
 
     /**
-     * @param userManagementRequest
-     * @return User Management Status
+     * @param userManagementRequest  related to associated users' management operation.
+     * @return Management Status informing about a result of completing requested management operation
      */
     @Override
     public ManagementStatus manage(UserManagementRequest userManagementRequest) throws AAMException {
