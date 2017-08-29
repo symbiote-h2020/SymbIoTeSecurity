@@ -29,7 +29,7 @@ public interface IComponentSecurityHandler {
             SecurityHandlerException;
 
     /**
-     * Used by the component to verify that the other components response was legitimate... eg to handle the service response encapsulated in a JWS.
+     * Used by the component to verify that the other components response was legitimate... e.g. to handle the service response encapsulated in a JWS.
      *
      * @param serviceResponse    that should prove the service's authenticity
      * @param serviceCertificate from the component that the last operation was requested. Can be found in the @{@link AAM#componentCertificates}

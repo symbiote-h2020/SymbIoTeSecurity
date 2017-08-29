@@ -10,26 +10,31 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 /**
- * SymbIoTe Access Policy that needs to be satisfied by a single Token issued by local AAM
+ * SymbIoTe Access Policy that needs to be satisfied by a single Token issued by local AAM for a particular user
  *
  * @author Mikołaj Dobski (PSNC)
  * @author Nemanja Ignjatov (UNIVIE)
  */
-public class SingleLocalHomeTokenAccessPolicy implements IAccessPolicy {
+public class SingleLocalHomeTokenIdentityBasedTokenAccessPolicy implements IAccessPolicy {
     private final String platformIdentifier;
+    private final String username;
     private Map<String, String> requiredClaims = new HashMap<>();
 
     /**
      * Creates a new access policy object
      *
      * @param platformIdentifier so that HOME tokens are properly identified
-     * @param requiredClaims     map with all the claims that need to be contained in a single token to satisfy the
+     * @param username           the user for which should have access to the resource
+     * @param requiredClaims     optional map with all other claims that need to be contained in a single token to satisfy the
      */
-    public SingleLocalHomeTokenAccessPolicy(String platformIdentifier, Map<String, String> requiredClaims) throws
+    public SingleLocalHomeTokenIdentityBasedTokenAccessPolicy(String platformIdentifier, String username, Map<String, String> requiredClaims) throws
             InvalidArgumentsException {
         if (platformIdentifier == null || platformIdentifier.isEmpty())
             throw new InvalidArgumentsException("Platform identifier must not be null/empty!");
         this.platformIdentifier = platformIdentifier;
+        if (username == null || username.isEmpty())
+            throw new InvalidArgumentsException("Username must not be null/empty!");
+        this.username = username;
         if (requiredClaims != null)
             this.requiredClaims = requiredClaims;
     }
@@ -41,8 +46,11 @@ public class SingleLocalHomeTokenAccessPolicy implements IAccessPolicy {
         Set<Token> validTokens = new HashSet<>();
         // trying to find token satisfying this policy
         for (Token token : authorizationTokens) {
-            //verify if token is HOME ttyp and if token is issued by this platform and if the token satisfies the general policy idea
-            if (token.getType().equals(Token.Type.HOME) && token.getClaims().getIssuer().equals(platformIdentifier) && isSatisfiedWith(token)) {
+            //verify if token
+            if (token.getType().equals(Token.Type.HOME) // is HOME ttyp
+                    && token.getClaims().getIssuer().equals(platformIdentifier) // is issued by this/local (platform) AAM
+                    && token.getClaims().getSubject().split("@")[0].equals(username) // for the given user
+                    && isSatisfiedWith(token)) { // and if the token satisfies the general policy idea
                 validTokens.add(token);
                 return validTokens;
             }

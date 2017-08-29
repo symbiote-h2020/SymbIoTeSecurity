@@ -1,8 +1,8 @@
 package eu.h2020.symbiote.security.accesspolicies;
 
-import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,7 +15,7 @@ import java.util.Set;
  * @author Nemanja Ignjatov (UNIVIE)
  */
 public class SingleTokenAccessPolicy implements IAccessPolicy {
-    private Map<String, String> requiredClaims;
+    private Map<String, String> requiredClaims = new HashMap<>();
 
     /**
      * Creates a new access policy object
@@ -24,15 +24,15 @@ public class SingleTokenAccessPolicy implements IAccessPolicy {
      *                       access policy
      */
     public SingleTokenAccessPolicy(Map<String, String> requiredClaims) {
-        this.requiredClaims = requiredClaims;
+        if (requiredClaims != null) this.requiredClaims = requiredClaims;
     }
 
 
     @Override
     public Set<Token> isSatisfiedWith(Set<Token> authorizationTokens) {
-        // trying to find token satisfying this policy
         // presume that none of the tokens could satisfy the policy
         Set<Token> validTokens = new HashSet<>();
+        // trying to find a token satisfying this policy
         for (Token token : authorizationTokens) {
             //verify if token satisfies the policy
             if (isSatisfiedWith(token)) {
@@ -44,17 +44,21 @@ public class SingleTokenAccessPolicy implements IAccessPolicy {
     }
 
     private boolean isSatisfiedWith(Token token) {
-        // need to verify that all the required claims are in the token
-        if (requiredClaims != null) {
-            for (Entry<String, String> requiredClaim : requiredClaims.entrySet()) {
-                // try to find requiredClaim in token attributes
-                String claimValue = (String) token.getClaims().get(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + requiredClaim.getKey());
-                //Validate presence of the attribute and matching of required value
-                // TODO review so that is covers all required attributes!
-                return claimValue != null ? requiredClaim.getValue().equals(claimValue) : false;
-            }
-        }
+        // empty access policy is satisfied by any token
+        if (requiredClaims.isEmpty())
+            return true;
 
+        // need to verify that all the required claims are in the token
+        for (Entry<String, String> requiredClaim : requiredClaims.entrySet()) {
+            // try to find requiredClaim in token attributes
+            String claimValue = (String) token.getClaims().get(requiredClaim.getKey());
+            // missing claim causes failed authorization
+            if (claimValue == null)
+                return false;
+            // wrong value of the claim also causes failed authorization
+            if (!requiredClaim.getValue().equals(claimValue))
+                return false;
+        }
         // token passes the satisfaction procedure
         return true;
     }

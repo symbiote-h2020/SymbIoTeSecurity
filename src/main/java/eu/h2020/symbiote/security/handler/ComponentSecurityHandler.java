@@ -124,7 +124,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                                                          SecurityRequest securityRequest) throws
             SecurityHandlerException {
         //TODO Mikolaj - do your magic
-        return ABACPolicyHelper.checkRequestedOperationAccess(accessPolicies, securityRequest).getAvailableResources();
+        return ABACPolicyHelper.checkRequestedOperationAccess(accessPolicies, securityRequest).getAuthorizedResourcesIdentifiers();
     }
 
     @Override
@@ -166,8 +166,6 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
      * @throws SecurityHandlerException on error
      */
     private BoundCredentials getCoreAAMCredentials() throws SecurityHandlerException {
-
-
         AAM coreAAM = securityHandler.getAvailableAAMs(localAAM).get(SecurityConstants.AAM_CORE_AAM_INSTANCE_ID);
         if (coreAAM == null)
             throw new SecurityHandlerException("Core AAM unavailable");

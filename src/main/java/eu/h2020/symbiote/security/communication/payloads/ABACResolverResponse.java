@@ -1,7 +1,5 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
-import eu.h2020.symbiote.security.commons.Token;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,19 +11,19 @@ import java.util.Set;
 public class ABACResolverResponse {
 
     private Set<String> availableResources;
-    private Set<SecurityCredentials> validCredentials;
+    private Set<SecurityCredentials> authorizationCredentials;
 
     public ABACResolverResponse() {
-        this.availableResources = new HashSet<String>();
-        this.validCredentials = new HashSet<SecurityCredentials>();
+        this.availableResources = new HashSet<>();
+        this.authorizationCredentials = new HashSet<>();
     }
 
-    public ABACResolverResponse(Set<String> availableResources, Set<SecurityCredentials> validCredentials) {
+    public ABACResolverResponse(Set<String> availableResources, Set<SecurityCredentials> authorizationCredentials) {
         this.availableResources = availableResources;
-        this.validCredentials = validCredentials;
+        this.authorizationCredentials = authorizationCredentials;
     }
 
-    public Set<String> getAvailableResources() {
+    public Set<String> getAuthorizedResourcesIdentifiers() {
         return availableResources;
     }
 
@@ -33,11 +31,11 @@ public class ABACResolverResponse {
         this.availableResources = availableResources;
     }
 
-    public Set<SecurityCredentials> getValidCredentials() {
-        return validCredentials;
+    public Set<SecurityCredentials> getAuthorizationCredentials() {
+        return authorizationCredentials;
     }
 
-    public void setValidCredentials(Set<SecurityCredentials> validCredentials) {
-        this.validCredentials = validCredentials;
+    public void setAuthorizationCredentials(Set<SecurityCredentials> authorizationCredentials) {
+        this.authorizationCredentials = authorizationCredentials;
     }
 }
