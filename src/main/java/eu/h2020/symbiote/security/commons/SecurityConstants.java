@@ -57,6 +57,7 @@ public class SecurityConstants {
     public static final String CLIENT_CERTIFICATE_HEADER_NAME = "X-Auth-Client-Cert";
     public static final String AAM_CERTIFICATE_HEADER_NAME = "X-Auth-AAM-Cert";
     public static final String FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE = "X-Auth-ISS-Cert";
+    public static final String AAM_LOCAL_USERS_ATTRIBUTES = "/local_users_attributes";
 
 
     private SecurityConstants() {

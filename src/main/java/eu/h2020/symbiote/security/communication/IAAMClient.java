@@ -90,4 +90,10 @@ public interface IAAMClient {
      * @return Management Status informing about a result of completing requested management operation
      */
     ManagementStatus manage(UserManagementRequest userManagementRequest) throws AAMException;
+
+    /**
+     * @param localUsersAttributesMap which needs to be set.
+     * @return Boolean status; if true, localUsersAttributesMap was set
+     */
+    Boolean setLocalUsersAttributes(LocalUsersAttributesMap localUsersAttributesMap);
 }

@@ -40,6 +40,10 @@ public interface IFeignAAMClient {
             SecurityConstants.TOKEN_HEADER_NAME + ": " + "{token}"})
     Response getHomeToken(@Param("token") String loginRequest);
 
+    @RequestLine("POST " + SecurityConstants.AAM_LOCAL_USERS_ATTRIBUTES)
+    @Headers("Content-Type: application/json")
+    Response setLocalUsersAttributes(LocalUsersAttributesMap localUsersAttributesMap);
+
     @RequestLine("POST " + SecurityConstants.AAM_GET_FOREIGN_TOKEN)
     @Headers({SecurityConstants.TOKEN_HEADER_NAME + ": {token}",
             SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME + ": {clientCertificate}",
