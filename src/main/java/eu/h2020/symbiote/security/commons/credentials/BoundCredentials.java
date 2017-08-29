@@ -10,10 +10,7 @@ import java.util.Map;
  * Credentials bound with a particular AAM
  */
 public class BoundCredentials {
-    /**
-     * the AAM the credentialsWallet are bound to
-     */
-    public final AAM aam;
+
     /**
      * credentials issued by the AAM if the user has an account in it
      */
@@ -23,7 +20,7 @@ public class BoundCredentials {
      */
     public Map<AAM, Token> foreignTokens = new HashMap<>();
 
-    public BoundCredentials(AAM aam) {
-        this.aam = aam;
+    public BoundCredentials(HomeCredentials homeCredentials) {
+        this.homeCredentials = homeCredentials;
     }
 }

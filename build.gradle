@@ -65,10 +65,13 @@ dependencies {
     compile('org.bouncycastle:bcprov-jdk15on:1.56+')
     compile('org.bouncycastle:bcpkix-jdk15on:1.56+')
     compile('io.github.openfeign:feign-jackson:9.5+')
+    compile('commons-logging:commons-logging:1.2+')
 
     // common testing
     testCompile('junit:junit:4.+')
-    testCompile('commons-logging:commons-logging:1.2+')
+    testCompile('org.powermock:powermock-api-mockito:1.6.4')
+    testCompile('org.powermock:powermock-core:1.6.4')
+    testCompile('org.powermock:powermock-module-junit4:1.6.4')
 }
 
 // code quality below

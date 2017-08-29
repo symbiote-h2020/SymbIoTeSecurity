@@ -8,7 +8,6 @@ import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
-import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
@@ -17,17 +16,17 @@ import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 import eu.h2020.symbiote.security.helpers.ABACPolicyHelper;
-import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper;
 
-import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * used by SymbIoTe Components to integrate with the security layer
@@ -80,7 +79,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
 
         Map<String, AAM> availableAAMs = new HashMap<>();
         if (!alwaysUseLocalAAMForValidation)
-            availableAAMs = securityHandler.getAvailableAAMs(); // retrieving AAMs available to use them for validation
+            availableAAMs = securityHandler.getAvailableAAMs(localAAM); // retrieving AAMs available to use them for validation
 
         // validating the authorization tokens
         for (SecurityCredentials securityCredentials : securityRequest.getSecurityCredentials()) {
@@ -175,40 +174,19 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
      * @throws SecurityHandlerException on error
      */
     private BoundCredentials getCoreAAMCredentials() throws SecurityHandlerException {
-        AAM coreAAM = securityHandler.getAvailableAAMs().get(SecurityConstants.AAM_CORE_AAM_INSTANCE_ID);
+        
+        
+        AAM coreAAM = securityHandler.getAvailableAAMs(localAAM).get(SecurityConstants.AAM_CORE_AAM_INSTANCE_ID);
         if (coreAAM == null)
             throw new SecurityHandlerException("Core AAM unavailable");
         BoundCredentials coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM);
         if (coreAAMBoundCredentials == null) {
-            KeyPair componentKeyPair;
-            Certificate componentCertificate;
-            try {
-                // we are missing core aam credentials and need to acquire them for this component
-                componentKeyPair = CryptoHelper.createKeyPair();
-                String componentCertificateCSR = CryptoHelper.buildComponentCertificateSigningRequestPEM(componentId, platformId, componentKeyPair);
-                componentCertificate = securityHandler.getCertificate(
-                        coreAAM,
-                        componentOwnerUsername,
-                        componentOwnerPassword,
-                        combinedClientIdentifier,
-                        componentCertificateCSR);
-                // fetching updated from the wallet
-                coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM);
-            } catch (NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException | IOException | InvalidArgumentsException e) {
-                e.printStackTrace();
-                throw new SecurityHandlerException("Security Handler failed to acquire component certificate from the core AAM");
-            }
-
-            HomeCredentials coreAAMCredentials = new HomeCredentials(
-                    coreAAM,
-                    componentOwnerUsername,
-                    combinedClientIdentifier,
-                    componentCertificate,
-                    componentKeyPair.getPrivate());
-            coreAAMBoundCredentials = new BoundCredentials(coreAAM);
-            coreAAMBoundCredentials.homeCredentials = coreAAMCredentials;
-            // TODO @JASM review if it is ok to just put the credentials there, as discussed, duplicated, the SH does it :)
-            securityHandler.getAcquiredCredentials().put(coreAAM, coreAAMBoundCredentials);
+            Certificate componentCertificate = componentCertificate = securityHandler.getCertificate(
+                coreAAM,
+                componentOwnerUsername,
+                componentOwnerPassword,
+                combinedClientIdentifier);
+            coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM.getAamInstanceId());
         }
 
         // check that we have a valid token
@@ -225,9 +203,15 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         // fetching the core token using the security handler
         if (isCoreTokenRefreshNeeded) {
             // gets the token and puts it in the wallet
-            securityHandler.login(coreAAMBoundCredentials.homeCredentials);
-            // fetching updated token from the wallet
-            coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM);
+            try {
+                securityHandler.login(coreAAM);
+                // fetching updated token from the wallet
+                coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM);
+                
+            } catch (ValidationException e) {
+                throw new SecurityHandlerException("Can't refesh token", e);
+            }
+            
         }
         return coreAAMBoundCredentials;
     }
