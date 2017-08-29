@@ -140,4 +140,4 @@ target
 logs
 *.log
 
-# just triggering a new jitpack build
+src/test/resources/keystore.jks
