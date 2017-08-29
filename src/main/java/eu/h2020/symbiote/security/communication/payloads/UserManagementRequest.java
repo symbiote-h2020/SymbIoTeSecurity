@@ -2,6 +2,9 @@ package eu.h2020.symbiote.security.communication.payloads;
 
 import eu.h2020.symbiote.security.commons.enums.OperationType;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Describes user registration in AAM payload.
  *
@@ -15,6 +18,7 @@ public class UserManagementRequest {
     private Credentials administratorCredentials = new Credentials();
     private Credentials userCredentials = new Credentials();
     private UserDetails userDetails = new UserDetails();
+    private Map<String, String> userAttributes = new HashMap<>();
     private OperationType operationType;
 
     /**
@@ -24,11 +28,12 @@ public class UserManagementRequest {
     }
 
     public UserManagementRequest(Credentials administratorCredentials, Credentials userCredentials,
-                                 UserDetails userDetails, OperationType operationType) {
+                                 UserDetails userDetails, Map<String, String> userAttributes, OperationType operationType) {
         this.administratorCredentials = administratorCredentials;
         this.userCredentials = userCredentials;
         this.userDetails = userDetails;
         this.operationType = operationType;
+        this.userAttributes = userAttributes;
     }
 
     public Credentials getAdministratorCredentials() {
@@ -62,4 +67,13 @@ public class UserManagementRequest {
     public void setUserCredentials(Credentials userCredentials) {
         this.userCredentials = userCredentials;
     }
+
+    public Map<String, String> getUserAttributes() {
+        return userAttributes;
+    }
+
+    public void setUserAttributes(Map<String, String> userAttributes) {
+        this.userAttributes = userAttributes;
+    }
+
 }
