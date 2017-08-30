@@ -25,6 +25,8 @@ public class ABACPolicyHelper {
     }
 
     /**
+     * TODO @Nemanja please improve to return ResourcesIdentifiers with Credentials that satisfied those resources' policies -> will allow optimistic validation in next step
+     *
      * @param accessPolicies  of the resources that need to be checked against the tokens
      * @param securityRequest container for tokens and user credentials which will be checked against access policies
      * @return set of resources (their identifiers) whose access policies are satisfied with the given credentials

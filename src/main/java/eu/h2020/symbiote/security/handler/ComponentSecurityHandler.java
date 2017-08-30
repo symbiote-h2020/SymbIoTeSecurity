@@ -13,6 +13,7 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerExcep
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
+import eu.h2020.symbiote.security.communication.payloads.ABACResolverResponse;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 import eu.h2020.symbiote.security.helpers.ABACPolicyHelper;
@@ -55,8 +56,8 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         this.combinedClientIdentifier = componentId;
     }
 
-    @Override
-    public ValidationStatus isReceivedSecurityRequestValid(SecurityRequest securityRequest) throws
+
+    private ValidationStatus isReceivedSecurityRequestValid(SecurityRequest securityRequest) throws
             SecurityHandlerException {
 
         // verifying that the request is integral and the client should posses the tokens in it
@@ -120,11 +121,25 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
 
 
     @Override
-    public Set<String> getAuthorizedResourcesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
-                                                         SecurityRequest securityRequest) throws
+    public Set<String> getSatisfiedPoliciesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
+                                                       SecurityRequest securityRequest) throws
             SecurityHandlerException {
-        //TODO Mikolaj - do your magic
-        return ABACPolicyHelper.checkRequestedOperationAccess(accessPolicies, securityRequest).getAuthorizedResourcesIdentifiers();
+
+        // resolving which tokens authorize access to resources -> filtering the security request to only contain business request relevant credentials
+        ABACResolverResponse abacResolverResponse = ABACPolicyHelper.checkRequestedOperationAccess(accessPolicies, securityRequest);
+
+        // TODO @Mikołaj once we know which credentials grant access to which resource we can provide an optimistic validator per policy and not the whole set
+        // validating only credentials that are useful to the business request
+        ValidationStatus receivedSecurityRequestValidationStatus = isReceivedSecurityRequestValid(
+                new SecurityRequest(
+                        abacResolverResponse.getAuthorizationCredentials(),
+                        securityRequest.getTimestamp()));
+        // check if the validation succeed for the whole filtered set
+        if (receivedSecurityRequestValidationStatus != ValidationStatus.VALID)
+            throw new SecurityHandlerException("Some of the provided security credentials failed validation with status: " + receivedSecurityRequestValidationStatus);
+
+        // resources to which the given security request grants access
+        return abacResolverResponse.getAuthorizedResourcesIdentifiers();
     }
 
     @Override
