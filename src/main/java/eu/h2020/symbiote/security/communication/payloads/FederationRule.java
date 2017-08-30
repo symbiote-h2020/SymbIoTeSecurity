@@ -5,13 +5,16 @@ import org.springframework.data.annotation.Id;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Federation {
+/**
+ * Required by the AAMs to exchange received remote HOME tokens into FOREIGN tokens containing the federation attributes.
+ */
+public class FederationRule {
     @Id
     private String federationId = "";
     private Map<String, String> requiredAttributes = new HashMap<>();
     private Map<String, String> releasedFederatedAttributes = new HashMap<>();
 
-    public Federation(String federationId, Map<String, String> requiredAttributes, Map<String, String> releasedFederatedAttributes) {
+    public FederationRule(String federationId, Map<String, String> requiredAttributes, Map<String, String> releasedFederatedAttributes) {
         this.federationId = federationId;
         this.requiredAttributes = requiredAttributes;
         this.releasedFederatedAttributes = releasedFederatedAttributes;
