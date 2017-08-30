@@ -3,26 +3,29 @@ package eu.h2020.symbiote.security.helpers;
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.SingleTokenAccessPolicy;
-import eu.h2020.symbiote.security.commons.*;
 import eu.h2020.symbiote.security.commons.Certificate;
+import eu.h2020.symbiote.security.commons.SecurityConstants;
+import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
+import eu.h2020.symbiote.security.communication.payloads.ABACResolverResponse;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 import eu.h2020.symbiote.security.utils.DummyTokenIssuer;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.FileInputStream;
-import java.security.*;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -39,13 +42,8 @@ public class ABACPolicyHelperTest {
     private static final String CLIENT_CERTIFICATE_ALIAS = "client-core-1";
     private static final String CERTIFICATE_LOCATION = "./src/test/resources/core.p12";
     private static final String CERTIFICATE_PASSWORD = "1234567";
-    private static final String SERVICE_CERTIFICATE_ALIAS = "platform-1-1-c1"; // let's suppose it
-    private static final String SERVICE_CERTIFICATE_LOCATION = "./src/test/resources/platform_1.p12"; // let's suppose it
     private final String username = "testusername";
     private final String clientId = "testclientid";
-    private HashSet<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<>();
-    private HashSet<AuthorizationCredentials> authorizationCredentialsMultipleTokensSet = new HashSet<>();
-
     private final String deploymentId = "deploymentId";
 
     private final String goodResourceID = "goodResourceID";
@@ -59,8 +57,10 @@ public class ABACPolicyHelperTest {
 
     private final String nameAttrOKValue = "John";
     private final String nameAttrBadValue = "Mike";
-
     private final String ageAttrOKValue = "20";
+
+    private HashSet<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<>();
+    private HashSet<AuthorizationCredentials> authorizationCredentialsMultipleTokensSet = new HashSet<>();
 
     @Before
     public void setUp() throws Exception {
@@ -133,182 +133,208 @@ public class ABACPolicyHelperTest {
     }
 
     @Test
-    public void singleResourceSingleTokenCheckSuccess() throws NoSuchAlgorithmException, MalformedJWTException, SecurityHandlerException {
+    public void singleResourceSingleTokenCheckSuccess() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
         Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
-        accessPolicyClaimsMap.put(nameAttr, nameAttrOKValue);
-        accessPolicyClaimsMap.put(ageAttr, ageAttrOKValue);
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
 
-        Set<String> allowedResources = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertTrue(allowedResources.contains(goodResourceID));
-
+        assertTrue(resp.getAuthorizedResourcesIdentifiers().contains(goodResourceID));
     }
 
     @Test
-    public void singleResourceSingleTokenCheckFailure() throws NoSuchAlgorithmException, MalformedJWTException, SecurityHandlerException {
+    public void singleResourceSingleTokenCheckFailure() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
         Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
-        accessPolicyClaimsMap.put(nameAttr, nameAttrBadValue);
-        accessPolicyClaimsMap.put(ageAttr, ageAttrOKValue);
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
 
-        Set<String> allowedResources = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertFalse(allowedResources.contains(badResourceID));
+        assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID));
 
     }
 
     @Test
-    public void singleResourceSingleTokenMissingAttribute() throws NoSuchAlgorithmException, MalformedJWTException, SecurityHandlerException {
+    public void singleResourceSingleTokenMissingAttribute() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
         Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
-        accessPolicyClaimsMap.put(nameAttr, nameAttrBadValue);
-        accessPolicyClaimsMap.put(ageAttr, ageAttrOKValue);
-        accessPolicyClaimsMap.put(missingAttr, "");
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + missingAttr, "");
 
         resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
 
-        Set<String> allowedResources = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertFalse(allowedResources.contains(badResourceID));
+        assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID));
 
     }
 
     @Test
-    public void multipleResourceSingleTokenCheckOneSuccessOneFailure() throws NoSuchAlgorithmException, MalformedJWTException, SecurityHandlerException {
+    public void multipleResourceSingleTokenCheckOneSuccessOneFailure() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
         Map<String, String> goodResourceAccessPolicyClaimsMap = new HashMap<String, String>();
-        goodResourceAccessPolicyClaimsMap.put(nameAttr, nameAttrOKValue);
-        goodResourceAccessPolicyClaimsMap.put(ageAttr, ageAttrOKValue);
+        goodResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
+        goodResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
 
         resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(goodResourceAccessPolicyClaimsMap));
 
         Map<String, String> badResourceAccessPolicyClaimsMap = new HashMap<String, String>();
-        badResourceAccessPolicyClaimsMap.put(nameAttr, nameAttrBadValue);
-        badResourceAccessPolicyClaimsMap.put(ageAttr, ageAttrOKValue);
+        badResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
+        badResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
         resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(badResourceAccessPolicyClaimsMap));
 
-        Set<String> allowedResources = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertTrue(allowedResources.contains(goodResourceID));
-        assertFalse(allowedResources.contains(badResourceID));
+        assertTrue(resp.getAuthorizedResourcesIdentifiers().contains(goodResourceID));
+        assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID));
 
     }
 
     @Test
-    public void multipleResourceSingleTokenAllSuccess() throws NoSuchAlgorithmException, MalformedJWTException, SecurityHandlerException {
+    public void multipleResourceSingleTokenAllSuccess() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
         Map<String, String> goodResourceAccessPolicyClaimsMap = new HashMap<String, String>();
-        goodResourceAccessPolicyClaimsMap.put(nameAttr, nameAttrOKValue);
-        goodResourceAccessPolicyClaimsMap.put(ageAttr, ageAttrOKValue);
+        goodResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
+        goodResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
 
         resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(goodResourceAccessPolicyClaimsMap));
 
         Map<String, String> badResourceAccessPolicyClaimsMap = new HashMap<String, String>();
-        badResourceAccessPolicyClaimsMap.put(nameAttr, nameAttrOKValue);
-        badResourceAccessPolicyClaimsMap.put(ageAttr, ageAttrOKValue);
+        badResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
+        badResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
         resourceAccessPolicyMap.put(goodResourceID2, new SingleTokenAccessPolicy(badResourceAccessPolicyClaimsMap));
 
-        Set<String> allowedResources = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertTrue(allowedResources.contains(goodResourceID));
-        assertTrue(allowedResources.contains(goodResourceID2));
+        assertTrue(resp.getAuthorizedResourcesIdentifiers().contains(goodResourceID));
+        assertTrue(resp.getAuthorizedResourcesIdentifiers().contains(goodResourceID2));
 
     }
 
     @Test
-    public void multipleResourceSingleTokenAllFailure() throws NoSuchAlgorithmException, MalformedJWTException, SecurityHandlerException {
+    public void multipleResourceSingleTokenAllFailure() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
         Map<String, String> goodResourceAccessPolicyClaimsMap = new HashMap<String, String>();
-        goodResourceAccessPolicyClaimsMap.put(nameAttr, nameAttrBadValue);
-        goodResourceAccessPolicyClaimsMap.put(ageAttr, ageAttrOKValue);
+        goodResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
+        goodResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
 
         resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(goodResourceAccessPolicyClaimsMap));
 
         Map<String, String> badResourceAccessPolicyClaimsMap = new HashMap<String, String>();
-        badResourceAccessPolicyClaimsMap.put(nameAttr, nameAttrBadValue);
-        badResourceAccessPolicyClaimsMap.put(ageAttr, ageAttrOKValue);
+        badResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
+        badResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
         resourceAccessPolicyMap.put(badResourceID2, new SingleTokenAccessPolicy(badResourceAccessPolicyClaimsMap));
 
-        Set<String> allowedResources = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertFalse(allowedResources.contains(badResourceID));
-        assertFalse(allowedResources.contains(badResourceID2));
+        assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID));
+        assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID2));
 
     }
 
     @Test
-    public void singleResourceMultipleTokensSuccess() throws NoSuchAlgorithmException, MalformedJWTException, SecurityHandlerException {
+    public void singleResourceMultipleTokensSuccess() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
         Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
-        accessPolicyClaimsMap.put(nameAttr, nameAttrOKValue);
-        accessPolicyClaimsMap.put(ageAttr, ageAttrOKValue);
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
 
-        Set<String> allowedResources = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
         //TODO Nemanja check if attribtues accumulation for access policy should be supported, then uncomment
         //assertTrue(allowedResources.contains(goodResourceID));
 
     }
 
     @Test
-    public void singleResourceMultipleTokensFailure() throws NoSuchAlgorithmException, MalformedJWTException, SecurityHandlerException {
+    public void singleResourceMultipleTokensFailure() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
         Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
-        accessPolicyClaimsMap.put(nameAttr, nameAttrBadValue);
-        accessPolicyClaimsMap.put(ageAttr, ageAttrOKValue);
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
 
-        Set<String> allowedResources = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
 
-        assertFalse(allowedResources.contains(badResourceID));
+        assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID));
 
     }
 
     @Test
-    public void singleResourceEmptyPolicySuccess() throws NoSuchAlgorithmException, MalformedJWTException, SecurityHandlerException {
+    public void singleResourceEmptyPolicySuccess() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -317,9 +343,9 @@ public class ABACPolicyHelperTest {
 
         resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(null));
 
-        Set<String> allowedResources = ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, resourceAccessPolicyMap, securityRequest);
+        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertTrue(allowedResources.contains(goodResourceID));
+        assertTrue(resp.getAuthorizedResourcesIdentifiers().contains(goodResourceID));
 
     }
 }

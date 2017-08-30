@@ -29,7 +29,7 @@ public interface IComponentSecurityHandler {
             SecurityHandlerException;
 
     /**
-     * Used by the component to verify that the other components response was legitimate... eg to handle the service response encapsulated in a JWS.
+     * Used by the component to verify that the other components response was legitimate... e.g. to handle the service response encapsulated in a JWS.
      *
      * @param serviceResponse    that should prove the service's authenticity
      * @param serviceCertificate from the component that the last operation was requested. Can be found in the @{@link AAM#componentCertificates}
@@ -40,12 +40,11 @@ public interface IComponentSecurityHandler {
 
     /**
      *
-     * @param deploymentId  identificator of the platform where Symbiote Security is instatiated
      * @param accessPolicies  of the resources that need to be checked against the tokens
      * @param securityRequest that might satisfy the access policies of the resources
      * @return set of resources (their identifiers) whose access policies are satisfied with the given tokens
      */
-    Set<String> getAuthorizedResourcesIdentifiers(String deploymentId, Map<String, IAccessPolicy> accessPolicies,
+    Set<String> getAuthorizedResourcesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
                                                   SecurityRequest securityRequest) throws SecurityHandlerException;
 
     /**

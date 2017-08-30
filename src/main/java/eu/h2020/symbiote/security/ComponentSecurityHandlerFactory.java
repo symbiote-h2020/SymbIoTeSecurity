@@ -21,6 +21,7 @@ public class ComponentSecurityHandlerFactory {
      * Creates an end-user security handler
      *
      * @param coreAAMAddress                 Symbiote Core AAM address which is available on the symbiote security webpage
+     * @param keystorePath                   where the keystore will be stored
      * @param keystorePassword               needed to access security credentials
      * @param clientId                       name of the component in the form of "componentId@platformId"
      * @param localAAMAddress                when using only local AAM for @{@link SecurityRequest} validation

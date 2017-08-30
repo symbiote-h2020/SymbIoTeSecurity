@@ -21,12 +21,7 @@ import eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * used by SymbIoTe Components to integrate with the security layer
@@ -42,8 +37,6 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
     private final String componentOwnerUsername;
     private final String componentOwnerPassword;
     private final String combinedClientIdentifier;
-    private final String componentId;
-    private final String platformId;
 
     public ComponentSecurityHandler(ISecurityHandler securityHandler,
                                     String localAAMAddress,
@@ -59,8 +52,6 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         String[] splitComponentId = componentId.split("@");
         if (splitComponentId.length != 2)
             throw new SecurityHandlerException("Component Id has bad form, must be componentId@platformId");
-        this.componentId = splitComponentId[0];
-        this.platformId = splitComponentId[1];
         this.combinedClientIdentifier = componentId;
     }
 
@@ -129,9 +120,11 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
 
 
     @Override
-    public Set<String> getAuthorizedResourcesIdentifiers(String deploymentId, Map<String, IAccessPolicy> accessPolicies,
-                                                         SecurityRequest securityRequest) throws SecurityHandlerException {
-        return ABACPolicyHelper.checkRequestedOperationAccess(deploymentId, accessPolicies, securityRequest);
+    public Set<String> getAuthorizedResourcesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
+                                                         SecurityRequest securityRequest) throws
+            SecurityHandlerException {
+        //TODO Mikolaj - do your magic
+        return ABACPolicyHelper.checkRequestedOperationAccess(accessPolicies, securityRequest).getAuthorizedResourcesIdentifiers();
     }
 
     @Override
@@ -173,18 +166,17 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
      * @throws SecurityHandlerException on error
      */
     private BoundCredentials getCoreAAMCredentials() throws SecurityHandlerException {
-        
-        
         AAM coreAAM = securityHandler.getAvailableAAMs(localAAM).get(SecurityConstants.AAM_CORE_AAM_INSTANCE_ID);
         if (coreAAM == null)
             throw new SecurityHandlerException("Core AAM unavailable");
         BoundCredentials coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM);
         if (coreAAMBoundCredentials == null) {
-            Certificate componentCertificate = componentCertificate = securityHandler.getCertificate(
-                coreAAM,
-                componentOwnerUsername,
-                componentOwnerPassword,
-                combinedClientIdentifier);
+            // making sure a proper certificate is in the keystore
+            securityHandler.getCertificate(
+                    coreAAM,
+                    componentOwnerUsername,
+                    componentOwnerPassword,
+                    combinedClientIdentifier);
             coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM.getAamInstanceId());
         }
 
@@ -206,11 +198,11 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                 securityHandler.login(coreAAM);
                 // fetching updated token from the wallet
                 coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM);
-                
+
             } catch (ValidationException e) {
-                throw new SecurityHandlerException("Can't refesh token", e);
+                throw new SecurityHandlerException("Can't refresh the platformOwner's CoreAAM HOME token", e);
             }
-            
+
         }
         return coreAAMBoundCredentials;
     }

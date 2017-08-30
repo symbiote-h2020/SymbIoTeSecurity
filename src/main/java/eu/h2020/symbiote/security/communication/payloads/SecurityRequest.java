@@ -1,6 +1,6 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
-import java.util.Set;
+import java.util.*;
 
 /**
  * Utility class for containing a set of {@link SecurityCredentials} objects and current timestamp used in the
@@ -19,11 +19,30 @@ public class SecurityRequest {
         this.timestamp = timestamp;
     }
 
+
+    /**
+     * @param splitSecurityRequest contains map of TODO add fields to constants
+     *                             X-Auth-Timestamp -> Timestamp
+     *                             X-Auth-Size -> Size of the SecurityCredentials Set
+     *                             X-Auth-1..n -> SecurityCredentials
+     */
+    public SecurityRequest(Map<String, List<String>> splitSecurityRequest) {
+        // TODO
+        this.securityCredentials = new HashSet<>();
+        this.timestamp = new Date().getTime();
+    }
+
     public Set<SecurityCredentials> getSecurityCredentials() {
         return securityCredentials;
     }
 
     public Long getTimestamp() {
         return timestamp;
+    }
+
+    public Map<String, String> splitIntoStrings() {
+        // TODO
+        return new HashMap<>();
+
     }
 }
