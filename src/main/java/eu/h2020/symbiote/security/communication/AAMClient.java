@@ -199,13 +199,4 @@ public class AAMClient implements IAAMClient {
         }
     }
 
-    /**
-     * @param localUsersAttributesMap which needs to be set.
-     * @return Boolean status; if true, localUsersAttributesMap was set
-     */
-    @Override
-    public Boolean setLocalUsersAttributes(LocalUsersAttributesMap localUsersAttributesMap) {
-        return Boolean.parseBoolean(feignClient.setLocalUsersAttributes(localUsersAttributesMap).body().toString());
-    }
-
 }

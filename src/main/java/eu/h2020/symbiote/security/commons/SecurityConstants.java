@@ -25,11 +25,6 @@ public class SecurityConstants {
     public static final String AAM_VALIDATE_QUEUE = "symbIoTe-AuthenticationAuthorizationManager-validate_request";
     public static final String AAM_VALIDATE_ROUTING_KEY = AAM_EXCHANGE_NAME +
             ".validate_request";
-    // TODO DROP THESE 2
-    public static final String AAM_LOGIN_QUEUE =
-            "symbIoTe-AuthenticationAuthorizationManager-getHomeToken_request";
-    public static final String AAM_LOGIN_ROUTING_KEY = AAM_EXCHANGE_NAME +
-            ".getHomeToken_request";
 
     public static final String AAM_GET_AVAILABLE_AAMS = "/get_available_aams";
     public static final String AAM_GET_CLIENT_CERTIFICATE = "/get_client_certificate";
@@ -57,7 +52,6 @@ public class SecurityConstants {
     public static final String CLIENT_CERTIFICATE_HEADER_NAME = "X-Auth-Client-Cert";
     public static final String AAM_CERTIFICATE_HEADER_NAME = "X-Auth-AAM-Cert";
     public static final String FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE = "X-Auth-ISS-Cert";
-    public static final String AAM_LOCAL_USERS_ATTRIBUTES = "/local_users_attributes";
 
 
     private SecurityConstants() {

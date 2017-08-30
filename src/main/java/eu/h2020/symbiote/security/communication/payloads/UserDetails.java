@@ -2,6 +2,9 @@ package eu.h2020.symbiote.security.communication.payloads;
 
 import eu.h2020.symbiote.security.commons.enums.UserRole;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Contains Symbiote User JSON details
  *
@@ -14,6 +17,7 @@ public class UserDetails {
     private UserRole role = UserRole.NULL;
     // TODO review for R4
     private String federatedId = "";
+    private Map<String, String> attributes = new HashMap<>();
 
     // TODO add user's clients certificates
 
@@ -21,11 +25,20 @@ public class UserDetails {
         // used in serialization
     }
 
-    public UserDetails(Credentials userCredentials, String federatedId, String recoveryMail, UserRole role) {
+    public UserDetails(Credentials userCredentials, String federatedId, String recoveryMail, UserRole role, Map<String, String> attributes) {
         this.userCredentials = userCredentials;
         this.federatedId = federatedId;
         this.recoveryMail = recoveryMail;
         this.role = role;
+        this.attributes = attributes;
+    }
+
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
     }
 
     public Credentials getCredentials() {

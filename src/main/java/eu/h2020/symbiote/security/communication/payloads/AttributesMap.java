@@ -3,12 +3,17 @@ package eu.h2020.symbiote.security.communication.payloads;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LocalUsersAttributesMap {
+public class AttributesMap {
 
     private Map<String, String> attributes = new HashMap<>();
 
-    public LocalUsersAttributesMap(Map<String, String> attributes) {
+    public AttributesMap(Map<String, String> attributes) {
         this.attributes = attributes;
+    }
+
+    public AttributesMap() {
+        //needed to create JSON
+        //needed to create JSON
     }
 
     public Map<String, String> getAttributes() {
