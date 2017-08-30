@@ -57,6 +57,7 @@ public class SecurityConstants {
     public static final String SECURITY_CREDENTIALS_TIMESTAMP_HEADER = "X-Auth-Timestamp";
     public static final String SECURITY_CREDENTIALS_SIZE_HEADER = "X-Auth-Size";
     public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "X-Auth-";
+    public static final String SECURITY_RESPONSE_HEADER = "X-Auth-Response";
 
 
     private SecurityConstants() {
