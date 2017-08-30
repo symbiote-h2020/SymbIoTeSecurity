@@ -21,12 +21,7 @@ import java.util.Set;
  */
 public class ABACPolicyHelper {
 
-    private ABACPolicyHelper() {
-    }
-
     /**
-     * TODO @Nemanja please improve to return ResourcesIdentifiers with Credentials that satisfied those resources' policies -> will allow optimistic validation in next step
-     *
      * @param accessPolicies  of the resources that need to be checked against the tokens
      * @param securityRequest container for tokens and user credentials which will be checked against access policies
      * @return set of resources (their identifiers) whose access policies are satisfied with the given credentials
@@ -44,7 +39,6 @@ public class ABACPolicyHelper {
             } catch (ValidationException e) {
                 // on purpose skipping corrupted/expired tokens instead of jumping out of the whole procedure
                 // as other tokens might be perfectly valid for the business request
-                e.printStackTrace();
             }
         }
 
@@ -71,12 +65,9 @@ public class ABACPolicyHelper {
                     // access to the resource is authorized
                     authorizedResources.put(resource.getKey(), validCredentials);
                 } else {
-
-                    // adding a token if the credentials set is empty
-                    Set<SecurityCredentials> validCredentials = new HashSet<SecurityCredentials>();
-                    validCredentials.add(authzCredentials.values().iterator().next());
-
                     // resource has a null access policy and therefore any token should satisfy it
+                    Set<SecurityCredentials> validCredentials = new HashSet<>();
+                    validCredentials.add(authzCredentials.values().iterator().next());
                     authorizedResources.put(resource.getKey(), validCredentials);
                 }
             }

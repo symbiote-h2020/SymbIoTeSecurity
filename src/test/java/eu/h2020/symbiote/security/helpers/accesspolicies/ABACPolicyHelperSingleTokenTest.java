@@ -27,10 +27,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -156,6 +153,46 @@ public class ABACPolicyHelperSingleTokenTest {
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
         assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleResourceEmptyCredentialsCheckFailure() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException {
+
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
+        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, new SecurityRequest(new HashSet<>(), new Date().getTime()));
+
+        assertTrue(resp.keySet().isEmpty());
+    }
+
+    @Test
+    public void singleResourceMalformedCredentialsCheckFailure() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException {
+
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
+        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
+
+        SecurityRequest malformedSecurityRequest = new SecurityRequest(new HashSet<>(), new Date().getTime());
+        malformedSecurityRequest.getSecurityCredentials().add(new SecurityCredentials("bad token string"));
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, malformedSecurityRequest);
+
+        assertTrue(resp.keySet().isEmpty());
     }
 
     @Test
@@ -325,6 +362,24 @@ public class ABACPolicyHelperSingleTokenTest {
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
 
         resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(null));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleResourceNullPolicySuccess() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
+
+        resourceAccessPolicyMap.put(goodResourceID, null);
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
