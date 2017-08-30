@@ -58,6 +58,11 @@ public class SecurityConstants {
     public static final String AAM_CERTIFICATE_HEADER_NAME = "X-Auth-AAM-Cert";
     public static final String FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE = "X-Auth-ISS-Cert";
 
+    // Security Request Headers
+    public static final String SECURITY_CREDENTIALS_TIMESTAMP_HEADER = "X-Auth-Timestamp";
+    public static final String SECURITY_CREDENTIALS_SIZE_HEADER = "X-Auth-Size";
+    public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "X-Auth-";
+
 
     private SecurityConstants() {
     }
