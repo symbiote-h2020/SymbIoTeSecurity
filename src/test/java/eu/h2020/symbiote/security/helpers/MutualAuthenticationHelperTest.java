@@ -1,9 +1,12 @@
 package eu.h2020.symbiote.security.helpers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.h2020.symbiote.security.commons.Certificate;
+import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
+import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
@@ -22,10 +25,7 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper.hashSHA256;
 import static org.junit.Assert.*;
@@ -310,5 +310,65 @@ public class MutualAuthenticationHelperTest {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.guestToken);
         assertEquals(this.guestToken.toString(), securityRequest.getSecurityCredentials().iterator().next().getToken());
         assertTrue(MutualAuthenticationHelper.isSecurityRequestVerified(securityRequest));
+    }
+
+    @Test
+    public void serializeAndDeserializeSecurityRequest() throws
+            NoSuchAlgorithmException,
+            JsonProcessingException,
+            InvalidArgumentsException {
+        // generate
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
+        // serialize
+        Map<String, String> securityRequestHeaderParams = securityRequest.getSecurityRequestHeaderParams();
+        // check headers
+        assertTrue(securityRequestHeaderParams.containsKey(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER));
+        assertTrue(securityRequestHeaderParams.containsKey(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER));
+        assertEquals(1, Integer.valueOf(securityRequestHeaderParams.get(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER)).intValue());
+        assertTrue(securityRequestHeaderParams.containsKey(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + 1));
+
+        // deserialize
+        SecurityRequest deserializedSecurityRequest = new SecurityRequest(securityRequestHeaderParams);
+        assertEquals(securityRequest, deserializedSecurityRequest);
+    }
+
+    @Test
+    public void serializeAndDeserializeSecurityRequestFailForMissingArgs() throws
+            NoSuchAlgorithmException,
+            JsonProcessingException {
+        // generate
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
+        // serialize
+        Map<String, String> securityRequestHeaderParams = securityRequest.getSecurityRequestHeaderParams();
+        // check headers
+        assertTrue(securityRequestHeaderParams.containsKey(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER));
+        assertTrue(securityRequestHeaderParams.containsKey(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER));
+        assertEquals(1, Integer.valueOf(securityRequestHeaderParams.get(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER)).intValue());
+        assertTrue(securityRequestHeaderParams.containsKey(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + 1));
+
+        // deserialize with errors
+        try {
+            securityRequestHeaderParams.remove(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + 1);
+            new SecurityRequest(securityRequestHeaderParams);
+            fail();
+        } catch (InvalidArgumentsException e) {
+            // must be thrown
+        }
+
+        try {
+            securityRequestHeaderParams.remove(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER);
+            new SecurityRequest(securityRequestHeaderParams);
+            fail();
+        } catch (InvalidArgumentsException e) {
+            // must be thrown
+        }
+
+        try {
+            securityRequestHeaderParams.remove(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER);
+            new SecurityRequest(securityRequestHeaderParams);
+            fail();
+        } catch (InvalidArgumentsException e) {
+            // must be thrown
+        }
     }
 }
