@@ -1,4 +1,4 @@
-package eu.h2020.symbiote.security.helpers;
+package eu.h2020.symbiote.security.helpers.accesspolicies;
 
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
@@ -13,6 +13,10 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerExcep
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.ABACResolverResponse;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
+import eu.h2020.symbiote.security.helpers.ABACPolicyHelper;
+import eu.h2020.symbiote.security.helpers.CryptoHelper;
+import eu.h2020.symbiote.security.helpers.ECDSAHelper;
+import eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper;
 import eu.h2020.symbiote.security.utils.DummyTokenIssuer;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +40,7 @@ import static org.junit.Assert.assertTrue;
  * @author Nemanja Ignjatov (UNIVIE)
  */
 
-public class ABACPolicyHelperTest {
+public class ABACPolicyHelperSingleTokenTest {
 
     private static final String ISSUING_AAM_CERTIFICATE_ALIAS = "core-1";
     private static final String CLIENT_CERTIFICATE_ALIAS = "client-core-1";
@@ -81,7 +85,7 @@ public class ABACPolicyHelperTest {
 
         // client home credentials
         AAM issuingAAM = new AAM("", "", "", new Certificate(CryptoHelper.convertX509ToPEM(issuingAAMCertificate)), new HashMap<>());
-        HomeCredentials homeCredentials = new HomeCredentials(issuingAAM, username, clientId, new eu.h2020.symbiote.security.commons.Certificate(CryptoHelper.convertX509ToPEM(clientCertificate)), clientPrivateKey);
+        HomeCredentials homeCredentials = new HomeCredentials(issuingAAM, username, clientId, new Certificate(CryptoHelper.convertX509ToPEM(clientCertificate)), clientPrivateKey);
 
         Map<String, String> attributes = new HashMap<String, String>();
         attributes.put(nameAttr, nameAttrOKValue);
@@ -282,28 +286,6 @@ public class ABACPolicyHelperTest {
 
         assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID));
         assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID2));
-
-    }
-
-    @Test
-    public void singleResourceMultipleTokensSuccess() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException {
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
-        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
-        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
-        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
-
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-        //TODO Nemanja check if attribtues accumulation for access policy should be supported, then uncomment
-        //assertTrue(allowedResources.contains(goodResourceID));
 
     }
 
