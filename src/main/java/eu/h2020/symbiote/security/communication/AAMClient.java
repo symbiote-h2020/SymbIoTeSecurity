@@ -199,4 +199,15 @@ public class AAMClient implements IAAMClient {
         }
     }
 
+    /**
+     * @param credentials of a user whose details should be returned
+     * @return details of requested user
+     */
+    @Override
+    public UserDetails getUserDetails(Credentials credentials) throws UserManagementException {
+        UserDetails details = feignClient.getUserDetails(credentials);
+        if (details == null) throw new UserManagementException("Failed to get user details");
+        return details;
+    }
+
 }

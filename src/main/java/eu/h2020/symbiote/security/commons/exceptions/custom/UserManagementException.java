@@ -30,6 +30,10 @@ public class UserManagementException extends SecurityException {
         this.statusCode = statusCode;
     }
 
+    public UserManagementException(String message) {
+        super(message);
+    }
+
     public UserManagementException(Throwable cause) {
         super(cause);
     }
