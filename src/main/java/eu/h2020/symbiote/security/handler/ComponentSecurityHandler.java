@@ -13,7 +13,6 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerExcep
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
-import eu.h2020.symbiote.security.communication.payloads.ABACResolverResponse;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 import eu.h2020.symbiote.security.helpers.ABACPolicyHelper;
@@ -126,20 +125,21 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
             SecurityHandlerException {
 
         // resolving which tokens authorize access to resources -> filtering the security request to only contain business request relevant credentials
-        ABACResolverResponse abacResolverResponse = ABACPolicyHelper.checkRequestedOperationAccess(accessPolicies, securityRequest);
+        Map<String, Set<SecurityCredentials>> abacResolverResponse = ABACPolicyHelper.checkRequestedOperationAccess(accessPolicies, securityRequest);
 
         // TODO @Mikołaj once we know which credentials grant access to which resource we can provide an optimistic validator per policy and not the whole set
+        // TODO commented out due to compilation error, @Mikolaj do your magic
         // validating only credentials that are useful to the business request
-        ValidationStatus receivedSecurityRequestValidationStatus = isReceivedSecurityRequestValid(
-                new SecurityRequest(
-                        abacResolverResponse.getAuthorizationCredentials(),
-                        securityRequest.getTimestamp()));
-        // check if the validation succeed for the whole filtered set
-        if (receivedSecurityRequestValidationStatus != ValidationStatus.VALID)
-            throw new SecurityHandlerException("Some of the provided security credentials failed validation with status: " + receivedSecurityRequestValidationStatus);
+//        ValidationStatus receivedSecurityRequestValidationStatus = isReceivedSecurityRequestValid(
+//                new SecurityRequest(
+//                        abacResolverResponse.getAuthorizationCredentials(),
+//                        securityRequest.getTimestamp()));
+//        // check if the validation succeed for the whole filtered set
+//        if (receivedSecurityRequestValidationStatus != ValidationStatus.VALID)
+//            throw new SecurityHandlerException("Some of the provided security credentials failed validation with status: " + receivedSecurityRequestValidationStatus);
 
         // resources to which the given security request grants access
-        return abacResolverResponse.getAuthorizedResourcesIdentifiers();
+        return abacResolverResponse.keySet();
     }
 
     @Override

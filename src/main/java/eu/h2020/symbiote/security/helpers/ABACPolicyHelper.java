@@ -3,11 +3,11 @@ package eu.h2020.symbiote.security.helpers;
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
-import eu.h2020.symbiote.security.communication.payloads.ABACResolverResponse;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,9 +31,11 @@ public class ABACPolicyHelper {
      * @param securityRequest container for tokens and user credentials which will be checked against access policies
      * @return set of resources (their identifiers) whose access policies are satisfied with the given credentials
      */
-    public static ABACResolverResponse checkRequestedOperationAccess(Map<String, IAccessPolicy> accessPolicies,
-                                                                     SecurityRequest securityRequest) {
-        ABACResolverResponse abacResp = new ABACResolverResponse();
+    public static Map<String, Set<SecurityCredentials>> checkRequestedOperationAccess(Map<String, IAccessPolicy> accessPolicies,
+                                                                                      SecurityRequest securityRequest) {
+
+        Map<String, Set<SecurityCredentials>> authorizedResources = new HashMap<String, Set<SecurityCredentials>>();
+
         // extracting credentials from the security request
         Map<Token, SecurityCredentials> authzCredentials = new HashMap<>(securityRequest.getSecurityCredentials().size());
         for (SecurityCredentials securityCredentials : securityRequest.getSecurityCredentials()) {
@@ -48,7 +50,7 @@ public class ABACPolicyHelper {
 
         // not valid tokens found in the request so no resolution will happen
         if (authzCredentials.isEmpty())
-            return abacResp;
+            return authorizedResources;
 
         // attempting to resolve the access policy
         if (accessPolicies != null) {
@@ -60,21 +62,25 @@ public class ABACPolicyHelper {
                         // the tokens do not match this resource's access policy
                         continue;
                     }
-                    // access to the resource is authorized
-                    abacResp.getAuthorizedResourcesIdentifiers().add(resource.getKey());
-                    // with the following tokens
+                    // attach valid tokens to the resource access
+                    Set<SecurityCredentials> validCredentials = new HashSet<SecurityCredentials>();
                     for (Token t : validTokens) {
-                        abacResp.getAuthorizationCredentials().add(authzCredentials.get(t));
+                        validCredentials.add(authzCredentials.get(t));
                     }
+
+                    // access to the resource is authorized
+                    authorizedResources.put(resource.getKey(), validCredentials);
                 } else {
-                    // resource has a null access policy and therefore any token should satisfy it
-                    abacResp.getAuthorizedResourcesIdentifiers().add(resource.getKey());
+
                     // adding a token if the credentials set is empty
-                    if (abacResp.getAuthorizationCredentials().isEmpty())
-                        abacResp.getAuthorizationCredentials().add(authzCredentials.values().iterator().next());
+                    Set<SecurityCredentials> validCredentials = new HashSet<SecurityCredentials>();
+                    validCredentials.add(authzCredentials.values().iterator().next());
+
+                    // resource has a null access policy and therefore any token should satisfy it
+                    authorizedResources.put(resource.getKey(), validCredentials);
                 }
             }
         }
-        return abacResp;
+        return authorizedResources;
     }
 }

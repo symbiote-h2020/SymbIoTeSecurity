@@ -2,10 +2,8 @@ package eu.h2020.symbiote.security.helpers.accesspolicies;
 
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
-import eu.h2020.symbiote.security.accesspolicies.SingleLocalHomeTokenAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.SingleLocalHomeTokenIdentityBasedTokenAccessPolicy;
 import eu.h2020.symbiote.security.commons.Certificate;
-import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
@@ -13,7 +11,7 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsExce
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
-import eu.h2020.symbiote.security.communication.payloads.ABACResolverResponse;
+import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 import eu.h2020.symbiote.security.helpers.ABACPolicyHelper;
 import eu.h2020.symbiote.security.helpers.CryptoHelper;
@@ -32,6 +30,7 @@ import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -158,9 +157,9 @@ public class ABACPolicyHelperLocalHomeIdentityBasedTokenTest {
 
         resourceAccessPolicyMap.put(goodResourceID, new SingleLocalHomeTokenIdentityBasedTokenAccessPolicy(deploymentId, username, null));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertTrue(resp.getAuthorizedResourcesIdentifiers().contains(goodResourceID));
+        assertTrue(resp.keySet().contains(goodResourceID));
     }
 
     @Test
@@ -177,9 +176,9 @@ public class ABACPolicyHelperLocalHomeIdentityBasedTokenTest {
 
         resourceAccessPolicyMap.put(badResourceID, new SingleLocalHomeTokenIdentityBasedTokenAccessPolicy(deploymentId, username, null));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID));
+        assertFalse(resp.keySet().contains(badResourceID));
 
     }
 
@@ -197,9 +196,9 @@ public class ABACPolicyHelperLocalHomeIdentityBasedTokenTest {
 
         resourceAccessPolicyMap.put(badResourceID, new SingleLocalHomeTokenIdentityBasedTokenAccessPolicy(deploymentId, username, null));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID));
+        assertFalse(resp.keySet().contains(badResourceID));
 
     }
 
@@ -217,9 +216,9 @@ public class ABACPolicyHelperLocalHomeIdentityBasedTokenTest {
 
         resourceAccessPolicyMap.put(badResourceID, new SingleLocalHomeTokenIdentityBasedTokenAccessPolicy(deploymentId, username, null));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID));
+        assertFalse(resp.keySet().contains(badResourceID));
 
     }
 }
