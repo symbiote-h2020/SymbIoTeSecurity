@@ -68,7 +68,7 @@ public interface IFeignAAMClient {
     @Headers("Content-Type: application/json")
     ManagementStatus manage(UserManagementRequest userManagementRequest);
 
-    @RequestLine("POST " + "/getUserDetails")
+    @RequestLine("POST " + SecurityConstants.AAM_GET_USER_DETAILS)
     @Headers("Content-Type: application/json")
     UserDetails getUserDetails(Credentials credentials);
 }
