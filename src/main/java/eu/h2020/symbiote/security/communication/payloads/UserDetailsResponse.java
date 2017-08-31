@@ -1,33 +1,27 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.HttpStatus;
 
 public class UserDetailsResponse {
-    private HttpStatus httpStatus;
-    private UserDetails userDetails;
+    private final HttpStatus httpStatus;
+    private final UserDetails userDetails;
 
-    public UserDetailsResponse(HttpStatus httpStatus, UserDetails userDetails) {
+    @JsonCreator
+    public UserDetailsResponse(@JsonProperty("httpStatus") HttpStatus httpStatus, @JsonProperty("userDetails") UserDetails userDetails) {
         this.httpStatus = httpStatus;
         this.userDetails = userDetails;
     }
 
-    public UserDetailsResponse() {
-
-    }
 
     public HttpStatus getHttpStatus() {
         return httpStatus;
     }
 
-    public void setHttpStatus(HttpStatus httpStatus) {
-        this.httpStatus = httpStatus;
-    }
 
     public UserDetails getUserDetails() {
         return userDetails;
     }
 
-    public void setUserDetails(UserDetails userDetails) {
-        this.userDetails = userDetails;
-    }
 }
