@@ -46,7 +46,7 @@ public class MutualAuthenticationHelperTest {
     private static final String SERVICE_CERTIFICATE_LOCATION = "./src/test/resources/platform_1.p12"; // let's suppose it
     private final String username = "testusername";
     private final String clientId = "testclientid";
-    private HashSet<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<>();
+    private HashSet<AuthorizationCredentials> authorizationCredentialsSet;
     private Token guestToken;
 
     @Before
@@ -89,7 +89,8 @@ public class MutualAuthenticationHelperTest {
                 issuingAAMPrivateKey));
 
         AuthorizationCredentials authorizationCredentials = new AuthorizationCredentials(new Token(authorizationToken), homeCredentials.homeAAM, homeCredentials);
-        this.authorizationCredentialsSet.add(authorizationCredentials);
+        authorizationCredentialsSet = new HashSet<>();
+        authorizationCredentialsSet.add(authorizationCredentials);
     }
 
     @Test
@@ -319,12 +320,14 @@ public class MutualAuthenticationHelperTest {
             InvalidArgumentsException {
         // generate
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
+        // adding second token
+        securityRequest.getSecurityCredentials().add(new SecurityCredentials(guestToken.getToken()));
         // serialize
         Map<String, String> securityRequestHeaderParams = securityRequest.getSecurityRequestHeaderParams();
         // check headers
         assertTrue(securityRequestHeaderParams.containsKey(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER));
         assertTrue(securityRequestHeaderParams.containsKey(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER));
-        assertEquals(1, Integer.valueOf(securityRequestHeaderParams.get(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER)).intValue());
+        assertEquals(2, Integer.valueOf(securityRequestHeaderParams.get(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER)).intValue());
         assertTrue(securityRequestHeaderParams.containsKey(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + 1));
 
         // deserialize

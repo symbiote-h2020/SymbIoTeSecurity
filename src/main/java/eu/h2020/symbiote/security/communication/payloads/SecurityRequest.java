@@ -96,6 +96,7 @@ public class SecurityRequest {
         int headerNumber = 1;
         for (SecurityCredentials securityCredential : securityCredentials) {
             securityHeaderParams.put(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + headerNumber, om.writeValueAsString(securityCredential));
+            headerNumber++;
         }
         return securityHeaderParams;
     }

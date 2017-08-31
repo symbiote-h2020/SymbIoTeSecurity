@@ -1,4 +1,4 @@
-package eu.h2020.symbiote.security.helpers;
+package eu.h2020.symbiote.security.helpers.accesspolicies;
 
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
@@ -11,8 +11,12 @@ import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
-import eu.h2020.symbiote.security.communication.payloads.ABACResolverResponse;
+import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
+import eu.h2020.symbiote.security.helpers.ABACPolicyHelper;
+import eu.h2020.symbiote.security.helpers.CryptoHelper;
+import eu.h2020.symbiote.security.helpers.ECDSAHelper;
+import eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper;
 import eu.h2020.symbiote.security.utils.DummyTokenIssuer;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,9 +27,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -36,7 +38,7 @@ import static org.junit.Assert.assertTrue;
  * @author Nemanja Ignjatov (UNIVIE)
  */
 
-public class ABACPolicyHelperTest {
+public class ABACPolicyHelperSingleTokenTest {
 
     private static final String ISSUING_AAM_CERTIFICATE_ALIAS = "core-1";
     private static final String CLIENT_CERTIFICATE_ALIAS = "client-core-1";
@@ -81,7 +83,7 @@ public class ABACPolicyHelperTest {
 
         // client home credentials
         AAM issuingAAM = new AAM("", "", "", new Certificate(CryptoHelper.convertX509ToPEM(issuingAAMCertificate)), new HashMap<>());
-        HomeCredentials homeCredentials = new HomeCredentials(issuingAAM, username, clientId, new eu.h2020.symbiote.security.commons.Certificate(CryptoHelper.convertX509ToPEM(clientCertificate)), clientPrivateKey);
+        HomeCredentials homeCredentials = new HomeCredentials(issuingAAM, username, clientId, new Certificate(CryptoHelper.convertX509ToPEM(clientCertificate)), clientPrivateKey);
 
         Map<String, String> attributes = new HashMap<String, String>();
         attributes.put(nameAttr, nameAttrOKValue);
@@ -148,9 +150,49 @@ public class ABACPolicyHelperTest {
 
         resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertTrue(resp.getAuthorizedResourcesIdentifiers().contains(goodResourceID));
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleResourceEmptyCredentialsCheckFailure() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException {
+
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
+        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, new SecurityRequest(new HashSet<>(), new Date().getTime()));
+
+        assertTrue(resp.keySet().isEmpty());
+    }
+
+    @Test
+    public void singleResourceMalformedCredentialsCheckFailure() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException {
+
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
+        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
+
+        SecurityRequest malformedSecurityRequest = new SecurityRequest(new HashSet<>(), new Date().getTime());
+        malformedSecurityRequest.getSecurityCredentials().add(new SecurityCredentials("bad token string"));
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, malformedSecurityRequest);
+
+        assertTrue(resp.keySet().isEmpty());
     }
 
     @Test
@@ -169,9 +211,9 @@ public class ABACPolicyHelperTest {
 
         resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID));
+        assertFalse(resp.keySet().contains(badResourceID));
 
     }
 
@@ -192,9 +234,9 @@ public class ABACPolicyHelperTest {
 
         resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID));
+        assertFalse(resp.keySet().contains(badResourceID));
 
     }
 
@@ -220,10 +262,10 @@ public class ABACPolicyHelperTest {
         badResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
         resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(badResourceAccessPolicyClaimsMap));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertTrue(resp.getAuthorizedResourcesIdentifiers().contains(goodResourceID));
-        assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID));
+        assertTrue(resp.keySet().contains(goodResourceID));
+        assertFalse(resp.keySet().contains(badResourceID));
 
     }
 
@@ -249,10 +291,10 @@ public class ABACPolicyHelperTest {
         badResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
         resourceAccessPolicyMap.put(goodResourceID2, new SingleTokenAccessPolicy(badResourceAccessPolicyClaimsMap));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertTrue(resp.getAuthorizedResourcesIdentifiers().contains(goodResourceID));
-        assertTrue(resp.getAuthorizedResourcesIdentifiers().contains(goodResourceID2));
+        assertTrue(resp.keySet().contains(goodResourceID));
+        assertTrue(resp.keySet().contains(goodResourceID2));
 
     }
 
@@ -278,32 +320,10 @@ public class ABACPolicyHelperTest {
         badResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
         resourceAccessPolicyMap.put(badResourceID2, new SingleTokenAccessPolicy(badResourceAccessPolicyClaimsMap));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID));
-        assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID2));
-
-    }
-
-    @Test
-    public void singleResourceMultipleTokensSuccess() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException {
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
-        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
-        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
-        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
-
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-        //TODO Nemanja check if attribtues accumulation for access policy should be supported, then uncomment
-        //assertTrue(allowedResources.contains(goodResourceID));
+        assertFalse(resp.keySet().contains(badResourceID));
+        assertFalse(resp.keySet().contains(badResourceID2));
 
     }
 
@@ -323,10 +343,10 @@ public class ABACPolicyHelperTest {
 
         resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
 
-        assertFalse(resp.getAuthorizedResourcesIdentifiers().contains(badResourceID));
+        assertFalse(resp.keySet().contains(badResourceID));
 
     }
 
@@ -343,9 +363,27 @@ public class ABACPolicyHelperTest {
 
         resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(null));
 
-        ABACResolverResponse resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertTrue(resp.getAuthorizedResourcesIdentifiers().contains(goodResourceID));
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleResourceNullPolicySuccess() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
+
+        resourceAccessPolicyMap.put(goodResourceID, null);
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
 
     }
 }
