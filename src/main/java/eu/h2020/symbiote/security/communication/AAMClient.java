@@ -208,9 +208,9 @@ public class AAMClient implements IAAMClient {
         try {
             return feignClient.getUserDetails(credentials);
         } catch (Exception exc) {
-            if (exc.getMessage().contains("400"))    //Requested user does not exsist
+            if (exc.getMessage().contains("400"))    //Bad Request, Requested user does not exsist
                 throw new UserManagementException("Requested user is not in database");
-            else    //Error 401, Wrong password was provided for existing user
+            else    //Error 401 - Unauthorized, Wrong password was provided for existing user
                 throw new UserManagementException("Wrong password was provided");
         }
     }
