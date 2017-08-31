@@ -3,6 +3,7 @@ package eu.h2020.symbiote.security.communication;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ManagementStatus;
+import eu.h2020.symbiote.security.commons.enums.UserRole;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.*;
 import eu.h2020.symbiote.security.communication.interfaces.IFeignAAMClient;
@@ -206,7 +207,12 @@ public class AAMClient implements IAAMClient {
     @Override
     public UserDetails getUserDetails(Credentials credentials) throws UserManagementException {
         UserDetails details = feignClient.getUserDetails(credentials);
-        if (details == null) throw new UserManagementException("Failed to get user details");
+        if (details.getCredentials().getUsername().equals("NotInDB") &&
+                details.getRole().equals(UserRole.NULL))
+            throw new UserManagementException("Requested user doesn't exist");
+        if (details.getCredentials().getUsername().equals("WrongPassword") &&
+                details.getRole().equals(UserRole.NULL))
+            throw new UserManagementException("Wrong Password was provided");
         return details;
     }
 
