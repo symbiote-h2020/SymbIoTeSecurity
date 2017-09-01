@@ -90,4 +90,10 @@ public interface IAAMClient {
      * @return Management Status informing about a result of completing requested management operation
      */
     ManagementStatus manage(UserManagementRequest userManagementRequest) throws AAMException;
+
+    /**
+     * @param credentials of a user whose details should be returned
+     * @return details of requested user
+     */
+    UserDetails getUserDetails(Credentials credentials) throws UserManagementException;
 }

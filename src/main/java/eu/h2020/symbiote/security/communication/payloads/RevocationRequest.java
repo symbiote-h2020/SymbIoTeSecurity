@@ -1,7 +1,12 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
-public class RevocationRequest {
+/**
+ * Describes revocation.
+ *
+ * @author Jakub Toczek (PSNC)
+ */
 
+public class RevocationRequest {
 
     private Credentials credentials = new Credentials();
     private String homeTokenString = "";
@@ -63,8 +68,11 @@ public class RevocationRequest {
     }
 
     public enum CredentialType {
+        //set when actor is user
         USER,
+        //set when actor is admin
         ADMIN,
+        //set when credentials are not sent, used in foreign token revocation
         NULL
     }
 }
