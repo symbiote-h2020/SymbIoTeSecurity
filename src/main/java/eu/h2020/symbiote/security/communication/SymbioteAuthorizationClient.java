@@ -26,11 +26,11 @@ public class SymbioteAuthorizationClient implements Client {
   
   private IComponentSecurityHandler handler = null;
   private Client client;
-  private Certificate certificate;
+  private String componentId;
   
-  public SymbioteAuthorizationClient(IComponentSecurityHandler handler, Certificate componentCertificate, Client client) {
+  public SymbioteAuthorizationClient(IComponentSecurityHandler handler, String componentId, Client client) {
     this.handler = handler;
-    this.certificate = componentCertificate;
+    this.componentId = componentId;
     this.client = client;
   }
   
@@ -51,7 +51,8 @@ public class SymbioteAuthorizationClient implements Client {
             response.headers().get(SecurityConstants.SECURITY_RESPONSE_HEADER);
       
         if (secResponse != null && !secResponse.isEmpty()) {
-          if (!handler.isReceivedServiceResponseVerified(secResponse.iterator().next(), certificate)) {
+          Certificate cert = handler.getSecurityHandler().getComponentCertificate(componentId);
+          if (!handler.isReceivedServiceResponseVerified(secResponse.iterator().next(), cert)) {
             return Response.builder().status(400).reason("Server response verification failed").build();
           }
         } else {

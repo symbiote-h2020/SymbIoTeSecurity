@@ -2,6 +2,7 @@ package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.clients.ClientFactory;
 import eu.h2020.symbiote.security.commons.Certificate;
+import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
@@ -22,6 +23,7 @@ import eu.h2020.symbiote.security.helpers.ECDSAHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -62,6 +64,8 @@ public class SecurityHandler implements ISecurityHandler {
   //Associate tokens with credentials
   private Map<String, BoundCredentials> tokenCredentials = new HashMap<>();
   
+  private AAM coreAAM = null;
+  
   
   /**
    * Creates a new instance of the Security Handler
@@ -87,7 +91,10 @@ public class SecurityHandler implements ISecurityHandler {
       throw new SecurityHandlerException("Error generating credentials wallet", e);
     }
   }
-  
+
+  public Map<String, AAM> getAvailableAAMs() throws SecurityHandlerException {
+    return getAvailableAAMs(coreAAM);
+  }
   
   public Map<String, AAM> getAvailableAAMs(AAM homeAAM) throws SecurityHandlerException {
     AvailableAAMsCollection response = ClientFactory.getAAMClient(homeAAM.getAamAddress())
@@ -162,11 +169,24 @@ public class SecurityHandler implements ISecurityHandler {
           IOException,
           CertificateException,
           NoSuchAlgorithmException {
-    KeyStore trustStore = KeyStore.getInstance("JKS");
-    try (
-            FileInputStream fIn = new FileInputStream(path)) {
-      trustStore.load(fIn, password.toCharArray());
+    
+    char[] pw = password.toCharArray();
+    KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+  
+    File ksFile = new File(path);
+    
+    if (!ksFile.exists()) {
+      trustStore.load(null, pw);
+  
+      // Store away the keystore.
+      FileOutputStream fos = new FileOutputStream(ksFile);
+      trustStore.store(fos, pw);
+      fos.close();
     }
+    
+    FileInputStream fIn = new FileInputStream(ksFile);
+    trustStore.load(fIn, password.toCharArray());
+    
     return trustStore;
   }
   
@@ -174,8 +194,8 @@ public class SecurityHandler implements ISecurityHandler {
                                    Optional<String> clientCertificate,
                                    Optional<String> clientCertificateSigningAAMCertificate,
                                    Optional<String> foreignTokenIssuingAAMCertificate) {
-  
-  
+    
+    
     return ClientFactory.getAAMClient(validationAuthority.getAamAddress()).validate(token,
         clientCertificate,
         clientCertificateSigningAAMCertificate,
@@ -185,6 +205,11 @@ public class SecurityHandler implements ISecurityHandler {
   @Override
   public Map<String, BoundCredentials> getAcquiredCredentials() {
     return credentialsWallet;
+  }
+  
+  @Override
+  public Certificate getComponentCertificate(String componentId) {
+    return coreAAM.getComponentCertificates().get(componentId);
   }
   
   private void cacheCertificate(HomeCredentials credentials) {
@@ -286,6 +311,12 @@ public class SecurityHandler implements ISecurityHandler {
     homeAAM.setAamAddress(homeAAMAddress);
     
     Map<String, AAM> aamList = getAvailableAAMs(homeAAM);
+    if (aamList != null && !aamList.isEmpty()
+            && aamList.get(SecurityConstants.AAM_CORE_AAM_INSTANCE_ID) != null) {
+      coreAAM = aamList.get(SecurityConstants.AAM_CORE_AAM_INSTANCE_ID);
+    } else {
+      throw new SecurityHandlerException("Can't find the Core AAM instance");
+    }
     
     Enumeration<String> aliases = trustStore.aliases();
     while (aliases.hasMoreElements()) {
@@ -304,7 +335,7 @@ public class SecurityHandler implements ISecurityHandler {
           String aamId = null;
           
           if (elements.length > 3) {
-            user = elements[0] + "@" + elements [1];
+            user = elements[0] + "@" + elements[1];
             client = elements[2];
             aamId = elements[3];
           } else {
@@ -318,10 +349,10 @@ public class SecurityHandler implements ISecurityHandler {
           if (aam != null) {
             Certificate certificate = new Certificate();
             certificate.setCertificateString(CryptoHelper.convertX509ToPEM(cert));
-  
+            
             BoundCredentials boundCredentials =
                 new BoundCredentials(new HomeCredentials(aam, user, client, certificate, pvKey));
-  
+            
             credentialsWallet.put(aamId, boundCredentials);
           }
         }

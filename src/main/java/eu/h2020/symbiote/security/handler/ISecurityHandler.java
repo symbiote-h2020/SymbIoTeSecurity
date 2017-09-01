@@ -21,6 +21,13 @@ import java.util.Optional;
  * @author Pietro Tedeschi (CNIT)
  */
 public interface ISecurityHandler {
+    
+    /**
+     * @return map of all currently available security entrypoints to symbiote (getCertificate, login, token
+     * validation) as obtained by the core AAM
+     * @throws SecurityHandlerException on operation error
+     */
+    Map<String, AAM> getAvailableAAMs() throws SecurityHandlerException;
 
     /**
      * @param aam the aam to retrieve the map from, note the symbIoTe Core AAM has always the up-to-date information
@@ -91,4 +98,6 @@ public interface ISecurityHandler {
                               Optional<String> foreignTokenIssuingAAMCertificate);
     
     Map<String, BoundCredentials> getAcquiredCredentials();
+    
+    Certificate getComponentCertificate(String componentId);
 }
