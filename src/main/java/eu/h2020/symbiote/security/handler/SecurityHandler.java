@@ -212,6 +212,11 @@ public class SecurityHandler implements ISecurityHandler {
     return coreAAM.getComponentCertificates().get(componentId);
   }
   
+  @Override
+  public AAM getCoreAAMInstance() {
+    return coreAAM;
+  }
+  
   private void cacheCertificate(HomeCredentials credentials) {
     
     BoundCredentials bound = new BoundCredentials(credentials);

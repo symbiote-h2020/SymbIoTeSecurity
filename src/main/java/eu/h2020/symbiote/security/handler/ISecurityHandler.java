@@ -100,4 +100,6 @@ public interface ISecurityHandler {
     Map<String, BoundCredentials> getAcquiredCredentials();
     
     Certificate getComponentCertificate(String componentId);
+    
+    AAM getCoreAAMInstance();
 }
