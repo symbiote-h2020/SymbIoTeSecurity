@@ -1,5 +1,7 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 
 import java.util.HashMap;
@@ -14,7 +16,8 @@ public class FederationRule {
     private Map<String, String> requiredAttributes = new HashMap<>();
     private Map<String, String> releasedFederatedAttributes = new HashMap<>();
 
-    public FederationRule(String federationId, Map<String, String> requiredAttributes, Map<String, String> releasedFederatedAttributes) {
+    @JsonCreator
+    public FederationRule(@JsonProperty("federationId") String federationId, @JsonProperty("requiredAttributes") Map<String, String> requiredAttributes, @JsonProperty("releasedFederatedAttributes") Map<String, String> releasedFederatedAttributes) {
         this.federationId = federationId;
         this.requiredAttributes = requiredAttributes;
         this.releasedFederatedAttributes = releasedFederatedAttributes;
@@ -24,23 +27,12 @@ public class FederationRule {
         return federationId;
     }
 
-    public void setFederationId(String federationId) {
-        this.federationId = federationId;
-    }
-
     public Map<String, String> getRequiredAttributes() {
         return requiredAttributes;
-    }
-
-    public void setRequiredAttributes(Map<String, String> requiredAttributes) {
-        this.requiredAttributes = requiredAttributes;
     }
 
     public Map<String, String> getReleasedFederatedAttributes() {
         return releasedFederatedAttributes;
     }
 
-    public void setReleasedFederatedAttributes(Map<String, String> releasedFederatedAttributes) {
-        this.releasedFederatedAttributes = releasedFederatedAttributes;
-    }
 }
