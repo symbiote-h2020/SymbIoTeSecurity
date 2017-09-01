@@ -2,6 +2,7 @@ package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.clients.ClientFactory;
 import eu.h2020.symbiote.security.commons.Certificate;
+import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.communication.AAMClient;
@@ -59,7 +60,7 @@ public class SecurityHandlerTest {
     String serverkeystorePath = localPath + "/src/test/resources/core.p12";
     String serverkeystorePassword = "1234567";
     String serveralias = "client-core-1";
-    String homeAAMId = "SymbIoTe_Core_AAM";
+    String homeAAMId = SecurityConstants.AAM_CORE_AAM_INSTANCE_ID;
     
     String serverCertString = null;
     AAM homeAAM = null;
@@ -137,6 +138,13 @@ public class SecurityHandlerTest {
         logger.info("TEST RESULT --> Map<String, AAM>: " + result);
         assert result != null;
 
+        assert equalsId(result, getAMMMap());
+    
+        result = testclient.getAvailableAAMs();
+    
+        logger.info("TEST RESULT --> Map<String, AAM>: " + result);
+        assert result != null;
+    
         assert equalsId(result, getAMMMap());
 
 
