@@ -13,7 +13,6 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerExcep
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
-import eu.h2020.symbiote.security.communication.payloads.ABACResolverResponse;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 import eu.h2020.symbiote.security.helpers.ABACPolicyHelper;
@@ -122,24 +121,55 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
 
     @Override
     public Set<String> getSatisfiedPoliciesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
-                                                       SecurityRequest securityRequest) throws
-            SecurityHandlerException {
+                                                       SecurityRequest securityRequest) {
 
+        Set<String> accessiblePolicies = new HashSet<>();
         // resolving which tokens authorize access to resources -> filtering the security request to only contain business request relevant credentials
-        ABACResolverResponse abacResolverResponse = ABACPolicyHelper.checkRequestedOperationAccess(accessPolicies, securityRequest);
+        Map<String, Set<SecurityCredentials>> abacResolverResponse = ABACPolicyHelper.checkRequestedOperationAccess(accessPolicies, securityRequest);
 
-        // TODO @Mikołaj once we know which credentials grant access to which resource we can provide an optimistic validator per policy and not the whole set
-        // validating only credentials that are useful to the business request
-        ValidationStatus receivedSecurityRequestValidationStatus = isReceivedSecurityRequestValid(
-                new SecurityRequest(
-                        abacResolverResponse.getAuthorizationCredentials(),
-                        securityRequest.getTimestamp()));
-        // check if the validation succeed for the whole filtered set
-        if (receivedSecurityRequestValidationStatus != ValidationStatus.VALID)
-            throw new SecurityHandlerException("Some of the provided security credentials failed validation with status: " + receivedSecurityRequestValidationStatus);
+        // useful to avoid duplicated validations
+        Map<SecurityCredentials, ValidationStatus> alreadyValidatedCredentialsCache = new HashMap<>();
+        // validating credentials for each resource
+        for (Map.Entry<String, Set<SecurityCredentials>> authorizedPolicy : abacResolverResponse.entrySet()) {
+            int neededCredentials = authorizedPolicy.getValue().size();
+            int validatedCredentials = 0;
+
+            // validating each credentials
+            for (SecurityCredentials partialPolicyCredentials : authorizedPolicy.getValue()) {
+                // trying to retrieve the policy from our cache
+                ValidationStatus validationStatus = alreadyValidatedCredentialsCache.get(partialPolicyCredentials);
+                // policy already checked
+                if (validationStatus != null) {
+                    // and valid
+                    if (validationStatus == ValidationStatus.VALID)
+                        validatedCredentials++;
+                    continue;
+                }
+
+                // need to validate the partial policy
+                Set<SecurityCredentials> credentialsForVerification = new HashSet<>(1);
+                credentialsForVerification.add(partialPolicyCredentials);
+                try {
+                    // validating the current policy
+                    ValidationStatus freshValidationStatus = isReceivedSecurityRequestValid(new SecurityRequest(credentialsForVerification, securityRequest.getTimestamp()));
+                    // storing the result in our cache
+                    alreadyValidatedCredentialsCache.put(partialPolicyCredentials, freshValidationStatus);
+                    // success, these credentials satisfy security requirements
+                    if (freshValidationStatus == ValidationStatus.VALID)
+                        validatedCredentials++;
+                } catch (SecurityHandlerException e) {
+                    // validation failed, storing with unknown status
+                    alreadyValidatedCredentialsCache.put(partialPolicyCredentials, ValidationStatus.UNKNOWN);
+                }
+            }
+
+            // all credentials need to be valid to confirm the policy access
+            if (validatedCredentials == neededCredentials)
+                accessiblePolicies.add(authorizedPolicy.getKey());
+        }
 
         // resources to which the given security request grants access
-        return abacResolverResponse.getAuthorizedResourcesIdentifiers();
+        return accessiblePolicies;
     }
 
     @Override

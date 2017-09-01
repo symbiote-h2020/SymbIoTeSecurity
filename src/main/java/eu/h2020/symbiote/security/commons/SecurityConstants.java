@@ -36,6 +36,7 @@ public class SecurityConstants {
     public static final String AAM_MANAGE_USERS = "/manage_users";
     public static final String AAM_MANAGE_PLATFORMS = "/manage_platforms";
     public static final String AAM_REVOKE = "/revoke";
+    public static final String AAM_GET_USER_DETAILS = "/get_user_details";
 
     // errors
     public static final String ERR_WRONG_CREDENTIALS = "ERR_WRONG_CREDENTIALS";

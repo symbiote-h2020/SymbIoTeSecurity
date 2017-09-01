@@ -27,7 +27,7 @@ public interface IComponentSecurityHandler {
      * @return set of identifiers of policies (e.g. resources identifiers) whose access policies are satisfied with the security verified {@link SecurityRequest#getSecurityCredentials()}
      */
     Set<String> getSatisfiedPoliciesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
-                                                SecurityRequest securityRequest) throws SecurityHandlerException;
+                                                SecurityRequest securityRequest);
 
     /**
      * Used by a service to generate the response payload to be encapsulated in a JWS required by
