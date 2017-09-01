@@ -31,29 +31,73 @@ public class PlatformAAMCertificateKeyStoreFactory {
     private PlatformAAMCertificateKeyStoreFactory() {
     }
 
-    public static void main() throws WrongCredentialsException, ValidationException {
-
-        // todo fill properly all the fields
-        String keyStorePath = "";
-        String keyStorePassword = "";
-        String platformId = "";
+    /**
+     * Generates a platform AAM keystore
+     * TODO fill properly all the fields to get the platform AAM keystore
+     */
+    public static void main() {
+        // given to you for integration, in the end should be available in public
+        // from spring bootstrap file: symbiote.coreaam.url
+        String coreAAMAddress = "";
+        // of the user registered through administration in the Symbiote Core
         String platformOwnerUsername = "";
         String platformOwnerPassword = "";
-        String clientId = "";
-        String coreAAMAddress = "";
-        String keyAlias = "";
-        String coreCertificateAlias = "";
+        // of the platform registered to the given platform Owner
+        String platformId = "";
+
+        // where you want to have the keystore generated
+        String keyStorePath = "";
+        // used to access the keystore
+        // from spring bootstrap file: aam.security.KEY_STORE_PASSWORD
+        String keyStorePassword = "";
+        // used to access the AAM private key
+        // from spring bootstrap file: aam.security.PV_KEY_PASSWORD
+        String privateKeyPassword = "";
+        // platform AAM key/certificate alias
+        // from spring bootstrap file: aam.security.CERTIFICATE_ALIAS
+        String aamCertificateAlias = "";
+        // root CA certificate alias
+        // from spring bootstrap file:  aam.security.ROOT_CA_CERTIFICATE_ALIAS
+        String rootCACertificateAlias = "";
 
         try {
-            getPlatformAAMKeystore(keyStorePath, keyStorePassword, platformId, platformOwnerUsername, platformOwnerPassword, clientId, coreAAMAddress, keyAlias, coreCertificateAlias);
+            getPlatformAAMKeystore(
+                    coreAAMAddress,
+                    platformOwnerUsername,
+                    platformOwnerPassword,
+                    platformId,
+                    keyStorePath,
+                    keyStorePassword,
+                    rootCACertificateAlias,
+                    aamCertificateAlias,
+                    privateKeyPassword
+            );
             log.info("OK");
-        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | InvalidArgumentsException | InvalidAlgorithmParameterException | NoSuchProviderException | NotExistingUserException e) {
+        } catch (WrongCredentialsException | ValidationException | KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | InvalidArgumentsException | InvalidAlgorithmParameterException | NoSuchProviderException | NotExistingUserException e) {
             log.error(e.getMessage());
             log.error(e.getCause());
         }
     }
 
-    public static void getPlatformAAMKeystore(String keyStorePath, String keyStorePassword, String platformId, String platformOwnerUsername, String platformOwnerPassword, String clientId, String coreAAMAddress, String keyTag, String coreCertificateAlias) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidArgumentsException, WrongCredentialsException, NotExistingUserException, ValidationException {
+    public static void getPlatformAAMKeystore(String coreAAMAddress,
+                                              String platformOwnerUsername,
+                                              String platformOwnerPassword,
+                                              String platformId,
+                                              String keyStorePath,
+                                              String keyStorePassword,
+                                              String rootCACertificateAlias,
+                                              String aamCertificateAlias,
+                                              String aamCertificatePrivateKeyPassword) throws
+            KeyStoreException,
+            IOException,
+            CertificateException,
+            NoSuchAlgorithmException,
+            NoSuchProviderException,
+            InvalidAlgorithmParameterException,
+            InvalidArgumentsException,
+            WrongCredentialsException,
+            NotExistingUserException,
+            ValidationException {
         KeyStore ks = getKeystore(keyStorePath, keyStorePassword);
         log.info("Key Store acquired.");
         KeyPair pair = CryptoHelper.createKeyPair();
@@ -63,7 +107,7 @@ public class PlatformAAMCertificateKeyStoreFactory {
         CertificateRequest request = new CertificateRequest();
         request.setUsername(platformOwnerUsername);
         request.setPassword(platformOwnerPassword);
-        request.setClientId(clientId);
+        request.setClientId(platformId);
         request.setClientCSRinPEMFormat(csr);
         log.info("Request created");
         AAMClient aamClient = new AAMClient(coreAAMAddress);
@@ -73,10 +117,10 @@ public class PlatformAAMCertificateKeyStoreFactory {
         if (!aamClient.getAvailableAAMs().getAvailableAAMs().get(platformId).getAamCACertificate().getCertificateString().equals(platformAAMCertificate)) {
             throw new CertificateException("Wrong certificate under the platformId");
         }
-        ks.setKeyEntry(keyTag, pair.getPrivate(), keyStorePassword.toCharArray(),
+        ks.setKeyEntry(aamCertificateAlias, pair.getPrivate(), aamCertificatePrivateKeyPassword.toCharArray(),
                 new java.security.cert.Certificate[]{CryptoHelper.convertPEMToX509(platformAAMCertificate)});
         Certificate aamCertificate = aamClient.getAvailableAAMs().getAvailableAAMs().get(SecurityConstants.AAM_CORE_AAM_INSTANCE_ID).getAamCACertificate();
-        ks.setCertificateEntry(coreCertificateAlias, aamCertificate.getX509());
+        ks.setCertificateEntry(rootCACertificateAlias, aamCertificate.getX509());
         FileOutputStream fOut = new FileOutputStream(keyStorePath);
         ks.store(fOut, keyStorePassword.toCharArray());
         fOut.close();
@@ -91,7 +135,7 @@ public class PlatformAAMCertificateKeyStoreFactory {
         KeyStore trustStore = KeyStore.getInstance("JKS");
         File f = new File(path);
         if (f.exists() && !f.isDirectory()) {
-            log.warn("KeyStore already exists. It will be override");
+            log.warn("KeyStore already exists. It was overridden");
             try (FileInputStream fIn = new FileInputStream(path)) {
                 trustStore.load(fIn, password.toCharArray());
                 fIn.close();
