@@ -12,5 +12,13 @@ public enum OperationType {
     /**
      * deleting actor
      */
-    DELETE
+    DELETE,
+    /**
+     * force updating actor (used while resetting password)
+     */
+    FORCE_UPDATE,
+    /**
+     * reading actor's details
+     */
+    READ
 }
