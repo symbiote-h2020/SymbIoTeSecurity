@@ -10,6 +10,10 @@ public enum OperationType {
      */
     UPDATE,
     /**
+     * updating actors attributes
+     */
+    ATTRIBUTES_UPDATE,
+    /**
      * deleting actor
      */
     DELETE,
