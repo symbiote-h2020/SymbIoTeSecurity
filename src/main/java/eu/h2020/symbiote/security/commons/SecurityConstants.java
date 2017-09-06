@@ -42,7 +42,7 @@ public class SecurityConstants {
     public static final String ERR_WRONG_CREDENTIALS = "ERR_WRONG_CREDENTIALS";
 
     // tokens
-    public static final String TOKEN_HEADER_NAME = "X-Auth-Token";
+    public static final String TOKEN_HEADER_NAME = "x-auth-token";
     public static final int JWT_PARTS_COUNT = 3; //Header, body and signature
     public static final String CLAIM_NAME_TOKEN_TYPE = "ttyp";
     public static final String SUB_NAME_TOKEN_TYPE = "sub";
@@ -50,15 +50,15 @@ public class SecurityConstants {
     public static final String GUEST_NAME = "guest";
 
     // certificates
-    public static final String CLIENT_CERTIFICATE_HEADER_NAME = "X-Auth-Client-Cert";
-    public static final String AAM_CERTIFICATE_HEADER_NAME = "X-Auth-AAM-Cert";
-    public static final String FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE = "X-Auth-ISS-Cert";
+    public static final String CLIENT_CERTIFICATE_HEADER_NAME = "x-auth-client-cert";
+    public static final String AAM_CERTIFICATE_HEADER_NAME = "x-auth-aam-cert";
+    public static final String FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE = "x-auth-iss-cert";
 
     // Security Request Headers
-    public static final String SECURITY_CREDENTIALS_TIMESTAMP_HEADER = "X-Auth-Timestamp";
-    public static final String SECURITY_CREDENTIALS_SIZE_HEADER = "X-Auth-Size";
-    public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "X-Auth-";
-    public static final String SECURITY_RESPONSE_HEADER = "X-Auth-Response";
+    public static final String SECURITY_CREDENTIALS_TIMESTAMP_HEADER = "x-auth-timestamp";
+    public static final String SECURITY_CREDENTIALS_SIZE_HEADER = "x-auth-size";
+    public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "x-auth-";
+    public static final String SECURITY_RESPONSE_HEADER = "x-auth-response";
 
 
     private SecurityConstants() {
