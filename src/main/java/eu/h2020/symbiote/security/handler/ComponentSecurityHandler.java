@@ -242,8 +242,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
             try {
                 securityHandler.login(coreAAM);
                 // fetching updated token from the wallet
-                coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM);
-
+                coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM.getAamInstanceId());
             } catch (ValidationException e) {
                 throw new SecurityHandlerException("Can't refresh the platformOwner's CoreAAM HOME token", e);
             }

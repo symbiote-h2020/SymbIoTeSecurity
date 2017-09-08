@@ -27,15 +27,11 @@ public class PlatformAAMCertificateKeyStoreFactory {
 
     private static Log log = LogFactory.getLog(PlatformAAMCertificateKeyStoreFactory.class);
 
-
-    private PlatformAAMCertificateKeyStoreFactory() {
-    }
-
     /**
      * Generates a platform AAM keystore
      * TODO fill properly all the fields to get the platform AAM keystore
      */
-    public static void main() {
+    public static void main(String[] args) {
         // given to you for integration, in the end should be available in public
         // from spring bootstrap file: symbiote.coreaam.url
         String coreAAMAddress = "";
@@ -98,6 +94,7 @@ public class PlatformAAMCertificateKeyStoreFactory {
             WrongCredentialsException,
             NotExistingUserException,
             ValidationException {
+        ECDSAHelper.enableECDSAProvider();
         KeyStore ks = getKeystore(keyStorePath, keyStorePassword);
         log.info("Key Store acquired.");
         KeyPair pair = CryptoHelper.createKeyPair();
@@ -117,10 +114,10 @@ public class PlatformAAMCertificateKeyStoreFactory {
         if (!aamClient.getAvailableAAMs().getAvailableAAMs().get(platformId).getAamCACertificate().getCertificateString().equals(platformAAMCertificate)) {
             throw new CertificateException("Wrong certificate under the platformId");
         }
-        ks.setKeyEntry(aamCertificateAlias, pair.getPrivate(), aamCertificatePrivateKeyPassword.toCharArray(),
-                new java.security.cert.Certificate[]{CryptoHelper.convertPEMToX509(platformAAMCertificate)});
         Certificate aamCertificate = aamClient.getAvailableAAMs().getAvailableAAMs().get(SecurityConstants.AAM_CORE_AAM_INSTANCE_ID).getAamCACertificate();
         ks.setCertificateEntry(rootCACertificateAlias, aamCertificate.getX509());
+        ks.setKeyEntry(aamCertificateAlias, pair.getPrivate(), aamCertificatePrivateKeyPassword.toCharArray(),
+                new java.security.cert.Certificate[]{CryptoHelper.convertPEMToX509(platformAAMCertificate), aamCertificate.getX509()});
         FileOutputStream fOut = new FileOutputStream(keyStorePath);
         ks.store(fOut, keyStorePassword.toCharArray());
         fOut.close();

@@ -7,19 +7,12 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
-import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.JWTCreationException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.NotExistingUserException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.*;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
 import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
 import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -27,21 +20,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyPair;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.UnrecoverableEntryException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -186,7 +168,8 @@ public class SecurityHandler implements ISecurityHandler {
     
     FileInputStream fIn = new FileInputStream(ksFile);
     trustStore.load(fIn, password.toCharArray());
-    
+
+    fIn.close();
     return trustStore;
   }
   
@@ -209,7 +192,15 @@ public class SecurityHandler implements ISecurityHandler {
   
   @Override
   public Certificate getComponentCertificate(String componentId) {
-    return coreAAM.getComponentCertificates().get(componentId);
+    String[] componentInfo = componentId.split("@");
+    try {
+      // attempt to return fresh info
+      return getAvailableAAMs().get(componentInfo[1]).getComponentCertificates().get(componentInfo[0]);
+    } catch (SecurityHandlerException e) {
+      e.printStackTrace();
+      // fallback to stored data
+      return credentialsWallet.get(componentInfo[1]).homeCredentials.homeAAM.getComponentCertificates().get(componentInfo[0]);
+    }
   }
   
   @Override
@@ -248,8 +239,8 @@ public class SecurityHandler implements ISecurityHandler {
       request.setClientId(clientId);
       
       String csr = null;
-      if (username.contains("@")) {
-        String[] componentInfo = username.split("@");
+      if (clientId.contains("@")) {
+        String[] componentInfo = clientId.split("@");
         csr = CryptoHelper.buildComponentCertificateSigningRequestPEM(
             componentInfo[0], componentInfo[1], pair);
       } else {
@@ -376,7 +367,7 @@ public class SecurityHandler implements ISecurityHandler {
     
     FileOutputStream fOut = new FileOutputStream(keystorePath);
     trustStore.store(fOut, keystorePassword.toCharArray());
-    
+    fOut.close();
     return true;
   }
   
