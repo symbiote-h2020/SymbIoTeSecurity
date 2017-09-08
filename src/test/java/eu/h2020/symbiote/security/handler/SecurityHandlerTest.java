@@ -75,8 +75,8 @@ public class SecurityHandlerTest {
     
         homeAAM = getHomeAMM(homeAAMId);
     
-        //aamClient.getClientCertificate
-        Mockito.when(aamClient.getClientCertificate(Mockito.any(CertificateRequest.class))).thenReturn(serverCertString);
+        //aamClient.signCertificateRequest
+        Mockito.when(aamClient.signCertificateRequest(Mockito.any(CertificateRequest.class))).thenReturn(serverCertString);
 
         Mockito.when(ClientFactory.getAAMClient(Matchers.anyString())).thenReturn(aamClient);
 
@@ -93,7 +93,7 @@ public class SecurityHandlerTest {
         Mockito.when(aamClient.getGuestToken()).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
 
         //aamClient.getGuestToken
-        Mockito.when(aamClient.validate(Matchers.anyString(), Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(ValidationStatus.VALID);
+        Mockito.when(aamClient.validateCredentials(Matchers.anyString(), Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(ValidationStatus.VALID);
     
     
         

@@ -10,7 +10,6 @@ import org.springframework.data.annotation.Transient;
 /**
  * Class that defines the SymbIoTe JWS token
  * <p>
- * TODO R3 unify the duplicated claims handling @{@link Claims} and
  *
  * @author Daniele Caldarola (CNIT)
  * @author Mikołaj Dobski (PSNC)
@@ -19,7 +18,6 @@ import org.springframework.data.annotation.Transient;
  * @{@link eu.h2020.symbiote.security.commons.jwt.JWTClaims}
  */
 public class Token {
-    public final static String JWT_CLAIMS_TTYPE = SecurityConstants.CLAIM_NAME_TOKEN_TYPE;
 
     private String id = "";
     private String token = "";

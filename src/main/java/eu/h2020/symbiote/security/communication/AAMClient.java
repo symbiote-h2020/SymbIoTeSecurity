@@ -58,12 +58,12 @@ public class AAMClient implements IAAMClient {
      * @return the signed certificate from the provided CSR in PEM format
      */
     @Override
-    public String getClientCertificate(CertificateRequest certificateRequest) throws
+    public String signCertificateRequest(CertificateRequest certificateRequest) throws
             WrongCredentialsException,
             NotExistingUserException,
             ValidationException,
             InvalidArgumentsException {
-        Response response = feignClient.getClientCertificate(certificateRequest);
+        Response response = feignClient.signCertificateRequest(certificateRequest);
         switch (response.status()) {
             case 400:
                 if (response.body().toString().contains("INVALID_ARGUMENTS"))
@@ -84,8 +84,8 @@ public class AAMClient implements IAAMClient {
      * @return the signed certificate from the provided CSR in PEM format
      */
     @Override
-    public String revoke(RevocationRequest revocationRequest) throws InvalidArgumentsException, WrongCredentialsException {
-        Response response = feignClient.revoke(revocationRequest);
+    public String revokeCredentials(RevocationRequest revocationRequest) throws InvalidArgumentsException, WrongCredentialsException {
+        Response response = feignClient.revokeCredentials(revocationRequest);
         switch (response.status()) {
             case 400:
                 throw new InvalidArgumentsException(response.body().toString());
@@ -169,8 +169,8 @@ public class AAMClient implements IAAMClient {
      * @return validation status
      */
     @Override
-    public ValidationStatus validate(String token, Optional<String> clientCertificate, Optional<String> clientCertificateSigningAAMCertificate, Optional<String> foreignTokenIssuingAAMCertificate) {
-        return feignClient.validate(token, clientCertificate.orElse(""), clientCertificateSigningAAMCertificate.orElse(""), foreignTokenIssuingAAMCertificate.orElse(""));
+    public ValidationStatus validateCredentials(String token, Optional<String> clientCertificate, Optional<String> clientCertificateSigningAAMCertificate, Optional<String> foreignTokenIssuingAAMCertificate) {
+        return feignClient.validateCredentials(token, clientCertificate.orElse(""), clientCertificateSigningAAMCertificate.orElse(""), foreignTokenIssuingAAMCertificate.orElse(""));
     }
 
     /**
@@ -178,22 +178,22 @@ public class AAMClient implements IAAMClient {
      * @return Management Status informing about a result of completing requested management operation
      */
     @Override
-    public ManagementStatus manage(PlatformManagementRequest platformManagementRequest) throws AAMException {
+    public ManagementStatus managePlatform(PlatformManagementRequest platformManagementRequest) throws AAMException {
         try {
-            return feignClient.manage(platformManagementRequest).getRegistrationStatus();
+            return feignClient.managePlatform(platformManagementRequest).getRegistrationStatus();
         } catch (Exception e) {
             throw new AAMException("Internal Platform Management Error");
         }
     }
 
     /**
-     * @param userManagementRequest  related to associated users' management operation.
+     * @param userManagementRequest related to associated users' management operation.
      * @return Management Status informing about a result of completing requested management operation
      */
     @Override
-    public ManagementStatus manage(UserManagementRequest userManagementRequest) throws AAMException {
+    public ManagementStatus manageUser(UserManagementRequest userManagementRequest) throws AAMException {
         try {
-            return feignClient.manage(userManagementRequest);
+            return feignClient.manageUser(userManagementRequest);
         } catch (Exception e) {
             throw new AAMException("Internal User Management Error");
         }

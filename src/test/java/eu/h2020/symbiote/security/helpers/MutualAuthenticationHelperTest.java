@@ -296,7 +296,7 @@ public class MutualAuthenticationHelperTest {
             InvalidKeySpecException,
             IOException {
 
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.guestToken);
+        SecurityRequest securityRequest = new SecurityRequest(this.guestToken.getToken());
         assertEquals(this.guestToken.toString(), securityRequest.getSecurityCredentials().iterator().next().getToken());
     }
 
@@ -308,7 +308,7 @@ public class MutualAuthenticationHelperTest {
             InvalidKeySpecException,
             IOException {
 
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.guestToken);
+        SecurityRequest securityRequest = new SecurityRequest(this.guestToken.getToken());
         assertEquals(this.guestToken.toString(), securityRequest.getSecurityCredentials().iterator().next().getToken());
         assertTrue(MutualAuthenticationHelper.isSecurityRequestVerified(securityRequest));
     }

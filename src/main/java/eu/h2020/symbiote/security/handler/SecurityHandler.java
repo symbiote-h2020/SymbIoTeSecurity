@@ -179,7 +179,7 @@ public class SecurityHandler implements ISecurityHandler {
                                    Optional<String> foreignTokenIssuingAAMCertificate) {
     
     
-    return ClientFactory.getAAMClient(validationAuthority.getAamAddress()).validate(token,
+    return ClientFactory.getAAMClient(validationAuthority.getAamAddress()).validateCredentials(token,
         clientCertificate,
         clientCertificateSigningAAMCertificate,
         foreignTokenIssuingAAMCertificate);
@@ -233,11 +233,6 @@ public class SecurityHandler implements ISecurityHandler {
     try {
       KeyPair pair = CryptoHelper.createKeyPair();
       
-      CertificateRequest request = new CertificateRequest();
-      request.setUsername(username);
-      request.setPassword(password);
-      request.setClientId(clientId);
-      
       String csr = null;
       if (clientId.contains("@")) {
         String[] componentInfo = clientId.split("@");
@@ -247,11 +242,11 @@ public class SecurityHandler implements ISecurityHandler {
         csr = CryptoHelper.buildCertificateSigningRequestPEM(
             homeAAM.getAamCACertificate().getX509(), username, clientId, pair);
       }
-      
-      request.setClientCSRinPEMFormat(csr);
-      
+
+      CertificateRequest request = new CertificateRequest(username,password,clientId,csr);
+
       String certificateValue = ClientFactory.getAAMClient(homeAAM.getAamAddress())
-                                    .getClientCertificate(request);
+                                    .signCertificateRequest(request);
       
       Certificate certificate = new Certificate();
       certificate.setCertificateString(certificateValue);
