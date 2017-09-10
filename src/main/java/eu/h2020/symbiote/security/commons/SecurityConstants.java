@@ -16,8 +16,11 @@ public class SecurityConstants {
     public static final String SIGNATURE_ALGORITHM = "SHA256withECDSA";
 
     // AAM GLOBAL
-    public static final String AAM_CORE_AAM_FRIENDLY_NAME = "SymbIoTe Core AAM";
-    public static final String AAM_CORE_AAM_INSTANCE_ID = "SymbIoTe_Core_AAM";
+    public static final String CORE_AAM_FRIENDLY_NAME = "SymbIoTe Core AAM";
+    public static final String CORE_AAM_INSTANCE_ID = "SymbIoTe_Core_AAM";
+
+    // component certificates resolver constants
+    public static final String AAM_COMPONENT_NAME = "aam";
 
     // AAM REST paths
     public static final String AAM_GET_AVAILABLE_AAMS = "/get_available_aams";

@@ -8,6 +8,7 @@ import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.*;
+import eu.h2020.symbiote.security.communication.AAMClient;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
 import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
@@ -189,18 +190,24 @@ public class SecurityHandler implements ISecurityHandler {
   public Map<String, BoundCredentials> getAcquiredCredentials() {
     return credentialsWallet;
   }
-  
+
   @Override
-  public Certificate getComponentCertificate(String componentId) {
-    String[] componentInfo = componentId.split("@");
-    try {
-      // attempt to return fresh info
-      return getAvailableAAMs().get(componentInfo[1]).getComponentCertificates().get(componentInfo[0]);
-    } catch (SecurityHandlerException e) {
-      e.printStackTrace();
-      // fallback to stored data
-      return credentialsWallet.get(componentInfo[1]).homeCredentials.homeAAM.getComponentCertificates().get(componentInfo[0]);
-    }
+  public Certificate getComponentCertificate(String componentIdentifier, String platformIdentifier) {
+      Certificate certificate = new Certificate();
+      try {
+          AAMClient aamClient = ClientFactory.getAAMClient(coreAAM.getAamAddress());
+          // checking cache
+          if (credentialsWallet.containsKey(platformIdentifier) && credentialsWallet.containsKey(componentIdentifier))
+              // fetching from wallet
+              certificate = credentialsWallet.get(platformIdentifier).homeCredentials.homeAAM.getComponentCertificates().get(componentIdentifier);
+          else {
+              // need to fetch fresh certificate
+              certificate = new Certificate(aamClient.getComponentCertificate(componentIdentifier, platformIdentifier));
+          }
+      } catch (AAMException e) {
+          logger.error(e);
+      }
+      return certificate;
   }
   
   @Override
@@ -303,8 +310,8 @@ public class SecurityHandler implements ISecurityHandler {
     
     Map<String, AAM> aamList = getAvailableAAMs(homeAAM);
     if (aamList != null && !aamList.isEmpty()
-            && aamList.get(SecurityConstants.AAM_CORE_AAM_INSTANCE_ID) != null) {
-      coreAAM = aamList.get(SecurityConstants.AAM_CORE_AAM_INSTANCE_ID);
+            && aamList.get(SecurityConstants.CORE_AAM_INSTANCE_ID) != null) {
+      coreAAM = aamList.get(SecurityConstants.CORE_AAM_INSTANCE_ID);
     } else {
       throw new SecurityHandlerException("Can't find the Core AAM instance");
     }

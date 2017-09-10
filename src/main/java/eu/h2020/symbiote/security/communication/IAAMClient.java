@@ -1,5 +1,6 @@
 package eu.h2020.symbiote.security.communication;
 
+import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ManagementStatus;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
@@ -15,10 +16,13 @@ import java.util.Optional;
  * @author Mikolaj Dobski (PSNC)
  */
 public interface IAAMClient {
+
     /**
-     * @return Certificate of the component in PEM format. In this case the AAM certificate.
+     * @param componentIdentifier component identifier or {@link SecurityConstants#AAM_COMPONENT_NAME} for AAM CA certificate
+     * @param platformIdentifier  for a platform component or {@link SecurityConstants#CORE_AAM_INSTANCE_ID} for Symbiote core components
+     * @return symbiote component Certificate of the component in PEM format
      */
-    String getComponentCertificate() throws AAMException;
+    String getComponentCertificate(String componentIdentifier, String platformIdentifier) throws AAMException;
 
     /**
      * Allows the user to acquire their client's certificate.

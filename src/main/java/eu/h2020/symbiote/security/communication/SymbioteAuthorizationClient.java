@@ -1,17 +1,13 @@
 package eu.h2020.symbiote.security.communication;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
-import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 import eu.h2020.symbiote.security.handler.IComponentSecurityHandler;
-
 import feign.Client;
 import feign.Request;
 import feign.Response;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -26,11 +22,20 @@ public class SymbioteAuthorizationClient implements Client {
   
   private IComponentSecurityHandler handler = null;
   private Client client;
-  private String componentId;
-  
-  public SymbioteAuthorizationClient(IComponentSecurityHandler handler, String componentId, Client client) {
+  private String serviceComponentIdentifier;
+  private String servicePlatformIdentifier;
+
+    /**
+     *
+     * @param handler configured for this component
+     * @param serviceComponentIdentifier of the service this client is used to communicate with
+     * @param servicePlatformIdentifier  to which the service belongs ({@link SecurityConstants#CORE_AAM_INSTANCE_ID} for Symbiote core components)
+     * @param client used for business logic
+     */
+  public SymbioteAuthorizationClient(IComponentSecurityHandler handler, String serviceComponentIdentifier, String servicePlatformIdentifier, Client client) {
     this.handler = handler;
-    this.componentId = componentId;
+    this.serviceComponentIdentifier = serviceComponentIdentifier;
+    this.servicePlatformIdentifier = servicePlatformIdentifier;
     this.client = client;
   }
   
@@ -51,9 +56,8 @@ public class SymbioteAuthorizationClient implements Client {
             response.headers().get(SecurityConstants.SECURITY_RESPONSE_HEADER);
       
         if (secResponse != null && !secResponse.isEmpty()) {
-          Certificate cert = handler.getSecurityHandler().getComponentCertificate(componentId);
-          if (!handler.isReceivedServiceResponseVerified(secResponse.iterator().next(), cert)) {
-            return Response.builder().status(400).reason("Server response verification failed").build();
+            if (!handler.isReceivedServiceResponseVerified(secResponse.iterator().next(), serviceComponentIdentifier, servicePlatformIdentifier)) {
+                return Response.builder().status(400).reason("Server response verification failed").build();
           }
         } else {
           return Response.builder().status(400).reason("Missing server challenge response").build();

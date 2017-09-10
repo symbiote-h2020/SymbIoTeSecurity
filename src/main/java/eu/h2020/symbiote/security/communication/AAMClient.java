@@ -40,14 +40,19 @@ public class AAMClient implements IAAMClient {
                 .target(IFeignAAMClient.class, serverAddress);
     }
 
+
     /**
-     * @return Certificate of the component in PEM format. In this case the AAM certificate.
+     * @param componentIdentifier component identifier or {@link SecurityConstants#AAM_COMPONENT_NAME} for AAM CA certificate
+     * @param platformIdentifier  for a platform component or {@link SecurityConstants#CORE_AAM_INSTANCE_ID} for Symbiote core components
+     * @return symbiote component Certificate of the component in PEM format
      */
     @Override
-    public String getComponentCertificate() throws AAMException {
-        Response response = feignClient.getComponentCertificate();
+    public String getComponentCertificate(String componentIdentifier, String platformIdentifier) throws AAMException {
+        Response response = feignClient.getComponentCertificate(componentIdentifier, platformIdentifier);
         if (response.status() == 500)
             throw new AAMException(response.body().toString());
+        if (response.status() == 404)
+            throw new AAMException("Certificate not found");
         return response.body().toString();
     }
 
@@ -80,6 +85,7 @@ public class AAMClient implements IAAMClient {
 
     /**
      * Allows the user to revoke their credentials
+     *
      * @param revocationRequest required to revoke a certificate or token.
      * @return the signed certificate from the provided CSR in PEM format
      */
