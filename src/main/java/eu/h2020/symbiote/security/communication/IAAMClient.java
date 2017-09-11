@@ -1,5 +1,6 @@
 package eu.h2020.symbiote.security.communication;
 
+import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ManagementStatus;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
@@ -15,10 +16,13 @@ import java.util.Optional;
  * @author Mikolaj Dobski (PSNC)
  */
 public interface IAAMClient {
+
     /**
-     * @return Certificate of the component in PEM format. In this case the AAM certificate.
+     * @param componentIdentifier component identifier or {@link SecurityConstants#AAM_COMPONENT_NAME} for AAM CA certificate
+     * @param platformIdentifier  for a platform component or {@link SecurityConstants#CORE_AAM_INSTANCE_ID} for Symbiote core components
+     * @return symbiote component Certificate of the component in PEM format
      */
-    String getComponentCertificate() throws AAMException;
+    String getComponentCertificate(String componentIdentifier, String platformIdentifier) throws AAMException;
 
     /**
      * Allows the user to acquire their client's certificate.
@@ -26,7 +30,7 @@ public interface IAAMClient {
      * @param certificateRequest required to issue a certificate for given (username, clientId) tupple.
      * @return the signed certificate from the provided CSR in PEM format
      */
-    String getClientCertificate(CertificateRequest certificateRequest) throws
+    String signCertificateRequest(CertificateRequest certificateRequest) throws
             WrongCredentialsException,
             NotExistingUserException,
             ValidationException,
@@ -38,7 +42,7 @@ public interface IAAMClient {
      * @param revocationRequest required to revoke a certificate or token.
      * @return the signed certificate from the provided CSR in PEM format
      */
-    String revoke(RevocationRequest revocationRequest) throws InvalidArgumentsException, WrongCredentialsException;
+    String revokeCredentials(RevocationRequest revocationRequest) throws InvalidArgumentsException, WrongCredentialsException;
 
     /**
      * @return GUEST token used to access public resources offered in SymbIoTe
@@ -77,19 +81,22 @@ public interface IAAMClient {
      * @param foreignTokenIssuingAAMCertificate      in PEM with key matching the IPK claim in the provided FOREIGN token in 'offline' (intranet) scenarios
      * @return validation status
      */
-    ValidationStatus validate(String token, Optional<String> clientCertificate, Optional<String> clientCertificateSigningAAMCertificate, Optional<String> foreignTokenIssuingAAMCertificate);
+    ValidationStatus validateCredentials(String token,
+                                         Optional<String> clientCertificate,
+                                         Optional<String> clientCertificateSigningAAMCertificate,
+                                         Optional<String> foreignTokenIssuingAAMCertificate);
 
     /**
      * @param platformManagementRequest related to associated platforms' management operation.
      * @return Management Status informing about a result of completing requested management operation
      */
-    ManagementStatus manage(PlatformManagementRequest platformManagementRequest) throws AAMException;
+    ManagementStatus managePlatform(PlatformManagementRequest platformManagementRequest) throws AAMException;
 
     /**
      * @param userManagementRequest related to associated users' management operation.
      * @return Management Status informing about a result of completing requested management operation
      */
-    ManagementStatus manage(UserManagementRequest userManagementRequest) throws AAMException;
+    ManagementStatus manageUser(UserManagementRequest userManagementRequest) throws AAMException;
 
     /**
      * @param credentials of a user whose details should be returned

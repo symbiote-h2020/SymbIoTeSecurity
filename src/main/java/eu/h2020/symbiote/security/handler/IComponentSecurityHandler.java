@@ -1,9 +1,8 @@
 package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
-import eu.h2020.symbiote.security.commons.Certificate;
+import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
-import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 
 import java.util.Map;
@@ -49,12 +48,15 @@ public interface IComponentSecurityHandler {
     /**
      * Used by a component to verify that the other components response was legitimate... e.g. to handle the service response encapsulated in a JWS.
      *
-     * @param serviceResponse    that should prove the service's authenticity
-     * @param serviceCertificate from the component that the last operation was requested. Can be found in the @{@link AAM#componentCertificates}
+     * @param serviceResponse     that should prove the service's authenticity
+     * @param componentIdentifier from which the service response was received
+     * @param platformIdentifier  to which the component belongs ({@link SecurityConstants#CORE_AAM_INSTANCE_ID} for Symbiote core components)
      * @return true if the service is genuine
      */
     boolean isReceivedServiceResponseVerified(String serviceResponse,
-                                              Certificate serviceCertificate) throws SecurityHandlerException;
+                                              String componentIdentifier,
+                                              String platformIdentifier)
+            throws SecurityHandlerException;
 
     /**
      * @return if the component owner wants to use the SH directly

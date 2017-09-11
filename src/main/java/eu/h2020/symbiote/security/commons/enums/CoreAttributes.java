@@ -4,10 +4,10 @@ package eu.h2020.symbiote.security.commons.enums;
  * Contains collection of symbIoTe related JWT attributes which might appear in core tokens.
  */
 public enum CoreAttributes {
-    ROLE("Role"),
-    OWNED_PLATFORM("OwnedPlatform");
+    ROLE("Role");
 
     private final String value;
+
     CoreAttributes(final String value) {
         this.value = value;
     }

@@ -109,9 +109,11 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
 
     @Override
     public boolean isReceivedServiceResponseVerified(String serviceResponse,
-                                                     Certificate serviceCertificate) throws SecurityHandlerException {
+                                                     String componentIdentifier,
+                                                     String platformIdentifier)
+            throws SecurityHandlerException {
         try {
-            return MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, serviceCertificate);
+            return MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, securityHandler.getComponentCertificate(componentIdentifier, platformIdentifier));
         } catch (NoSuchAlgorithmException | CertificateException e) {
             e.printStackTrace();
             throw new SecurityHandlerException("Failed to verify the serviceResponse, the operation should be retried: " + e.getMessage());
@@ -211,7 +213,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
      * @throws SecurityHandlerException on error
      */
     private BoundCredentials getCoreAAMCredentials() throws SecurityHandlerException {
-        AAM coreAAM = securityHandler.getAvailableAAMs(localAAM).get(SecurityConstants.AAM_CORE_AAM_INSTANCE_ID);
+        AAM coreAAM = securityHandler.getAvailableAAMs(localAAM).get(SecurityConstants.CORE_AAM_INSTANCE_ID);
         if (coreAAM == null)
             throw new SecurityHandlerException("Core AAM unavailable");
         BoundCredentials coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM);
@@ -242,8 +244,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
             try {
                 securityHandler.login(coreAAM);
                 // fetching updated token from the wallet
-                coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM);
-
+                coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM.getAamInstanceId());
             } catch (ValidationException e) {
                 throw new SecurityHandlerException("Can't refresh the platformOwner's CoreAAM HOME token", e);
             }

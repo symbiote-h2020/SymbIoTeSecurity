@@ -7,6 +7,7 @@ import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -28,6 +29,18 @@ public class SecurityRequest {
     public SecurityRequest(Set<SecurityCredentials> securityCredentials, Long timestamp) {
         this.securityCredentials = securityCredentials;
         this.timestamp = timestamp;
+    }
+
+    /**
+     * Used to generate the security request needed to access public resources
+     *
+     * @param guestToken acquired from whichever symbIoTe AAM
+     * @return the required payload for client's authentication and authorization
+     */
+    public SecurityRequest(String guestToken) {
+        this.timestamp = ZonedDateTime.now().toInstant().toEpochMilli();
+        this.securityCredentials = new HashSet<>();
+        securityCredentials.add(new SecurityCredentials(guestToken));
     }
 
     /**
