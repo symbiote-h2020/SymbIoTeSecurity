@@ -11,7 +11,6 @@ import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection
 import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
 import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.utils.DummyTokenIssuer;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -33,12 +32,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -60,7 +54,7 @@ public class SecurityHandlerTest {
     String serverkeystorePath = localPath + "/src/test/resources/core.p12";
     String serverkeystorePassword = "1234567";
     String serveralias = "client-core-1";
-    String homeAAMId = SecurityConstants.AAM_CORE_AAM_INSTANCE_ID;
+    String homeAAMId = SecurityConstants.CORE_AAM_INSTANCE_ID;
     
     String serverCertString = null;
     AAM homeAAM = null;
@@ -75,8 +69,8 @@ public class SecurityHandlerTest {
     
         homeAAM = getHomeAMM(homeAAMId);
     
-        //aamClient.getClientCertificate
-        Mockito.when(aamClient.getClientCertificate(Mockito.any(CertificateRequest.class))).thenReturn(serverCertString);
+        //aamClient.signCertificateRequest
+        Mockito.when(aamClient.signCertificateRequest(Mockito.any(CertificateRequest.class))).thenReturn(serverCertString);
 
         Mockito.when(ClientFactory.getAAMClient(Matchers.anyString())).thenReturn(aamClient);
 
@@ -93,7 +87,7 @@ public class SecurityHandlerTest {
         Mockito.when(aamClient.getGuestToken()).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
 
         //aamClient.getGuestToken
-        Mockito.when(aamClient.validate(Matchers.anyString(), Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(ValidationStatus.VALID);
+        Mockito.when(aamClient.validateCredentials(Matchers.anyString(), Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(ValidationStatus.VALID);
     
     
         

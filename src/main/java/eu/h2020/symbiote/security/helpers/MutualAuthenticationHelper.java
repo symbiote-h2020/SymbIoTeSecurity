@@ -1,7 +1,6 @@
 package eu.h2020.symbiote.security.helpers;
 
 import eu.h2020.symbiote.security.commons.Certificate;
-import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.Token.Type;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
@@ -121,21 +120,6 @@ public class MutualAuthenticationHelper {
         }
 
         return new SecurityRequest(securityCredentialsSet, timestamp1Seconds);
-    }
-
-    /**
-     * Used to generate the security request needed to access public resources
-     *
-     * @param guestToken acquired from whichever symbIoTe AAM
-     * @return the required payload for client's authentication and authorization
-     */
-    public static SecurityRequest getSecurityRequest(Token guestToken) {
-
-        Long timestamp1 = ZonedDateTime.now().toInstant().toEpochMilli();
-        Set<SecurityCredentials> securityCredentialsSet = new HashSet<>();
-        securityCredentialsSet.add(new SecurityCredentials(guestToken.toString()));
-
-        return new SecurityRequest(securityCredentialsSet, timestamp1);
     }
 
     /**

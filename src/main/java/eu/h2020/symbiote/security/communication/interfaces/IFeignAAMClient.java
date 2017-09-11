@@ -21,16 +21,9 @@ public interface IFeignAAMClient {
     @Headers("Content-Type: application/json")
     AvailableAAMsCollection getAvailableAAMs();
 
-    @RequestLine("GET " + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE)
-    Response getComponentCertificate();
-
-    @RequestLine("POST " + SecurityConstants.AAM_GET_CLIENT_CERTIFICATE)
-    @Headers("Content-Type: application/json")
-    Response getClientCertificate(CertificateRequest certificateRequest);
-
-    @RequestLine("POST " + SecurityConstants.AAM_REVOKE)
-    @Headers("Content-Type: application/json")
-    Response revoke(RevocationRequest revocationRequest);
+    @RequestLine("GET " + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
+    Response getComponentCertificate(@Param("componentIdentifier") String componentIdentifier,
+                                     @Param("platformIdentifier") String platformIdentifier);
 
     @RequestLine("POST " + SecurityConstants.AAM_GET_GUEST_TOKEN)
     Response getGuestToken();
@@ -49,26 +42,34 @@ public interface IFeignAAMClient {
                              @Param("clientCertificate") String clientCertificate,
                              @Param("aamCertificate") String aamCertificate);
 
-    @RequestLine("POST " + SecurityConstants.AAM_VALIDATE)
+    @RequestLine("POST " + SecurityConstants.AAM_GET_USER_DETAILS)
+    @Headers("Content-Type: application/json")
+    UserDetails getUserDetails(Credentials credentials);
+
+    @RequestLine("POST " + SecurityConstants.AAM_MANAGE_PLATFORMS)
+    @Headers("Content-Type: application/json")
+    PlatformManagementResponse managePlatform(PlatformManagementRequest platformManagementRequest);
+
+    @RequestLine("POST " + SecurityConstants.AAM_MANAGE_USERS)
+    @Headers("Content-Type: application/json")
+    ManagementStatus manageUser(UserManagementRequest userManagementRequest);
+
+    @RequestLine("POST " + SecurityConstants.AAM_REVOKE_CREDENTIALS)
+    @Headers("Content-Type: application/json")
+    Response revokeCredentials(RevocationRequest revocationRequest);
+
+    @RequestLine("POST " + SecurityConstants.AAM_SIGN_CERTIFICATE_REQUEST)
+    @Headers("Content-Type: application/json")
+    Response signCertificateRequest(CertificateRequest certificateRequest);
+
+    @RequestLine("POST " + SecurityConstants.AAM_VALIDATE_CREDENTIALS)
     @Headers({SecurityConstants.TOKEN_HEADER_NAME + ": {token}",
             SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME + ": {clientCertificate}",
             SecurityConstants.AAM_CERTIFICATE_HEADER_NAME + ": {clientCertificateSigningAAMCertificate}",
             SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE + ": {foreignTokenIssuingAAMCertificate}",
             "Accept: application/json"})
-    ValidationStatus validate(@Param("token") String token,
-                              @Param("clientCertificate") String clientCertificate,
-                              @Param("clientCertificateSigningAAMCertificate") String clientCertificateSigningAAMCertificate,
-                              @Param("foreignTokenIssuingAAMCertificate") String foreignTokenIssuingAAMCertificate);
-
-    @RequestLine("POST " + SecurityConstants.AAM_MANAGE_PLATFORMS)
-    @Headers("Content-Type: application/json")
-    PlatformManagementResponse manage(PlatformManagementRequest platformManagementRequest);
-
-    @RequestLine("POST " + SecurityConstants.AAM_MANAGE_USERS)
-    @Headers("Content-Type: application/json")
-    ManagementStatus manage(UserManagementRequest userManagementRequest);
-
-    @RequestLine("POST " + SecurityConstants.AAM_GET_USER_DETAILS)
-    @Headers("Content-Type: application/json")
-    UserDetails getUserDetails(Credentials credentials);
+    ValidationStatus validateCredentials(@Param("token") String token,
+                                         @Param("clientCertificate") String clientCertificate,
+                                         @Param("clientCertificateSigningAAMCertificate") String clientCertificateSigningAAMCertificate,
+                                         @Param("foreignTokenIssuingAAMCertificate") String foreignTokenIssuingAAMCertificate);
 }

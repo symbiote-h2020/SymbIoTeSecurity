@@ -1,11 +1,10 @@
 package eu.h2020.symbiote.security.commons.enums;
 
 /**
- * Used to define the status of registration procedure
+ * Used to define the status of a user/platform management procedure
  * @author Maks Marcinowski(PSNC)
  */
 public enum ManagementStatus {
-
     /**
      * successful registration
      */

@@ -101,20 +101,16 @@ public class PlatformAAMCertificateKeyStoreFactory {
         log.info("Key pair for the platform AAM generated.");
         String csr = CryptoHelper.buildPlatformCertificateSigningRequestPEM(platformId, pair);
         log.info("CSR for the platform AAM generated.");
-        CertificateRequest request = new CertificateRequest();
-        request.setUsername(platformOwnerUsername);
-        request.setPassword(platformOwnerPassword);
-        request.setClientId(platformId);
-        request.setClientCSRinPEMFormat(csr);
+        CertificateRequest request = new CertificateRequest(platformOwnerUsername, platformOwnerPassword, platformId, csr);
         log.info("Request created");
         AAMClient aamClient = new AAMClient(coreAAMAddress);
         log.info("Connection with AAMClient established");
-        String platformAAMCertificate = aamClient.getClientCertificate(request);
+        String platformAAMCertificate = aamClient.signCertificateRequest(request);
         log.info("Platform Certificate acquired");
         if (!aamClient.getAvailableAAMs().getAvailableAAMs().get(platformId).getAamCACertificate().getCertificateString().equals(platformAAMCertificate)) {
             throw new CertificateException("Wrong certificate under the platformId");
         }
-        Certificate aamCertificate = aamClient.getAvailableAAMs().getAvailableAAMs().get(SecurityConstants.AAM_CORE_AAM_INSTANCE_ID).getAamCACertificate();
+        Certificate aamCertificate = aamClient.getAvailableAAMs().getAvailableAAMs().get(SecurityConstants.CORE_AAM_INSTANCE_ID).getAamCACertificate();
         ks.setCertificateEntry(rootCACertificateAlias, aamCertificate.getX509());
         ks.setKeyEntry(aamCertificateAlias, pair.getPrivate(), aamCertificatePrivateKeyPassword.toCharArray(),
                 new java.security.cert.Certificate[]{CryptoHelper.convertPEMToX509(platformAAMCertificate), aamCertificate.getX509()});

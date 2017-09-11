@@ -1,7 +1,7 @@
 package eu.h2020.symbiote.security.commons.enums;
 
 /**
- * Denotes what kind of role a user in symbIoTe ecosystem has
+ * Denotes what kind of role the user has in symbIoTe ecosystem
  */
 public enum UserRole {
     /**
