@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Required by the AAMs to exchange received remote HOME tokens into FOREIGN tokens containing the federation attributes.
@@ -13,26 +13,31 @@ import java.util.Map;
 public class FederationRule {
     @Id
     private String federationId = "";
-    private Map<String, String> requiredAttributes = new HashMap<>();
-    private Map<String, String> releasedFederatedAttributes = new HashMap<>();
+    private Set<String> platformIds = new HashSet<>();
 
     @JsonCreator
-    public FederationRule(@JsonProperty("federationId") String federationId, @JsonProperty("requiredAttributes") Map<String, String> requiredAttributes, @JsonProperty("releasedFederatedAttributes") Map<String, String> releasedFederatedAttributes) {
+    public FederationRule(@JsonProperty("federationId") String federationId, @JsonProperty("platformIds") Set<String> platformIds) {
         this.federationId = federationId;
-        this.requiredAttributes = requiredAttributes;
-        this.releasedFederatedAttributes = releasedFederatedAttributes;
+        this.platformIds = platformIds;
     }
 
     public String getFederationId() {
         return federationId;
     }
 
-    public Map<String, String> getRequiredAttributes() {
-        return requiredAttributes;
+    public Set<String> getPlatformIds() {
+        return platformIds;
     }
 
-    public Map<String, String> getReleasedFederatedAttributes() {
-        return releasedFederatedAttributes;
+    public void addPlatform(String platformId) {
+        platformIds.add(platformId);
     }
 
+    public void deletePlatform(String platformId) {
+        platformIds.remove(platformId);
+    }
+
+    public boolean containPlatform(String platformId) {
+        return platformIds.contains(platformId);
+    }
 }

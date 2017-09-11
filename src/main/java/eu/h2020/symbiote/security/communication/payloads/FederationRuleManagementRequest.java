@@ -3,8 +3,8 @@ package eu.h2020.symbiote.security.communication.payloads;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Describes management of the federation rules.
@@ -14,29 +14,25 @@ import java.util.Map;
 public class FederationRuleManagementRequest {
     private final Credentials adminCredentials;
     private final String federationRuleId;
-    private final Map<String, String> requiredAttributes;
-    private final Map<String, String> releasedFederatedAttributes;
+    private final Set<String> platformIds;
     private final OperationType operationType;
 
     /**
      * Constructor used to build FederationRuleManagementRequest operations
      *
-     * @param adminCredentials            credentials of the admin.
-     * @param federationRuleId            id of the federation rule.
-     * @param requiredAttributes          required attributes to get the released federated attributes in foreign token. Not checked in case of READ and DELETE operation.
-     * @param releasedFederatedAttributes released federated attributes in foreign tokens. Not checked in case of READ and DELETE operation.
-     * @param operationType               type of the operation.
+     * @param adminCredentials credentials of the admin.
+     * @param federationRuleId id of the federation rule.
+     * @param platformIds      ids of the platforms taking part in federation.
+     * @param operationType    type of the operation.
      */
     @JsonCreator
     public FederationRuleManagementRequest(@JsonProperty("adminCredentials") Credentials adminCredentials,
                                            @JsonProperty("federationRuleId") String federationRuleId,
-                                           @JsonProperty("requiredAttributes") Map<String, String> requiredAttributes,
-                                           @JsonProperty("releasedFederatedAttributes") Map<String, String> releasedFederatedAttributes,
+                                           @JsonProperty("platformIds") Set<String> platformIds,
                                            @JsonProperty("operationType") OperationType operationType) {
         this.adminCredentials = adminCredentials;
         this.federationRuleId = federationRuleId;
-        this.requiredAttributes = requiredAttributes;
-        this.releasedFederatedAttributes = releasedFederatedAttributes;
+        this.platformIds = platformIds;
         this.operationType = operationType;
     }
 
@@ -50,7 +46,11 @@ public class FederationRuleManagementRequest {
     public FederationRuleManagementRequest(@JsonProperty("adminCredentials") Credentials adminCredentials,
                                            @JsonProperty("federationRuleId") String federationRuleId,
                                            @JsonProperty("operationType") OperationType operationType) {
-        this(adminCredentials, federationRuleId, new HashMap<>(), new HashMap<>(), operationType);
+        this(adminCredentials, federationRuleId, new HashSet<>(), operationType);
+    }
+
+    public Set<String> getPlatformIds() {
+        return platformIds;
     }
 
     public Credentials getAdminCredentials() {
@@ -59,14 +59,6 @@ public class FederationRuleManagementRequest {
 
     public String getFederationRuleId() {
         return federationRuleId;
-    }
-
-    public Map<String, String> getRequiredAttributes() {
-        return requiredAttributes;
-    }
-
-    public Map<String, String> getReleasedFederatedAttributes() {
-        return releasedFederatedAttributes;
     }
 
     public OperationType getOperationType() {
