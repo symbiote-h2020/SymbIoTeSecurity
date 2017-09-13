@@ -1,9 +1,11 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Required by the AAMs to exchange received remote HOME tokens into FOREIGN tokens containing the federation attributes.
@@ -11,36 +13,31 @@ import java.util.Map;
 public class FederationRule {
     @Id
     private String federationId = "";
-    private Map<String, String> requiredAttributes = new HashMap<>();
-    private Map<String, String> releasedFederatedAttributes = new HashMap<>();
+    private Set<String> platformIds = new HashSet<>();
 
-    public FederationRule(String federationId, Map<String, String> requiredAttributes, Map<String, String> releasedFederatedAttributes) {
+    @JsonCreator
+    public FederationRule(@JsonProperty("federationId") String federationId, @JsonProperty("platformIds") Set<String> platformIds) {
         this.federationId = federationId;
-        this.requiredAttributes = requiredAttributes;
-        this.releasedFederatedAttributes = releasedFederatedAttributes;
+        this.platformIds = platformIds;
     }
 
     public String getFederationId() {
         return federationId;
     }
 
-    public void setFederationId(String federationId) {
-        this.federationId = federationId;
+    public Set<String> getPlatformIds() {
+        return platformIds;
     }
 
-    public Map<String, String> getRequiredAttributes() {
-        return requiredAttributes;
+    public void addPlatform(String platformId) {
+        platformIds.add(platformId);
     }
 
-    public void setRequiredAttributes(Map<String, String> requiredAttributes) {
-        this.requiredAttributes = requiredAttributes;
+    public void deletePlatform(String platformId) {
+        platformIds.remove(platformId);
     }
 
-    public Map<String, String> getReleasedFederatedAttributes() {
-        return releasedFederatedAttributes;
-    }
-
-    public void setReleasedFederatedAttributes(Map<String, String> releasedFederatedAttributes) {
-        this.releasedFederatedAttributes = releasedFederatedAttributes;
+    public boolean containPlatform(String platformId) {
+        return platformIds.contains(platformId);
     }
 }
