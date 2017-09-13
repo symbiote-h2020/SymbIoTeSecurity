@@ -26,8 +26,10 @@ public class ClientSecurityHandlerFactory {
      */
     public static ISecurityHandler getSecurityHandler(String coreAAMAddress,
                                                       String keystorePath,
-                                                      String keystorePassword) throws
+                                                      String keystorePassword,
+                                                      //TODO: Dirty hack to be removed as it should be present in persistent storage in the future
+                                                      String userId) throws
             SecurityHandlerException {
-        return new SecurityHandler(keystorePath, keystorePassword, coreAAMAddress);
+        return new SecurityHandler(keystorePath, keystorePassword, coreAAMAddress, userId);
     }
 }

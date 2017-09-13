@@ -7,24 +7,47 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
-import eu.h2020.symbiote.security.commons.exceptions.custom.*;
+import eu.h2020.symbiote.security.commons.exceptions.custom.AAMException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.JWTCreationException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.NotExistingUserException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
 import eu.h2020.symbiote.security.communication.AAMClient;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
 import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
 import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -39,6 +62,8 @@ public class SecurityHandler implements ISecurityHandler {
   private final String keystorePath;
   private final String keystorePassword;
   private final String homeAAMAddress;
+  
+  private final String userId;
   
   //In memory credentials wallet by Home AAM id -> Client ID -> User ID -> Credentials
   private Map<String, BoundCredentials> credentialsWallet =
@@ -58,7 +83,9 @@ public class SecurityHandler implements ISecurityHandler {
    */
   public SecurityHandler(String keystorePath,
                          String keystorePassword,
-                         String homeAAMAddress)
+                         String homeAAMAddress,
+                         //TODO: Dirty hack to be removed as it should be present in persistent storage in the future
+                         String userId)
       throws SecurityHandlerException {
     // enabling support for elliptic curve certificates
     ECDSAHelper.enableECDSAProvider();
@@ -67,6 +94,7 @@ public class SecurityHandler implements ISecurityHandler {
     this.keystorePath = keystorePath;
     this.keystorePassword = keystorePassword;
     this.homeAAMAddress = homeAAMAddress;
+    this.userId = userId;
     
     try {
       buildCredentialsWallet();
@@ -324,22 +352,26 @@ public class SecurityHandler implements ISecurityHandler {
       X509Certificate cert = (X509Certificate) trustStore.getCertificate(alias);
       
       String subject = cert.getSubjectX500Principal().getName();
+      String aamSubject = cert.getIssuerX500Principal().getName();
+  
+      X500Name x500name = new JcaX509CertificateHolder(cert).getIssuer();
+      RDN cn = x500name.getRDNs(BCStyle.CN)[0];
+      String aamId = cn.getFirst().getValue().toString();
+      
+      
       if (subject.startsWith("CN=")) {
         String[] elements = subject.split("CN=")[1].split("@");
-        if (elements.length > 2) {
+        if (elements.length > 1) {
           
           String user = null;
           String client = null;
-          String aamId = null;
           
-          if (elements.length > 3) {
-            user = elements[0] + "@" + elements[1];
-            client = elements[2];
-            aamId = elements[3];
-          } else {
+          if (elements.length > 2) {
             user = elements[0];
             client = elements[1];
-            aamId = elements[2];
+          } else {
+            user = this.userId;
+            client = elements[0] + "@" + elements[1];
           }
           
           AAM aam = aamList.get(aamId);

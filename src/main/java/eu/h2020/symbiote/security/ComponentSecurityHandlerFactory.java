@@ -41,7 +41,7 @@ public class ComponentSecurityHandlerFactory {
                                                                         String componentOwnerPassword) throws
             SecurityHandlerException {
         return new ComponentSecurityHandler(
-                new SecurityHandler(keystorePath, keystorePassword, coreAAMAddress),
+                new SecurityHandler(keystorePath, keystorePassword, coreAAMAddress, componentOwnerUsername),
                 localAAMAddress,
                 alwaysUseLocalAAMForValidation,
                 componentOwnerUsername,
