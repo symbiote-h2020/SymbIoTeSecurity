@@ -92,7 +92,7 @@ public class SecurityHandlerTest {
     
         
         createEmptyKeystore();
-        testclient = new SecurityHandler(keystorePath, keystorePassword, "http://test");
+        testclient = new SecurityHandler(keystorePath, keystorePassword, "http://test", "user1");
     
     
     }
