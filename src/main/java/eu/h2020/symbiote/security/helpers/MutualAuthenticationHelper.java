@@ -38,7 +38,7 @@ public class MutualAuthenticationHelper {
 
     // TODO @Daniele by Mikołaj -> I think it should be param of the validator as SS doesn't have support for properties. It should be integrated as the exp claim timestamp which by RFC self-invalidates the challenge
     // in seconds
-    private static final long THRESHOLD_SECONDS = 10;
+    private static final long THRESHOLD_SECONDS = 60;
     private static SecureRandom random = new SecureRandom();
 
     /**
