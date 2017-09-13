@@ -1,6 +1,8 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
@@ -26,7 +28,10 @@ public class SecurityRequest {
     private final Set<SecurityCredentials> securityCredentials;
     private final long timestamp;
 
-    public SecurityRequest(Set<SecurityCredentials> securityCredentials, Long timestamp) {
+    @JsonCreator
+    public SecurityRequest(
+            @JsonProperty("securityCredentials") Set<SecurityCredentials> securityCredentials,
+            @JsonProperty("timestamp") long timestamp) {
         this.securityCredentials = securityCredentials;
         this.timestamp = timestamp;
     }

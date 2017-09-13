@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Describes management of the localAttributes in AAM repository.
  *
- * @author Jakub Toczke (PSNC)
+ * @author Jakub Toczek (PSNC)
  */
 public class LocalAttributesManagementRequest {
 
@@ -18,7 +18,7 @@ public class LocalAttributesManagementRequest {
     private final OperationType operationType;
 
     /**
-     *
+     *Constructor for LocalAttributesManagementRequest
      * @param attributes new attributes Map to replace those in AAM repository
      * @param adminCredentials admin username and password
      * @param operationType describe if we want to acquire actual attributes from AAM repository or replace them
