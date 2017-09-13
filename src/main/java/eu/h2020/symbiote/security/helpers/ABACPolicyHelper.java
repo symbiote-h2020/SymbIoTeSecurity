@@ -5,6 +5,8 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +22,8 @@ import java.util.Set;
  * @author Nemanja Ignjatov (UNIVIE)
  */
 public class ABACPolicyHelper {
+
+    private final static Log log = LogFactory.getLog(ABACPolicyHelper.class);
 
     /**
      * @param accessPolicies  of the resources that need to be checked against the tokens
@@ -39,6 +43,7 @@ public class ABACPolicyHelper {
             } catch (ValidationException e) {
                 // on purpose skipping corrupted/expired tokens instead of jumping out of the whole procedure
                 // as other tokens might be perfectly valid for the business request
+                log.debug(e);
             }
         }
 

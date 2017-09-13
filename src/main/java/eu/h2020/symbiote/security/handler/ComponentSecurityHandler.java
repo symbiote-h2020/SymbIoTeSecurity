@@ -17,6 +17,8 @@ import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 import eu.h2020.symbiote.security.helpers.ABACPolicyHelper;
 import eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -31,6 +33,8 @@ import java.util.*;
  * @author Jose Antonio Sanchez Murillo (Atos)
  */
 public class ComponentSecurityHandler implements IComponentSecurityHandler {
+
+    private final static Log log = LogFactory.getLog(ComponentSecurityHandler.class);
     private final ISecurityHandler securityHandler;
     private final AAM localAAM;
     private final boolean alwaysUseLocalAAMForValidation;
@@ -61,10 +65,12 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
 
         // verifying that the request is integral and the client should posses the tokens in it
         try {
-            if (!MutualAuthenticationHelper.isSecurityRequestVerified(securityRequest))
+            if (!MutualAuthenticationHelper.isSecurityRequestVerified(securityRequest)) {
+                log.debug("The security request failed mutual authentication check");
                 return ValidationStatus.INVALID_TRUST_CHAIN;
+            }
         } catch (NoSuchAlgorithmException | MalformedJWTException | InvalidKeySpecException | ValidationException e) {
-            e.printStackTrace();
+            log.error(e);
             throw new SecurityHandlerException(e.getMessage());
         }
 
@@ -95,10 +101,12 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                         Optional.of(securityCredentials.getClientCertificateSigningAAMCertificate()),
                         Optional.of(securityCredentials.getForeignTokenIssuingAAMCertificate()));
                 // any invalid token causes the whole validation to fail
-                if (tokenValidationStatus != ValidationStatus.VALID)
+                if (tokenValidationStatus != ValidationStatus.VALID) {
+                    log.debug("token was invalidated with the following reason: " + tokenValidationStatus);
                     return tokenValidationStatus;
+                }
             } catch (ValidationException e) {
-                e.printStackTrace();
+                log.error(e);
                 throw new SecurityHandlerException(e.getMessage());
             }
         }
@@ -115,7 +123,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         try {
             return MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, securityHandler.getComponentCertificate(componentIdentifier, platformIdentifier));
         } catch (NoSuchAlgorithmException | CertificateException e) {
-            e.printStackTrace();
+            log.error(e);
             throw new SecurityHandlerException("Failed to verify the serviceResponse, the operation should be retried: " + e.getMessage());
         }
     }
@@ -159,8 +167,11 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                     // success, these credentials satisfy security requirements
                     if (freshValidationStatus == ValidationStatus.VALID)
                         validatedCredentials++;
+                    else
+                        log.debug(freshValidationStatus);
                 } catch (SecurityHandlerException e) {
                     // validation failed, storing with unknown status
+                    log.debug(e);
                     alreadyValidatedCredentialsCache.put(partialPolicyCredentials, ValidationStatus.UNKNOWN);
                 }
             }
@@ -184,7 +195,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         try {
             return MutualAuthenticationHelper.getSecurityRequest(authorizationCredentials, false);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            log.error(e);
             throw new SecurityHandlerException("Failed to generate security request: " + e.getMessage());
         }
     }
@@ -196,7 +207,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
             // generating the service response
             return MutualAuthenticationHelper.getServiceResponse(coreAAMBoundCredentials.homeCredentials.privateKey, new Date().getTime());
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            log.error(e);
             throw new SecurityHandlerException("Failed to generate service response");
         }
     }
@@ -235,6 +246,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                 isCoreTokenRefreshNeeded = true;
             }
         } catch (ValidationException e) {
+            log.debug(e);
             isCoreTokenRefreshNeeded = true;
         }
 
@@ -246,6 +258,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                 // fetching updated token from the wallet
                 coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM.getAamInstanceId());
             } catch (ValidationException e) {
+                log.error(e);
                 throw new SecurityHandlerException("Can't refresh the platformOwner's CoreAAM HOME token", e);
             }
 
