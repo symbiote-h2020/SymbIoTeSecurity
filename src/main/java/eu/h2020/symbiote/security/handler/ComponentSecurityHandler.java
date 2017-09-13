@@ -19,6 +19,7 @@ import eu.h2020.symbiote.security.helpers.ABACPolicyHelper;
 import eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.http.HttpStatus;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -254,7 +255,20 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         if (isCoreTokenRefreshNeeded) {
             // gets the token and puts it in the wallet
             try {
-                securityHandler.login(coreAAM);
+                try {
+                    securityHandler.login(coreAAM);
+                } catch (SecurityHandlerException e) {
+                    if (e.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
+                        // we need to refresh our certificate
+                        securityHandler.getCertificate(
+                                coreAAM,
+                                componentOwnerUsername,
+                                componentOwnerPassword,
+                                combinedClientIdentifier);
+                        // and trying to refresh the token with the new credentials
+                        securityHandler.login(coreAAM);
+                    }
+                }
                 // fetching updated token from the wallet
                 coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM.getAamInstanceId());
             } catch (ValidationException e) {
