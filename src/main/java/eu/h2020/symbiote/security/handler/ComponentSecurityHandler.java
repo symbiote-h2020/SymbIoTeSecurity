@@ -227,7 +227,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         AAM coreAAM = securityHandler.getAvailableAAMs(localAAM).get(SecurityConstants.CORE_AAM_INSTANCE_ID);
         if (coreAAM == null)
             throw new SecurityHandlerException("Core AAM unavailable");
-        BoundCredentials coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM);
+        BoundCredentials coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(SecurityConstants.CORE_AAM_INSTANCE_ID);
         if (coreAAMBoundCredentials == null) {
             // making sure a proper certificate is in the keystore
             securityHandler.getCertificate(
