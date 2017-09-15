@@ -1,5 +1,6 @@
-package eu.h2020.symbiote.security.accesspolicies;
+package eu.h2020.symbiote.security.accesspolicies.common.singletoken;
 
+import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 
@@ -15,7 +16,7 @@ import java.util.Set;
  * @author Mikołaj Dobski (PSNC)
  * @author Nemanja Ignjatov (UNIVIE)
  */
-public class SingleLocalHomeTokenIdentityBasedTokenAccessPolicy implements IAccessPolicy {
+public class SingleLocalHomeTokenIdentityBasedAccessPolicy implements IAccessPolicy {
     private final String platformIdentifier;
     private final String username;
     private Map<String, String> requiredClaims = new HashMap<>();
@@ -27,7 +28,7 @@ public class SingleLocalHomeTokenIdentityBasedTokenAccessPolicy implements IAcce
      * @param username           the user for which should have access to the resource
      * @param requiredClaims     optional map with all other claims that need to be contained in a single token to satisfy the
      */
-    public SingleLocalHomeTokenIdentityBasedTokenAccessPolicy(String platformIdentifier, String username, Map<String, String> requiredClaims) throws
+    public SingleLocalHomeTokenIdentityBasedAccessPolicy(String platformIdentifier, String username, Map<String, String> requiredClaims) throws
             InvalidArgumentsException {
         if (platformIdentifier == null || platformIdentifier.isEmpty())
             throw new InvalidArgumentsException("Platform identifier must not be null/empty!");

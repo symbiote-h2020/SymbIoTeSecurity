@@ -2,12 +2,15 @@ package eu.h2020.symbiote.security.helpers.accesspolicies;
 
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
-import eu.h2020.symbiote.security.accesspolicies.SingleTokenAccessPolicy;
+import eu.h2020.symbiote.security.accesspolicies.common.SingleTokenAccessPolicyFactory;
+import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicy;
+import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
+import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
@@ -138,7 +141,8 @@ public class ABACPolicyHelperSingleTokenTest {
     public void singleResourceSingleTokenCheckSuccess() throws
             NoSuchAlgorithmException,
             MalformedJWTException,
-            SecurityHandlerException {
+            SecurityHandlerException,
+            InvalidArgumentsException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -148,7 +152,12 @@ public class ABACPolicyHelperSingleTokenTest {
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
-        resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(accessPolicyClaimsMap));
+        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(
+                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                accessPolicyClaimsMap
+        );
+
+        resourceAccessPolicyMap.put(goodResourceID, SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 

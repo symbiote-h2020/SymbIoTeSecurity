@@ -2,7 +2,9 @@ package eu.h2020.symbiote.security.helpers.accesspolicies;
 
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
-import eu.h2020.symbiote.security.accesspolicies.SingleLocalHomeTokenAccessPolicy;
+import eu.h2020.symbiote.security.accesspolicies.common.SingleTokenAccessPolicyFactory;
+import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleLocalHomeTokenAccessPolicy;
+import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
@@ -19,6 +21,7 @@ import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
 import eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper;
 import eu.h2020.symbiote.security.utils.DummyTokenIssuer;
+import io.jsonwebtoken.Claims;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -155,8 +158,14 @@ public class ABACPolicyHelperLocalHomeTokenTest {
         Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+        accessPolicyClaimsMap.put(Claims.ISSUER, deploymentId);
 
-        resourceAccessPolicyMap.put(goodResourceID, new SingleLocalHomeTokenAccessPolicy(deploymentId, accessPolicyClaimsMap));
+        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(
+                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.SLHTAP,
+                accessPolicyClaimsMap
+        );
+
+        resourceAccessPolicyMap.put(goodResourceID, SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 

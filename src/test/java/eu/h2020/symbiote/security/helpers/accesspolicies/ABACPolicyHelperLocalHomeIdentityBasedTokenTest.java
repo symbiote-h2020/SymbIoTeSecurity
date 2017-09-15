@@ -2,7 +2,9 @@ package eu.h2020.symbiote.security.helpers.accesspolicies;
 
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
-import eu.h2020.symbiote.security.accesspolicies.SingleLocalHomeTokenIdentityBasedTokenAccessPolicy;
+import eu.h2020.symbiote.security.accesspolicies.common.SingleTokenAccessPolicyFactory;
+import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleLocalHomeTokenIdentityBasedAccessPolicy;
+import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
@@ -18,6 +20,7 @@ import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
 import eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper;
 import eu.h2020.symbiote.security.utils.DummyTokenIssuer;
+import io.jsonwebtoken.Claims;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -155,7 +158,15 @@ public class ABACPolicyHelperLocalHomeIdentityBasedTokenTest {
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
 
-        resourceAccessPolicyMap.put(goodResourceID, new SingleLocalHomeTokenIdentityBasedTokenAccessPolicy(deploymentId, username, null));
+        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
+        accessPolicyClaimsMap.put(Claims.ISSUER, deploymentId);
+        accessPolicyClaimsMap.put(Claims.SUBJECT, username);
+        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(
+                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.SLHTIBAP,
+                accessPolicyClaimsMap
+        );
+
+        resourceAccessPolicyMap.put(goodResourceID, SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -174,7 +185,7 @@ public class ABACPolicyHelperLocalHomeIdentityBasedTokenTest {
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
 
-        resourceAccessPolicyMap.put(badResourceID, new SingleLocalHomeTokenIdentityBasedTokenAccessPolicy(deploymentId, username, null));
+        resourceAccessPolicyMap.put(badResourceID, new SingleLocalHomeTokenIdentityBasedAccessPolicy(deploymentId, username, null));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -194,7 +205,7 @@ public class ABACPolicyHelperLocalHomeIdentityBasedTokenTest {
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
 
-        resourceAccessPolicyMap.put(badResourceID, new SingleLocalHomeTokenIdentityBasedTokenAccessPolicy(deploymentId, username, null));
+        resourceAccessPolicyMap.put(badResourceID, new SingleLocalHomeTokenIdentityBasedAccessPolicy(deploymentId, username, null));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -214,7 +225,7 @@ public class ABACPolicyHelperLocalHomeIdentityBasedTokenTest {
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
 
-        resourceAccessPolicyMap.put(badResourceID, new SingleLocalHomeTokenIdentityBasedTokenAccessPolicy(deploymentId, username, null));
+        resourceAccessPolicyMap.put(badResourceID, new SingleLocalHomeTokenIdentityBasedAccessPolicy(deploymentId, username, null));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
