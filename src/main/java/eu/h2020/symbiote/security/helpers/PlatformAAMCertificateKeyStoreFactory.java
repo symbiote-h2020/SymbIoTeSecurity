@@ -124,8 +124,9 @@ public class PlatformAAMCertificateKeyStoreFactory {
             KeyStoreException,
             IOException,
             CertificateException,
-            NoSuchAlgorithmException {
-        KeyStore trustStore = KeyStore.getInstance("JKS");
+            NoSuchAlgorithmException, NoSuchProviderException {
+        ECDSAHelper.enableECDSAProvider();
+        KeyStore trustStore = KeyStore.getInstance("PKCS12", "BC");
         File f = new File(path);
         if (f.exists() && !f.isDirectory()) {
             log.warn("KeyStore already exists. It was overridden");
