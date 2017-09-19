@@ -94,6 +94,9 @@ public class PlatformAAMCertificateKeyStoreFactory {
             WrongCredentialsException,
             NotExistingUserException,
             ValidationException {
+    	
+    	File keyStoreFile=new File(keyStorePath);
+    	
         ECDSAHelper.enableECDSAProvider();
         KeyStore ks = getKeystore(keyStorePath, keyStorePassword);
         log.info("Key Store acquired.");
@@ -114,8 +117,18 @@ public class PlatformAAMCertificateKeyStoreFactory {
         ks.setCertificateEntry(rootCACertificateAlias, aamCertificate.getX509());
         ks.setKeyEntry(aamCertificateAlias, pair.getPrivate(), aamCertificatePrivateKeyPassword.toCharArray(),
                 new java.security.cert.Certificate[]{CryptoHelper.convertPEMToX509(platformAAMCertificate), aamCertificate.getX509()});
-        FileOutputStream fOut = new FileOutputStream(keyStorePath);
-        ks.store(fOut, keyStorePassword.toCharArray());
+        FileOutputStream fOut = new FileOutputStream(keyStoreFile);
+        try {
+        	ks.store(fOut, keyStorePassword.toCharArray());
+        } catch (Throwable t) {
+        	try {
+        		fOut.close();
+        		keyStoreFile.delete();        		
+        	} catch(IOException ioe) {
+        		// Do nothing. We're doomed.
+        	}
+        	throw t;
+        }
         fOut.close();
         log.info("Certificates and private key saved in keystore");
     }
