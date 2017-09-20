@@ -2,15 +2,14 @@ package eu.h2020.symbiote.security.accesspolicies.common;
 
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
-import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleLocalHomeTokenAccessPolicy;
-import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleLocalHomeTokenIdentityBasedAccessPolicy;
-import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicy;
-import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
+import eu.h2020.symbiote.security.accesspolicies.common.singletoken.*;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import io.jsonwebtoken.Claims;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Factory for producing sample access policies.
@@ -40,6 +39,15 @@ public class SingleTokenAccessPolicyFactory {
             case STAP: {
                 return new SingleTokenAccessPolicy(specifier.getRequiredClaims());
             }
+            case SFTAP:
+                String homePlatformIdentifier = specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_HOME_PLATFORM_ID);
+                String federationIdentifier = specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_IDENTIFIER_KEY);
+                Set<String> federationMembers = new HashSet<>(Integer.parseInt(specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_SIZE)));
+                for (String claimKey : specifier.getRequiredClaims().keySet()) {
+                    if (claimKey.startsWith(SingleTokenAccessPolicySpecifier.FEDERATION_MEMBER_KEY_PREFIX))
+                        federationMembers.add(specifier.getRequiredClaims().get(claimKey));
+                }
+                return new SingleFederatedTokenAccessPolicy(federationMembers, homePlatformIdentifier, federationIdentifier);
             case SLHTAP: {
                 String platformIdentifier = specifier.getRequiredClaims().get(Claims.ISSUER);
                 Map<String, String> filteredClaims = new HashMap<>(specifier.getRequiredClaims());

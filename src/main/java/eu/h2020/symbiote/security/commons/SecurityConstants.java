@@ -40,6 +40,7 @@ public class SecurityConstants {
     public static final int JWT_PARTS_COUNT = 3; //Header, body and signature
     public static final String CLAIM_NAME_TOKEN_TYPE = "ttyp";
     public static final String SYMBIOTE_ATTRIBUTES_PREFIX = "SYMBIOTE_";
+    public static final String FEDERATION_CLAIM_KEY_PREFIX = SYMBIOTE_ATTRIBUTES_PREFIX + "federation_";
     public static final String GUEST_NAME = "guest";
 
     // certificates
