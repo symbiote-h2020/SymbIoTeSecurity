@@ -2,13 +2,17 @@ package eu.h2020.symbiote.security.accesspolicies.common.singletoken;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import eu.h2020.symbiote.security.accesspolicies.common.SingleTokenAccessPolicyFactory;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
-import io.jsonwebtoken.Claims;
+
+import org.springframework.data.annotation.PersistenceConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import io.jsonwebtoken.Claims;
 
 /**
  * Specifies the sample access policy. It is used by {@link SingleTokenAccessPolicyFactory SingleTokenAccessPolicyFactory}
@@ -33,6 +37,7 @@ public class SingleTokenAccessPolicySpecifier {
      *                       sample access policy
      */
     @JsonCreator
+    @PersistenceConstructor
     public SingleTokenAccessPolicySpecifier(
             @JsonProperty("policyType") SingleTokenAccessPolicyType policyType,
             @JsonProperty("requiredClaims") Map<String, String> requiredClaims)
