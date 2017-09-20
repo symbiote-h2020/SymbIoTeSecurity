@@ -59,7 +59,7 @@ public class SingleFederatedTokenAccessPolicy implements IAccessPolicy {
             if (token.getType().equals(Token.Type.FOREIGN) && federationMembers.contains(token.getClaims().getIssuer())) {
                 Set<String> federationIdentifierClaims = new HashSet<>();
                 for (String claimKey : token.getClaims().keySet()) {
-                    if (claimKey.startsWith(SecurityConstants.FEDERATION_CLAIM_KEY_PREFIX))
+                    if (claimKey.startsWith(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + SecurityConstants.FEDERATION_CLAIM_KEY_PREFIX))
                         federationIdentifierClaims.add(token.getClaims().get(claimKey).toString());
                 }
                 // checking if federation claims have our needed id
