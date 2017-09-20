@@ -12,7 +12,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.*;
@@ -43,16 +42,16 @@ public class PlatformAAMCertificateKeyStoreFactory {
 
         // where you want to have the keystore generated
         String keyStorePath = "";
-        // used to access the keystore
+        // used to access the keystore. MUST NOT be longer than 7 chars
         // from spring bootstrap file: aam.security.KEY_STORE_PASSWORD
         String keyStorePassword = "";
-        // used to access the AAM private key
+        // used to access the AAM private key. MUST NOT be longer than 7 chars
         // from spring bootstrap file: aam.security.PV_KEY_PASSWORD
         String privateKeyPassword = "";
-        // platform AAM key/certificate alias
+        // platform AAM key/certificate alias... case INSENSITIVE (all lowercase)
         // from spring bootstrap file: aam.security.CERTIFICATE_ALIAS
         String aamCertificateAlias = "";
-        // root CA certificate alias
+        // root CA certificate alias... case INSENSITIVE (all lowercase)
         // from spring bootstrap file:  aam.security.ROOT_CA_CERTIFICATE_ALIAS
         String rootCACertificateAlias = "";
 
@@ -94,9 +93,12 @@ public class PlatformAAMCertificateKeyStoreFactory {
             WrongCredentialsException,
             NotExistingUserException,
             ValidationException {
-    	
-    	File keyStoreFile=new File(keyStorePath);
-    	
+
+        File keyStoreFile = new File(keyStorePath);
+
+        if (keyStorePassword.length() > 6 || aamCertificatePrivateKeyPassword.length() > 6)
+            throw new InvalidArgumentsException("The passwords must not be longer that 7 chars... don't ask why...");
+
         ECDSAHelper.enableECDSAProvider();
         KeyStore ks = getKeystore(keyStorePath, keyStorePassword);
         log.info("Key Store acquired.");
@@ -119,15 +121,16 @@ public class PlatformAAMCertificateKeyStoreFactory {
                 new java.security.cert.Certificate[]{CryptoHelper.convertPEMToX509(platformAAMCertificate), aamCertificate.getX509()});
         FileOutputStream fOut = new FileOutputStream(keyStoreFile);
         try {
-        	ks.store(fOut, keyStorePassword.toCharArray());
-        } catch (Throwable t) {
-        	try {
-        		fOut.close();
-        		keyStoreFile.delete();        		
-        	} catch(IOException ioe) {
-        		// Do nothing. We're doomed.
-        	}
-        	throw t;
+            ks.store(fOut, keyStorePassword.toCharArray());
+        } catch (Exception e) {
+            log.error(e);
+            try {
+                fOut.close();
+                keyStoreFile.delete();
+            } catch (IOException ioe) {
+                // Do nothing. We're doomed.
+            }
+            throw e;
         }
         fOut.close();
         log.info("Certificates and private key saved in keystore");
@@ -143,13 +146,9 @@ public class PlatformAAMCertificateKeyStoreFactory {
         File f = new File(path);
         if (f.exists() && !f.isDirectory()) {
             log.warn("KeyStore already exists. It was overridden");
-            try (FileInputStream fIn = new FileInputStream(path)) {
-                trustStore.load(fIn, password.toCharArray());
-                fIn.close();
-            }
-        } else {
-            trustStore.load(null, null);
+            f.delete();
         }
+        trustStore.load(null, null);
         return trustStore;
     }
 }
