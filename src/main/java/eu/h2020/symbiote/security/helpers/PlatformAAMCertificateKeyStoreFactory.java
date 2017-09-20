@@ -96,7 +96,7 @@ public class PlatformAAMCertificateKeyStoreFactory {
 
         File keyStoreFile = new File(keyStorePath);
 
-        if (keyStorePassword.length() > 6 || aamCertificatePrivateKeyPassword.length() > 6)
+        if (keyStorePassword.length() > 7 || aamCertificatePrivateKeyPassword.length() > 7)
             throw new InvalidArgumentsException("The passwords must not be longer that 7 chars... don't ask why...");
 
         ECDSAHelper.enableECDSAProvider();
