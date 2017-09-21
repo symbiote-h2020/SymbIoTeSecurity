@@ -147,7 +147,10 @@ public class AAMClient implements IAAMClient {
     public String getForeignToken(String remoteHomeToken, Optional<String> clientCertificate, Optional<String> aamCertificate) throws
             ValidationException,
             JWTCreationException {
-        Response response = feignClient.getForeignToken(remoteHomeToken, clientCertificate.orElse(""), aamCertificate.orElse(""));
+        Response response = feignClient.getForeignToken(
+                remoteHomeToken,
+                clientCertificate.orElse("").replace("\n", "").replace("\r", ""),
+                aamCertificate.orElse("").replace("\n", "").replace("\r", ""));
         switch (response.status()) {
             case 401:
                 throw new ValidationException("Failed to validate homeToken");
@@ -176,7 +179,11 @@ public class AAMClient implements IAAMClient {
      */
     @Override
     public ValidationStatus validateCredentials(String token, Optional<String> clientCertificate, Optional<String> clientCertificateSigningAAMCertificate, Optional<String> foreignTokenIssuingAAMCertificate) {
-        return feignClient.validateCredentials(token, clientCertificate.orElse(""), clientCertificateSigningAAMCertificate.orElse(""), foreignTokenIssuingAAMCertificate.orElse(""));
+        return feignClient.validateCredentials(
+                token,
+                clientCertificate.orElse("").replace("\n", "").replace("\r", ""),
+                clientCertificateSigningAAMCertificate.orElse("").replace("\n", "").replace("\r", ""),
+                foreignTokenIssuingAAMCertificate.orElse("").replace("\n", "").replace("\r", ""));
     }
 
     /**

@@ -146,16 +146,9 @@ public class SecurityHandler implements ISecurityHandler {
       String certificateStr = credentials.homeCredentials.certificate.getCertificateString();
       Map<AAM, Token> result = foreignAAMs.stream().collect(Collectors.toMap(aam -> aam, aam -> {
         try {
-          /*
-          // TODO we need to base64 the certs in AAMClient implementation
           return new Token(ClientFactory.getAAMClient(aam.getAamAddress()).getForeignToken(homeToken,
               Optional.ofNullable(certificateStr),
               Optional.ofNullable(credentials.homeCredentials.homeAAM.getAamCACertificate().getCertificateString())));
-              */
-          // dirty bug fix for the moment
-          return new Token(ClientFactory.getAAMClient(aam.getAamAddress()).getForeignToken(homeToken,
-                  Optional.empty(),
-                  Optional.empty()));
         } catch (ValidationException e) {
           logger.error("Invalid token returned for AAM " + aam.getAamInstanceId(), e);
           return null;
