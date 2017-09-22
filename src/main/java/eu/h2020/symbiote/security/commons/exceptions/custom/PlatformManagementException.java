@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
  */
 public class PlatformManagementException extends SecurityException {
 
-    public final static String errorMessage = "USER_MANAGEMENT_ERROR";
+    public final static String errorMessage = "PLATFORM_MANAGEMENT_ERROR";
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
     public static HttpStatus statusCode = HttpStatus.BAD_REQUEST;
 

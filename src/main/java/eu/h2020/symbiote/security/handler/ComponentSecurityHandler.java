@@ -55,7 +55,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         this.componentOwnerUsername = componentOwnerUsername;
         this.componentOwnerPassword = componentOwnerPassword;
         String[] splitComponentId = componentId.split("@");
-        if (splitComponentId.length != 2)
+        if (splitComponentId.length != 2 || !componentId.matches("^((\\w|[\\-])+)(@)((\\w|[\\-])+)$"))
             throw new SecurityHandlerException("Component Id has bad form, must be componentId@platformId");
         this.combinedClientIdentifier = componentId;
     }
