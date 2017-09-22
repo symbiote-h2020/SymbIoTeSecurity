@@ -52,10 +52,15 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         this.securityHandler = securityHandler;
         this.localAAM = new AAM(localAAMAddress, "", "", new Certificate(), new HashMap<>());
         this.alwaysUseLocalAAMForValidation = alwaysUseLocalAAMForValidation;
+        if (componentOwnerUsername.isEmpty()
+                || !componentOwnerUsername.matches("^(([\\w-])+)$")
+                || componentOwnerPassword.isEmpty())
+            throw new SecurityHandlerException("Bad credentials");
         this.componentOwnerUsername = componentOwnerUsername;
         this.componentOwnerPassword = componentOwnerPassword;
         String[] splitComponentId = componentId.split("@");
-        if (splitComponentId.length != 2 || !componentId.matches("^(([\\w-])+)(@)(([\\w-])+)$"))
+        if (splitComponentId.length != 2
+                || !componentId.matches("^(([\\w-])+)(@)(([\\w-])+)$"))
             throw new SecurityHandlerException("Component Id has bad form, must be componentId@platformId");
         this.combinedClientIdentifier = componentId;
     }

@@ -2,8 +2,11 @@ package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.ComponentSecurityHandlerFactory;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
+import org.junit.After;
 import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
+
+import java.io.File;
 
 /**
  * @author Mikołaj Dobski (PSNC)
@@ -87,5 +90,10 @@ public class ComponentSecurityHandlerTest {
                 goodComponentId + "@" + goodPlatformId);
     }
 
+    @After
+    public void deleteKeystore() {
+        File file = new File("irrelevant");
+        file.delete();
+    }
 
 }
