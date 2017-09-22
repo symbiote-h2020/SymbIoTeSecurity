@@ -102,6 +102,7 @@ public class SymbioteAuthorizationClient implements Client {
       msg += ": " + errMsg;
     }
     return Response.builder().status(401).reason(msg)
+               .body(msg.getBytes())
                .headers(new HashMap<>()).build();
   }
 }
