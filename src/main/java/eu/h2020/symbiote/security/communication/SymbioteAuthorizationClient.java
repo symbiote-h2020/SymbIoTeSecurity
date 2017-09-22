@@ -72,14 +72,17 @@ public class SymbioteAuthorizationClient implements Client {
           try {
             if (!handler.isReceivedServiceResponseVerified(secResponse.iterator().next(), serviceComponentIdentifier, servicePlatformIdentifier)) {
               return Response.builder().status(400).reason("Server response verification failed")
+                         .body("Server response verification failed".getBytes())
                          .headers(response.headers()).build();
             }
           } catch (SecurityHandlerException e) {
             return Response.builder().status(400).reason("Server response verification failed: "+e.getErrorMessage())
+                       .body(("Server response verification failed: "+e.getErrorMessage()).getBytes())
                        .headers(response.headers()).build();
           }
         } else {
           return Response.builder().status(400).reason("Missing server challenge response")
+                     .body("Missing server challenge response".getBytes())
                      .headers(response.headers()).build();
         }
       }
