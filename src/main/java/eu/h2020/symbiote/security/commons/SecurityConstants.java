@@ -34,6 +34,8 @@ public class SecurityConstants {
     public static final String AAM_REVOKE_CREDENTIALS = "/revoke_credentials";
     public static final String AAM_SIGN_CERTIFICATE_REQUEST = "/sign_certificate_request";
     public static final String AAM_VALIDATE_CREDENTIALS = "/validate_credentials";
+    public static final String AAM_VALIDATE_CLIENT_CERTIFICATE = "/validate_client_certificate";
+
 
     // tokens
     public static final String TOKEN_HEADER_NAME = "x-auth-token";
