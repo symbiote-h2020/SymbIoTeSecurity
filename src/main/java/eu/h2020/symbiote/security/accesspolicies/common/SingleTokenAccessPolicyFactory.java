@@ -4,8 +4,11 @@ package eu.h2020.symbiote.security.accesspolicies.common;
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.*;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
+import eu.h2020.symbiote.security.handler.ISecurityHandler;
 import io.jsonwebtoken.Claims;
 
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,8 +34,8 @@ public class SingleTokenAccessPolicyFactory {
      * @return the sample access policy
      * @throws InvalidArgumentsException
      */
-    public static IAccessPolicy getSingleTokenAccessPolicy(SingleTokenAccessPolicySpecifier specifier)
-            throws InvalidArgumentsException {
+    public static IAccessPolicy getSingleTokenAccessPolicy(SingleTokenAccessPolicySpecifier specifier, ISecurityHandler securityHandler)
+            throws InvalidArgumentsException, CertificateException, WrongCredentialsException {
 
         switch (specifier.getPolicyType()) {
             case PUBLIC: {
@@ -65,14 +68,17 @@ public class SingleTokenAccessPolicyFactory {
                 return new SingleLocalHomeTokenIdentityBasedAccessPolicy(platformIdentifier, username,
                         filteredClaims);
             }
-            case SLHTIBCAP:
+            case CHTAP:
                 String platformIdentifier = specifier.getRequiredClaims().get(Claims.ISSUER);
                 String clientId = specifier.getRequiredClaims().get(Claims.SUBJECT).split(illegalSign)[0];
                 Map<String, String> filteredClaims = new HashMap<>(specifier.getRequiredClaims());
                 filteredClaims.remove(Claims.ISSUER);
                 filteredClaims.remove(Claims.SUBJECT);
-                return new SingleLocalHomeTokenIdentityBasedComponentAccessPolicy(platformIdentifier, clientId,
-                        filteredClaims);
+                if (securityHandler == null) {
+                    throw new InvalidArgumentsException("Security handler is required.");
+                }
+                return new ComponentHomeTokenAccessPolicy(platformIdentifier, clientId,
+                        filteredClaims, securityHandler);
             default:
                 throw new InvalidArgumentsException("The type of the access policy was not recognized");
         }
