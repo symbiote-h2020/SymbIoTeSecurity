@@ -2,17 +2,21 @@ package eu.h2020.symbiote.security.accesspolicies.common.singletoken;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import eu.h2020.symbiote.security.accesspolicies.common.SingleTokenAccessPolicyFactory;
+import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
-
+import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
+import eu.h2020.symbiote.security.handler.ISecurityHandler;
+import io.jsonwebtoken.Claims;
 import org.springframework.data.annotation.PersistenceConstructor;
 
+import java.security.cert.CertificateException;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import io.jsonwebtoken.Claims;
+import static eu.h2020.symbiote.security.helpers.CryptoHelper.illegalSign;
 
 /**
  * Specifies the sample access policy. It is used by {@link SingleTokenAccessPolicyFactory SingleTokenAccessPolicyFactory}
@@ -79,6 +83,16 @@ public class SingleTokenAccessPolicySpecifier {
                     throw new InvalidArgumentsException("Empty claims define a public access policy!");
                 this.requiredClaims = requiredClaims;
                 break;
+            case SLHTIBCAP:
+                if (requiredClaims == null
+                        || requiredClaims.isEmpty()
+                        || !requiredClaims.containsKey(Claims.ISSUER)
+                        || !requiredClaims.containsKey(Claims.SUBJECT)
+                        || !requiredClaims.containsKey("ipk")
+                        || !requiredClaims.containsKey("spk"))
+                    throw new InvalidArgumentsException("Missing ISS, SUB, IPK and/or SPK claims required to build this policy type");
+                this.requiredClaims = requiredClaims;
+                break;
             case PUBLIC:
                 if (requiredClaims != null && !requiredClaims.isEmpty())
                     throw new InvalidArgumentsException("Public access must not have required claims!");
@@ -123,6 +137,34 @@ public class SingleTokenAccessPolicySpecifier {
         }
     }
 
+    public SingleTokenAccessPolicySpecifier(String componentId, String homePlatformIdentifier, ISecurityHandler securityHandler) throws
+            InvalidArgumentsException, CertificateException, WrongCredentialsException {
+        // required contents check
+        if (componentId == null
+                || componentId.isEmpty()
+                || homePlatformIdentifier == null
+                || homePlatformIdentifier.isEmpty()
+                || securityHandler == null)
+            throw new InvalidArgumentsException("Missing componentId, homePlatformIdentifier or SH required to build this policy type");
+
+        policyType = SingleTokenAccessPolicyType.SLHTIBCAP;
+        // building the map
+        requiredClaims = new HashMap<>(4);
+        requiredClaims.put(Claims.ISSUER, homePlatformIdentifier);
+        requiredClaims.put(Claims.SUBJECT, componentId + illegalSign + homePlatformIdentifier);
+
+        if (securityHandler.getComponentCertificate(SecurityConstants.AAM_COMPONENT_NAME, homePlatformIdentifier).getCertificateString().isEmpty()
+                || securityHandler.getComponentCertificate(componentId, homePlatformIdentifier).getCertificateString().isEmpty()) {
+            throw new WrongCredentialsException("Certificate for platform or component is empty");
+        }
+
+        requiredClaims.put("ipk", Base64.getEncoder().encodeToString(
+                securityHandler.getComponentCertificate(SecurityConstants.AAM_COMPONENT_NAME, homePlatformIdentifier).getX509().getPublicKey().getEncoded()));
+        requiredClaims.put("spk", Base64.getEncoder().encodeToString(
+                securityHandler.getComponentCertificate(componentId, homePlatformIdentifier).getX509().getPublicKey().getEncoded()));
+    }
+
+
 
     public SingleTokenAccessPolicyType getPolicyType() {
         return policyType;
@@ -154,6 +196,10 @@ public class SingleTokenAccessPolicySpecifier {
          * SingleTokenAccessPolicy
          */
         STAP,
+        /**
+         * SingleLocalHomeTokenIdentityBasedComponentAccessPolicy
+         */
+        SLHTIBCAP,
         /**
          * Public access policy
          */

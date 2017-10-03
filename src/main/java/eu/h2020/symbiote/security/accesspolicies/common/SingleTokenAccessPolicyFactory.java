@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static eu.h2020.symbiote.security.helpers.CryptoHelper.illegalSign;
+
 /**
  * Factory for producing sample access policies.
  *
@@ -63,6 +65,14 @@ public class SingleTokenAccessPolicyFactory {
                 return new SingleLocalHomeTokenIdentityBasedAccessPolicy(platformIdentifier, username,
                         filteredClaims);
             }
+            case SLHTIBCAP:
+                String platformIdentifier = specifier.getRequiredClaims().get(Claims.ISSUER);
+                String clientId = specifier.getRequiredClaims().get(Claims.SUBJECT).split(illegalSign)[0];
+                Map<String, String> filteredClaims = new HashMap<>(specifier.getRequiredClaims());
+                filteredClaims.remove(Claims.ISSUER);
+                filteredClaims.remove(Claims.SUBJECT);
+                return new SingleLocalHomeTokenIdentityBasedComponentAccessPolicy(platformIdentifier, clientId,
+                        filteredClaims);
             default:
                 throw new InvalidArgumentsException("The type of the access policy was not recognized");
         }
