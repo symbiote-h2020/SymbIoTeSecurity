@@ -50,6 +50,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static eu.h2020.symbiote.security.helpers.CryptoHelper.illegalSign;
+
 /**
  * Abstract implementation of the {@link ISecurityHandler} that all concrete implementations should
  * extend from.
@@ -285,10 +287,14 @@ public class SecurityHandler implements ISecurityHandler {
       
       Certificate certificate = new Certificate();
       certificate.setCertificateString(certificateValue);
-      
-      HomeCredentials credentials = new HomeCredentials(homeAAM, username, clientId, certificate,
-                                                           pair.getPrivate());
-      
+      HomeCredentials credentials;
+      if (clientId.contains("@")) {
+        credentials = new HomeCredentials(homeAAM, clientId.split(illegalSign)[1], clientId.split(illegalSign)[0], certificate,
+                pair.getPrivate());
+      } else {
+          credentials = new HomeCredentials(homeAAM, username, clientId, certificate,
+                pair.getPrivate());
+      }
       
       if (saveCertificate(credentials)) {
         cacheCertificate(credentials);
@@ -370,8 +376,8 @@ public class SecurityHandler implements ISecurityHandler {
             user = elements[0];
             client = elements[1];
           } else {
-            user = this.userId;
-            client = elements[0] + "@" + elements[1];
+            user = elements[1];
+            client = elements[0];
           }
           
           AAM aam = aamList.get(aamId);
