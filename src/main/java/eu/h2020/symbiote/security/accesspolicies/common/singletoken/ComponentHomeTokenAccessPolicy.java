@@ -78,7 +78,6 @@ public class ComponentHomeTokenAccessPolicy implements IAccessPolicy {
             //verify if token
             if (token.getType().equals(Token.Type.HOME) // is HOME ttyp
                     && token.getClaims().getIssuer().equals(platformIdentifier) // is issued by this/local (platform) AAM
-                    && token.getClaims().getSubject().split(illegalSign)[1].equals(platformIdentifier) //for it's component
                     && token.getClaims().getSubject().split(illegalSign)[0].equals(componentId) // for the given component
                     && token.getClaims().get("ipk").equals(this.ipk)    //checking ipk
                     && token.getClaims().get("spk").equals(this.spk)    //checking spk
