@@ -21,6 +21,7 @@ import static eu.h2020.symbiote.security.helpers.CryptoHelper.illegalSign;
  *
  * @author Vasileios Glykantzis (ICOM)
  * @author Mikołaj Dobski (PSNC)
+ * @author Jakub Toczek (PSNC)
  */
 public class SingleTokenAccessPolicyFactory {
 
@@ -30,7 +31,8 @@ public class SingleTokenAccessPolicyFactory {
     /**
      * Create the access policy from a {@link SingleTokenAccessPolicySpecifier SingleTokenAccessPolicySpecifier}.
      *
-     * @param specifier the access policy specifier
+     * @param specifier       the access policy specifier
+     * @param securityHandler required only if we expect to build {@link ComponentHomeTokenAccessPolicy}, otherwise can be null.
      * @return the sample access policy
      * @throws InvalidArgumentsException
      */

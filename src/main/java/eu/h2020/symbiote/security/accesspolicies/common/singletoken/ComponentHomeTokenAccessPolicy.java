@@ -15,9 +15,11 @@ import java.util.Map.Entry;
 import static eu.h2020.symbiote.security.helpers.CryptoHelper.illegalSign;
 
 /**
- * SymbIoTe Access Policy that needs to be satisfied by a single Token issued by local AAM for a particular user
+ * SymbIoTe Access Policy that needs to be satisfied by a single Token issued by component's local AAM particularly for that component.
  *
+ * @implNote requires {@link ISecurityHandler} to confirm the token validity!
  * @author Jakub Toczek (PSNC)
+ * @author Mikołaj Dobski (PSNC)
  */
 public class ComponentHomeTokenAccessPolicy implements IAccessPolicy {
 
@@ -38,6 +40,8 @@ public class ComponentHomeTokenAccessPolicy implements IAccessPolicy {
      */
     public ComponentHomeTokenAccessPolicy(String platformIdentifier, String componentId, Map<String, String> requiredClaims, ISecurityHandler securityHandler) throws
             InvalidArgumentsException {
+        if (securityHandler == null)
+            throw new InvalidArgumentsException("Policy resolver wont' work without a valid Security Handler");
         this.securityHandler = securityHandler;
         if (platformIdentifier == null || platformIdentifier.isEmpty())
             throw new InvalidArgumentsException("Platform identifier must not be null/empty!");

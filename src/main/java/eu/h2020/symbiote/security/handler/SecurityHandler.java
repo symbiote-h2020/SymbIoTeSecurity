@@ -225,6 +225,7 @@ public class SecurityHandler implements ISecurityHandler {
   public Certificate getComponentCertificate(String componentIdentifier, String platformIdentifier) {
       Certificate certificate = new Certificate();
       try {
+          // TODO change so it uses AAMClient to the particular platform AAM if the component id != SecurityConstants#AAM_COMPONENT_NAME
           AAMClient aamClient = ClientFactory.getAAMClient(coreAAM.getAamAddress());
           // checking cache
           if (credentialsWallet.containsKey(platformIdentifier) && credentialsWallet.containsKey(componentIdentifier))
