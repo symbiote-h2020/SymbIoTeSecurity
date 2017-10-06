@@ -225,16 +225,17 @@ public class SecurityHandler implements ISecurityHandler {
   public Certificate getComponentCertificate(String componentIdentifier, String platformIdentifier) {
       Certificate certificate = new Certificate();
       try {
-          // TODO change so it uses AAMClient to the particular platform AAM if the component id != SecurityConstants#AAM_COMPONENT_NAME
-          AAMClient aamClient = ClientFactory.getAAMClient(coreAAM.getAamAddress());
-          // checking cache
-          if (credentialsWallet.containsKey(platformIdentifier) && credentialsWallet.containsKey(componentIdentifier))
-              // fetching from wallet
-              certificate = credentialsWallet.get(platformIdentifier).homeCredentials.homeAAM.getComponentCertificates().get(componentIdentifier);
-          else {
-              // need to fetch fresh certificate
-              certificate = new Certificate(aamClient.getComponentCertificate(componentIdentifier, platformIdentifier));
-          }
+        AAMClient aamClient = ClientFactory.getAAMClient(homeAAMAddress);
+        // checking cache
+        if (credentialsWallet.containsKey(platformIdentifier)
+                && credentialsWallet.get(platformIdentifier).homeCredentials.homeAAM.getComponentCertificates().containsKey(componentIdentifier))
+          // fetching from wallet
+          certificate = credentialsWallet.get(platformIdentifier).homeCredentials.homeAAM.getComponentCertificates().get(componentIdentifier);
+        else {
+          // need to fetch fresh certificate
+          certificate = new Certificate(aamClient.getComponentCertificate(componentIdentifier, platformIdentifier));
+          //TODO: add new certificate to credentialWallet (create credWallet for platform if missing?)
+        }
       } catch (AAMException e) {
           logger.error(e);
       }
