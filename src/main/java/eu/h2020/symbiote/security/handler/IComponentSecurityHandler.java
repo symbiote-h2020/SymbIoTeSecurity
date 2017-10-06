@@ -42,7 +42,7 @@ public interface IComponentSecurityHandler {
      *
      * @return the required payload for client's authentication and authorization
      */
-    SecurityRequest generateSecurityRequestUsingCoreCredentials() throws
+    SecurityRequest generateSecurityRequestUsingLocalCredentials() throws
             SecurityHandlerException;
 
     /**

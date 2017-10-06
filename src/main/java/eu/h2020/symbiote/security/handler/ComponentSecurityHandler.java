@@ -2,7 +2,6 @@ package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.commons.Certificate;
-import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
@@ -192,10 +191,10 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
     }
 
     @Override
-    public SecurityRequest generateSecurityRequestUsingCoreCredentials() throws
+    public SecurityRequest generateSecurityRequestUsingLocalCredentials() throws
             SecurityHandlerException {
         Set<AuthorizationCredentials> authorizationCredentials = new HashSet<>();
-        HomeCredentials coreCredentials = getCoreAAMCredentials().homeCredentials;
+        HomeCredentials coreCredentials = getLocalAAMCredentials().homeCredentials;
 
         authorizationCredentials.add(new AuthorizationCredentials(coreCredentials.homeToken, coreCredentials.homeAAM, coreCredentials));
         try {
@@ -208,7 +207,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
 
     @Override
     public String generateServiceResponse() throws SecurityHandlerException {
-        BoundCredentials coreAAMBoundCredentials = getCoreAAMCredentials();
+        BoundCredentials coreAAMBoundCredentials = getLocalAAMCredentials();
         try {
             // generating the service response
             return MutualAuthenticationHelper.getServiceResponse(coreAAMBoundCredentials.homeCredentials.privateKey, new Date().getTime());
@@ -226,62 +225,59 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
     /**
      * gets the credentials from the wallet, if missing then issues them and adds to the wallet
      *
-     * @return required for authorizing operations in the symbiote Core
+     * @return required for authorizing operations in the local AAM
      * @throws SecurityHandlerException on error
      */
-    private BoundCredentials getCoreAAMCredentials() throws SecurityHandlerException {
-        AAM coreAAM = securityHandler.getAvailableAAMs(localAAM).get(SecurityConstants.CORE_AAM_INSTANCE_ID);
-        if (coreAAM == null)
-            throw new SecurityHandlerException("Core AAM unavailable");
-        BoundCredentials coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(SecurityConstants.CORE_AAM_INSTANCE_ID);
-        if (coreAAMBoundCredentials == null) {
+    private BoundCredentials getLocalAAMCredentials() throws SecurityHandlerException {
+        BoundCredentials localAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(localAAM.getAamInstanceId());
+        if (localAAMBoundCredentials == null) {
             // making sure a proper certificate is in the keystore
             securityHandler.getCertificate(
-                    coreAAM,
+                    localAAM,
                     componentOwnerUsername,
                     componentOwnerPassword,
                     combinedClientIdentifier);
-            coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM.getAamInstanceId());
+            localAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(localAAM.getAamInstanceId());
         }
 
         // check that we have a valid token
-        boolean isCoreTokenRefreshNeeded = false;
+        boolean isLocalTokenRefreshNeeded = false;
         try {
-            if (coreAAMBoundCredentials.homeCredentials.homeToken == null
-                    || JWTEngine.validateTokenString(coreAAMBoundCredentials.homeCredentials.homeToken.getToken()) != ValidationStatus.VALID) {
-                isCoreTokenRefreshNeeded = true;
+            if (localAAMBoundCredentials.homeCredentials.homeToken == null
+                    || JWTEngine.validateTokenString(localAAMBoundCredentials.homeCredentials.homeToken.getToken()) != ValidationStatus.VALID) {
+                isLocalTokenRefreshNeeded = true;
             }
         } catch (ValidationException e) {
             log.debug(e);
-            isCoreTokenRefreshNeeded = true;
+            isLocalTokenRefreshNeeded = true;
         }
 
         // fetching the core token using the security handler
-        if (isCoreTokenRefreshNeeded) {
+        if (isLocalTokenRefreshNeeded) {
             // gets the token and puts it in the wallet
             try {
                 try {
-                    securityHandler.login(coreAAM);
+                    securityHandler.login(localAAM);
                 } catch (SecurityHandlerException e) {
                     if (e.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
                         // we need to refresh our certificate
                         securityHandler.getCertificate(
-                                coreAAM,
+                                localAAM,
                                 componentOwnerUsername,
                                 componentOwnerPassword,
                                 combinedClientIdentifier);
                         // and trying to refresh the token with the new credentials
-                        securityHandler.login(coreAAM);
+                        securityHandler.login(localAAM);
                     }
                 }
                 // fetching updated token from the wallet
-                coreAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(coreAAM.getAamInstanceId());
+                localAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(localAAM.getAamInstanceId());
             } catch (ValidationException e) {
                 log.error(e);
                 throw new SecurityHandlerException("Can't refresh the platformOwner's CoreAAM HOME token", e);
             }
 
         }
-        return coreAAMBoundCredentials;
+        return localAAMBoundCredentials;
     }
 }

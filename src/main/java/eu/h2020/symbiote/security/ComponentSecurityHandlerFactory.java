@@ -24,7 +24,7 @@ public class ComponentSecurityHandlerFactory {
      * @param keystorePath                   where the keystore will be stored
      * @param keystorePassword               needed to access security credentials
      * @param clientId                       name of the component in the form of "componentId@platformId"
-     * @param localAAMAddress                when using only local AAM for @{@link SecurityRequest} validation
+     * @param localAAMAddress                needed for authorizing operations in the local AAM and validation
      * @param alwaysUseLocalAAMForValidation when wanting to use local AAM for @{@link SecurityRequest} validation
      * @param componentOwnerUsername         AAMAdmin credentials for core components and platform owner credentials for platform components
      * @param componentOwnerPassword         AAMAdmin credentials for core components and platform owner credentials for platform components
@@ -41,7 +41,7 @@ public class ComponentSecurityHandlerFactory {
                                                                         String componentOwnerPassword) throws
             SecurityHandlerException {
         return new ComponentSecurityHandler(
-                new SecurityHandler(keystorePath, keystorePassword, coreAAMAddress, componentOwnerUsername),
+                new SecurityHandler(keystorePath, keystorePassword, localAAMAddress, componentOwnerUsername),
                 localAAMAddress,
                 alwaysUseLocalAAMForValidation,
                 componentOwnerUsername,
