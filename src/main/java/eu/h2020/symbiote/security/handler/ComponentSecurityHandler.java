@@ -34,7 +34,7 @@ import java.util.*;
  */
 public class ComponentSecurityHandler implements IComponentSecurityHandler {
 
-    private final static Log log = LogFactory.getLog(ComponentSecurityHandler.class);
+    private static final Log log = LogFactory.getLog(ComponentSecurityHandler.class);
     private final ISecurityHandler securityHandler;
     private final AAM localAAM;
     private final boolean alwaysUseLocalAAMForValidation;
@@ -49,7 +49,6 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                                     String componentOwnerPassword,
                                     String componentId) throws SecurityHandlerException {
         this.securityHandler = securityHandler;
-        this.localAAM = new AAM(localAAMAddress, "", "", new Certificate(), new HashMap<>());
         this.alwaysUseLocalAAMForValidation = alwaysUseLocalAAMForValidation;
         if (componentOwnerUsername.isEmpty()
                 || !componentOwnerUsername.matches("^(([\\w-])+)$")
@@ -62,6 +61,10 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                 || !componentId.matches("^(([\\w-])+)(@)(([\\w-])+)$"))
             throw new SecurityHandlerException("Component Id has bad form, must be componentId@platformId");
         this.combinedClientIdentifier = componentId;
+        this.localAAM = securityHandler.getAvailableAAMs(new AAM(localAAMAddress, "", "", new Certificate(), new HashMap<>())).get(splitComponentId[1]);
+        if (this.localAAM == null) {
+            throw new SecurityHandlerException("You are not connected to your local aam");
+        }
     }
 
 
@@ -206,7 +209,8 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
     }
 
     @Override
-    public String generateServiceResponse() throws SecurityHandlerException {
+    public String generateServiceResponse() throws
+            SecurityHandlerException {
         BoundCredentials coreAAMBoundCredentials = getLocalAAMCredentials();
         try {
             // generating the service response
@@ -228,7 +232,8 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
      * @return required for authorizing operations in the local AAM
      * @throws SecurityHandlerException on error
      */
-    private BoundCredentials getLocalAAMCredentials() throws SecurityHandlerException {
+    private BoundCredentials getLocalAAMCredentials() throws
+            SecurityHandlerException {
         BoundCredentials localAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(localAAM.getAamInstanceId());
         if (localAAMBoundCredentials == null) {
             // making sure a proper certificate is in the keystore

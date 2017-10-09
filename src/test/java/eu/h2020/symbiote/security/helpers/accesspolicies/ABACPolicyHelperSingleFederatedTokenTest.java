@@ -11,6 +11,7 @@ import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -27,8 +28,12 @@ import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -116,8 +121,6 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         AuthorizationCredentials authorizationCredentialsSecond = new AuthorizationCredentials(new Token(authorizationTokenTwo), homeCredentials.homeAAM, homeCredentials);
         this.authorizationCredentialsForeignTokenSet.add(authorizationCredentialsFirst);
         this.authorizationCredentialsHomeTokenSet.add(authorizationCredentialsSecond);
-
-
     }
 
     @Test
@@ -125,7 +128,9 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
             NoSuchAlgorithmException,
             MalformedJWTException,
             SecurityHandlerException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            CertificateException,
+            WrongCredentialsException {
 
         Set<String> federationMembers = new HashSet<>();
         federationMembers.add(federatedPlatformId);
@@ -154,7 +159,9 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
             NoSuchAlgorithmException,
             MalformedJWTException,
             SecurityHandlerException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            CertificateException,
+            WrongCredentialsException {
 
         Set<String> federationMembers = new HashSet<>();
         federationMembers.add(deploymentId);

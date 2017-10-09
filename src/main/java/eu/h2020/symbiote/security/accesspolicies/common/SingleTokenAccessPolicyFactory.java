@@ -4,11 +4,8 @@ package eu.h2020.symbiote.security.accesspolicies.common;
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.*;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
-import eu.h2020.symbiote.security.handler.ISecurityHandler;
 import io.jsonwebtoken.Claims;
 
-import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,13 +28,12 @@ public class SingleTokenAccessPolicyFactory {
     /**
      * Create the access policy from a {@link SingleTokenAccessPolicySpecifier SingleTokenAccessPolicySpecifier}.
      *
-     * @param specifier       the access policy specifier
-     * @param securityHandler required only if we expect to build {@link ComponentHomeTokenAccessPolicy}, otherwise can be null.
+     * @param specifier the access policy specifier
      * @return the sample access policy
      * @throws InvalidArgumentsException
      */
-    public static IAccessPolicy getSingleTokenAccessPolicy(SingleTokenAccessPolicySpecifier specifier, ISecurityHandler securityHandler)
-            throws InvalidArgumentsException, CertificateException, WrongCredentialsException {
+    public static IAccessPolicy getSingleTokenAccessPolicy(SingleTokenAccessPolicySpecifier specifier) throws
+            InvalidArgumentsException {
 
         switch (specifier.getPolicyType()) {
             case PUBLIC: {
@@ -76,11 +72,8 @@ public class SingleTokenAccessPolicyFactory {
                 Map<String, String> filteredClaims = new HashMap<>(specifier.getRequiredClaims());
                 filteredClaims.remove(Claims.ISSUER);
                 filteredClaims.remove(Claims.SUBJECT);
-                if (securityHandler == null) {
-                    throw new InvalidArgumentsException("Security handler is required.");
-                }
                 return new ComponentHomeTokenAccessPolicy(platformIdentifier, clientId,
-                        filteredClaims, securityHandler);
+                        filteredClaims);
             default:
                 throw new InvalidArgumentsException("The type of the access policy was not recognized");
         }

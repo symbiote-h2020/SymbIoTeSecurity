@@ -76,8 +76,8 @@ public class ComponentSecurityHandlerTest {
         );
     }
 
-    @Test
-    public void goodComponentIdTest() throws SecurityHandlerException {
+    @Test(expected = SecurityHandlerException.class)
+    public void noConnectionComponentIdTest() throws SecurityHandlerException {
 
         ISecurityHandler mock = PowerMockito.mock(ISecurityHandler.class);
 

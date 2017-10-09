@@ -13,6 +13,7 @@ import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -30,6 +31,7 @@ import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -94,7 +96,7 @@ public class ABACPolicyHelperLocalHomeTokenTest {
         AAM issuingAAM = new AAM("", "", "", new Certificate(CryptoHelper.convertX509ToPEM(issuingAAMCertificate)), new HashMap<>());
         HomeCredentials homeCredentials = new HomeCredentials(issuingAAM, username, clientId, new Certificate(CryptoHelper.convertX509ToPEM(clientCertificate)), clientPrivateKey);
 
-        Map<String, String> attributes = new HashMap<String, String>();
+        Map<String, String> attributes = new HashMap<>();
         attributes.put(nameAttr, nameAttrOKValue);
         attributes.put(ageAttr, ageAttrOKValue);
 
@@ -110,11 +112,10 @@ public class ABACPolicyHelperLocalHomeTokenTest {
         AuthorizationCredentials authorizationCredentials = new AuthorizationCredentials(new Token(authorizationToken), homeCredentials.homeAAM, homeCredentials);
         this.homePlatformAuthorizationCredentialsSet.add(authorizationCredentials);
 
-
-        Map<String, String> attributesFirst = new HashMap<String, String>();
+        Map<String, String> attributesFirst = new HashMap<>();
         attributes.put(nameAttr, nameAttrOKValue);
 
-        Map<String, String> attributesSecond = new HashMap<String, String>();
+        Map<String, String> attributesSecond = new HashMap<>();
         attributes.put(ageAttr, ageAttrOKValue);
 
         String authorizationTokenGuest = DummyTokenIssuer.buildAuthorizationToken(clientId,
@@ -149,13 +150,15 @@ public class ABACPolicyHelperLocalHomeTokenTest {
             NoSuchAlgorithmException,
             MalformedJWTException,
             SecurityHandlerException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            CertificateException,
+            WrongCredentialsException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.homePlatformAuthorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
-        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> accessPolicyClaimsMap = new HashMap<>();
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
         accessPolicyClaimsMap.put(Claims.ISSUER, deploymentId);
@@ -182,8 +185,8 @@ public class ABACPolicyHelperLocalHomeTokenTest {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.homePlatformAuthorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
-        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> accessPolicyClaimsMap = new HashMap<>();
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
@@ -205,8 +208,8 @@ public class ABACPolicyHelperLocalHomeTokenTest {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.homePlatformAuthorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
-        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> accessPolicyClaimsMap = new HashMap<>();
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + missingAttr, "");
@@ -229,7 +232,7 @@ public class ABACPolicyHelperLocalHomeTokenTest {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.homePlatformAuthorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
 
         resourceAccessPolicyMap.put(goodResourceID, new SingleLocalHomeTokenAccessPolicy(deploymentId, null));
 
@@ -249,8 +252,8 @@ public class ABACPolicyHelperLocalHomeTokenTest {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.guestAuthorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
-        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> accessPolicyClaimsMap = new HashMap<>();
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
@@ -272,8 +275,8 @@ public class ABACPolicyHelperLocalHomeTokenTest {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.foreignPlatformAuthorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
-        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> accessPolicyClaimsMap = new HashMap<>();
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
