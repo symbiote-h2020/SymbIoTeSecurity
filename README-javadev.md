@@ -5,7 +5,17 @@ Security handler provides methods that allow retrieving AAMs (`getAvailableAAMs`
 
 At the beginning of an integration with Sybiote Security Layer as end-user you have to receive an implementation of [ISecurityHandler.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/ISecurityHandler.java) using [SecurityHandlerFactory.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/ClientSecurityHandlerFactory.java).
 ```java
-SecurityHandler securityHandler = ClientSecurityHandlerFactory.getSecurityHandler(coreAAMAddress, keystorePath, keystorePassword, userId);
+/**
+     * Creates an end-user security handler
+     *
+     * @param coreAAMAddress   Symbiote Core AAM address which is available on the symbiote security webpage
+     * @param keystorePath     where the keystore will be stored
+     * @param keystorePassword needed to access security credentials
+     * @return the security handler ready to talk with Symbiote Security Layer
+     * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
+     */
+SecurityHandler securityHandler = ClientSecurityHandlerFactory.getSecurityHandler(
+        coreAAMAddress, keystorePath, keystorePassword, userId);
 ```
 
 
@@ -23,11 +33,26 @@ In order to find the certificate of the component you communicate with, please u
 #### Component Security Handler
 If you want to manage components, create ComponentSecurityHandler object with  [ComponentSecurityHandlerFactory](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/ComponentSecurityHandler.java) class.
 ```java
-ComponentSecurityHandler componentSecurityHandler = ComponentSecurityHandlerFactory.getComponentSecurityHandler(coreAAMAddress, keystorePath, keystorePassword, clientId, localAAMAddress, alwaysUseLocalAAMForValidation, componentOwnerUsername, componentOwnerPassword);
+/**
+     * Creates an end-user component security handler
+     *
+     * @param coreAAMAddress                 Symbiote Core AAM address which is available on the symbiote security webpage
+     * @param keystorePath                   where the keystore will be stored
+     * @param keystorePassword               needed to access security credentials
+     * @param clientId                       name of the component in the form of "componentId@platformId"
+     * @param localAAMAddress                when using only local AAM for @{@link SecurityRequest} validation
+     * @param alwaysUseLocalAAMForValidation when wanting to use local AAM for @{@link SecurityRequest} validation
+     * @param componentOwnerUsername         AAMAdmin credentials for core components and platform owner credentials for platform components
+     * @param componentOwnerPassword         AAMAdmin credentials for core components and platform owner credentials for platform components
+     * @return the component security handler ready to talk with Symbiote components
+     * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
+     */
+ComponentSecurityHandler componentSecurityHandler = ComponentSecurityHandlerFactory.getComponentSecurityHandler(
+        coreAAMAddress, keystorePath, keystorePassword, clientId, localAAMAddress, alwaysUseLocalAAMForValidation, componentOwnerUsername, componentOwnerPassword);
 ```
 
 #### SecurityRequest and API
-The SecurityRequest (available here [SecurityRequest.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/payloads/SecurityRequest.java)) is split into the following HTTP security headers for communication. We also offer convenience converters on how to consume the SecurityRequest on your business API and how to prepare one for attaching to a REST request.
+The SecurityRequest (available here [SecurityRequest.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/payloads/SecurityRequest.java)) is split into the following HTTP security headers for REST communication. We also offer convenience converters on how to consume the SecurityRequest on your business API and how to prepare one for attaching to a REST request.
 ```java
 // timestamp header
 public static final String SECURITY_CREDENTIALS_TIMESTAMP_HEADER = "x-auth-timestamp";
