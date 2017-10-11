@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 /**
- * SymbIoTe Access Policy that needs to be satisfied by a single Token issued by component's local AAM particularly for that component.
+ * SymbIoTe Access Policy that needs to be satisfied by a single Token issued by component's local AAM for that component.
  *
  * @author Jakub Toczek (PSNC)
  * @author Mikołaj Dobski (PSNC)
@@ -24,8 +24,8 @@ public class ComponentHomeTokenAccessPolicy implements IAccessPolicy {
 
     /**
      * Creates a new access policy object
-     * @param platformIdentifier so that HOME tokens are properly identified
-     * @param componentId        the component for which should have access to the resource
+     * @param platformIdentifier so that we make sure that the token was issued by the platform the components belongs to
+     * @param componentId        the component identifier which should have access to the resource
      * @param requiredClaims     optional map with all other claims that need to be contained in a single token to satisfy the policy
      */
     public ComponentHomeTokenAccessPolicy(String platformIdentifier, String componentId, Map<String, String> requiredClaims) throws
@@ -34,7 +34,7 @@ public class ComponentHomeTokenAccessPolicy implements IAccessPolicy {
             throw new InvalidArgumentsException("Platform identifier must not be null/empty!");
         this.platformIdentifier = platformIdentifier;
         if (componentId == null || componentId.isEmpty())
-            throw new InvalidArgumentsException("Username must not be null/empty!");
+            throw new InvalidArgumentsException("Component identifier must not be null/empty!");
         this.componentId = componentId;
         if (requiredClaims != null)
             this.requiredClaims = requiredClaims;
