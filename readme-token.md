@@ -1,6 +1,13 @@
 ### Authorization Token acquisition
 To acquire access to any resource, actor needs to acquire authorization credentials containing tokens ([JSON Web Token](https://jwt.io/introduction/)).
 
+Actor needs to know **coreInterfaceAdress**. 
+In case of acquiring tokens from other platform, their **platformInterworkingInterfaces** 
+can be accessed, sending GET request on:
+```
+https://<coreInterfaceAdress>/get_available_aams
+```
+
 #### Guest Token
 Guest Token is a authorization token, for which no registration is required.
 However, it can give access only to public resources. 
@@ -23,7 +30,13 @@ Issue (“iat”) and expiration date (“exp”) limit the validity of the toke
 
 ![Login Request structure](media/home-acquisition.png "Login request token format and content in symbIoTe.")
 
-To acquire such token, HTTP POST request with proper Login Request has to be sent on:
+To acquire such token, HTTP POST request with proper body has to be sent. 
+Required body of the request should look like this:
+ ```
+ x-auth-token: {token}
+ ```
+ where {token} is Login Request.
+ Request should be send on:
 ```
 https://<coreInterfaceAdress>/get_home_token
 ```
