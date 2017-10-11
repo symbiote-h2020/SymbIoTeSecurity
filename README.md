@@ -38,7 +38,8 @@ At the beginning of an integration with Sybiote Security Layer as end-user you h
 /**
      * Creates an end-user security handler
      *
-     * @param coreAAMAddress   Symbiote Core AAM address which is available on the symbiote security webpage
+     * @param coreAAMAddress   Symbiote Core AAM address which is available 
+     *                         on the symbiote security webpage
      * @param keystorePath     where the keystore will be stored
      * @param keystorePassword needed to access security credentials
      * @return the security handler ready to talk with Symbiote Security Layer
@@ -66,19 +67,24 @@ If you want to manage components, create ComponentSecurityHandler object with  [
 /**
      * Creates an end-user component security handler
      *
-     * @param coreAAMAddress                 Symbiote Core AAM address which is available on the symbiote security webpage
+     * @param coreAAMAddress                 Symbiote Core AAM address which is available 
+     *                                       on the symbiote security webpage
      * @param keystorePath                   where the keystore will be stored
      * @param keystorePassword               needed to access security credentials
      * @param clientId                       name of the component in the form of "componentId@platformId"
-     * @param localAAMAddress                when using only local AAM for @{@link SecurityRequest} validation
-     * @param alwaysUseLocalAAMForValidation when wanting to use local AAM for @{@link SecurityRequest} validation
-     * @param componentOwnerUsername         AAMAdmin credentials for core components and platform owner credentials for platform components
-     * @param componentOwnerPassword         AAMAdmin credentials for core components and platform owner credentials for platform components
+     * @param localAAMAddress                when using only local AAM for SecurityRequest validation
+     * @param alwaysUseLocalAAMForValidation when wanting to use local AAM for SecurityRequest validation
+     * @param componentOwnerUsername         AAMAdmin credentials for core components 
+     *                                       and platform owner credentials for platform components
+     * @param componentOwnerPassword         AAMAdmin credentials for core components 
+     *                                       and platform owner credentials for platform components
      * @return the component security handler ready to talk with Symbiote components
      * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
      */
-ComponentSecurityHandler componentSecurityHandler = ComponentSecurityHandlerFactory.getComponentSecurityHandler(
-        coreAAMAddress, keystorePath, keystorePassword, clientId, localAAMAddress, alwaysUseLocalAAMForValidation, componentOwnerUsername, componentOwnerPassword);
+ComponentSecurityHandler componentSecurityHandler = 
+    ComponentSecurityHandlerFactory.getComponentSecurityHandler(
+            coreAAMAddress, keystorePath, keystorePassword, clientId, localAAMAddress, 
+            alwaysUseLocalAAMForValidation, componentOwnerUsername, componentOwnerPassword);
 ```
 
 #### SecurityRequest and API
@@ -146,6 +152,7 @@ MyServiceFeignClient jsonclient = Feign.builder()
                  .target(InterworkingInterfaceService.class, url);
 ```
 From now on, all methods call to jsonclient will generate REST requests with valid authentication headers and the responses will be validated as well for integrity, so in case of a challenge-response failure it will return a 400 error message.
+
 
 
 ## Instructions for non java developers
