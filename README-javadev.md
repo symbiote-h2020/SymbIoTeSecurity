@@ -1,10 +1,12 @@
 ## Instructions for java developers
 #### End-user Security Handler
+
+Security handler provides methods that allow retrieving AAMs (`getAvailableAAMs`), component certificates (`getComponentCertificate`), logging into AAMs (`login`) etc. See [SecurityHandler.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/SecurityHandler.java) 
+
 At the beginning of an integration with Sybiote Security Layer as end-user you have to receive an implementation of [ISecurityHandler.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/ISecurityHandler.java) using [SecurityHandlerFactory.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/ClientSecurityHandlerFactory.java).
 ```java
 SecurityHandler securityHandler = ClientSecurityHandlerFactory.getSecurityHandler(coreAAMAddress, keystorePath, keystorePassword, userId);
 ```
-Security handler provides methods that allow retrieving AAMs (`getAvailableAAMs`), component certificates (`getComponentCertificate`), logging into AAMs (`login`) etc. See [SecurityHandler.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/SecurityHandler.java) 
 
 
 In order to find the certificate of the component you communicate with, please use the following table:
@@ -24,13 +26,8 @@ If you want to manage components, create ComponentSecurityHandler object with  [
 ComponentSecurityHandler componentSecurityHandler = ComponentSecurityHandlerFactory.getComponentSecurityHandler(coreAAMAddress, keystorePath, keystorePassword, clientId, localAAMAddress, alwaysUseLocalAAMForValidation, componentOwnerUsername, componentOwnerPassword);
 ```
 
-
-#### Platform AAM certificate store
-SymbioteSecurity contains class [PlatformAAMCertificateKeystoreFactory.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/helpers/PlatformAAMCertificateKeyStoreFactory.java) that allows you to retrieve keystore for your AAM. 
-You need to modify the parameters in the main method (after you have registered your platformOwner account and the platform itself in the SymbioteCore) and after running it, it will generate the keystore that you can copy to your platform AAM deployment.
-
 #### SecurityRequest and API
-The SecurityRequest (available here [SecurityRequest.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/payloads/SecurityRequest.java)) can be split into the following HTTP security headers for communication. We also offer convenience converters on how to consume the SecurityRequest on your business API and how to prepare one for attaching to a REST request.
+The SecurityRequest (available here [SecurityRequest.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/payloads/SecurityRequest.java)) is split into the following HTTP security headers for communication. We also offer convenience converters on how to consume the SecurityRequest on your business API and how to prepare one for attaching to a REST request.
 ```java
 // timestamp header
 public static final String SECURITY_CREDENTIALS_TIMESTAMP_HEADER = "x-auth-timestamp";
@@ -55,7 +52,7 @@ public SecurityRequest(String guestToken) {
 }
 ```
 
-#### Feign client
+#### Proxy client for access to AAM Services
 In addition to the [IComponentSecurityHandler](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/IComponentSecurityHandler.java) that was released, there's an utility class for REST clients using Feign. In case you are using it, it is created a client that will manage automatically the authentication headers and validate the server response (with respect to security). This class is [SymbioteAuthorizationClient](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/SymbioteAuthorizationClient.java).
 
 So let's say that you have a Feign client named MyServiceFeignClient. Normally you would instantiate it like:
