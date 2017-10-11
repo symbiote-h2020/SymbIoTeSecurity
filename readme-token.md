@@ -1,29 +1,47 @@
 ### Authorization Token acquisition
-To acquire access to any resource, actor needs to acquire authorization token ([JSON Web Token](https://jwt.io/introduction/)).
+To acquire access to any resource, actor needs to acquire authorization credentials containing tokens ([JSON Web Token](https://jwt.io/introduction/)).
 
 #### Guest Token
-Guest Token is a authorization token, for which no registration is required
-[see [IFeignAAMClient](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/interfaces/IFeignAAMClient.java), getGuestToken()].
+Guest Token is a authorization token, for which no registration is required.
 However, it can give access only to public resources. 
 
+To acquire such token, empty HTTP POST request has to be sent on:
+```
+https://<coreInterfaceAdress>/get_guest_token
+```
+or
+```
+https://<platformInterworkingInterface>/paam/get_guest_token
+```
+depending from which platform we want to acquire Guest Token.
 #### Home Token 
 Home Token is a authorization token, for registered actors only. It can give access to public and private resources (depending on actors privileges).
 
 To log in into a service and acquire Home Token, actor has to generate and send Login Request to the Local AAM in which he is registered. 
-Login Request is a [JSON Web Token](https://jwt.io/introduction/), with right claims, containing JWS. In *iss*, actor's unique identifier is sent, *sub* contains one of the actor's client identifier. 
+Login Request is a [JSON Web Token](https://jwt.io/introduction/), with right claims, wrapped into JWS. In *iss*, actor's unique identifier is sent, *sub* contains one of the actor's client identifier. 
 Issue (“iat”) and expiration date (“exp”) limit the validity of the token. Login Request can be created for registered actors with issued certificate in local AAM or for guest.
 
 ![Login Request structure](media/home-acquisition.png "Login request token format and content in symbIoTe.")
 
+To acquire such token, HTTP POST request with proper Login Request has to be sent on:
+```
+https://<coreInterfaceAdress>/get_home_token
+```
+or
+```
+https://<platformInterworkingInterface>/paam/get_home_token
+```
+depending from which platform we want to acquire Home Token.
+
 #### Structure of *sub* and *iss* claim
 There are two kinds of *sub* claim, depending on for who Login Request is created. 
 
-For ordinary user or PO:
+For ordinary user or Platform Owner:
 ```
 ISS: username
 SUB: clientId
 ```
-For symbiote components acting on behalf of the CoreAAMOwner or PlatformOwner:
+For symbiote components acting on behalf of the CoreAAMOwner or PlatformOwner [Note: R3 version, will be changed in R3.1]:
 ```
 ISS: AAMOwnerUsername/PlatformOwnerUsername
 SUB: componentId@PlatformId
