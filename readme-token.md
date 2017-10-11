@@ -7,6 +7,7 @@ can be accessed, sending GET request on:
 ```
 https://<coreInterfaceAdress>/get_available_aams
 ```
+In return, response with json containing [AvailableAAMsCollection](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/payloads/AvailableAAMsCollection.java) should be received.
 
 #### Guest Token
 Guest Token is a authorization token, for which no registration is required.
@@ -21,6 +22,7 @@ or
 https://<platformInterworkingInterface>/paam/get_guest_token
 ```
 depending from which platform we want to acquire Guest Token.
+In return, headers with *x-auth-token* containing Guest Token should be received.
 #### Home Token 
 Home Token is a authorization token, for registered actors only. It can give access to public and private resources (depending on actors privileges).
 
@@ -30,8 +32,8 @@ Issue (“iat”) and expiration date (“exp”) limit the validity of the toke
 
 ![Login Request structure](media/home-acquisition.png "Login request token format and content in symbIoTe.")
 
-To acquire such token, HTTP POST request with proper body has to be sent. 
-Required body of the request should look like this:
+To acquire such token, HTTP POST request with proper headers has to be sent. 
+Required request should look like this:
  ```
  x-auth-token: {token}
  ```
@@ -45,6 +47,7 @@ or
 https://<platformInterworkingInterface>/paam/get_home_token
 ```
 depending from which platform we want to acquire Home Token.
+In return, headers with *x-auth-token* containing Home Token should be received.
 
 #### Structure of *sub* and *iss* claim
 There are two kinds of *sub* claim, depending on for who Login Request is created. 
