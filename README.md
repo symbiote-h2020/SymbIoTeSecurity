@@ -170,12 +170,47 @@ The following image depicts in general how to get a symbiote authentication cert
    - for a platform AAM
      - CN=platformId
      - CSR's format in REGEX: ^(CN=)(([\w-])+)$
-3. submit the CSR along with other credentials to your HOME AAM on the following REST endpoint, to receive your signed Certificate
+3. submit the CSR along with other credentials to your HOME AAM on the following REST endpoint, to receive your signed Certificate:
+```
+https://<coreInterfaceAdress>/sign_certificate_request
+```
+or
+```
+https://<platformInterworkingInterface>/paam/sign_certificate_request
+```
 
-TODO The SignCertificateRequest is located in body of request which is sent with POST method on address:
+CSR is located in body of the request, sent with POST method.
+
+[CertificateRequest](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/docs/src/main/java/eu/h2020/symbiote/security/communication/payloads/CertificateRequest.java) example:
+
 ```
-https://<coreInterfaceAdress>/AAM_SIGN_CERTIFICATE_REQUEST
+{
+  "username" : "testApplicationUsername",
+  "password" : "testApplicationPassword",
+  "clientId" : "clientId",
+  "clientCSRinPEMFormat" : "-----BEGIN CERTIFICATE REQUEST-----\r\nMIH4MIGfAgEAMD0xOzA5BgNVBAMMMnRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNs\r\naWVudElkQFN5bWJJb1RlX0NvcmVfQUFNMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcD\r\nQgAE6hgbq/xGIGp9aRPuzHY1MPuxAA3dmhZ/RQRD/F7t+fhjUaOboWDIkmeAMfw6\r\nc9X+3JZVcJlklBvjWFM+tm96qaAAMAoGCCqGSM49BAMCA0gAMEUCICLGFyqGDt+u\r\nekgxkwpulG53JEMVoQ+OJp9dmf608a76AiEAved+JWfNmA6TBlwq/lllrVthE3rO\r\nru1m7ZyKHBdaoEQ=\r\n-----END CERTIFICATE REQUEST-----\r\n"
+}
 ```
+
+4. Home AAM verifies the request and response containing signed Certificate in body or error status should be received. Signed certificate is added to the HomeAAM's database for the user which send the request and given client's ID.
+Response body example:
+```
+-----BEGIN CERTIFICATE-----
+MIIBgjCCASigAwIBAgIBATAKBggqhkjOPQQDAjBJMQ0wCwYDVQQHEwR0ZXN0MQ0w
+CwYDVQQKEwR0ZXN0MQ0wCwYDVQQLEwR0ZXN0MRowGAYDVQQDDBFTeW1iSW9UZV9D
+b3JlX0FBTTAeFw0xNzEwMTIxMDQ5MDVaFw0xODEwMTIxMDQ5MDVaMD0xOzA5BgNV
+BAMMMnRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkQFN5bWJJb1RlX0Nv
+cmVfQUFNMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE22XrQOVU5dOYI7nWWE+M
+3xNc//0kvpiT/tqOA3AL6Jj1ZZbsui8pQKKJzWjhOTgw0NHULbnqDO8eZ9F63b7D
+MKMNMAswCQYDVR0TBAIwADAKBggqhkjOPQQDAgNIADBFAiEA5MwiGcLYFj/9x/80
+CR6oAmE3HVBkstwcAaYUsy3kUIECIAPGWPh++7In2oM/PirBFZoR8xKqufypo1lm
+61fUd+FJ
+-----END CERTIFICATE-----
+```
+
+5. User should store received signed Certificate in the Keystore with his private key.
+
+From now the user can log in to his Home AAM and acquire home tokens from it.
 
 ### Authorization Token acquisition
 To acquire access to any resource, actor needs to acquire authorization credentials containing tokens ([JSON Web Token](https://jwt.io/introduction/)).
