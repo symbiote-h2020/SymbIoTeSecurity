@@ -156,6 +156,81 @@ From now on, all methods call to jsonclient will generate REST requests with val
 
 ## Instructions for non java developers
 ### Certificates
+
+##### How to create a Java Keystore with the issued SSL certificate, required for Core AAM deployment
+
+Create a Java Keystore containing the certificate. Use the KeyStore Explorer application to create [JavaKeystore](http://keystore-explorer.org/downloads.html):
+
+1. (optionally) Inspect obtained files using Examine --> Examine File
+
+2. Create a new Keystore --> PKCS #12
+
+3. Tools --> Import Key Pair --> PKCS #8
+
+4. Deselect Encrypted Private Key
+
+5. Browse and set your private key
+
+6. Browse and set your certificate
+
+7. Import --> enter alias for the certificate for this keystore
+
+8. Enter password
+
+9. File --> Save --> enter previously set password  --> <filename>.p12
+
+Filename will be used as configuration parameter of the Core AAM component.
+
+```
+ server.ssl.key-store=classpath:<filename>.p12
+```
+
+#### Configuring the CoreAAM resources
+
+Once one has done previous actions, you need to fix the file `src/main/resources/bootstrap.properties` manually for each deployment using the template below or comments from the file itself.
+
+Example bootstrap.properties:
+
+```
+spring.cloud.config.enabled=true
+spring.application.name=AuthenticationAuthorizationManager
+logging.file=logs/AuthenticationAuthorizationManager.log
+# security agreed constants
+aam.security.KEY_PAIR_GEN_ALGORITHM=ECDSA
+aam.security.CURVE_NAME=secp256r1
+aam.security.SIGNATURE_ALGORITHM=SHA256withECDSA
+  
+# username and password of the AAM module (of your choice)
+aam.deployment.owner.username=TODO
+aam.deployment.owner.password=TODO
+# name of the CAAM JavaKeyStore file you need to put in your src/main/resources directory
+aam.security.KEY_STORE_FILE_NAME=TODO.p12
+# name of the certificate entry in the Keystore
+aam.security.KEY_STORE_ALIAS=symbiote_core_aam
+# symbiote keystore password
+aam.security.KEY_STORE_PASSWORD=TODO
+# symbiote certificate private key password
+aam.security.PV_KEY_PASSWORD=TODO
+#JWT validity time in milliseconds - how long the tokens issued to your users (apps) are valid... think maybe of an hour, day, week?
+aam.deployment.token.validityMillis=TODO
+# HTTPS only
+# name of the keystore containing the letsencrypt (or other) certificate and key pair for your AAM host's SSL, you need to put it also in your src/main/resources directory
+server.ssl.key-store=classpath:TODO.p12
+# SSL keystore password
+server.ssl.key-store-password=TODO
+# SSL certificate private key password
+server.ssl.key-password=TODO
+# http to https redirect
+security.require-ssl=true
+```
+
+You also need to copy to the `src/main/resources/` directory:
+
+•	JavaKeyStore file containing the self-signed Core AAM cert+key that you have generated
+
+•	the keystore generated for your SSL certificate
+
+#### Acquiring certificates
 In order to acquire relevant certificates using directly the AAM endpoint the actor (user/platform owner) needs to provide Certificate Request. 
 It consists of credentials of the actor (username and password), client identifier and a Certificate Signing Request with the following specifics:
 
