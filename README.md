@@ -33,7 +33,7 @@ by the **SymbIoTe Security Team**.
 
 Security handler provides methods that allow retrieving AAMs (`getAvailableAAMs`), component certificates (`getComponentCertificate`), logging into AAMs (`login`) etc. See [SecurityHandler.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/SecurityHandler.java) 
 
-At the beginning of an integration with Sybiote Security Layer as end-user you have to receive an implementation of [ISecurityHandler.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/ISecurityHandler.java) using [SecurityHandlerFactory.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/ClientSecurityHandlerFactory.java).
+At the beginning of an integration with SymbIoTe Security Layer as end-user you have to receive an implementation of [ISecurityHandler.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/ISecurityHandler.java) using [SecurityHandlerFactory.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/ClientSecurityHandlerFactory.java).
 ```java
 /**
      * Creates an end-user security handler
@@ -97,7 +97,7 @@ public static final String SECURITY_CREDENTIALS_SIZE_HEADER = "x-auth-size";
 // each SecurityCredentials entry header prefix, they are number 1..size
 public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "x-auth-";
 ```
-whereas the ServiceResponseJWS is in communication just a String and should be transport in the following header
+whereas the ServiceResponseJWS is in contrast just a String and should be transport in the following header
 ```java
 public static final SECURITY_RESPONSE_HEADER = "x-auth-response";
 ```
@@ -149,13 +149,13 @@ MyServiceFeignClient jsonclient = Feign.builder()
                  .decoder(new JacksonDecoder())
                  .encoder(new JacksonEncoder())
                  .client(client)
-                 .target(InterworkingInterfaceService.class, url);
+                 .target(MyServiceFeignClient.class, url);
 ```
 From now on, all methods call to jsonclient will generate REST requests with valid authentication headers and the responses will be validated as well for integrity, so in case of a challenge-response failure it will return a 400 error message.
 
 ## Instructions for non java developers
 ### Acquiring client certificates needed to get authorization credentials
-The following image depicts in general how to get a symbiote authentication certificate:
+The following image depicts in general how to get a symbIoTe authentication certificate:
 ![Certificate acquisition procedure](media/acquire_user_cert.png)
 
 0. Make sure you have an account in the platform you want to access resources (using Home credentials).
@@ -224,7 +224,7 @@ https://<coreInterfaceAdress>/get_available_aams
 In return, response with json containing [AvailableAAMsCollection](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/payloads/AvailableAAMsCollection.java) should be received.
 
 #### Guest Token
-Guest Token is a authorization token, for which no registration is required.
+Guest Token is an authorization token, for which no registration is required.
 However, it can give access only to public resources. 
 
 To acquire such token, empty HTTP POST request has to be sent on:
@@ -296,7 +296,7 @@ In case the equation is verified, the token is valid, i.e. it is authentic and i
 
 ##### Example
 
-Actor wants to acquire Home Token for one of the registrated clients. To do so, he has to generate JWS message, modified JWT from his username, client id, actual data as issue_date and expiration_date (issue_date + 60s). All the information is signed, using actor's private key complementary with the public key for registrated client. From all of this components (data + JWS), text chain is generated and sent to AAM. 
+Actor wants to acquire Home Token for one of the registered clients. To do so, he has to generate JWS message, modified JWT from his username, client id, actual data as issue_date and expiration_date (issue_date + 60s). All the information is signed, using actor's private key complementary with the public key for registered client. From all of this components (data + JWS), text chain is generated and sent to AAM. 
 Example login request JWS compact token:
 
 ```
@@ -349,31 +349,31 @@ For that the client needs to generate a token ownership proof - challenge. Striv
 
 All the claims marked with T means values of claims from AuthorizationToken for which challenge is made.
 
-•	jti, - token's identifier
-
-•	iss, actor's client identifier (SUB from the authorization token)
-
-•	sub contains the JTI of the authorization token,
-
-•	ipk is the public key of the actor, spk from the authorization token
- 
-•	Issue (“iat”) and expiration date (“exp”) limit the validity of the challenge token.
-
-•	hash claim contains a SHA256 hash of the authorization token compact form String concatenated with the challenge timestamp1
-
-•	sign claim is the same as in the login request - uses the client's private key
+* jti is the  token's identifier    
+* iss is the actor's client identifier (SUB from the authorization token)    
+* sub contains the JTI of the authorization token    
+* ipk is the public key of the actor, spk from the authorization token   
+* issue (“iat”) and expiration date (“exp”) limit the validity of the challenge token    
+* hash claim contains a SHA256 hash of the authorization token compact form String concatenated with the challenge timestamp1     
+* sign claim is the same as in the login request - uses the client's private key
 
 #### Service Response payload
 The client can verify that the service response was genuine by checking that the service response contains a valid JWS token.
 ![Service response structure](media/service-response.png)
 
-Claims description:
-•	hash claim contains a SHA256 hash of the timestamp2
-•	timestamp claim contains the timestamp2
-•	sign claim is the same as in the login request - uses the service's private key
+Claims description:   
+* hash claim contains a SHA256 hash of the timestamp2    
+* timestamp claim contains the timestamp2    
+* sign claim is the same as in the login request - uses the service's private key   
 
 The client can verify that the response was generated recently and is signed with the desired service private key by checking the tokens signature against the component's exposed certificate available in its platform AAM using a GET request.
-```https://<coreInterfaceAdress>/get_component_certificate/platform/SymbIoTe_Core_AAM/component/<componentID>```or```https://<platformInterworkingInterface>/paam/get_component_certificate/platform/<platformID>/component/<componentID>```
+```
+https://<coreInterfaceAdress>/get_component_certificate/platform/SymbIoTe_Core_AAM/component/<componentID>
+```
+or
+```
+https://<platformInterworkingInterface>/paam/get_component_certificate/platform/<platformID>/component/<componentID>
+```
 The certificate is returned in the body in PEM format.
 
 ##### Example:
