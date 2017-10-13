@@ -11,6 +11,7 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTExceptio
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
+import eu.h2020.symbiote.security.communication.AAMClient;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -100,9 +101,19 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                     if (validationAAM == null)// fallback to local AAM
                         validationAAM = localAAM;
                 }
+                ValidationStatus tokenValidationStatus;
+                AAMClient aamClient = new AAMClient(localAAM.getAamAddress());
+                AAM issuer = aamClient.getAvailableAAMs().getAvailableAAMs().get(authorizationToken.getClaims().getIssuer());
+                if (issuer == null
+                        || issuer.getAamCACertificate().getCertificateString().isEmpty()) {
+                    throw new SecurityHandlerException("ISSUER platform certificate is not available");
+                }
+                tokenValidationStatus = JWTEngine.validateTokenString(authorizationToken.toString(), issuer.getAamCACertificate().getX509().getPublicKey());
+                if (tokenValidationStatus != ValidationStatus.VALID)
+                    return tokenValidationStatus;
 
                 // validate
-                ValidationStatus tokenValidationStatus = securityHandler.validate(
+                tokenValidationStatus = securityHandler.validate(
                         validationAAM,
                         authorizationToken.getToken(),
                         Optional.of(securityCredentials.getClientCertificate()),
@@ -113,7 +124,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                     log.debug("token was invalidated with the following reason: " + tokenValidationStatus);
                     return tokenValidationStatus;
                 }
-            } catch (ValidationException e) {
+            } catch (ValidationException | CertificateException e) {
                 log.error(e);
                 throw new SecurityHandlerException(e.getMessage());
             }
