@@ -110,8 +110,8 @@ ComponentSecurityHandler componentSecurityHandler =
 
 Component Security Handler provides following methods:
  - `Set<String> getSatisfiedPoliciesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
-                                                    SecurityRequest securityRequest)` - set of identifiers of policies (e.g. resources identifiers) whose access policies are satisfied with the security verified SecurityRequest#getSecurityCredentials()
- - `boolean isReceivedServiceResponseVerified(String serviceResponse,
+                                                    SecurityRequest securityRequest)` - returns a set of identifiers of policies (e.g. resources identifiers) whose access policies are satisfied with the given SecurityRequest
+ - `boolean isReceivedServiceResponseVerified(String serviceResponse,                                                  
                                                   String componentIdentifier,
                                                   String platformIdentifier)` - is used by a component to verify that the other components response was legitimate... e.g. to handle the service response encapsulated in a JWS. Returns true if the service is genuine.
  - `SecurityRequest generateSecurityRequestUsingCoreCredentials()` - is used by a component to generate the SecurityRequest needed to authorize operations in the Symbiote Core to be attached to the business query
