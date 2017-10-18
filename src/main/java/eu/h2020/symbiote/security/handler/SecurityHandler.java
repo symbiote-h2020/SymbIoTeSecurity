@@ -50,6 +50,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static eu.h2020.symbiote.security.helpers.CryptoHelper.illegalSign;
+
 /**
  * Abstract implementation of the {@link ISecurityHandler} that all concrete implementations should
  * extend from.
@@ -223,15 +225,17 @@ public class SecurityHandler implements ISecurityHandler {
   public Certificate getComponentCertificate(String componentIdentifier, String platformIdentifier) {
       Certificate certificate = new Certificate();
       try {
-          AAMClient aamClient = ClientFactory.getAAMClient(coreAAM.getAamAddress());
-          // checking cache
-          if (credentialsWallet.containsKey(platformIdentifier) && credentialsWallet.containsKey(componentIdentifier))
-              // fetching from wallet
-              certificate = credentialsWallet.get(platformIdentifier).homeCredentials.homeAAM.getComponentCertificates().get(componentIdentifier);
-          else {
-              // need to fetch fresh certificate
-              certificate = new Certificate(aamClient.getComponentCertificate(componentIdentifier, platformIdentifier));
-          }
+        AAMClient aamClient = ClientFactory.getAAMClient(homeAAMAddress);
+        // checking cache
+        if (credentialsWallet.containsKey(platformIdentifier)
+                && credentialsWallet.get(platformIdentifier).homeCredentials.homeAAM.getComponentCertificates().containsKey(componentIdentifier))
+          // fetching from wallet
+          certificate = credentialsWallet.get(platformIdentifier).homeCredentials.homeAAM.getComponentCertificates().get(componentIdentifier);
+        else {
+          // need to fetch fresh certificate
+          certificate = new Certificate(aamClient.getComponentCertificate(componentIdentifier, platformIdentifier));
+          //TODO: add new certificate to credentialWallet (create credWallet for platform if missing?)
+        }
       } catch (AAMException e) {
           logger.error(e);
       }
@@ -285,10 +289,14 @@ public class SecurityHandler implements ISecurityHandler {
       
       Certificate certificate = new Certificate();
       certificate.setCertificateString(certificateValue);
-      
-      HomeCredentials credentials = new HomeCredentials(homeAAM, username, clientId, certificate,
-                                                           pair.getPrivate());
-      
+      HomeCredentials credentials;
+      if (clientId.contains("@")) {
+        credentials = new HomeCredentials(homeAAM, clientId.split(illegalSign)[1], clientId.split(illegalSign)[0], certificate,
+                pair.getPrivate());
+      } else {
+          credentials = new HomeCredentials(homeAAM, username, clientId, certificate,
+                pair.getPrivate());
+      }
       
       if (saveCertificate(credentials)) {
         cacheCertificate(credentials);
@@ -370,8 +378,8 @@ public class SecurityHandler implements ISecurityHandler {
             user = elements[0];
             client = elements[1];
           } else {
-            user = this.userId;
-            client = elements[0] + "@" + elements[1];
+            user = elements[1];
+            client = elements[0];
           }
           
           AAM aam = aamList.get(aamId);

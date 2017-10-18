@@ -13,6 +13,7 @@ import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -29,6 +30,7 @@ import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
@@ -88,7 +90,7 @@ public class ABACPolicyHelperSingleTokenTest {
         AAM issuingAAM = new AAM("", "", "", new Certificate(CryptoHelper.convertX509ToPEM(issuingAAMCertificate)), new HashMap<>());
         HomeCredentials homeCredentials = new HomeCredentials(issuingAAM, username, clientId, new Certificate(CryptoHelper.convertX509ToPEM(clientCertificate)), clientPrivateKey);
 
-        Map<String, String> attributes = new HashMap<String, String>();
+        Map<String, String> attributes = new HashMap<>();
         attributes.put(nameAttr, nameAttrOKValue);
         attributes.put(ageAttr, ageAttrOKValue);
 
@@ -105,10 +107,10 @@ public class ABACPolicyHelperSingleTokenTest {
         this.authorizationCredentialsSet.add(authorizationCredentials);
 
 
-        Map<String, String> attributesFirst = new HashMap<String, String>();
+        Map<String, String> attributesFirst = new HashMap<>();
         attributes.put(nameAttr, nameAttrOKValue);
 
-        Map<String, String> attributesSecond = new HashMap<String, String>();
+        Map<String, String> attributesSecond = new HashMap<>();
         attributes.put(ageAttr, ageAttrOKValue);
 
         String authorizationTokenOne = DummyTokenIssuer.buildAuthorizationToken(clientId,
@@ -133,8 +135,6 @@ public class ABACPolicyHelperSingleTokenTest {
         AuthorizationCredentials authorizationCredentialsSecond = new AuthorizationCredentials(new Token(authorizationTokenTwo), homeCredentials.homeAAM, homeCredentials);
         this.authorizationCredentialsMultipleTokensSet.add(authorizationCredentialsFirst);
         this.authorizationCredentialsMultipleTokensSet.add(authorizationCredentialsSecond);
-
-
     }
 
     @Test
@@ -142,13 +142,15 @@ public class ABACPolicyHelperSingleTokenTest {
             NoSuchAlgorithmException,
             MalformedJWTException,
             SecurityHandlerException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            CertificateException,
+            WrongCredentialsException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
-        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> accessPolicyClaimsMap = new HashMap<>();
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
@@ -171,8 +173,8 @@ public class ABACPolicyHelperSingleTokenTest {
             SecurityHandlerException {
 
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
-        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> accessPolicyClaimsMap = new HashMap<>();
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
@@ -190,8 +192,8 @@ public class ABACPolicyHelperSingleTokenTest {
             SecurityHandlerException {
 
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
-        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> accessPolicyClaimsMap = new HashMap<>();
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
@@ -213,8 +215,8 @@ public class ABACPolicyHelperSingleTokenTest {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
-        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> accessPolicyClaimsMap = new HashMap<>();
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
@@ -235,8 +237,8 @@ public class ABACPolicyHelperSingleTokenTest {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
-        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> accessPolicyClaimsMap = new HashMap<>();
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + missingAttr, "");
@@ -258,15 +260,15 @@ public class ABACPolicyHelperSingleTokenTest {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
-        Map<String, String> goodResourceAccessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> goodResourceAccessPolicyClaimsMap = new HashMap<>();
         goodResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
         goodResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
 
         resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(goodResourceAccessPolicyClaimsMap));
 
-        Map<String, String> badResourceAccessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, String> badResourceAccessPolicyClaimsMap = new HashMap<>();
         badResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
         badResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
         resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(badResourceAccessPolicyClaimsMap));
@@ -287,15 +289,15 @@ public class ABACPolicyHelperSingleTokenTest {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
-        Map<String, String> goodResourceAccessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> goodResourceAccessPolicyClaimsMap = new HashMap<>();
         goodResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
         goodResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
 
         resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(goodResourceAccessPolicyClaimsMap));
 
-        Map<String, String> badResourceAccessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, String> badResourceAccessPolicyClaimsMap = new HashMap<>();
         badResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
         badResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
         resourceAccessPolicyMap.put(goodResourceID2, new SingleTokenAccessPolicy(badResourceAccessPolicyClaimsMap));
@@ -316,15 +318,15 @@ public class ABACPolicyHelperSingleTokenTest {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
-        Map<String, String> goodResourceAccessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> goodResourceAccessPolicyClaimsMap = new HashMap<>();
         goodResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
         goodResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
 
         resourceAccessPolicyMap.put(badResourceID, new SingleTokenAccessPolicy(goodResourceAccessPolicyClaimsMap));
 
-        Map<String, String> badResourceAccessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, String> badResourceAccessPolicyClaimsMap = new HashMap<>();
         badResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
         badResourceAccessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
         resourceAccessPolicyMap.put(badResourceID2, new SingleTokenAccessPolicy(badResourceAccessPolicyClaimsMap));
@@ -345,8 +347,8 @@ public class ABACPolicyHelperSingleTokenTest {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
-        Map<String, String> accessPolicyClaimsMap = new HashMap<String, String>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> accessPolicyClaimsMap = new HashMap<>();
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
@@ -368,7 +370,7 @@ public class ABACPolicyHelperSingleTokenTest {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
 
         resourceAccessPolicyMap.put(goodResourceID, new SingleTokenAccessPolicy(null));
 
@@ -386,7 +388,7 @@ public class ABACPolicyHelperSingleTokenTest {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<String, IAccessPolicy>();
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
 
         resourceAccessPolicyMap.put(goodResourceID, null);
 

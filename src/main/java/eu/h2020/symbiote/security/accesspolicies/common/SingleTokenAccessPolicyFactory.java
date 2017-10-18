@@ -11,11 +11,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static eu.h2020.symbiote.security.helpers.CryptoHelper.illegalSign;
+
 /**
  * Factory for producing sample access policies.
  *
  * @author Vasileios Glykantzis (ICOM)
  * @author Mikołaj Dobski (PSNC)
+ * @author Jakub Toczek (PSNC)
  */
 public class SingleTokenAccessPolicyFactory {
 
@@ -29,8 +32,8 @@ public class SingleTokenAccessPolicyFactory {
      * @return the sample access policy
      * @throws InvalidArgumentsException
      */
-    public static IAccessPolicy getSingleTokenAccessPolicy(SingleTokenAccessPolicySpecifier specifier)
-            throws InvalidArgumentsException {
+    public static IAccessPolicy getSingleTokenAccessPolicy(SingleTokenAccessPolicySpecifier specifier) throws
+            InvalidArgumentsException {
 
         switch (specifier.getPolicyType()) {
             case PUBLIC: {
@@ -63,6 +66,14 @@ public class SingleTokenAccessPolicyFactory {
                 return new SingleLocalHomeTokenIdentityBasedAccessPolicy(platformIdentifier, username,
                         filteredClaims);
             }
+            case CHTAP:
+                String platformIdentifier = specifier.getRequiredClaims().get(Claims.ISSUER);
+                String clientId = specifier.getRequiredClaims().get(Claims.SUBJECT).split(illegalSign)[0];
+                Map<String, String> filteredClaims = new HashMap<>(specifier.getRequiredClaims());
+                filteredClaims.remove(Claims.ISSUER);
+                filteredClaims.remove(Claims.SUBJECT);
+                return new ComponentHomeTokenAccessPolicy(platformIdentifier, clientId,
+                        filteredClaims);
             default:
                 throw new InvalidArgumentsException("The type of the access policy was not recognized");
         }

@@ -1,16 +1,13 @@
 package eu.h2020.symbiote.security.communication;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 import eu.h2020.symbiote.security.handler.IComponentSecurityHandler;
-
 import feign.Client;
 import feign.Request;
 import feign.Response;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -51,7 +48,7 @@ public class SymbioteAuthorizationClient implements Client {
     String errMsg = null;
     
     try {
-      SecurityRequest credentials = handler.generateSecurityRequestUsingCoreCredentials();
+      SecurityRequest credentials = handler.generateSecurityRequestUsingLocalCredentials();
       
       Map<String, Collection<String>> headers = credentials.getSecurityRequestHeaderParams().entrySet().stream()
                                                     .collect(Collectors.toMap(entry -> entry.getKey(),

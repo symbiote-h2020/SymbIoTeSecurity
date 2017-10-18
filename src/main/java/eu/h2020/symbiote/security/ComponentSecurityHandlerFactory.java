@@ -24,10 +24,10 @@ public class ComponentSecurityHandlerFactory {
      * @param keystorePath                   where the keystore will be stored
      * @param keystorePassword               needed to access security credentials
      * @param clientId                       name of the component in the form of "componentId@platformId"
-     * @param localAAMAddress                when using only local AAM for @{@link SecurityRequest} validation
+     * @param localAAMAddress                needed to acquire the component's authorization credentials
      * @param alwaysUseLocalAAMForValidation when wanting to use local AAM for @{@link SecurityRequest} validation
-     * @param componentOwnerUsername         AAMAdmin credentials for core components and platform owner credentials for platform components
-     * @param componentOwnerPassword         AAMAdmin credentials for core components and platform owner credentials for platform components
+     * @param componentOwnerUsername         local AAM Admin credentials
+     * @param componentOwnerPassword         local AAM Admin credentials
      * @return the component security handler ready to talk with Symbiote components
      * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
      */
@@ -41,7 +41,7 @@ public class ComponentSecurityHandlerFactory {
                                                                         String componentOwnerPassword) throws
             SecurityHandlerException {
         return new ComponentSecurityHandler(
-                new SecurityHandler(keystorePath, keystorePassword, coreAAMAddress, componentOwnerUsername),
+                new SecurityHandler(keystorePath, keystorePassword, localAAMAddress, componentOwnerUsername),
                 localAAMAddress,
                 alwaysUseLocalAAMForValidation,
                 componentOwnerUsername,

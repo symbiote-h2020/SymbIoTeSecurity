@@ -2,17 +2,16 @@ package eu.h2020.symbiote.security.accesspolicies.common.singletoken;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import eu.h2020.symbiote.security.accesspolicies.common.SingleTokenAccessPolicyFactory;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
-
+import io.jsonwebtoken.Claims;
 import org.springframework.data.annotation.PersistenceConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import io.jsonwebtoken.Claims;
+import static eu.h2020.symbiote.security.helpers.CryptoHelper.illegalSign;
 
 /**
  * Specifies the sample access policy. It is used by {@link SingleTokenAccessPolicyFactory SingleTokenAccessPolicyFactory}
@@ -45,7 +44,6 @@ public class SingleTokenAccessPolicySpecifier {
         switch (policyType) {
             case SLHTIBAP:
                 if (requiredClaims == null
-                        || requiredClaims.isEmpty()
                         || !requiredClaims.containsKey(Claims.ISSUER)
                         || !requiredClaims.containsKey(Claims.SUBJECT))
                     throw new InvalidArgumentsException("Missing ISS and/or SUB claims required to build this policy type");
@@ -53,7 +51,6 @@ public class SingleTokenAccessPolicySpecifier {
                 break;
             case SLHTAP:
                 if (requiredClaims == null
-                        || requiredClaims.isEmpty()
                         || !requiredClaims.containsKey(Claims.ISSUER))
                     throw new InvalidArgumentsException("Missing ISS claim required to build this policy type");
                 this.requiredClaims = requiredClaims;
@@ -61,7 +58,6 @@ public class SingleTokenAccessPolicySpecifier {
             case SFTAP:
                 // initial check of needed fields
                 if (requiredClaims == null
-                        || requiredClaims.isEmpty()
                         || !requiredClaims.containsKey(FEDERATION_HOME_PLATFORM_ID)
                         || !requiredClaims.containsKey(FEDERATION_IDENTIFIER_KEY)
                         || !requiredClaims.containsKey(FEDERATION_SIZE))
@@ -77,6 +73,13 @@ public class SingleTokenAccessPolicySpecifier {
             case STAP:
                 if (requiredClaims == null || requiredClaims.isEmpty())
                     throw new InvalidArgumentsException("Empty claims define a public access policy!");
+                this.requiredClaims = requiredClaims;
+                break;
+            case CHTAP:
+                if (requiredClaims == null
+                        || !requiredClaims.containsKey(Claims.ISSUER)
+                        || !requiredClaims.containsKey(Claims.SUBJECT))
+                    throw new InvalidArgumentsException("Missing ISS or/and SUB claim required to build this policy type");
                 this.requiredClaims = requiredClaims;
                 break;
             case PUBLIC:
@@ -123,6 +126,30 @@ public class SingleTokenAccessPolicySpecifier {
         }
     }
 
+    /**
+     * Used to create the specifier for resources accessable by component HomeToken
+     *
+     * @param componentId            - id of the component for which access should be granted
+     * @param homePlatformIdentifier - platform of the component
+     * @throws InvalidArgumentsException
+     */
+    public SingleTokenAccessPolicySpecifier(String componentId, String homePlatformIdentifier) throws
+            InvalidArgumentsException {
+        // required contents check
+        if (componentId == null
+                || componentId.isEmpty()
+                || homePlatformIdentifier == null
+                || homePlatformIdentifier.isEmpty())
+            throw new InvalidArgumentsException("Missing componentId, homePlatformIdentifier or SH required to build this policy type");
+
+        policyType = SingleTokenAccessPolicyType.CHTAP;
+        // building the map
+        requiredClaims = new HashMap<>(4);
+        requiredClaims.put(Claims.ISSUER, homePlatformIdentifier);
+        requiredClaims.put(Claims.SUBJECT, componentId + illegalSign + homePlatformIdentifier);
+    }
+
+
 
     public SingleTokenAccessPolicyType getPolicyType() {
         return policyType;
@@ -154,6 +181,10 @@ public class SingleTokenAccessPolicySpecifier {
          * SingleTokenAccessPolicy
          */
         STAP,
+        /**
+         * ComponentHomeTokenAccessPolicy
+         */
+        CHTAP,
         /**
          * Public access policy
          */
