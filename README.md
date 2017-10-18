@@ -184,6 +184,80 @@ MyServiceFeignClient jsonclient = Feign.builder()
 ```
 From now on, all methods call to jsonclient will generate REST requests with valid authentication headers and the responses will be validated as well for integrity, so in case of a challenge-response failure it will return a 400 error message.
 
+### Attribute Based Access Control
+The owner of a resource can establish a policy that describe with attributes, whom and what operations can be performed on this object. 
+If a subject has the attributes that satisfies the access control policy established by the resource owner, 
+then the subject is authorized to perform the desidered operation on that object. All attributes are in authorization tokens.
+
+For the simplest IBAC (Identity-Based Access Control) implementation, the policies should look something like:
+```json
+AND:
+    ISS: <PlatformInstanceIdentifier>
+    SUB: <UserAuthorizedForThatResource1>
+```
+Access to the resource will be granted only to particular actor <UserAuthorizedForThatResource1>, who has token issued by specified platform <PlatformInstanceIdentifier>.
+Another good example of the ABAC is an access policy for federated resource:
+```json
+AND:
+    ISS: <PlatformInstanceIdentifier>
+    ttyp: "FOREIGN"
+    "SYMBIOTE_federation_{ordinal_number}" : "federationId"
+```
+Access to the resource will be granted to the actor, who has FOREIGN token issued by specified platform and contain attribute defining affiliation to the appropriate federation.
+
+The package [eu/h2020/symbiote/security/accesspolicies](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies) 
+offers a set of premade access policies that you can use out of the box (or always implement your own):
+* [SingleLocalHomeTokenIdentityBasedTokenAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/SingleLocalHomeTokenIdentityBasedTokenAccessPolicy.java)
+ – offers basically IdentityBasedAC - useful when you only want a particular user in your platform to access a resource
+* [SingleLocalHomeTokenAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/SingleLocalHomeTokenAccessPolicy.java)
+ – will offer access to the resource by any user that has an account in your platform.
+* [ComponentHomeTokenAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/ComponentHomeTokenAccessPolicy.java)
+ – will offer access to the resource by particular component from specified platform. Additional required claims can be specified.
+* [SingleTokenAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/SingleTokenAccessPolicy.java) – most generic and simple implentation. You are free to set your required map of attributes that the user must possess. 
+* [SingleFederatedTokenAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/SingleFederatedTokenAccessPolicy.java) - offer access to:
+    * one of the federation members if his FOREIGN token contains the federation identifier claim
+    * user which HOME token was issued by the home platform
+
+To make it easier, above policies can be generated using special factory: [SingleTokenAccessPolicyFactory.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/SingleTokenAccessPolicyFactory.java).
+To work, factory as a parameter needs object of [SingleTokenAccessPolicySpecifier.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/SingleTokenAccessPolicySpecifier.java) class. 
+It checks if the requirements for each ABAC was met and build proper policy (e.g. if issuer is defined in attributes map for SingleLocalHomeTokenAccessPolicy).
+
+It's important to know, that creating your own AccessPolicy, it has to implement [IAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/IAccessPolicy.java). 
+
+#### ABAC example
+To generate SingleLocalHomeTokenAccessPolicy, issuer claim has to be provided. 
+```java
+//generate required attributes map
+Map<String, String> accessPolicyClaimsMap = new HashMap<>();
+//only tokens with proper values of attributes 'name', 'age' and right issuer of the token can pass access policy
+accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + "name", "John");
+accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + "age", "18");
+accessPolicyClaimsMap.put(Claims.ISSUER, deploymentId);
+
+//generate SingleTokenAccessPolicySpecifier 
+SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(
+        SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.SLHTAP,
+        accessPolicyClaimsMap
+        );
+//create map of active policies
+Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+resourceAccessPolicyMap.put("resourceId", SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));
+```
+Received Security Request must be checked against policies:
+```java
+Set<String> resp = componentSecurityHandler.getSatisfiedPoliciesIdentifiers(resourceAccessPolicyMap, securityRequest);
+//returns set of identifiers of policies (e.g. resources identifiers) whose access policies are satisfied
+```
+Note, that all custom dynamic attributes (for ABAC only) in authorization tokens are prefixed according to SecurityConstants.java
+```java
+public static final String SYMBIOTE_ATTRIBUTES_PREFIX = "SYMBIOTE_";
+```
+For PUBLIC access to a resource, just use:
+```java
+new SingleTokenAccessPolicy(null);
+```
+This will be satisfied by any valid symbiote token.
+
 ## Instructions for non java developers
 ### Acquiring client certificates needed to get authorization credentials
 The following image depicts in general how to get a symbIoTe authentication certificate:
