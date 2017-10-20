@@ -15,15 +15,13 @@ public class EventLogRequest {
     private String clientIdentifier;
     private String jti;
     private EventType eventType;
-    private Long timestamp;
+    private long timestamp;
 
-
-    @JsonCreator
-    public EventLogRequest(@JsonProperty("username") String username,
-                              @JsonProperty("clientIdentifier") String clientIdentifier,
-                              @JsonProperty("jti") String jti,
-                              @JsonProperty("eventType") EventType eventType,
-                                @JsonProperty("timestamp") Long timestamp)  {
+    public EventLogRequest(String username,
+                           String clientIdentifier,
+                           String jti,
+                           EventType eventType,
+                           long timestamp) {
         this.username = username;
         this.clientIdentifier = clientIdentifier;
         this.jti = jti;
@@ -31,11 +29,10 @@ public class EventLogRequest {
         this.timestamp = timestamp;
     }
 
-    @JsonCreator
-    public EventLogRequest(@JsonProperty("tokenString") String tokenString,
-                           @JsonProperty("eventType") EventType eventType,
-                           @JsonProperty("timestamp") Long timestamp) throws WrongCredentialsException {
-        JWTClaims claims = null;
+    public EventLogRequest(String tokenString,
+                           EventType eventType,
+                           long timestamp) throws WrongCredentialsException {
+        JWTClaims claims;
         try {
             claims = JWTEngine.getClaimsFromToken(tokenString);
         } catch (MalformedJWTException e) {
@@ -46,7 +43,7 @@ public class EventLogRequest {
 
         if (subjectParts.length > 1)
             this.clientIdentifier = subjectParts[1];
-        if (subjectParts.length >2)
+        if (subjectParts.length > 2)
             this.jti = subjectParts[2];
 
         this.eventType = eventType;
@@ -54,7 +51,6 @@ public class EventLogRequest {
     }
 
     public EventLogRequest() {
-
     }
 
     public String getUsername() {
@@ -73,7 +69,7 @@ public class EventLogRequest {
         return eventType;
     }
 
-    public Long getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 }

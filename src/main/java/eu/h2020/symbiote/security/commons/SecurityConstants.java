@@ -55,6 +55,7 @@ public class SecurityConstants {
     public static final String SECURITY_CREDENTIALS_SIZE_HEADER = "x-auth-size";
     public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "x-auth-";
     public static final String SECURITY_RESPONSE_HEADER = "x-auth-response";
+    public static final long ANOMALY_DETECTION_DELTA = 6000L;
 
     private SecurityConstants() {
     }
