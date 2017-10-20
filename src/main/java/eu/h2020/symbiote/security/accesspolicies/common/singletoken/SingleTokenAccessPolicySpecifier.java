@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static eu.h2020.symbiote.security.helpers.CryptoHelper.illegalSign;
-
 /**
  * Specifies the sample access policy. It is used by {@link SingleTokenAccessPolicyFactory SingleTokenAccessPolicyFactory}
  * to create the sample access policy POJO.
@@ -144,11 +142,10 @@ public class SingleTokenAccessPolicySpecifier {
 
         policyType = SingleTokenAccessPolicyType.CHTAP;
         // building the map
-        requiredClaims = new HashMap<>(4);
+        requiredClaims = new HashMap<>(2);
         requiredClaims.put(Claims.ISSUER, homePlatformIdentifier);
-        requiredClaims.put(Claims.SUBJECT, componentId + illegalSign + homePlatformIdentifier);
+        requiredClaims.put(Claims.SUBJECT, componentId);
     }
-
 
 
     public SingleTokenAccessPolicyType getPolicyType() {
