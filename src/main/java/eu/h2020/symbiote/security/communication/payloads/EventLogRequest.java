@@ -11,11 +11,11 @@ import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
 
 public class EventLogRequest {
 
-    private String username;
-    private String clientIdentifier;
-    private String jti;
+    private String username = "";
+    private String clientIdentifier = "";
+    private String jti = "";
     private EventType eventType;
-    private long timestamp;
+    private long timestamp = 0;
 
     @JsonCreator
     public EventLogRequest(@JsonProperty("username") String username,
@@ -44,9 +44,8 @@ public class EventLogRequest {
 
         if (subjectParts.length > 1)
             this.clientIdentifier = subjectParts[1];
-        if (subjectParts.length > 2)
-            this.jti = subjectParts[2];
 
+        this.jti = claims.getJti();
         this.eventType = eventType;
         this.timestamp = timestamp;
     }
