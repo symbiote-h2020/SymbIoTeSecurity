@@ -8,7 +8,11 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsExce
 import eu.h2020.symbiote.security.commons.jwt.JWTClaims;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
 
-
+/**
+ * Class that defines structure of payload needed to log event
+ *
+ * @author Piotr Jakubowski (PSNC)
+ */
 public class EventLogRequest {
 
     private String username = "";
@@ -17,6 +21,14 @@ public class EventLogRequest {
     private EventType eventType;
     private long timestamp = 0;
 
+    /**
+     * Standard constructor for creating EventLogRequest object prepared for serializing and deserializing.
+     * @param username             user's name
+     * @param clientIdentifier     identifier of client
+     * @param jti                  jti
+     * @param eventType            type  of incoming event
+     * @param timestamp            time of event in millis
+     */
     @JsonCreator
     public EventLogRequest(@JsonProperty("username") String username,
                            @JsonProperty("clientIdentifier") String clientIdentifier,
@@ -30,6 +42,12 @@ public class EventLogRequest {
         this.timestamp = timestamp;
     }
 
+    /**
+     * Alternative constructor for creating EventLogRequest object. It tries to extract username, clientIdentifier and jti from token.
+     * @param tokenString          token from which you can extract username, clientIdentified and jti
+     * @param eventType            type of incoming event
+     * @param timestamp            time of event in millis
+     */
     public EventLogRequest(String tokenString,
                            EventType eventType,
                            long timestamp) throws WrongCredentialsException {
@@ -48,9 +66,6 @@ public class EventLogRequest {
         this.jti = claims.getJti();
         this.eventType = eventType;
         this.timestamp = timestamp;
-    }
-
-    public EventLogRequest() {
     }
 
     public String getUsername() {
