@@ -17,11 +17,12 @@ public class EventLogRequest {
     private EventType eventType;
     private long timestamp;
 
-    public EventLogRequest(String username,
-                           String clientIdentifier,
-                           String jti,
-                           EventType eventType,
-                           long timestamp) {
+    @JsonCreator
+    public EventLogRequest(@JsonProperty("username") String username,
+                           @JsonProperty("clientIdentifier") String clientIdentifier,
+                           @JsonProperty("jti") String jti,
+                           @JsonProperty("eventType") EventType eventType,
+                           @JsonProperty("timestamp") long timestamp) {
         this.username = username;
         this.clientIdentifier = clientIdentifier;
         this.jti = jti;
