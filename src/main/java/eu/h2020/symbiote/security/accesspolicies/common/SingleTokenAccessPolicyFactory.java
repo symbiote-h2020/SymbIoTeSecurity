@@ -11,8 +11,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static eu.h2020.symbiote.security.helpers.CryptoHelper.illegalSign;
-
 /**
  * Factory for producing sample access policies.
  *
@@ -68,7 +66,7 @@ public class SingleTokenAccessPolicyFactory {
             }
             case CHTAP:
                 String platformIdentifier = specifier.getRequiredClaims().get(Claims.ISSUER);
-                String clientId = specifier.getRequiredClaims().get(Claims.SUBJECT).split(illegalSign)[0];
+                String clientId = specifier.getRequiredClaims().get(Claims.SUBJECT);
                 Map<String, String> filteredClaims = new HashMap<>(specifier.getRequiredClaims());
                 filteredClaims.remove(Claims.ISSUER);
                 filteredClaims.remove(Claims.SUBJECT);
