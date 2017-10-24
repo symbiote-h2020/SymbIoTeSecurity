@@ -43,8 +43,8 @@ This section provides the information about usage of SymbIoTe Security library i
 
 #### End-user Security Handler
 Security handler class is a thin Java client providing methods allowing clients to acquire authorization and authentication credentials required to gain access to symbIoTe resource:
-  - `Map<String, AAM> getAvailableAAMs()` - returns map of all currently available security entrypoints in symbiote (namely symbiote enabled platforms) obtained from the Core AAM as well as information about core components.
-  - `Map<String, AAM> getAvailableAAMs(AAM aam)` - the same as above but obtained from the AAM (platform) specified in parameter. Information about components registered in this specified AAM and in core AAM is included.
+ - `Map<String, AAM> getAvailableAAMs()` - returns map of all currently available security entrypoints in symbiote (namely symbiote enabled platforms) obtained from the Core AAM as well as information about core components.
+ - `Map<String, AAM> getAvailableAAMs(AAM aam)` - the same as above but obtained from the AAM (platform) specified in parameter. Information about components registered in this specified AAM and in core AAM is included.
  - `Token login(AAM aam)` - returns HOME token for your account in a given AAM (token is a digital object used as a container for security-related information. It serves for authorization purposes).
  - `Map<AAM, Token> login(List<AAM> foreignAAMs, String homeToken)` - allows you to acquire FOREIGN tokens from AAMs in which you don't have accounts using one of your home tokens.
  - `Token loginAsGuest(AAM aam)` - returns a GUEST token that allows access to only public resources in symbIoTe.
@@ -82,34 +82,34 @@ SecurityHandler securityHandler = ClientSecurityHandlerFactory.getSecurityHandle
 
 To acquire access to any of the resources the following instructions have to be done:
 ```java
-    // Initializing application security handler
-    ISecurityHandler clientSH = ClientSecurityHandlerFactory.getSecurityHandler(
-            coreAAMServerAddress,
-            KEY_STORE_PATH,
-            KEY_STORE_PASSWORD,
-            clientId
-    );
-	// examples how to retrieve AAM instances
-    AAM coreAAM = clientSH.getCoreAAMInstance();
-    AAM platform1 = clientSH.getAvailableAAMs().get(platformId);
+// Initializing application security handler
+ISecurityHandler clientSH = ClientSecurityHandlerFactory.getSecurityHandler(
+         coreAAMServerAddress,
+         KEY_STORE_PATH,
+         KEY_STORE_PASSWORD,
+         clientId
+);
+// examples how to retrieve AAM instances
+AAM coreAAM = clientSH.getCoreAAMInstance();
+AAM platform1 = clientSH.getAvailableAAMs().get(platformId);
 
-    // Acquiring application certificate, this operation needs the user password
-    Certificate clientCertificate = clientSH.getCertificate(platform1, username, password, clientId);
-	
-    // Acquiring HOME token from platform1 AAM
-    Token token = clientSH.login(platform1);
-    
-    // preparing the security request using the credentials the actor has from platform 1
-    Set<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<>();
-	// please note that from now on we don't need the password and only the the client certificate and matching private key.
-    authorizationCredentialsSet.add(new AuthorizationCredentials(token, platform1, clientSH.getAcquiredCredentials().get(platform1.getAamInstanceId()).homeCredentials));
-    SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
+// Acquiring application certificate, this operation needs the user password
+Certificate clientCertificate = clientSH.getCertificate(platform1, username, password, clientId);
+
+// Acquiring HOME token from platform1 AAM
+Token token = clientSH.login(platform1);
+ 
+// preparing the security request using the credentials the actor has from platform 1
+Set<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<>();
+// please note that from now on we don't need the password and only the the client certificate and matching private key.
+authorizationCredentialsSet.add(new AuthorizationCredentials(token, platform1, clientSH.getAcquiredCredentials().get(platform1.getAamInstanceId()).homeCredentials));
+SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
 ```
 
 Then after received a business response from a symbiote component we can check if it came from component we are interested in with the following operations:
 ```java
-      // trying to validate the service response
-      MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, clientSH.getComponentCertificate(componentIdentifier, platformIdentifier));
+// trying to validate the service response
+MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, clientSH.getComponentCertificate(componentIdentifier, platformIdentifier));
 ```
 
 In order to identify the certificate of the component you communicate with, please use the following table:
@@ -161,28 +161,27 @@ Component Security Handler provides following methods:
 
 To set up component SH, following instructions have to be done. Example for a platform registrationHandler
 ```java
-    IComponentSecurityHandler registrationHandlerCSH = ComponentSecurityHandlerFactory.getComponentSecurityHandler(
-                    coreAAMAddress,
-                    KEY_STORE_PATH,
-                    KEY_STORE_PASSWORD,
-                    "reghandler" + "@platfom1",
-                    localAAMAddress,
-                    false,
-                    componentOwnerUsername,
-                    componentOwnerPassword
-    );
+IComponentSecurityHandler registrationHandlerCSH = ComponentSecurityHandlerFactory.getComponentSecurityHandler(
+                coreAAMAddress,
+                KEY_STORE_PATH,
+                KEY_STORE_PASSWORD,
+                "reghandler" + "@platfom1",
+                localAAMAddress,
+                false,
+                componentOwnerUsername,
+                componentOwnerPassword);
 
-    // building a service response that needs to be attached to each of your business responses
-    String regHandlerServiceResponse = rhCSH.generateServiceResponse();
-	
-    // building a security request to authorize operation from the registration handler in other platforms' components (e.g. Core Registry)
-    SecurityRequest rhSecurityRequest = rhCSH.generateSecurityRequestUsingLocalCredentials();
+// building a service response that needs to be attached to each of your business responses
+String regHandlerServiceResponse = rhCSH.generateServiceResponse();
+
+// building a security request to authorize operation from the registration handler in other platforms' components (e.g. Core Registry)
+SecurityRequest rhSecurityRequest = rhCSH.generateSecurityRequestUsingLocalCredentials();
 ```
 
 To check validity of a response, if it came from component we are interested in (e.g. from the Core Registry), following operation have to be done: 
 ```java  
-    // trying to validate the service response
-    registrationHandlerCSH.isReceivedServiceResponseVerified(serviceResponse, "registry", "SymbIoTe_Core_AAM); 
+// trying to validate the service response
+registrationHandlerCSH.isReceivedServiceResponseVerified(serviceResponse, "registry", "SymbIoTe_Core_AAM); 
 ```
 
 #### SecurityRequest and API
@@ -235,9 +234,9 @@ IComponentSecurityHandler secHandler = ComponentSecurityHandlerFactory
                                                clientId, localAAMAddress, false,
                                                username, password );
 ```
-  2. Create an instance of the [SymbioteAuthorizationClient](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/SymbioteAuthorizationClient.java) 
-  passing the Security Handler instance and the target service (serviceComponentIdentifier of the service this client is used to communicate with and servicePlatformIdentifier to which the service belongs ([CORE_AAM_INSTANCE_ID](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/commons/SecurityConstants.java#L20)) for Symbiote core components). So for example, the Registration Handler wanting to communicate with the Registry will pass `registry` in the first parameter and [CORE_AAM_INSTANCE_ID](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/commons/SecurityConstants.java#L20) for the latter. This will allow the Security Handler to get the correct certificate to validate responses.
-   ```java
+2. Create an instance of the [SymbioteAuthorizationClient](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/SymbioteAuthorizationClient.java) 
+passing the Security Handler instance and the target service (serviceComponentIdentifier of the service this client is used to communicate with and servicePlatformIdentifier to which the service belongs ([CORE_AAM_INSTANCE_ID](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/commons/SecurityConstants.java#L20)) for Symbiote core components). So for example, the Registration Handler wanting to communicate with the Registry will pass `registry` in the first parameter and [CORE_AAM_INSTANCE_ID](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/commons/SecurityConstants.java#L20) for the latter. This will allow the Security Handler to get the correct certificate to validate responses.
+```java
 Client client = new SymbioteAuthorizationClient(
     secHandler, serviceComponentIdentifier,servicePlatformIdentifier, new Client.Default(null, null));
 ```
