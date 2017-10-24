@@ -2,7 +2,12 @@
 [![](https://jitpack.io/v/symbiote-h2020/SymbIoTeSecurity.svg)](https://jitpack.io/#symbiote-h2020/SymbIoTeSecurity)
 [![codecov.io](https://codecov.io/github/symbiote-h2020/SymbIoTeSecurity/branch/staging/graph/badge.svg)](https://codecov.io/github/symbiote-h2020/SymbIoTeSecurity)
 # SymbIoTe Security
-This repository contains SymbIoTe security layer interfaces, payloads, helper methods and a thin client named the SecurityHandler used throughout different components and different layers. It contains usefull metods to interact with the system, such as login procedure to the IoT platform, validation of the received tokens, e.t.c. 
+This repository contains SymbIoTe security layer interfaces, payloads, helper methods and a thin client named the SecurityHandler used throughout different components and different layers. It contains methods that allow the clients to acquire authorization credentials, service to evaluate the received credentials in terms of both authorizing operations and authenticating the clients and finally the clients to verify the authenticy of service they interact with.
+
+For such we define 2 most important security paylods
+ - Security Request - a set of standardized payloads authorizing actor in the system (JSON Web Tokens) with the confirmation, that those payloads belong to it,
+ - Service Response - a payload produced by SymbIoTe components which proofs that the received business response was produced by a genuine component.
+
 ## Context
 To read more about the project, please see documentation of:
  * [SymbioteCloud](https://github.com/symbiote-h2020/SymbioteCloud)
@@ -33,30 +38,27 @@ As you notice above, during development (i.e. feature and develop branches of co
 compile('com.github.symbiote-h2020:SymbIoTeSecurity:{tag}')
 ```
 
-## Instructions for java developers
+## Instructions for Java developers
 This section provides the information about usage of SymbIoTe Security library in the java code. 
-#### End-user Security Handler
 
-Security handler class is a thin java client providing some useful methods:
-  - `Map<String, AAM> getAvailableAAMs()` - returns map of all currently available security entrypoints to symbiote (getCertificate, login, token
- validation) obtained from core AAM. Information about components registered in core AAM is included.
-  - `Map<String, AAM> getAvailableAAMs(AAM aam)` - returns map of all currently available security entrypoints to symbiote (getCertificate, login, token
-validation) obtained from AAM specified in parameter. Information about components registered in this specified AAM and in core AAM is included.
- - `Token login(AAM aam)` - returns home token for your account in a given AAM (token is a digital object used as a container for security-related information. It serves for authentication and/or authorization purposes).
- - `Map<AAM, Token> login(List<AAM> foreignAAMs, String homeToken)` - allows you to acquire foreign tokens to foreign AAMs (in which you don't have accounts) using home token.
- - `Token loginAsGuest(AAM aam)` - returns guest token that allows access to all public resources in symbIoTe.
+#### End-user Security Handler
+Security handler class is a thin Java client providing methods allowing clients to acquire authorization and authentication credentials required to gain access to symbIoTe resource:
+  - `Map<String, AAM> getAvailableAAMs()` - returns map of all currently available security entrypoints in symbiote (namely symbiote enabled platforms) obtained from the Core AAM as well as information about core components.
+  - `Map<String, AAM> getAvailableAAMs(AAM aam)` - the same as above but obtained from the AAM (platform) specified in parameter. Information about components registered in this specified AAM and in core AAM is included.
+ - `Token login(AAM aam)` - returns HOME token for your account in a given AAM (token is a digital object used as a container for security-related information. It serves for authorization purposes).
+ - `Map<AAM, Token> login(List<AAM> foreignAAMs, String homeToken)` - allows you to acquire FOREIGN tokens from AAMs in which you don't have accounts using one of your home tokens.
+ - `Token loginAsGuest(AAM aam)` - returns a GUEST token that allows access to only public resources in symbIoTe.
  - `ValidationStatus validate(AAM validationAuthority, String token,
                                   Optional<String> clientCertificate,
                                   Optional<String> clientCertificateSigningAAMCertificate,
                                   Optional<String> foreignTokenIssuingAAMCertificate)` 
-                                  - validates your token by the specified AAM.
- - `Certificate getComponentCertificate(String componentIdentifier, String platformIdentifier)` - returns certificate of the specified component belonging to the given platform.
+                                  - validates your credentials in the specified AAM.
+ - `Certificate getComponentCertificate(String componentIdentifier, String platformIdentifier)` - returns certificate of the specified component belonging to the given platform needed for components authentication operation.
  - `Certificate getCertificate(AAM homeAAM,
                                    String username,
                                    String password,
-                                   String clientId)` - method used to acquire a certificate(PKI) for this client from the home AAM (AAM in which actor is registered).
-The private key matching the acquired certificate will be used to sign the requests to AAM. 
-- `getAcquiredCredentials()` - returns all saved credentials bounded with a particular AAM.
+                                   String clientId)` - method used to acquire a certificate(PKI) for your client from the home AAM (AAM in which actor is registered). The private key matching the acquired certificate will be used to authenticate the client by signing requests to AAM and other symbiote components.
+- `getAcquiredCredentials()` - returns all saved credentials bound with a particular AAM.
 - `AAM getCoreAAMInstance()` - returns the Core AAM instance.
 - `void clearCachedTokens()` - clears all acquired tokens from memory (credentialsWallet).
 
@@ -78,8 +80,39 @@ SecurityHandler securityHandler = ClientSecurityHandlerFactory.getSecurityHandle
         coreAAMAddress, keystorePath, keystorePassword, userId);
 ```
 
+To acquire access to any of the resources the following instructions have to be done:
+```java
+    // Initializing application security handler
+    ISecurityHandler clientSH = ClientSecurityHandlerFactory.getSecurityHandler(
+            coreAAMServerAddress,
+            KEY_STORE_PATH,
+            KEY_STORE_PASSWORD,
+            clientId
+    );
+	// examples how to retrieve AAM instances
+    AAM coreAAM = clientSH.getCoreAAMInstance();
+    AAM platform1 = clientSH.getAvailableAAMs().get(platformId);
 
-In order to find the certificate of the component you communicate with, please use the following table:
+    // Acquiring application certificate, this operation needs the user password
+    Certificate clientCertificate = clientSH.getCertificate(platform1, username, password, clientId);
+	
+    // Acquiring HOME token from platform1 AAM
+    Token token = clientSH.login(platform1);
+    
+    // preparing the security request using the credentials the actor has from platform 1
+    Set<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<>();
+	// please note that from now on we don't need the password and only the the client certificate and matching private key.
+    authorizationCredentialsSet.add(new AuthorizationCredentials(token, platform1, clientSH.getAcquiredCredentials().get(platform1.getAamInstanceId()).homeCredentials));
+    SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
+```
+
+Then after received a business response from a symbiote component we can check if it came from component we are interested in with the following operations:
+```java
+      // trying to validate the service response
+      MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, clientSH.getComponentCertificate(componentIdentifier, platformIdentifier));
+```
+
+In order to identify the certificate of the component you communicate with, please use the following table:
 
 | Component name | Component certificate key in the AAM collection |
 | ------ | ------ |
@@ -89,36 +122,8 @@ In order to find the certificate of the component you communicate with, please u
 | ResourceAccessProxy | rap |
 | CoreResourceMonitor | crm |
 | CoreResourceAccessMonitor | cram |
+| other might appear | ... |
 
-To acquire access to any of the resources, following instructions have to be done:
-```java
-    log.info("Initializing application security handler");
-    // generating the SH
-    ISecurityHandler clientSH = ClientSecurityHandlerFactory.getSecurityHandler(
-            coreAAMServerAddress,
-            KEY_STORE_PATH,
-            KEY_STORE_PASSWORD,
-            clientId
-    );
-    AAM coreAAM = clientSH.getCoreAAMInstance();
-    AAM platform1 = clientSH.getAvailableAAMs().get(platformId);
-
-    log.info("Acquiring application certificate");
-    Certificate clientCertificate = clientSH.getCertificate(platform1, username, password, clientId);
-    log.info("Acquiring application HOME token from " + platformId);
-    Token token = clientSH.login(platform1);
-    
-    log.info("Acquiring Security request needed to get access to any resource")
-    Set<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<>();
-    authorizationCredentialsSet.add(new AuthorizationCredentials(token, platform1, clientSH.getAcquiredCredentials().get(platform1.getAamInstanceId()).homeCredentials));
-    SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
-```
-
-To check validity of the response to our SecurityRequest (if it came from component we are interested in), following operation have to be done:
-```java
-      // trying to validate the service response
-      MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, clientSH.getComponentCertificate(componentIdentifier, platformIdentifier));
-```
 #### Component Security Handler
 If you want to manage components, create ComponentSecurityHandler object with  [ComponentSecurityHandlerFactory](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/ComponentSecurityHandler.java) class.
 ```java
@@ -132,10 +137,8 @@ If you want to manage components, create ComponentSecurityHandler object with  [
      * @param clientId                       name of the component in the form of "componentId@platformId"
      * @param localAAMAddress                when using only local AAM for SecurityRequest validation
      * @param alwaysUseLocalAAMForValidation when wanting to use local AAM for SecurityRequest validation
-     * @param componentOwnerUsername         AAMAdmin credentials for core components 
-     *                                       and platform owner credentials for platform components
-     * @param componentOwnerPassword         AAMAdmin credentials for core components 
-     *                                       and platform owner credentials for platform components
+     * @param componentOwnerUsername         AAMAdmin credentials 
+     * @param componentOwnerPassword         AAMAdmin credentials
      * @return the component security handler ready to talk with Symbiote components
      * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
      */
@@ -147,7 +150,7 @@ ComponentSecurityHandler componentSecurityHandler =
 
 Component Security Handler provides following methods:
  - `Set<String> getSatisfiedPoliciesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
-                                                    SecurityRequest securityRequest)` - returns a set of identifiers of policies (e.g. resources identifiers) whose access policies are satisfied with the given SecurityRequest
+                                                    SecurityRequest securityRequest)` - returns a set of identifiers of policies (e.g. resources identifiers) which are satisfied with the given SecurityRequest
  - `boolean isReceivedServiceResponseVerified(String serviceResponse,                                                  
                                                   String componentIdentifier,
                                                   String platformIdentifier)` - is used by a component to verify that the other components response was legitimate... e.g. to handle the service response encapsulated in a JWS. Returns true if the service is genuine.
@@ -156,33 +159,35 @@ Component Security Handler provides following methods:
  - `String generateServiceResponse()` - returns the required payload that should be attached next to the components API business response so that the client can verify that the service is legitimate.  
  - `ISecurityHandler getSecurityHandler()` - returns Security Handler if the component owner wants to use it directly
 
-To set up component SH, following instructions have to be done:
+To set up component SH, following instructions have to be done. Example for a platform registrationHandler
 ```java
     IComponentSecurityHandler registrationHandlerCSH = ComponentSecurityHandlerFactory.getComponentSecurityHandler(
                     coreAAMAddress,
                     KEY_STORE_PATH,
                     KEY_STORE_PASSWORD,
-                    registrationHandlerId,
+                    "reghandler" + "@platfom1",
                     localAAMAddress,
                     false,
                     componentOwnerUsername,
                     componentOwnerPassword
     );
 
-    // getting a CRM service response
+    // building a service response that needs to be attached to each of your business responses
     String regHandlerServiceResponse = rhCSH.generateServiceResponse();
-    // getting a CRM security request
+	
+    // building a security request to authorize operation from the registration handler in other platforms' components (e.g. Core Registry)
     SecurityRequest rhSecurityRequest = rhCSH.generateSecurityRequestUsingLocalCredentials();
 ```
-To check validity of the response to our SecurityRequest (if it came from component we are interested in), following operation have to be done: 
+
+To check validity of a response, if it came from component we are interested in (e.g. from the Core Registry), following operation have to be done: 
 ```java  
     // trying to validate the service response
-    registrationHandlerCSH.isReceivedServiceResponseVerified(serviceResponse, componentIdentifier, platformIdentifier); 
+    registrationHandlerCSH.isReceivedServiceResponseVerified(serviceResponse, "registry", "SymbIoTe_Core_AAM); 
 ```
 
 #### SecurityRequest and API
 The SecurityRequest (available here [SecurityRequest.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/payloads/SecurityRequest.java)) 
-is a set of payloads authorising actor in the system (JSON Web Tokens) with the confirmation, that those payloads belongs to it. It is split into the following HTTP security headers for REST communication. We also offer convenience converters on how to consume the SecurityRequest on your business API and how to prepare one for attaching to a REST request.
+is a set of payloads authorizing actor in the system (JSON Web Tokens) with the confirmation, that those payloads belong to it. It is split into the following HTTP security headers for REST communication. We also offer convenience converters on how to consume the SecurityRequest on your business API and how to prepare one for attaching to a REST request.
 ```java
 // timestamp header
 public static final String SECURITY_CREDENTIALS_TIMESTAMP_HEADER = "x-auth-timestamp";
@@ -248,9 +253,10 @@ MyServiceFeignClient jsonclient = Feign.builder()
 From now on, all methods call to jsonclient will generate REST requests with valid authentication headers and the responses will be validated as well for integrity, so in case of a challenge-response failure it will return a 400 error message.
 
 ### Attribute Based Access Control
-The owner of a resource can establish a policy that describe with attributes, whom and what operations can be performed on this object. 
-If a subject has the attributes that satisfies the access control policy established by the resource owner, 
-then the subject is authorized to perform the desidered operation on that object. All attributes are in authorization tokens.
+The owner of a resource can establish a policy that describe using attributes, by whom and what operations can be performed on this object. 
+If a subject has the attributes that satisfies the access control policy established by the resource owner, then the subject is authorized to perform the desidered operation on that object.
+All attributes are stored in authorization tokens.
+Authorization tokens are issued only by AAMs.
 
 For the simplest IBAC (Identity-Based Access Control) implementation, the policies should look something like:
 ```json
