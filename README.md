@@ -2,7 +2,13 @@
 [![](https://jitpack.io/v/symbiote-h2020/SymbIoTeSecurity.svg)](https://jitpack.io/#symbiote-h2020/SymbIoTeSecurity)
 [![codecov.io](https://codecov.io/github/symbiote-h2020/SymbIoTeSecurity/branch/staging/graph/badge.svg)](https://codecov.io/github/symbiote-h2020/SymbIoTeSecurity)
 # SymbIoTe Security
-This repository contains SymbIoTe security layer interfaces, payloads, helper methods and a thin client named the SecurityHandler used throughout different components and different layers.
+This repository contains SymbIoTe security layer interfaces, payloads, helper methods and a thin client named the SecurityHandler used throughout different components and different layers. It contains usefull metods to interact with the system, such as login procedure to the IoT platform, validation of the received tokens, e.t.c. 
+## Context
+To read more about the project, please see documentation of:
+ * [SymbioteCloud](https://github.com/symbiote-h2020/SymbioteCloud)
+ * [SymbioteCore](https://github.com/symbiote-h2020/SymbioteCore)
+ 
+In general, symbIoTe is a mediator, an intermediary connecting applications and IoT platforms. The basic functionality is that of a registry service which lists platforms, their resources and properties, while also providing a way to map between the platforms' different APIs.
 
 ## How to include this library in your code
 The codes will be transiently available using SymbioteLibraries dependency. However, should one want to include it directly, then
@@ -26,31 +32,33 @@ As you notice above, during development (i.e. feature and develop branches of co
 ```
 compile('com.github.symbiote-h2020:SymbIoTeSecurity:{tag}')
 ```
-by the **SymbIoTe Security Team**.
 
 ## Instructions for java developers
+This section provides the information about usage of SymbIoTe Security library in the java code. 
 #### End-user Security Handler
 
-Security handler class provides some useful methods:
+Security handler class is a thin java client providing some useful methods:
   - `Map<String, AAM> getAvailableAAMs()` - returns map of all currently available security entrypoints to symbiote (getCertificate, login, token
- validation) as obtained by the core AAM
+ validation) obtained from core AAM. Information about components registered in core AAM is included.
   - `Map<String, AAM> getAvailableAAMs(AAM aam)` - returns map of all currently available security entrypoints to symbiote (getCertificate, login, token
-validation) for AAM specified specified in parameter
- - `Token login(AAM aam)` - returns home token for your account in a given AAM
- - `Map<AAM, Token> login(List<AAM> foreignAAMs, String homeToken)` - allows you to login to foreign AAMs (you don't have account in) using home token.
- - `Token loginAsGuest(AAM aam)` - returns guest token that allows access to all public resources in symbIoTe
+validation) obtained from AAM specified in parameter. Information about components registered in this specified AAM and in core AAM is included.
+ - `Token login(AAM aam)` - returns home token for your account in a given AAM (token is a digital object used as a container for security-related information. It serves for authentication and/or authorization purposes).
+ - `Map<AAM, Token> login(List<AAM> foreignAAMs, String homeToken)` - allows you to acquire foreign tokens to foreign AAMs (in which you don't have accounts) using home token.
+ - `Token loginAsGuest(AAM aam)` - returns guest token that allows access to all public resources in symbIoTe.
  - `ValidationStatus validate(AAM validationAuthority, String token,
                                   Optional<String> clientCertificate,
                                   Optional<String> clientCertificateSigningAAMCertificate,
-                                  Optional<String> foreignTokenIssuingAAMCertificate)` - validates your token to the specified AAM
- - `Certificate getComponentCertificate(String componentIdentifier, String platformIdentifier)` - returns component with specified identifier for the platform
+                                  Optional<String> foreignTokenIssuingAAMCertificate)` 
+                                  - validates your token by the specified AAM.
+ - `Certificate getComponentCertificate(String componentIdentifier, String platformIdentifier)` - returns certificate of the specified component belonging to the given platform.
  - `Certificate getCertificate(AAM homeAAM,
                                    String username,
                                    String password,
-                                   String clientId)` - method used to acquire a certificate(PKI) for this client from the home AAM
-This private key will be used to sign-off the request to AAM
-- `buildCredentialsWallet()` - reads all certificates in the keystore and populate the credentialsWallet
-
+                                   String clientId)` - method used to acquire a certificate(PKI) for this client from the home AAM (AAM in which actor is registered).
+The private key matching the acquired certificate will be used to sign the requests to AAM. 
+- `getAcquiredCredentials()` - returns all saved credentials bounded with a particular AAM.
+- `AAM getCoreAAMInstance()` - returns the Core AAM instance.
+- `void clearCachedTokens()` - clears all acquired tokens from memory (credentialsWallet).
 
 See [SecurityHandler.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/SecurityHandler.java) 
 
@@ -114,7 +122,7 @@ Component Security Handler provides following methods:
  - `boolean isReceivedServiceResponseVerified(String serviceResponse,                                                  
                                                   String componentIdentifier,
                                                   String platformIdentifier)` - is used by a component to verify that the other components response was legitimate... e.g. to handle the service response encapsulated in a JWS. Returns true if the service is genuine.
- - `SecurityRequest generateSecurityRequestUsingCoreCredentials()` - is used by a component to generate the SecurityRequest needed to authorize operations in the Symbiote Core to be attached to the business query
+ - `SecurityRequest generateSecurityRequestUsingLocalCredentials()` - is used by a component to generate the SecurityRequest needed to authorize operations in the Symbiote Environment to be attached to the business query
              so that the service can confirm that the client should posses provided tokens. Returns the required payload for client's authentication and authorization.
  - `String generateServiceResponse()` - returns the required payload that should be attached next to the components API business response so that the client can verify that the service is legitimate.  
  - `ISecurityHandler getSecurityHandler()` - returns Security Handler if the component owner wants to use it directly
@@ -128,7 +136,7 @@ public static final String SECURITY_CREDENTIALS_SIZE_HEADER = "x-auth-size";
 // each SecurityCredentials entry header prefix, they are number 1..size
 public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "x-auth-";
 ```
-whereas the ServiceResponseJWS is in contrast just a String and should be transport in the following header
+whereas the ServiceResponseJWS is in contrast just a String and should be transport in the following header:
 ```java
 public static final SECURITY_RESPONSE_HEADER = "x-auth-response";
 ```
