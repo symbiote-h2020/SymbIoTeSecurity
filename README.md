@@ -90,6 +90,35 @@ In order to find the certificate of the component you communicate with, please u
 | CoreResourceMonitor | crm |
 | CoreResourceAccessMonitor | cram |
 
+To acquire access to any of the resources, following instructions have to be done:
+```java
+    log.info("Initializing application security handler");
+    // generating the SH
+    ISecurityHandler clientSH = ClientSecurityHandlerFactory.getSecurityHandler(
+            coreAAMServerAddress,
+            KEY_STORE_PATH,
+            KEY_STORE_PASSWORD,
+            clientId
+    );
+    AAM coreAAM = clientSH.getCoreAAMInstance();
+    AAM platform1 = clientSH.getAvailableAAMs().get(platformId);
+
+    log.info("Acquiring application certificate");
+    Certificate clientCertificate = clientSH.getCertificate(platform1, username, password, clientId);
+    log.info("Acquiring application HOME token from " + platformId);
+    Token token = clientSH.login(platform1);
+    
+    log.info("Acquiring Security request needed to get access to any resource")
+    Set<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<>();
+    authorizationCredentialsSet.add(new AuthorizationCredentials(token, platform1, clientSH.getAcquiredCredentials().get(platform1.getAamInstanceId()).homeCredentials));
+    SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
+```
+
+To check validity of the response to our SecurityRequest (if it came from component we are interested in), following operation have to be done:
+```java
+      // trying to validate the service response
+      MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, clientSH.getComponentCertificate(componentIdentifier, platformIdentifier));
+```
 #### Component Security Handler
 If you want to manage components, create ComponentSecurityHandler object with  [ComponentSecurityHandlerFactory](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/ComponentSecurityHandler.java) class.
 ```java
@@ -126,8 +155,34 @@ Component Security Handler provides following methods:
              so that the service can confirm that the client should posses provided tokens. Returns the required payload for client's authentication and authorization.
  - `String generateServiceResponse()` - returns the required payload that should be attached next to the components API business response so that the client can verify that the service is legitimate.  
  - `ISecurityHandler getSecurityHandler()` - returns Security Handler if the component owner wants to use it directly
+
+To set up component SH, following instructions have to be done:
+```java
+    IComponentSecurityHandler registrationHandlerCSH = ComponentSecurityHandlerFactory.getComponentSecurityHandler(
+                    coreAAMAddress,
+                    KEY_STORE_PATH,
+                    KEY_STORE_PASSWORD,
+                    registrationHandlerId,
+                    localAAMAddress,
+                    false,
+                    componentOwnerUsername,
+                    componentOwnerPassword
+    );
+
+    // getting a CRM service response
+    String regHandlerServiceResponse = rhCSH.generateServiceResponse();
+    // getting a CRM security request
+    SecurityRequest rhSecurityRequest = rhCSH.generateSecurityRequestUsingLocalCredentials();
+```
+To check validity of the response to our SecurityRequest (if it came from component we are interested in), following operation have to be done: 
+```java  
+    // trying to validate the service response
+    registrationHandlerCSH.isReceivedServiceResponseVerified(serviceResponse, componentIdentifier, platformIdentifier); 
+```
+
 #### SecurityRequest and API
-The SecurityRequest (available here [SecurityRequest.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/payloads/SecurityRequest.java)) is split into the following HTTP security headers for REST communication. We also offer convenience converters on how to consume the SecurityRequest on your business API and how to prepare one for attaching to a REST request.
+The SecurityRequest (available here [SecurityRequest.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/payloads/SecurityRequest.java)) 
+is a set of payloads authorising actor in the system (JSON Web Tokens) with the confirmation, that those payloads belongs to it. It is split into the following HTTP security headers for REST communication. We also offer convenience converters on how to consume the SecurityRequest on your business API and how to prepare one for attaching to a REST request.
 ```java
 // timestamp header
 public static final String SECURITY_CREDENTIALS_TIMESTAMP_HEADER = "x-auth-timestamp";
