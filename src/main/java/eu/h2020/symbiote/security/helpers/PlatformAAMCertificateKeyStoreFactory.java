@@ -40,8 +40,8 @@ public class PlatformAAMCertificateKeyStoreFactory {
         // of the platform registered to the given platform Owner
         String platformId = "";
 
-        // where you want to have the keystore generated
-        String keyStorePath = "";
+        // how the generated keystore should be named
+        String keyStoreFileName = "";
         // used to access the keystore. MUST NOT be longer than 7 chars
         // from spring bootstrap file: aam.security.KEY_STORE_PASSWORD
         // R3 dirty fix MUST BE THE SAME as spring bootstrap file: aam.security.PV_KEY_PASSWORD
@@ -59,7 +59,7 @@ public class PlatformAAMCertificateKeyStoreFactory {
                     platformOwnerUsername,
                     platformOwnerPassword,
                     platformId,
-                    keyStorePath,
+                    keyStoreFileName,
                     keyStorePassword,
                     rootCACertificateAlias,
                     aamCertificateAlias
@@ -75,7 +75,7 @@ public class PlatformAAMCertificateKeyStoreFactory {
                                               String platformOwnerUsername,
                                               String platformOwnerPassword,
                                               String platformId,
-                                              String keyStorePath,
+                                              String keyStoreFileName,
                                               String keyStorePassword,
                                               String rootCACertificateAlias,
                                               String aamCertificateAlias
@@ -91,14 +91,17 @@ public class PlatformAAMCertificateKeyStoreFactory {
             NotExistingUserException,
             ValidationException {
 
-        File keyStoreFile = new File(keyStorePath);
+        if (!keyStoreFileName.endsWith(".p12")) {
+            keyStoreFileName = keyStoreFileName + ".p12";
+        }
+        File keyStoreFile = new File(keyStoreFileName);
 
         if (keyStorePassword.length() > 7)
             throw new InvalidArgumentsException("The passwords must not be longer that 7 chars... don't ask why...");
 
         ECDSAHelper.enableECDSAProvider();
-        KeyStore ks = getKeystore(keyStorePath, keyStorePassword);
-        log.info("Key Store acquired.");
+        KeyStore ks = getKeystore(keyStoreFileName, keyStorePassword);
+        log.info("Key Store generated.");
         KeyPair pair = CryptoHelper.createKeyPair();
         log.info("Key pair for the platform AAM generated.");
         String csr = CryptoHelper.buildPlatformCertificateSigningRequestPEM(platformId, pair);
