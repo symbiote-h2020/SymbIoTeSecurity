@@ -32,9 +32,9 @@ public class PlatformAAMCertificateKeyStoreFactory {
      */
     public static void main(String[] args) {
         // given to you for integration, in the end should be available in public
-        // from spring bootstrap file: symbiote.coreaam.url
+        // from spring bootstrap file: symbIoTe.core.interface.url
         String coreAAMAddress = "";
-        // of the user registered through administration in the Symbiote Core
+        // of the user registered through administration in the symbIoTe Core
         String platformOwnerUsername = "";
         String platformOwnerPassword = "";
         // of the platform registered to the given platform Owner
