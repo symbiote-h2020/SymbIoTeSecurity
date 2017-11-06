@@ -104,6 +104,18 @@ public class AAMClient implements IAAMClient {
     }
 
     /**
+     * Allow to report detected anomaly.
+     *
+     * @param handleAnomalyRequest required to report detected anomaly.
+     * @return true/false depending on anomaly handling status
+     */
+    @Override
+    public String reportAnomaly(HandleAnomalyRequest handleAnomalyRequest) throws InvalidArgumentsException, WrongCredentialsException {
+        Response response = feignClient.reportAnomaly(handleAnomalyRequest);
+        return response.body().toString();
+    }
+
+    /**
      * @return GUEST token used to access public resources offered in SymbIoTe
      */
     @Override

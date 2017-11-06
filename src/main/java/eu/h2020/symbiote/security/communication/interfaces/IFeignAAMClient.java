@@ -58,6 +58,10 @@ public interface IFeignAAMClient {
     @Headers("Content-Type: application/json")
     Response revokeCredentials(RevocationRequest revocationRequest);
 
+    @RequestLine("POST " + SecurityConstants.ANOMALY_DETECTION_MESSAGE)
+    @Headers("Content-Type: application/json")
+    Response reportAnomaly(HandleAnomalyRequest handleAnomalyRequest);
+
     @RequestLine("POST " + SecurityConstants.AAM_SIGN_CERTIFICATE_REQUEST)
     @Headers("Content-Type: application/json")
     Response signCertificateRequest(CertificateRequest certificateRequest);
