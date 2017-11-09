@@ -2,10 +2,8 @@ package eu.h2020.symbiote.security.helpers;
 
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
-import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.NotExistingUserException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
+import eu.h2020.symbiote.security.commons.exceptions.SecurityException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.*;
 import eu.h2020.symbiote.security.communication.AAMClient;
 import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
 import org.apache.commons.logging.Log;
@@ -65,9 +63,14 @@ public class PlatformAAMCertificateKeyStoreFactory {
                     aamCertificateAlias
             );
             log.info("OK");
-        } catch (WrongCredentialsException | ValidationException | KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | InvalidArgumentsException | InvalidAlgorithmParameterException | NoSuchProviderException | NotExistingUserException e) {
-            log.error(e.getMessage());
-            log.error(e.getCause());
+        } catch (SecurityException
+                | IOException
+                | CertificateException
+                | InvalidAlgorithmParameterException
+                | NoSuchAlgorithmException
+                | KeyStoreException
+                | NoSuchProviderException e) {
+            log.error(e);
         }
     }
 
@@ -89,7 +92,8 @@ public class PlatformAAMCertificateKeyStoreFactory {
             InvalidArgumentsException,
             WrongCredentialsException,
             NotExistingUserException,
-            ValidationException {
+            ValidationException,
+            AAMException {
 
         if (!keyStoreFileName.endsWith(".p12")) {
             keyStoreFileName = keyStoreFileName + ".p12";

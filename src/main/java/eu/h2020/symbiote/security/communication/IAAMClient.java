@@ -22,7 +22,9 @@ public interface IAAMClient {
      * @param platformIdentifier  for a platform component or {@link SecurityConstants#CORE_AAM_INSTANCE_ID} for Symbiote core components
      * @return symbiote component Certificate of the component in PEM format
      */
-    String getComponentCertificate(String componentIdentifier, String platformIdentifier) throws AAMException;
+    String getComponentCertificate(String componentIdentifier,
+                                   String platformIdentifier) throws
+            AAMException;
 
     /**
      * Allows the user to acquire their client's certificate.
@@ -34,7 +36,8 @@ public interface IAAMClient {
             WrongCredentialsException,
             NotExistingUserException,
             ValidationException,
-            InvalidArgumentsException;
+            InvalidArgumentsException,
+            AAMException;
 
     /**
      * Allows the user to revoke their credentials
@@ -42,12 +45,15 @@ public interface IAAMClient {
      * @param revocationRequest required to revoke a certificate or token.
      * @return the signed certificate from the provided CSR in PEM format
      */
-    String revokeCredentials(RevocationRequest revocationRequest) throws InvalidArgumentsException, WrongCredentialsException;
+    String revokeCredentials(RevocationRequest revocationRequest) throws
+            InvalidArgumentsException,
+            WrongCredentialsException,
+            AAMException;
 
     /**
      * @return GUEST token used to access public resources offered in SymbIoTe
      */
-    String getGuestToken() throws JWTCreationException;
+    String getGuestToken() throws JWTCreationException, AAMException;
 
     /**
      * @param loginRequest JWS build in accordance to @{@link eu.h2020.symbiote.security.helpers.CryptoHelper#buildHomeTokenAcquisitionRequest(HomeCredentials)}
@@ -57,7 +63,8 @@ public interface IAAMClient {
     String getHomeToken(String loginRequest) throws
             WrongCredentialsException,
             JWTCreationException,
-            MalformedJWTException;
+            MalformedJWTException,
+            AAMException;
 
     /**
      * @param remoteHomeToken   that an actor wants to exchange in this AAM for a FOREIGN token
@@ -67,12 +74,13 @@ public interface IAAMClient {
      */
     String getForeignToken(String remoteHomeToken, Optional<String> clientCertificate, Optional<String> aamCertificate) throws
             ValidationException,
-            JWTCreationException;
+            JWTCreationException,
+            AAMException;
 
     /**
      * @return collection of AAMs available in the SymbIoTe ecosystem
      */
-    AvailableAAMsCollection getAvailableAAMs();
+    AvailableAAMsCollection getAvailableAAMs() throws AAMException;
 
     /**
      * @param token                                  that is to be validated
@@ -84,7 +92,7 @@ public interface IAAMClient {
     ValidationStatus validateCredentials(String token,
                                          Optional<String> clientCertificate,
                                          Optional<String> clientCertificateSigningAAMCertificate,
-                                         Optional<String> foreignTokenIssuingAAMCertificate);
+                                         Optional<String> foreignTokenIssuingAAMCertificate) throws AAMException;
 
     /**
      * @param platformManagementRequest related to associated platforms' management operation.
@@ -102,5 +110,7 @@ public interface IAAMClient {
      * @param credentials of a user whose details should be returned
      * @return details of requested user
      */
-    UserDetails getUserDetails(Credentials credentials) throws UserManagementException;
+    UserDetails getUserDetails(Credentials credentials) throws
+            UserManagementException,
+            AAMException;
 }

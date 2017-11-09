@@ -13,15 +13,15 @@ import java.util.Map;
 public class LocalAttributesManagementRequest {
 
     private final Map<String, String> attributes;
-
     private final Credentials adminCredentials;
     private final OperationType operationType;
 
     /**
-     *Constructor for LocalAttributesManagementRequest
-     * @param attributes new attributes Map to replace those in AAM repository
+     * Constructor for LocalAttributesManagementRequest
+     *
+     * @param attributes       new attributes Map to replace those in AAM repository
      * @param adminCredentials admin username and password
-     * @param operationType describe if we want to acquire actual attributes from AAM repository or replace them
+     * @param operationType    describe if we want to acquire actual attributes from AAM repository or replace them
      */
     @JsonCreator
     public LocalAttributesManagementRequest(

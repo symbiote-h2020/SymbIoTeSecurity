@@ -108,11 +108,17 @@ public class SecurityHandler implements ISecurityHandler {
   public Map<String, AAM> getAvailableAAMs() throws SecurityHandlerException {
     return getAvailableAAMs(coreAAM);
   }
-  
+
   public Map<String, AAM> getAvailableAAMs(AAM homeAAM) throws SecurityHandlerException {
-    AvailableAAMsCollection response = ClientFactory.getAAMClient(homeAAM.getAamAddress())
-                                           .getAvailableAAMs();
-    return response.getAvailableAAMs();
+    return getAvailableAAMs(homeAAM.getAamAddress());
+  }
+
+  public Map<String, AAM> getAvailableAAMs(String aamAddress) throws SecurityHandlerException {
+    try {
+      return ClientFactory.getAAMClient(aamAddress).getAvailableAAMs().getAvailableAAMs();
+    } catch (AAMException e) { // communication fail with the AAM
+      throw new SecurityHandlerException(e.getMessage(),e);
+    }
   }
   
   public Token login(AAM homeAAMId) throws SecurityHandlerException, ValidationException {
@@ -132,6 +138,8 @@ public class SecurityHandler implements ISecurityHandler {
         throw new SecurityHandlerException("Error creating log in token", e);
       } catch (MalformedJWTException e) {
         throw new SecurityHandlerException("Malformed token sent", e);
+      } catch (AAMException e) { // communication fail with the AAM
+        throw new SecurityHandlerException(e.getMessage(),e);
       }
     } else {
       throw new SecurityHandlerException("Can't find certificate for AAM " + homeAAMId.getAamInstanceId());
@@ -157,6 +165,9 @@ public class SecurityHandler implements ISecurityHandler {
         } catch (JWTCreationException e) {
           logger.error("Error creating log in token", e);
           return null;
+        } catch (AAMException e) {
+          logger.error("Other error when communicating with the AAM occured" + e.getMessage(),e);
+          return null;
         }
       }));
       
@@ -174,6 +185,8 @@ public class SecurityHandler implements ISecurityHandler {
       return new Token(ClientFactory.getAAMClient(aam.getAamAddress()).getGuestToken());
     } catch (JWTCreationException e) {
       throw new SecurityHandlerException("Error creating log in token", e);
+    } catch (AAMException e) { // communication fail with the AAM
+      throw new SecurityHandlerException(e.getMessage(),e);
     }
   }
   
@@ -207,13 +220,17 @@ public class SecurityHandler implements ISecurityHandler {
   public ValidationStatus validate(AAM validationAuthority, String token,
                                    Optional<String> clientCertificate,
                                    Optional<String> clientCertificateSigningAAMCertificate,
-                                   Optional<String> foreignTokenIssuingAAMCertificate) {
-    
-    
-    return ClientFactory.getAAMClient(validationAuthority.getAamAddress()).validateCredentials(token,
-        clientCertificate,
-        clientCertificateSigningAAMCertificate,
-        foreignTokenIssuingAAMCertificate);
+                                   Optional<String> foreignTokenIssuingAAMCertificate) throws SecurityHandlerException {
+
+
+    try {
+      return ClientFactory.getAAMClient(validationAuthority.getAamAddress()).validateCredentials(token,
+          clientCertificate,
+          clientCertificateSigningAAMCertificate,
+          foreignTokenIssuingAAMCertificate);
+    } catch (AAMException e) { // communication fail with the AAM
+      throw new SecurityHandlerException(e.getMessage(),e);
+    }
   }
   
   @Override
@@ -222,10 +239,10 @@ public class SecurityHandler implements ISecurityHandler {
   }
 
   @Override
-  public Certificate getComponentCertificate(String componentIdentifier, String platformIdentifier) {
-      Certificate certificate = new Certificate();
-      try {
+  public Certificate getComponentCertificate(String componentIdentifier, String platformIdentifier) throws
+          SecurityHandlerException {
         AAMClient aamClient = ClientFactory.getAAMClient(homeAAMAddress);
+        Certificate certificate;
         // checking cache
         if (credentialsWallet.containsKey(platformIdentifier)
                 && credentialsWallet.get(platformIdentifier).homeCredentials.homeAAM.getComponentCertificates().containsKey(componentIdentifier))
@@ -233,13 +250,15 @@ public class SecurityHandler implements ISecurityHandler {
           certificate = credentialsWallet.get(platformIdentifier).homeCredentials.homeAAM.getComponentCertificates().get(componentIdentifier);
         else {
           // need to fetch fresh certificate
+          try {
           certificate = new Certificate(aamClient.getComponentCertificate(componentIdentifier, platformIdentifier));
           //TODO: add new certificate to credentialWallet (create credWallet for platform if missing?)
+          } catch (AAMException | CertificateException e) {
+            logger.error(e);
+            throw new SecurityHandlerException("Failed to fetch the component certificate from the AAM. "+ e.getMessage());
+          }
         }
-      } catch (AAMException e) {
-          logger.error(e);
-      }
-      return certificate;
+        return certificate;
   }
   
   @Override
@@ -284,11 +303,15 @@ public class SecurityHandler implements ISecurityHandler {
 
       CertificateRequest request = new CertificateRequest(username,password,clientId,csr);
 
-      String certificateValue = ClientFactory.getAAMClient(homeAAM.getAamAddress())
-                                    .signCertificateRequest(request);
-      
-      Certificate certificate = new Certificate();
-      certificate.setCertificateString(certificateValue);
+      String certificateValue = null;
+      try {
+        certificateValue = ClientFactory.getAAMClient(homeAAM.getAamAddress())
+                                      .signCertificateRequest(request);
+      } catch (AAMException e) { // communication fail with the AAM
+        throw new SecurityHandlerException(e.getMessage(),e);
+      }
+
+      Certificate certificate = new Certificate(certificateValue);
       HomeCredentials credentials;
       if (clientId.contains("@")) {
         credentials = new HomeCredentials(homeAAM, clientId.split(illegalSign)[1], clientId.split(illegalSign)[0], certificate,
@@ -341,10 +364,7 @@ public class SecurityHandler implements ISecurityHandler {
     
     KeyStore trustStore = getKeystore();
     
-    AAM homeAAM = new AAM();
-    homeAAM.setAamAddress(homeAAMAddress);
-    
-    Map<String, AAM> aamList = getAvailableAAMs(homeAAM);
+    Map<String, AAM> aamList = getAvailableAAMs(homeAAMAddress);
     if (aamList != null && !aamList.isEmpty()
             && aamList.get(SecurityConstants.CORE_AAM_INSTANCE_ID) != null) {
       coreAAM = aamList.get(SecurityConstants.CORE_AAM_INSTANCE_ID);
@@ -385,9 +405,7 @@ public class SecurityHandler implements ISecurityHandler {
           AAM aam = aamList.get(aamId);
           
           if (aam != null) {
-            Certificate certificate = new Certificate();
-            certificate.setCertificateString(CryptoHelper.convertX509ToPEM(cert));
-            
+            Certificate certificate = new Certificate(CryptoHelper.convertX509ToPEM(cert));
             BoundCredentials boundCredentials =
                 new BoundCredentials(new HomeCredentials(aam, user, client, certificate, pvKey));
             

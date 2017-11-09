@@ -1,9 +1,10 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -13,15 +14,11 @@ import java.util.Map;
  */
 public class OwnedPlatformDetails {
 
-    private String platformInstanceId = "";
-    private String platformInterworkingInterfaceAddress = "";
-    private String platformInstanceFriendlyName = "";
-    private Certificate platformAAMCertificate = new Certificate();
-    private Map<String, Certificate> componentCertificates = new HashMap<>();
-
-    public OwnedPlatformDetails() {
-        // for Jackson JSON
-    }
+    private final String platformInstanceId;
+    private final String platformInterworkingInterfaceAddress;
+    private final String platformInstanceFriendlyName;
+    private final Certificate platformAAMCertificate;
+    private final Map<String, Certificate> componentCertificates;
 
     /**
      * @param platformInstanceId                   SymbIoTe-unique platform identifier
@@ -30,11 +27,12 @@ public class OwnedPlatformDetails {
      * @param platformAAMCertificate               the platform's AM CA Certificate
      * @param componentCertificates                the certificates used by SymbIoTe components for @{@link MutualAuthenticationHelper#isServiceResponseVerified(String, Certificate)}
      */
-    public OwnedPlatformDetails(String platformInstanceId,
-                                String platformInterworkingInterfaceAddress,
-                                String platformInstanceFriendlyName,
-                                Certificate platformAAMCertificate,
-                                Map<String, Certificate> componentCertificates) {
+    @JsonCreator
+    public OwnedPlatformDetails(@JsonProperty("platformInstanceId") String platformInstanceId,
+                                @JsonProperty("platformInterworkingInterfaceAddress") String platformInterworkingInterfaceAddress,
+                                @JsonProperty("platformInstanceFriendlyName") String platformInstanceFriendlyName,
+                                @JsonProperty("platformAAMCertificate") Certificate platformAAMCertificate,
+                                @JsonProperty("componentCertificates") Map<String, Certificate> componentCertificates) {
         this.platformInstanceId = platformInstanceId;
         this.platformInterworkingInterfaceAddress = platformInterworkingInterfaceAddress;
         this.platformInstanceFriendlyName = platformInstanceFriendlyName;
@@ -49,19 +47,11 @@ public class OwnedPlatformDetails {
         return platformInstanceId;
     }
 
-    public void setPlatformInstanceId(String platformInstanceId) {
-        this.platformInstanceId = platformInstanceId;
-    }
-
     /**
      * @return Address where the Platform exposes its Interworking Interface
      */
     public String getPlatformInterworkingInterfaceAddress() {
         return platformInterworkingInterfaceAddress;
-    }
-
-    public void setPlatformInterworkingInterfaceAddress(String platformInterworkingInterfaceAddress) {
-        this.platformInterworkingInterfaceAddress = platformInterworkingInterfaceAddress;
     }
 
     /**
@@ -71,10 +61,6 @@ public class OwnedPlatformDetails {
         return platformInstanceFriendlyName;
     }
 
-    public void setPlatformInstanceFriendlyName(String platformInstanceFriendlyName) {
-        this.platformInstanceFriendlyName = platformInstanceFriendlyName;
-    }
-
     /**
      * @return the platform's AM CA Certificate
      */
@@ -82,18 +68,10 @@ public class OwnedPlatformDetails {
         return platformAAMCertificate;
     }
 
-    public void setPlatformAAMCertificate(Certificate platformAAMCertificate) {
-        this.platformAAMCertificate = platformAAMCertificate;
-    }
-
     /**
      * @return the certificates used by SymbIoTe components for @{@link MutualAuthenticationHelper#isServiceResponseVerified(String, Certificate)}
      */
     public Map<String, Certificate> getComponentCertificates() {
         return componentCertificates;
-    }
-
-    public void setComponentCertificates(Map<String, Certificate> componentCertificates) {
-        this.componentCertificates = componentCertificates;
     }
 }

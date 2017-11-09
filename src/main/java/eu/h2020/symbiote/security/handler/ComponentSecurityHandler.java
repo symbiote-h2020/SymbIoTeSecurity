@@ -1,12 +1,12 @@
 package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
-import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
+import eu.h2020.symbiote.security.commons.exceptions.custom.AAMException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
@@ -62,7 +62,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                 || !componentId.matches("^(([\\w-])+)(@)(([\\w-])+)$"))
             throw new SecurityHandlerException("Component Id has bad form, must be componentId@platformId");
         this.combinedClientIdentifier = componentId;
-        this.localAAM = securityHandler.getAvailableAAMs(new AAM(localAAMAddress, "", "", new Certificate(), new HashMap<>())).get(splitComponentId[1]);
+        this.localAAM = securityHandler.getAvailableAAMs(localAAMAddress).get(splitComponentId[1]);
         if (this.localAAM == null) {
             throw new SecurityHandlerException("You are not connected to your local aam");
         }
@@ -124,7 +124,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                     log.debug("token was invalidated with the following reason: " + tokenValidationStatus);
                     return tokenValidationStatus;
                 }
-            } catch (ValidationException | CertificateException e) {
+            } catch (AAMException | ValidationException | CertificateException e) {
                 log.error(e);
                 throw new SecurityHandlerException(e.getMessage());
             }
@@ -140,7 +140,8 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                                                      String platformIdentifier)
             throws SecurityHandlerException {
         try {
-            return MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, securityHandler.getComponentCertificate(componentIdentifier, platformIdentifier));
+            return MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse,
+                    securityHandler.getComponentCertificate(componentIdentifier, platformIdentifier));
         } catch (NoSuchAlgorithmException | CertificateException e) {
             log.error(e);
             throw new SecurityHandlerException("Failed to verify the serviceResponse, the operation should be retried: " + e.getMessage());

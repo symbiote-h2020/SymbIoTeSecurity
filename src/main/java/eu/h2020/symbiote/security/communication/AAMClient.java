@@ -8,6 +8,7 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.*;
 import eu.h2020.symbiote.security.communication.interfaces.IFeignAAMClient;
 import eu.h2020.symbiote.security.communication.payloads.*;
 import feign.Feign;
+import feign.FeignException;
 import feign.Response;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
@@ -21,6 +22,7 @@ import java.util.Optional;
  */
 public class AAMClient implements IAAMClient {
 
+    private static final String AAM_COMMS_ERROR_MESSAGE = "Failed to communicate with the AAM: ";
     private String serverAddress;
     private IFeignAAMClient feignClient;
 
@@ -47,13 +49,21 @@ public class AAMClient implements IAAMClient {
      * @return symbiote component Certificate of the component in PEM format
      */
     @Override
-    public String getComponentCertificate(String componentIdentifier, String platformIdentifier) throws AAMException {
-        Response response = feignClient.getComponentCertificate(componentIdentifier, platformIdentifier);
+    public String getComponentCertificate(String componentIdentifier,
+                                          String platformIdentifier) throws
+            AAMException {
+        Response response;
+        try {
+            response = feignClient.getComponentCertificate(componentIdentifier, platformIdentifier);
+        } catch (FeignException fe) {
+            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
+        }
         if (response.status() == 500)
             throw new AAMException(response.body().toString());
         if (response.status() == 404)
             throw new AAMException("Certificate not found");
         return response.body().toString();
+
     }
 
     /**
@@ -67,8 +77,14 @@ public class AAMClient implements IAAMClient {
             WrongCredentialsException,
             NotExistingUserException,
             ValidationException,
-            InvalidArgumentsException {
-        Response response = feignClient.signCertificateRequest(certificateRequest);
+            InvalidArgumentsException,
+            AAMException {
+        Response response;
+        try {
+            response = feignClient.signCertificateRequest(certificateRequest);
+        } catch (FeignException fe) {
+            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
+        }
         switch (response.status()) {
             case 400:
                 if (response.body().toString().contains("INVALID_ARGUMENTS"))
@@ -90,8 +106,16 @@ public class AAMClient implements IAAMClient {
      * @return the signed certificate from the provided CSR in PEM format
      */
     @Override
-    public String revokeCredentials(RevocationRequest revocationRequest) throws InvalidArgumentsException, WrongCredentialsException {
-        Response response = feignClient.revokeCredentials(revocationRequest);
+    public String revokeCredentials(RevocationRequest revocationRequest) throws
+            InvalidArgumentsException,
+            WrongCredentialsException,
+            AAMException {
+        Response response;
+        try {
+            response = feignClient.revokeCredentials(revocationRequest);
+        } catch (FeignException fe) {
+            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
+        }
         switch (response.status()) {
             case 400:
                 throw new InvalidArgumentsException(response.body().toString());
@@ -107,8 +131,15 @@ public class AAMClient implements IAAMClient {
      * @return GUEST token used to access public resources offered in SymbIoTe
      */
     @Override
-    public String getGuestToken() throws JWTCreationException {
-        Response response = feignClient.getGuestToken();
+    public String getGuestToken() throws
+            JWTCreationException,
+            AAMException {
+        Response response;
+        try {
+            response = feignClient.getGuestToken();
+        } catch (FeignException fe) {
+            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
+        }
         if (response.status() == 500)
             throw new JWTCreationException("Server failed to create a guest token");
         return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toString();
@@ -123,8 +154,14 @@ public class AAMClient implements IAAMClient {
     public String getHomeToken(String loginRequest) throws
             WrongCredentialsException,
             JWTCreationException,
-            MalformedJWTException {
-        Response response = feignClient.getHomeToken(loginRequest);
+            MalformedJWTException,
+            AAMException {
+        Response response;
+        try {
+            response = feignClient.getHomeToken(loginRequest);
+        } catch (FeignException fe) {
+            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
+        }
         switch (response.status()) {
             case 400:
                 throw new MalformedJWTException("Unable to read malformed token");
@@ -144,13 +181,21 @@ public class AAMClient implements IAAMClient {
      * @return FOREIGN token used to access restricted resources offered in SymbIoTe federations
      */
     @Override
-    public String getForeignToken(String remoteHomeToken, Optional<String> clientCertificate, Optional<String> aamCertificate) throws
+    public String getForeignToken(String remoteHomeToken,
+                                  Optional<String> clientCertificate,
+                                  Optional<String> aamCertificate) throws
             ValidationException,
-            JWTCreationException {
-        Response response = feignClient.getForeignToken(
-                remoteHomeToken,
-                clientCertificate.orElse("").replace("\n", "").replace("\r", ""),
-                aamCertificate.orElse("").replace("\n", "").replace("\r", ""));
+            JWTCreationException,
+            AAMException {
+        Response response;
+        try {
+            response = feignClient.getForeignToken(
+                    remoteHomeToken,
+                    clientCertificate.orElse("").replace("\n", "").replace("\r", ""),
+                    aamCertificate.orElse("").replace("\n", "").replace("\r", ""));
+        } catch (FeignException fe) {
+            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
+        }
         switch (response.status()) {
             case 401:
                 throw new ValidationException("Failed to validate homeToken");
@@ -166,8 +211,12 @@ public class AAMClient implements IAAMClient {
      * @return collection of AAMs available in the SymbIoTe ecosystem
      */
     @Override
-    public AvailableAAMsCollection getAvailableAAMs() {
-        return feignClient.getAvailableAAMs();
+    public AvailableAAMsCollection getAvailableAAMs() throws AAMException {
+        try {
+            return feignClient.getAvailableAAMs();
+        } catch (FeignException fe) {
+            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
+        }
     }
 
     /**
@@ -178,12 +227,20 @@ public class AAMClient implements IAAMClient {
      * @return validation status
      */
     @Override
-    public ValidationStatus validateCredentials(String token, Optional<String> clientCertificate, Optional<String> clientCertificateSigningAAMCertificate, Optional<String> foreignTokenIssuingAAMCertificate) {
-        return feignClient.validateCredentials(
-                token,
-                clientCertificate.orElse("").replace("\n", "").replace("\r", ""),
-                clientCertificateSigningAAMCertificate.orElse("").replace("\n", "").replace("\r", ""),
-                foreignTokenIssuingAAMCertificate.orElse("").replace("\n", "").replace("\r", ""));
+    public ValidationStatus validateCredentials(String token,
+                                                Optional<String> clientCertificate,
+                                                Optional<String> clientCertificateSigningAAMCertificate,
+                                                Optional<String> foreignTokenIssuingAAMCertificate) throws
+            AAMException {
+        try {
+            return feignClient.validateCredentials(
+                    token,
+                    clientCertificate.orElse("").replace("\n", "").replace("\r", ""),
+                    clientCertificateSigningAAMCertificate.orElse("").replace("\n", "").replace("\r", ""),
+                    foreignTokenIssuingAAMCertificate.orElse("").replace("\n", "").replace("\r", ""));
+        } catch (FeignException fe) {
+            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
+        }
     }
 
     /**
@@ -191,9 +248,12 @@ public class AAMClient implements IAAMClient {
      * @return Management Status informing about a result of completing requested management operation
      */
     @Override
-    public ManagementStatus managePlatform(PlatformManagementRequest platformManagementRequest) throws AAMException {
+    public ManagementStatus managePlatform(PlatformManagementRequest platformManagementRequest) throws
+            AAMException {
         try {
             return feignClient.managePlatform(platformManagementRequest).getRegistrationStatus();
+        } catch (FeignException fe) {
+            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
         } catch (Exception e) {
             throw new AAMException("Internal Platform Management Error");
         }
@@ -204,9 +264,12 @@ public class AAMClient implements IAAMClient {
      * @return Management Status informing about a result of completing requested management operation
      */
     @Override
-    public ManagementStatus manageUser(UserManagementRequest userManagementRequest) throws AAMException {
+    public ManagementStatus manageUser(UserManagementRequest userManagementRequest) throws
+            AAMException {
         try {
             return feignClient.manageUser(userManagementRequest);
+        } catch (FeignException fe) {
+            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
         } catch (Exception e) {
             throw new AAMException("Internal User Management Error");
         }
@@ -217,14 +280,20 @@ public class AAMClient implements IAAMClient {
      * @return details of requested user
      */
     @Override
-    public UserDetails getUserDetails(Credentials credentials) throws UserManagementException {
+    public UserDetails getUserDetails(Credentials credentials) throws
+            UserManagementException,
+            AAMException {
         try {
             return feignClient.getUserDetails(credentials);
-        } catch (Exception exc) {
-            if (exc.getMessage().contains("400"))    //Bad Request, Requested user does not exsist
-                throw new UserManagementException("Requested user is not in database");
-            else    //Error 401 - Unauthorized, Wrong password was provided for existing user
-                throw new UserManagementException("Wrong password was provided");
+        } catch (FeignException exc) {
+            switch (exc.status()) {
+                case 400: //Bad Request, Requested user does not exist
+                    throw new UserManagementException("Requested user is not in database");
+                case 401: //Error 401 - Unauthorized, Wrong password was provided for existing user
+                    throw new UserManagementException("Wrong password was provided");
+                default:
+                    throw new AAMException(AAM_COMMS_ERROR_MESSAGE + exc.getMessage());
+            }
         }
     }
 

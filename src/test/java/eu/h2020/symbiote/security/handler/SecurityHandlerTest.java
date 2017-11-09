@@ -279,8 +279,7 @@ public class SecurityHandlerTest {
 
         String aamAddress = "https:\\www.aamserver";
         String aamInstanceFriendlyName = "name-friendly-" + aamInstanceId;
-        Certificate certificate = new Certificate();
-        certificate.setCertificateString(serverCertString);
+        Certificate certificate = new Certificate(serverCertString);
 
         return new AAM(aamAddress, aamInstanceFriendlyName, aamInstanceId, certificate, new HashMap<>());
     }
@@ -303,8 +302,7 @@ public class SecurityHandlerTest {
         
         aamMap.put(homeAAMId, homeAAM);
         
-        Certificate certificate = new Certificate();
-        certificate.setCertificateString(getCertString(serverkeystorePath, serverkeystorePassword, serveralias));
+        Certificate certificate = new Certificate(getCertString(serverkeystorePath, serverkeystorePassword, serveralias));
 
         for (int i = 0; i < 3; i++) {
             String key = "ammId" + i;

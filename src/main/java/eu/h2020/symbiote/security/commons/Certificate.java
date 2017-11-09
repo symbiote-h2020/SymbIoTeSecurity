@@ -27,15 +27,15 @@ public class Certificate {
      * required by JPA
      */
     public Certificate() {
-        ECDSAHelper.enableECDSAProvider();
+        // TODO R4 drop this and force immutability in R4
     }
 
     /**
      * @param certificateString in PEM format
+     * @throws CertificateException when the passed PEM certificate is invalid
      */
-    public Certificate(String certificateString) {
-        ECDSAHelper.enableECDSAProvider();
-        this.certificateString = certificateString;
+    public Certificate(String certificateString) throws CertificateException {
+        this.setCertificateString(certificateString);
     }
 
     /**
@@ -45,7 +45,7 @@ public class Certificate {
     @JsonIgnore
     public X509Certificate getX509() throws CertificateException {
         if (certificateString.isEmpty())
-            throw new CertificateException("internal PEM certificate is not initialized");
+            throw new CertificateException("held PEM certificate is not initialized");
         ECDSAHelper.enableECDSAProvider();
         InputStream stream = new ByteArrayInputStream(this.getCertificateString().getBytes(StandardCharsets.UTF_8));
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
@@ -62,11 +62,9 @@ public class Certificate {
     /**
      * @param certificateString in PEM format
      */
-    public void setCertificateString(String certificateString) {
-        /* TODO R3, once AAM knows the certificates, we can enforce this check
-        if (certificateString == null || certificateString.isEmpty())
+    public void setCertificateString(String certificateString) throws CertificateException {
+        if (certificateString == null) // || certificateString.isEmpty()) // todo R4 enforce this check
             throw new CertificateException("trying to pass empty value");
-        */
         this.certificateString = certificateString;
     }
 

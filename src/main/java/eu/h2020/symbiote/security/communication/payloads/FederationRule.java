@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -12,8 +11,8 @@ import java.util.Set;
  */
 public class FederationRule {
     @Id
-    private String federationId = "";
-    private Set<String> platformIds = new HashSet<>();
+    private final String federationId;
+    private final Set<String> platformIds;
 
     @JsonCreator
     public FederationRule(@JsonProperty("federationId") String federationId, @JsonProperty("platformIds") Set<String> platformIds) {

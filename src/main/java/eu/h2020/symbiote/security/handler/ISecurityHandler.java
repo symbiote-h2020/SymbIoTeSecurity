@@ -31,6 +31,14 @@ public interface ISecurityHandler {
     Map<String, AAM> getAvailableAAMs() throws SecurityHandlerException;
 
     /**
+     * @param aamAddress address of the AAM to retrieve the map from, note the symbIoTe Core AAM has always the up-to-date information
+     * @return map of all currently available security entrypoints to symbiote (getCertificate, login, token
+     * validation)
+     * @throws SecurityHandlerException on operation error
+     */
+    Map<String, AAM> getAvailableAAMs(String aamAddress) throws SecurityHandlerException;
+
+    /**
      * @param aam the aam to retrieve the map from, note the symbIoTe Core AAM has always the up-to-date information
      * @return map of all currently available security entrypoints to symbiote (getCertificate, login, token
      * validation)
@@ -92,19 +100,25 @@ public interface ISecurityHandler {
      * @param validationAuthority where the token should be validated (ideally it should be the token issuer authority)
      * @param token               to be validated
      * @return validation status of the given token
+     * @throws SecurityHandlerException on operation error
      */
     ValidationStatus validate(AAM validationAuthority, String token,
                               Optional<String> clientCertificate,
                               Optional<String> clientCertificateSigningAAMCertificate,
-                              Optional<String> foreignTokenIssuingAAMCertificate);
+                              Optional<String> foreignTokenIssuingAAMCertificate) throws
+            SecurityHandlerException;
 
     Map<String, BoundCredentials> getAcquiredCredentials();
 
     /**
      * @param componentIdentifier component identifier or {@link SecurityConstants#AAM_COMPONENT_NAME} for AAM CA certificate
      * @param platformIdentifier  for a platform component or {@link SecurityConstants#CORE_AAM_INSTANCE_ID} for Symbiote core components
+     * @return certificate of the selected component
+     * @throws SecurityHandlerException on operation error
      */
-    Certificate getComponentCertificate(String componentIdentifier, String platformIdentifier);
+    Certificate getComponentCertificate(String componentIdentifier,
+                                        String platformIdentifier) throws
+            SecurityHandlerException;
 
     AAM getCoreAAMInstance();
 }

@@ -1,5 +1,7 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.h2020.symbiote.security.commons.enums.ManagementStatus;
 
 /**
@@ -9,14 +11,12 @@ import eu.h2020.symbiote.security.commons.enums.ManagementStatus;
  * @author Mikołaj Dobski (PSNC)
  */
 public class PlatformManagementResponse {
-    private String platformId = "";
-    private ManagementStatus registrationStatus;
+    private final String platformId;
+    private final ManagementStatus registrationStatus;
 
-    public PlatformManagementResponse() {
-        // used by serializer
-    }
-
-    public PlatformManagementResponse(String registeredPlatformId, ManagementStatus registrationStatus) {
+    @JsonCreator
+    public PlatformManagementResponse(@JsonProperty("registeredPlatformId") String registeredPlatformId,
+                                      @JsonProperty("registrationStatus") ManagementStatus registrationStatus) {
         this.platformId = registeredPlatformId;
         this.registrationStatus = registrationStatus;
     }
@@ -28,15 +28,7 @@ public class PlatformManagementResponse {
         return platformId;
     }
 
-    public void setPlatformId(String platformId) {
-        this.platformId = platformId;
-    }
-
     public ManagementStatus getRegistrationStatus() {
         return registrationStatus;
-    }
-
-    public void setRegistrationStatus(ManagementStatus registrationStatus) {
-        this.registrationStatus = registrationStatus;
     }
 }

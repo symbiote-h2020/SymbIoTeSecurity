@@ -33,8 +33,14 @@ public class UserDetails {
      * @param recoveryMail    Recovery mail of the user
      * @param role            Role of the user (USER, PLATFORM_OWNER, NULL)
      * @param attributes      This user attributes. NOTE: during update, in case of empty map, attributes also will be updated (removed)
+     * @param clients         user's clients
      */
-    public UserDetails(Credentials userCredentials, String federatedId, String recoveryMail, UserRole role, Map<String, String> attributes, Map<String, Certificate> clients) {
+    public UserDetails(Credentials userCredentials,
+                       String federatedId,
+                       String recoveryMail,
+                       UserRole role,
+                       Map<String, String> attributes,
+                       Map<String, Certificate> clients) {
         this.userCredentials = userCredentials;
         this.federatedId = federatedId;
         this.recoveryMail = recoveryMail;

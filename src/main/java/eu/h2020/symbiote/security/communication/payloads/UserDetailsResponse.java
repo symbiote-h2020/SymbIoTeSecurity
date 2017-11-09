@@ -14,14 +14,11 @@ public class UserDetailsResponse {
         this.userDetails = userDetails;
     }
 
-
     public HttpStatus getHttpStatus() {
         return httpStatus;
     }
 
-
     public UserDetails getUserDetails() {
         return userDetails;
     }
-
 }

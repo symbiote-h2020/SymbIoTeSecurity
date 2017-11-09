@@ -10,10 +10,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class CertificateRequest {
 
-    private String username;
-    private String password;
-    private String clientId;
-    private String clientCSRinPEMFormat;
+    private final String username;
+    private final String password;
+    private final String clientId;
+    private final String clientCSRinPEMFormat;
 
     /**
      * @param username             user's name
