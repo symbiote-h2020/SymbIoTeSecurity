@@ -29,7 +29,9 @@ public class ComponentSecurityHandlerTest {
                 "irrelevant",
                 false,
                 "irrelevant",
-                "irrelevant"
+                "irrelevant",
+                null,
+                0
         );
     }
 
@@ -44,7 +46,9 @@ public class ComponentSecurityHandlerTest {
                 "irrelevant",
                 false,
                 "irrelevant",
-                "irrelevant"
+                "irrelevant",
+                null,
+                0
         );
     }
 
@@ -58,7 +62,9 @@ public class ComponentSecurityHandlerTest {
                 "irrelevant",
                 false,
                 "irrelevant",
-                "irrelevant"
+                "irrelevant",
+                null,
+                0
         );
     }
 
@@ -72,7 +78,9 @@ public class ComponentSecurityHandlerTest {
                 "irrelevant",
                 false,
                 "irrelevant",
-                "irrelevant"
+                "irrelevant",
+                null,
+                0
         );
     }
 
@@ -87,7 +95,9 @@ public class ComponentSecurityHandlerTest {
                 false,
                 "irrelevant",
                 "irrelevant",
-                goodComponentId + "@" + goodPlatformId);
+                goodComponentId + "@" + goodPlatformId,
+                null,
+                0);
     }
 
     @After

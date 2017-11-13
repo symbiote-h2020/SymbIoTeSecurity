@@ -3,8 +3,11 @@ package eu.h2020.symbiote.security;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 import eu.h2020.symbiote.security.handler.ComponentSecurityHandler;
+import eu.h2020.symbiote.security.handler.IAnomalyListenerSecurity;
 import eu.h2020.symbiote.security.handler.IComponentSecurityHandler;
 import eu.h2020.symbiote.security.handler.SecurityHandler;
+
+import java.util.Optional;
 
 /**
  * Builds a component security Handler
@@ -38,7 +41,9 @@ public class ComponentSecurityHandlerFactory {
                                                                         String localAAMAddress,
                                                                         boolean alwaysUseLocalAAMForValidation,
                                                                         String componentOwnerUsername,
-                                                                        String componentOwnerPassword) throws
+                                                                        String componentOwnerPassword,
+                                                                        IAnomalyListenerSecurity anomalyListenerSecurity,
+                                                                        int verbosityLevel) throws
             SecurityHandlerException {
         return new ComponentSecurityHandler(
                 new SecurityHandler(keystorePath, keystorePassword, localAAMAddress, componentOwnerUsername),
@@ -46,6 +51,8 @@ public class ComponentSecurityHandlerFactory {
                 alwaysUseLocalAAMForValidation,
                 componentOwnerUsername,
                 componentOwnerPassword,
-                clientId);
+                clientId,
+                anomalyListenerSecurity,
+                verbosityLevel);
     }
 }

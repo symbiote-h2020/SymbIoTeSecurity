@@ -104,14 +104,14 @@ public class AAMClient implements IAAMClient {
     }
 
     /**
-     * Allow to report detected anomaly.
+     * Sends information about event to Anomaly Detection Module
      *
-     * @param handleAnomalyRequest required to report detected anomaly.
-     * @return true/false depending on anomaly handling status
+     * @param eventLogRequest contains information about event
+     * @return true/false depending on event report status
      */
     @Override
-    public String reportAnomaly(HandleAnomalyRequest handleAnomalyRequest) throws InvalidArgumentsException, WrongCredentialsException {
-        Response response = feignClient.reportAnomaly(handleAnomalyRequest);
+    public String logAnomalyEvent(EventLogRequest eventLogRequest) {
+        Response response = feignClient.logAnomalyEvent(eventLogRequest);
         return response.body().toString();
     }
 

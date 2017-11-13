@@ -58,6 +58,7 @@ public class SecurityConstants {
 
     //Anomaly Detection
     public static final long ANOMALY_DETECTION_DELTA = 6000L;
+    public static final String LOG_ANOMALY_EVENT = "/log_anomaly_event";
     public static final String ANOMALY_DETECTION_MESSAGE = "/anomaly_detection_message";
 
     private SecurityConstants() {

@@ -45,12 +45,12 @@ public interface IAAMClient {
     String revokeCredentials(RevocationRequest revocationRequest) throws InvalidArgumentsException, WrongCredentialsException;
 
     /**
-     * Allow to report detected anomaly.
+     * Sends information about event to Anomaly Detection Module
      *
-     * @param handleAnomalyRequest required to report detected anomaly.
-     * @return true/false depending on anomaly handling status
+     * @param eventLogRequest contains information about event
+     * @return true/false depending on event report status
      */
-    String reportAnomaly(HandleAnomalyRequest handleAnomalyRequest) throws InvalidArgumentsException, WrongCredentialsException;
+    String logAnomalyEvent(EventLogRequest eventLogRequest);
 
     /**
      * @return GUEST token used to access public resources offered in SymbIoTe
