@@ -2,7 +2,6 @@ package eu.h2020.symbiote.security.helpers.accesspolicies;
 
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
-import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyType;
 import eu.h2020.symbiote.security.accesspolicies.common.CompositeAccessPolicyFactory;
 import eu.h2020.symbiote.security.accesspolicies.common.composite.CompositeAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
@@ -159,7 +158,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
+                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -167,7 +166,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
+                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -204,7 +203,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
+                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -212,7 +211,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
+                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -249,7 +248,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
+                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -257,7 +256,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
+                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -295,7 +294,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
+                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -303,7 +302,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
+                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -340,7 +339,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
+                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -348,7 +347,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
+                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -385,7 +384,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
+                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -393,7 +392,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
+                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -407,856 +406,6 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         );
 
         resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(compositePolicySpecifier));
-
-        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-
-        assertFalse(resp.keySet().contains(goodResourceID));
-    }
-    @Test
-    public  void singleResourceMultipleTokensCompositeAndSingleAndOperatorCheckSuccess()throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException{
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
-        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFirst
-        );
-
-        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
-        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapSecond
-        );
-
-        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
-        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapThird
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSet = new HashSet<>();
-        accessPoliciesSet.add(testPolicySpecifierFirst);
-        accessPoliciesSet.add(testPolicySpecifierSecond);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifier = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSet, null
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> singleAccessPolicySet = new HashSet<>();
-        singleAccessPolicySet.add(testPolicySpecifierThird);
-
-        Set<CompositeAccessPolicySpecifier> nestedAccessPoliciesSet = new HashSet<>();
-        nestedAccessPoliciesSet.add(compositePolicySpecifier);
-
-        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                singleAccessPolicySet, nestedAccessPoliciesSet
-        );
-
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(parentCompositePolicySpecifier));
-
-        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-
-        assertTrue(resp.keySet().contains(goodResourceID));
-    }
-
-    @Test
-    public  void singleResourceMultipleTokensCompositeAndSingleAndOperatorOneBadArgumentCheckFailure()throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException{
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
-        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFirst
-        );
-
-        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
-        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapSecond
-        );
-
-        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
-        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapThird
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSet = new HashSet<>();
-        accessPoliciesSet.add(testPolicySpecifierFirst);
-        accessPoliciesSet.add(testPolicySpecifierSecond);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifier = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSet, null
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> singleAccessPolicySet = new HashSet<>();
-        singleAccessPolicySet.add(testPolicySpecifierThird);
-
-        Set<CompositeAccessPolicySpecifier> nestedAccessPoliciesSet = new HashSet<>();
-        nestedAccessPoliciesSet.add(compositePolicySpecifier);
-
-        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                singleAccessPolicySet, nestedAccessPoliciesSet
-        );
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(parentCompositePolicySpecifier));
-
-        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-
-        assertFalse(resp.keySet().contains(goodResourceID));
-    }
-
-    @Test
-    public  void singleResourceMultipleTokensCompositeAndSingleAndOperatorTwoBadArgumentsCheckFailure()throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException{
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
-        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFirst
-        );
-
-        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
-        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapSecond
-        );
-
-        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
-        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapThird
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSet = new HashSet<>();
-        accessPoliciesSet.add(testPolicySpecifierFirst);
-        accessPoliciesSet.add(testPolicySpecifierSecond);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifier = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSet, null
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> singleAccessPolicySet = new HashSet<>();
-        singleAccessPolicySet.add(testPolicySpecifierThird);
-
-        Set<CompositeAccessPolicySpecifier> nestedAccessPoliciesSet = new HashSet<>();
-        nestedAccessPoliciesSet.add(compositePolicySpecifier);
-
-        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                singleAccessPolicySet, nestedAccessPoliciesSet
-        );
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(parentCompositePolicySpecifier));
-
-        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-
-        assertFalse(resp.keySet().contains(goodResourceID));
-    }
-
-    @Test
-    public  void singleResourceMultipleTokensCompositeAndCompositeAndOperatorCheckSuccess()throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException{
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
-        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFirst
-        );
-
-        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
-        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapSecond
-        );
-
-        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
-        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapThird
-        );
-
-        Map<String, String> accessPolicyClaimsMapFourth = new HashMap<>();
-        accessPolicyClaimsMapFourth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFourth = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFourth
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetFirst = new HashSet<>();
-        accessPoliciesSetFirst.add(testPolicySpecifierFirst);
-        accessPoliciesSetFirst.add(testPolicySpecifierSecond);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifierFirst = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSetFirst, null
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSecond = new HashSet<>();
-        accessPoliciesSetSecond.add(testPolicySpecifierThird);
-        accessPoliciesSetSecond.add(testPolicySpecifierFourth);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifierSecond = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSetSecond, null
-        );
-
-
-        Set<CompositeAccessPolicySpecifier> nestedAccessPoliciesSet = new HashSet<>();
-        nestedAccessPoliciesSet.add(compositePolicySpecifierFirst);
-        nestedAccessPoliciesSet.add(compositePolicySpecifierSecond);
-
-
-        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                null, nestedAccessPoliciesSet
-        );
-
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(parentCompositePolicySpecifier));
-
-        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-
-        assertTrue(resp.keySet().contains(goodResourceID));
-    }
-
-
-    @Test
-    public  void singleResourceMultipleTokensCompositeAndCompositeAndOperatorOneBadArgumentCheckFailure()throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException{
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
-        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFirst
-        );
-
-        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
-        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapSecond
-        );
-
-        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
-        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapThird
-        );
-
-        Map<String, String> accessPolicyClaimsMapFourth = new HashMap<>();
-        accessPolicyClaimsMapFourth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFourth = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFourth
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetFirst = new HashSet<>();
-        accessPoliciesSetFirst.add(testPolicySpecifierFirst);
-        accessPoliciesSetFirst.add(testPolicySpecifierSecond);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifierFirst = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSetFirst, null
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSecond = new HashSet<>();
-        accessPoliciesSetSecond.add(testPolicySpecifierThird);
-        accessPoliciesSetSecond.add(testPolicySpecifierFourth);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifierSecond = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSetSecond, null
-        );
-
-
-        Set<CompositeAccessPolicySpecifier> nestedAccessPoliciesSet = new HashSet<>();
-        nestedAccessPoliciesSet.add(compositePolicySpecifierFirst);
-        nestedAccessPoliciesSet.add(compositePolicySpecifierSecond);
-
-
-        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                null, nestedAccessPoliciesSet
-        );
-
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(parentCompositePolicySpecifier));
-
-        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-
-        assertFalse(resp.keySet().contains(goodResourceID));
-    }
-
-
-    @Test
-    public void singleResourceThreeTokensAndOperatorCheckSuccess() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException {
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
-        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFirst
-        );
-
-        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
-        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapSecond
-        );
-
-        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
-        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapThird
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSet = new HashSet<>();
-        accessPoliciesSet.add(testPolicySpecifierFirst);
-        accessPoliciesSet.add(testPolicySpecifierSecond);
-        accessPoliciesSet.add(testPolicySpecifierThird);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifier = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSet, null
-        );
-
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(compositePolicySpecifier));
-
-        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-
-        assertTrue(resp.keySet().contains(goodResourceID));
-    }
-
-
-    @Test
-    public void singleResourceThreeTokensAndOperatorOneBadArgumentCheckFailure() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException {
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
-        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFirst
-        );
-
-        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
-        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapSecond
-        );
-
-        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
-        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapThird
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSet = new HashSet<>();
-        accessPoliciesSet.add(testPolicySpecifierFirst);
-        accessPoliciesSet.add(testPolicySpecifierSecond);
-        accessPoliciesSet.add(testPolicySpecifierThird);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifier = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSet, null
-        );
-
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(compositePolicySpecifier));
-
-        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-
-        assertFalse(resp.keySet().contains(goodResourceID));
-    }
-
-    @Test
-    public void singleResourceThreeTokensOROperatorTwoBadArgumentsCheckSuccess() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException {
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
-        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFirst
-        );
-
-        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
-        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapSecond
-        );
-
-        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
-        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapThird
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSet = new HashSet<>();
-        accessPoliciesSet.add(testPolicySpecifierFirst);
-        accessPoliciesSet.add(testPolicySpecifierSecond);
-        accessPoliciesSet.add(testPolicySpecifierThird);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifier = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.OR,
-                accessPoliciesSet, null
-        );
-
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(compositePolicySpecifier));
-
-        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-
-        assertTrue(resp.keySet().contains(goodResourceID));
-    }
-
-    @Test
-    public void singleResourceThreeTokensOROperatorThreeBadArgumentsCheckFailure() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException {
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
-        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFirst
-        );
-
-        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
-        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapSecond
-        );
-
-        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
-        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapThird
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSet = new HashSet<>();
-        accessPoliciesSet.add(testPolicySpecifierFirst);
-        accessPoliciesSet.add(testPolicySpecifierSecond);
-        accessPoliciesSet.add(testPolicySpecifierThird);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifier = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.OR,
-                accessPoliciesSet, null
-        );
-
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(compositePolicySpecifier));
-
-        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-
-        assertFalse(resp.keySet().contains(goodResourceID));
-    }
-
-    @Test
-    public  void singleResourceMultipleTokensCompositeAndCompositeAndSingleAndOperatorCheckSuccess()throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException{
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
-        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFirst
-        );
-
-        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
-        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapSecond
-        );
-
-        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
-        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapThird
-        );
-
-        Map<String, String> accessPolicyClaimsMapFourth = new HashMap<>();
-        accessPolicyClaimsMapFourth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFourth = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFourth
-        );
-
-
-        Map<String, String> accessPolicyClaimsMapFifth = new HashMap<>();
-        accessPolicyClaimsMapFifth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFifth = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFifth
-        );
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSingle = new HashSet<>();
-        accessPoliciesSetSingle.add(testPolicySpecifierFifth);
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetFirst = new HashSet<>();
-        accessPoliciesSetFirst.add(testPolicySpecifierFirst);
-        accessPoliciesSetFirst.add(testPolicySpecifierSecond);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifierFirst = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSetFirst, null
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSecond = new HashSet<>();
-        accessPoliciesSetSecond.add(testPolicySpecifierThird);
-        accessPoliciesSetSecond.add(testPolicySpecifierFourth);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifierSecond = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSetSecond, null
-        );
-
-
-        Set<CompositeAccessPolicySpecifier> nestedAccessPoliciesSet = new HashSet<>();
-        nestedAccessPoliciesSet.add(compositePolicySpecifierFirst);
-        nestedAccessPoliciesSet.add(compositePolicySpecifierSecond);
-
-
-        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSetSingle, nestedAccessPoliciesSet
-        );
-
-
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(parentCompositePolicySpecifier));
-
-        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-
-        assertTrue(resp.keySet().contains(goodResourceID));
-    }
-
-    @Test
-    public  void singleResourceMultipleTokensCompositeAndCompositeAndSingleAndOperatorBadArgumentInSingleCheckFailure()throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException{
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
-        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFirst
-        );
-
-        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
-        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapSecond
-        );
-
-        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
-        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapThird
-        );
-
-        Map<String, String> accessPolicyClaimsMapFourth = new HashMap<>();
-        accessPolicyClaimsMapFourth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFourth = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFourth
-        );
-
-
-        Map<String, String> accessPolicyClaimsMapFifth = new HashMap<>();
-        accessPolicyClaimsMapFifth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFifth = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFifth
-        );
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSingle = new HashSet<>();
-        accessPoliciesSetSingle.add(testPolicySpecifierFifth);
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetFirst = new HashSet<>();
-        accessPoliciesSetFirst.add(testPolicySpecifierFirst);
-        accessPoliciesSetFirst.add(testPolicySpecifierSecond);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifierFirst = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSetFirst, null
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSecond = new HashSet<>();
-        accessPoliciesSetSecond.add(testPolicySpecifierThird);
-        accessPoliciesSetSecond.add(testPolicySpecifierFourth);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifierSecond = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSetSecond, null
-        );
-
-
-        Set<CompositeAccessPolicySpecifier> nestedAccessPoliciesSet = new HashSet<>();
-        nestedAccessPoliciesSet.add(compositePolicySpecifierFirst);
-        nestedAccessPoliciesSet.add(compositePolicySpecifierSecond);
-
-
-        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSetSingle, nestedAccessPoliciesSet
-        );
-
-
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(parentCompositePolicySpecifier));
-
-        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-
-        assertFalse(resp.keySet().contains(goodResourceID));
-    }
-
-
-    @Test
-    public  void singleResourceMultipleTokensCompositeAndCompositeAndSingleAndOperatorOneBadArgumentInFirstCompositeCheckFailure()throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException{
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
-        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFirst
-        );
-
-        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
-        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapSecond
-        );
-
-        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
-        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapThird
-        );
-
-        Map<String, String> accessPolicyClaimsMapFourth = new HashMap<>();
-        accessPolicyClaimsMapFourth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFourth = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFourth
-        );
-
-
-        Map<String, String> accessPolicyClaimsMapFifth = new HashMap<>();
-        accessPolicyClaimsMapFifth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        SingleTokenAccessPolicySpecifier testPolicySpecifierFifth = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.STAP,
-                accessPolicyClaimsMapFifth
-        );
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSingle = new HashSet<>();
-        accessPoliciesSetSingle.add(testPolicySpecifierFifth);
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetFirst = new HashSet<>();
-        accessPoliciesSetFirst.add(testPolicySpecifierFirst);
-        accessPoliciesSetFirst.add(testPolicySpecifierSecond);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifierFirst = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSetFirst, null
-        );
-
-        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSecond = new HashSet<>();
-        accessPoliciesSetSecond.add(testPolicySpecifierThird);
-        accessPoliciesSetSecond.add(testPolicySpecifierFourth);
-
-        CompositeAccessPolicySpecifier compositePolicySpecifierSecond = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSetSecond, null
-        );
-
-
-        Set<CompositeAccessPolicySpecifier> nestedAccessPoliciesSet = new HashSet<>();
-        nestedAccessPoliciesSet.add(compositePolicySpecifierFirst);
-        nestedAccessPoliciesSet.add(compositePolicySpecifierSecond);
-
-
-        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                accessPoliciesSetSingle, nestedAccessPoliciesSet
-        );
-
-
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(parentCompositePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
