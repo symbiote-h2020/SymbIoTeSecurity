@@ -37,6 +37,70 @@ As you notice above, during development (i.e. feature and develop branches of co
 ```
 compile('com.github.symbiote-h2020:SymbIoTeSecurity:{tag}')
 ```
+## Access to public resources
+### Java developers
+1. Create REST client communicating with Symbiote
+2. Acquire guestToken
+3. Generate Security Request containing guest Token
+```java
+// Creating REST client comunicating with Symbiote Authorization Services (coreAAMServerAddress can be acquired from symbIoTe web page )
+IAAMClient restClient = new AAMClient(coreAAMServerAddress);
+
+// Acquiring Guest Token
+String guestToken = restClient.getGuestToken();
+
+//Creating securityRequest using guest Token
+SecurityRequest securityRequest = new SecurityRequest(guestToken);
+```
+4. With Security Request containing guest token, public resources can be accessed
+5. After receiving a business response from a symbiote component, we should check if it came from component we are interested in
+
+```java 
+ // trying to validate the service response
+MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, restClient.getComponentCertificate(componentIdentifier, platformIdentifier));
+``` 
+
+### Non java developers
+1. Acquire Guest Token, sending empty HTTP POST request on:
+   ```
+   https://<coreInterfaceAdress>/get_guest_token
+   ```
+   or
+   ```
+   https://<platformInterworkingInterface>/paam/get_guest_token
+   ```
+   depending from which platform we want to acquire Guest Token.
+   In return, headers with *x-auth-token* containing Guest Token should be received.
+
+2. Create Security Request
+
+   The SecurityRequest is a set of payloads authorizing actor in the system (JSON Web Tokens) with the confirmation, that those payloads belong to it. 
+   It is split into the **HTTP security headers** for REST communication.
+   
+   Security Request using guest token should look like this:
+   ```java
+    {
+     x-auth-timestamp=1510567267951,
+     x-auth-1={
+           "token":"[eyJhbGciOiJFUzI1NiJ9.eyJ0dHlwIjoiR1VFU1QiLCJzdWIiOiJndWVzdCIsImlwayI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRVBhZURDNElnT3VITlBmWCtURG5adXZuTHdUbHMwMERQb294aVZCTE8za3I0N0N3TXFYSm4yN3lpdFdZUkRRKzBmWG52MzFIbGJLbkxSWktqSmF5U3p3PT0iLCJpc3MiOiJTeW1iSW9UZV9Db3JlX0FBTSIsImV4cCI6MTUxMDU2Nzg2NywiaWF0IjoxNTEwNTY3MjY3LCJqdGkiOiI2MzI4NDUxMzAiLCJzcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVsdlNwYVhDa2RFZ3lYM2xJeWQ1VCs2VFgyQ0hXMDluekNjL05aY2krcGEvdmtQSG5DeFZESkpLTkZwL1hQc0g2T1hvSTkxQXJFcUJ1SlJtd3k2dWZSdz09In0.zn7xjwUq89YSNptLTFCZSpb8n65n4o24HPOw2WPTJSglfaO8paW1O5vC3n9072ktm327kj44Kgs5qqMhRy22cA]",
+           "authenticationChallenge":"",
+           "clientCertificate":"",
+           "clientCertificateSigningAAMCertificate":"",
+           "foreignTokenIssuingAAMCertificate":""},
+     x-auth-size=1
+    }
+    ```
+    where x-auth-timestamp should contain actual timestamp and "token" - received guest Token in previous step.
+    Fields: 
+    * "authenticationChallenge", 
+    * "clientCertificate", 
+    * "clientCertificateSigningAAMCertificate",
+    * "foreignTokenIssuingAAMCertificate" 
+    
+    should remain empty - there is no need of authentication using Guest Token.
+3. With Security Request containing guest token, public resources can be accessed.
+4. After receiving a business response from a symbiote component, we should check if it came from component we are interested in.
+    To do so, please see [Service Response payload](#Service Response payload)
 
 ## Instructions for Java developers
 This section provides the information about usage of SymbIoTe Security library in the java code. 
