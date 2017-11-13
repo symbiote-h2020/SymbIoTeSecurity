@@ -2,9 +2,8 @@ package eu.h2020.symbiote.security.helpers.accesspolicies;
 
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
-import eu.h2020.symbiote.security.accesspolicies.common.MultipleDomainAccessPolicyFactory;
-import eu.h2020.symbiote.security.accesspolicies.common.SingleTokenAccessPolicyFactory;
-import eu.h2020.symbiote.security.accesspolicies.common.multipleDomain.MultipleDomainAccessPolicySpecifier;
+import eu.h2020.symbiote.security.accesspolicies.common.CompositeAccessPolicyFactory;
+import eu.h2020.symbiote.security.accesspolicies.common.composite.CompositeAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
@@ -47,7 +46,7 @@ import static org.junit.Assert.assertTrue;
  * @author Nemanja Ignjatov (UNIVIE)
  */
 
-public class ABACPolicyHelperMultipleDomainTest {
+public class ABACPolicyHelperCompositeAccessPoliciesTest {
 
     private static final String ISSUING_AAM_CERTIFICATE_ALIAS = "core-1";
     private static final String CLIENT_CERTIFICATE_ALIAS = "client-core-1";
@@ -171,16 +170,16 @@ public class ABACPolicyHelperMultipleDomainTest {
                 accessPolicyClaimsMapSecond
         );
 
-        Set<IAccessPolicy> accessPoliciesSet = new HashSet<>();
-        accessPoliciesSet.add(SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifierFirst));
-        accessPoliciesSet.add(SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifierSecond));
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSet = new HashSet<>();
+        accessPoliciesSet.add(testPolicySpecifierFirst);
+        accessPoliciesSet.add(testPolicySpecifierSecond);
 
-        MultipleDomainAccessPolicySpecifier multiplePolicySpecifier = new MultipleDomainAccessPolicySpecifier(
-                MultipleDomainAccessPolicySpecifier.MultipleDomainAccessPolicyRelationOperator.OR,
-                accessPoliciesSet
+        CompositeAccessPolicySpecifier compositePolicySpecifier = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.OR,
+                accessPoliciesSet, null
         );
 
-        resourceAccessPolicyMap.put(goodResourceID, MultipleDomainAccessPolicyFactory.getMultipleDomainAccessPolicy(multiplePolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(compositePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -216,16 +215,16 @@ public class ABACPolicyHelperMultipleDomainTest {
                 accessPolicyClaimsMapSecond
         );
 
-        Set<IAccessPolicy> accessPoliciesSet = new HashSet<>();
-        accessPoliciesSet.add(SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifierFirst));
-        accessPoliciesSet.add(SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifierSecond));
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSet = new HashSet<>();
+        accessPoliciesSet.add(testPolicySpecifierFirst);
+        accessPoliciesSet.add(testPolicySpecifierSecond);
 
-        MultipleDomainAccessPolicySpecifier multiplePolicySpecifier = new MultipleDomainAccessPolicySpecifier(
-                MultipleDomainAccessPolicySpecifier.MultipleDomainAccessPolicyRelationOperator.OR,
-                accessPoliciesSet
+        CompositeAccessPolicySpecifier compositePolicySpecifier = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.OR,
+                accessPoliciesSet, null
         );
 
-        resourceAccessPolicyMap.put(goodResourceID, MultipleDomainAccessPolicyFactory.getMultipleDomainAccessPolicy(multiplePolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(compositePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -261,16 +260,16 @@ public class ABACPolicyHelperMultipleDomainTest {
                 accessPolicyClaimsMapSecond
         );
 
-        Set<IAccessPolicy> accessPoliciesSet = new HashSet<>();
-        accessPoliciesSet.add(SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifierFirst));
-        accessPoliciesSet.add(SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifierSecond));
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSet = new HashSet<>();
+        accessPoliciesSet.add(testPolicySpecifierFirst);
+        accessPoliciesSet.add(testPolicySpecifierSecond);
 
-        MultipleDomainAccessPolicySpecifier multiplePolicySpecifier = new MultipleDomainAccessPolicySpecifier(
-                MultipleDomainAccessPolicySpecifier.MultipleDomainAccessPolicyRelationOperator.OR,
-                accessPoliciesSet
+        CompositeAccessPolicySpecifier compositePolicySpecifier = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.OR,
+                accessPoliciesSet, null
         );
 
-        resourceAccessPolicyMap.put(goodResourceID, MultipleDomainAccessPolicyFactory.getMultipleDomainAccessPolicy(multiplePolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(compositePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -307,16 +306,16 @@ public class ABACPolicyHelperMultipleDomainTest {
                 accessPolicyClaimsMapSecond
         );
 
-        Set<IAccessPolicy> accessPoliciesSet = new HashSet<>();
-        accessPoliciesSet.add(SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifierFirst));
-        accessPoliciesSet.add(SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifierSecond));
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSet = new HashSet<>();
+        accessPoliciesSet.add(testPolicySpecifierFirst);
+        accessPoliciesSet.add(testPolicySpecifierSecond);
 
-        MultipleDomainAccessPolicySpecifier multiplePolicySpecifier = new MultipleDomainAccessPolicySpecifier(
-                MultipleDomainAccessPolicySpecifier.MultipleDomainAccessPolicyRelationOperator.AND,
-                accessPoliciesSet
+        CompositeAccessPolicySpecifier compositePolicySpecifier = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSet, null
         );
 
-        resourceAccessPolicyMap.put(goodResourceID, MultipleDomainAccessPolicyFactory.getMultipleDomainAccessPolicy(multiplePolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(compositePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -352,16 +351,16 @@ public class ABACPolicyHelperMultipleDomainTest {
                 accessPolicyClaimsMapSecond
         );
 
-        Set<IAccessPolicy> accessPoliciesSet = new HashSet<>();
-        accessPoliciesSet.add(SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifierFirst));
-        accessPoliciesSet.add(SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifierSecond));
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSet = new HashSet<>();
+        accessPoliciesSet.add(testPolicySpecifierFirst);
+        accessPoliciesSet.add(testPolicySpecifierSecond);
 
-        MultipleDomainAccessPolicySpecifier multiplePolicySpecifier = new MultipleDomainAccessPolicySpecifier(
-                MultipleDomainAccessPolicySpecifier.MultipleDomainAccessPolicyRelationOperator.AND,
-                accessPoliciesSet
+        CompositeAccessPolicySpecifier compositePolicySpecifier = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSet, null
         );
 
-        resourceAccessPolicyMap.put(goodResourceID, MultipleDomainAccessPolicyFactory.getMultipleDomainAccessPolicy(multiplePolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(compositePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -397,16 +396,16 @@ public class ABACPolicyHelperMultipleDomainTest {
                 accessPolicyClaimsMapSecond
         );
 
-        Set<IAccessPolicy> accessPoliciesSet = new HashSet<>();
-        accessPoliciesSet.add(SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifierFirst));
-        accessPoliciesSet.add(SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifierSecond));
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSet = new HashSet<>();
+        accessPoliciesSet.add(testPolicySpecifierFirst);
+        accessPoliciesSet.add(testPolicySpecifierSecond);
 
-        MultipleDomainAccessPolicySpecifier multiplePolicySpecifier = new MultipleDomainAccessPolicySpecifier(
-                MultipleDomainAccessPolicySpecifier.MultipleDomainAccessPolicyRelationOperator.AND,
-                accessPoliciesSet
+        CompositeAccessPolicySpecifier compositePolicySpecifier = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSet, null
         );
 
-        resourceAccessPolicyMap.put(goodResourceID, MultipleDomainAccessPolicyFactory.getMultipleDomainAccessPolicy(multiplePolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(compositePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
