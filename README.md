@@ -65,7 +65,7 @@ With these headers containing your GUEST token you can use SymbIoTe APIs to acce
  // trying to validate the service response
 MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, restClient.getComponentCertificate(componentIdentifier, platformIdentifier));
 ``` 
-where the componentIdentifier can be read from the table below.
+where the componentIdentifier can be read from the table available [here](#component_table).
 
 ## Non java developers
 1. To acquire a GUEST Token, send empty HTTP POST request on:
@@ -107,7 +107,7 @@ where the componentIdentifier can be read from the table below.
    }
     ```
 3. With such prepared headers you can access SymbIoTe resources offered publicly.
-4. After receiving a business response from a symbiote component, you should check if it came from component you are interested in. To do so, please see [Service Response payload](#Service Response payload)
+4. After receiving a business response from a symbiote component, you should check if it came from component you are interested in. To do so, please see [Service Response payload](#service_response)
 
 # Access and offering resources with restricted access 
 The sections below demonstrate the SymbioteSecurity in depth for parties interested in accessing and offering resources with limited access.
@@ -185,7 +185,7 @@ Then after received a business response from a symbiote component we can check i
 // trying to validate the service response
 MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, clientSH.getComponentCertificate(componentIdentifier, platformIdentifier));
 ```
-
+<a name="component_table"></a>
 In order to identify the certificate of the component you communicate with, please use the following table:
 
 | Component name | Component certificate key in the AAM collection |
@@ -604,7 +604,7 @@ All the claims marked with T means values of claims from AuthorizationToken for 
 * hash claim contains a SHA256 hash of the authorization token compact form String concatenated with the challenge timestamp1     
 * sign claim is the same as in the login request - uses the client's private key
 
-#### Service Response payload
+#### <a name="service_response"></a>Service Response payload
 The client can verify that the service response was genuine by checking that the service response contains a valid JWS token.
 ![Service response structure](media/service-response.png)
 
