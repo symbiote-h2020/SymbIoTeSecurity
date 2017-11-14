@@ -243,8 +243,14 @@ public class MutualAuthenticationHelper {
         Long timestamp3 = ZonedDateTime.now().toInstant().toEpochMilli();
         PublicKey servicePublicKey = serviceCertificate.getX509().getPublicKey();
 
-        Long timestamp2 = Long.valueOf(Jwts.parser().setSigningKey(servicePublicKey).parseClaimsJws(serviceResponse).getBody().get("timestamp").toString());
-        String hashedTimestamp2 = Jwts.parser().setSigningKey(servicePublicKey).parseClaimsJws(serviceResponse).getBody().get("hash").toString();
+        Long timestamp2;
+        String hashedTimestamp2;
+        try {
+            timestamp2 = Long.valueOf(Jwts.parser().setSigningKey(servicePublicKey).parseClaimsJws(serviceResponse).getBody().get("timestamp").toString());
+            hashedTimestamp2 = Jwts.parser().setSigningKey(servicePublicKey).parseClaimsJws(serviceResponse).getBody().get("hash").toString();
+        } catch (io.jsonwebtoken.SignatureException e) {
+            throw new CertificateException(e.getMessage());
+        }
 
         String calculatedHash = hashSHA256(timestamp2.toString());
         Long deltaT = timestamp3 - timestamp2;

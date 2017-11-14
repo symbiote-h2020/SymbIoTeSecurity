@@ -143,8 +143,8 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
             return MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse,
                     securityHandler.getComponentCertificate(componentIdentifier, platformIdentifier));
         } catch (NoSuchAlgorithmException | CertificateException e) {
-            log.error(e);
-            throw new SecurityHandlerException("Failed to verify the serviceResponse, the operation should be retried: " + e.getMessage());
+            log.error("Failed to verify the serviceResponse, the operation should be retried: " + e.getMessage());
+            return false;
         }
     }
 
@@ -223,10 +223,10 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
     @Override
     public String generateServiceResponse() throws
             SecurityHandlerException {
-        BoundCredentials coreAAMBoundCredentials = getLocalAAMCredentials();
+        BoundCredentials localAAMBoundCredentials = getLocalAAMCredentials();
         try {
             // generating the service response
-            return MutualAuthenticationHelper.getServiceResponse(coreAAMBoundCredentials.homeCredentials.privateKey, new Date().getTime());
+            return MutualAuthenticationHelper.getServiceResponse(localAAMBoundCredentials.homeCredentials.privateKey, new Date().getTime());
         } catch (NoSuchAlgorithmException e) {
             log.error(e);
             throw new SecurityHandlerException("Failed to generate service response");

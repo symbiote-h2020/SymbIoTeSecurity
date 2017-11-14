@@ -243,22 +243,24 @@ public class SecurityHandler implements ISecurityHandler {
           SecurityHandlerException {
         AAMClient aamClient = ClientFactory.getAAMClient(homeAAMAddress);
         Certificate certificate;
+        /*   temporarily disabling the cache as it causes service response validation errors
+        TODO R4 add forced refresh on failed validation
         // checking cache
         if (credentialsWallet.containsKey(platformIdentifier)
                 && credentialsWallet.get(platformIdentifier).homeCredentials.homeAAM.getComponentCertificates().containsKey(componentIdentifier))
           // fetching from wallet
           certificate = credentialsWallet.get(platformIdentifier).homeCredentials.homeAAM.getComponentCertificates().get(componentIdentifier);
         else {
-          // need to fetch fresh certificate
-          try {
-          certificate = new Certificate(aamClient.getComponentCertificate(componentIdentifier, platformIdentifier));
-          //TODO: add new certificate to credentialWallet (create credWallet for platform if missing?)
-          } catch (AAMException | CertificateException e) {
-            logger.error(e);
-            throw new SecurityHandlerException("Failed to fetch the component certificate from the AAM. "+ e.getMessage());
-          }
+        */
+        // need to fetch fresh certificate
+        try {
+        certificate = new Certificate(aamClient.getComponentCertificate(componentIdentifier, platformIdentifier));
+        //TODO: add new certificate to credentialWallet (create credWallet for platform if missing?)
+        } catch (AAMException | CertificateException e) {
+          logger.error(e);
+          throw new SecurityHandlerException("Failed to fetch the component certificate from the AAM. " + e.getMessage());
         }
-        return certificate;
+    return certificate;
   }
   
   @Override

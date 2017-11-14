@@ -31,7 +31,7 @@ import java.security.spec.ECGenParameterSpec;
 import java.util.Date;
 
 /**
- * Utility class containing helper methods for PKI related operation (keys, certifates, conversions)
+ * Utility class containing helper methods for PKI related operation (keys, certificates, conversions)
  *
  * @author Daniele Caldarola (CNIT)
  * @author Mikołaj Dobski (PSNC)
