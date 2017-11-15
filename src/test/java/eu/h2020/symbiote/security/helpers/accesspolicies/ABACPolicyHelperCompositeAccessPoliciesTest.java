@@ -4,7 +4,6 @@ package eu.h2020.symbiote.security.helpers.accesspolicies;
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.CompositeAccessPolicyFactory;
 import eu.h2020.symbiote.security.accesspolicies.common.composite.CompositeAccessPolicySpecifier;
-import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
@@ -458,17 +457,18 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
                 accessPoliciesSet, null
         );
 
-        Set<SingleTokenAccessPolicySpecifier> SingleAccessPolicySet = new HashSet<>();
-        SingleAccessPolicySet.add(testPolicySpecifierThird);
+        Set<SingleTokenAccessPolicySpecifier> singleAccessPolicySet = new HashSet<>();
+        singleAccessPolicySet.add(testPolicySpecifierThird);
 
         Set<CompositeAccessPolicySpecifier> nestedAccessPoliciesSet = new HashSet<>();
         nestedAccessPoliciesSet.add(compositePolicySpecifier);
 
-        CompositeAccessPolicySpecifier ParentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
+        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
                 CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                SingleAccessPolicySet, nestedAccessPoliciesSet
+                singleAccessPolicySet, nestedAccessPoliciesSet
         );
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(ParentCompositePolicySpecifier));
+
+        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(parentCompositePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -521,17 +521,17 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
                 accessPoliciesSet, null
         );
 
-        Set<SingleTokenAccessPolicySpecifier> SingleAccessPolicySet = new HashSet<>();
-        SingleAccessPolicySet.add(testPolicySpecifierThird);
+        Set<SingleTokenAccessPolicySpecifier> singleAccessPolicySet = new HashSet<>();
+        singleAccessPolicySet.add(testPolicySpecifierThird);
 
         Set<CompositeAccessPolicySpecifier> nestedAccessPoliciesSet = new HashSet<>();
         nestedAccessPoliciesSet.add(compositePolicySpecifier);
 
-        CompositeAccessPolicySpecifier ParentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
+        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
                 CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                SingleAccessPolicySet, nestedAccessPoliciesSet
+                singleAccessPolicySet, nestedAccessPoliciesSet
         );
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(ParentCompositePolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(parentCompositePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -584,17 +584,17 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
                 accessPoliciesSet, null
         );
 
-        Set<SingleTokenAccessPolicySpecifier> SingleAccessPolicySet = new HashSet<>();
-        SingleAccessPolicySet.add(testPolicySpecifierThird);
+        Set<SingleTokenAccessPolicySpecifier> singleAccessPolicySet = new HashSet<>();
+        singleAccessPolicySet.add(testPolicySpecifierThird);
 
         Set<CompositeAccessPolicySpecifier> nestedAccessPoliciesSet = new HashSet<>();
         nestedAccessPoliciesSet.add(compositePolicySpecifier);
 
-        CompositeAccessPolicySpecifier ParentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
+        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
                 CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
-                SingleAccessPolicySet, nestedAccessPoliciesSet
+                singleAccessPolicySet, nestedAccessPoliciesSet
         );
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(ParentCompositePolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(parentCompositePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -670,12 +670,12 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         nestedAccessPoliciesSet.add(compositePolicySpecifierSecond);
 
 
-        CompositeAccessPolicySpecifier ParentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
+        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
                 CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
                 null, nestedAccessPoliciesSet
         );
 
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(ParentCompositePolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(parentCompositePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -752,12 +752,12 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         nestedAccessPoliciesSet.add(compositePolicySpecifierSecond);
 
 
-        CompositeAccessPolicySpecifier ParentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
+        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
                 CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
                 null, nestedAccessPoliciesSet
         );
 
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(ParentCompositePolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(parentCompositePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -1062,13 +1062,13 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         nestedAccessPoliciesSet.add(compositePolicySpecifierSecond);
 
 
-        CompositeAccessPolicySpecifier ParentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
+        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
                 CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
                 accessPoliciesSetSingle, nestedAccessPoliciesSet
         );
 
 
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(ParentCompositePolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(parentCompositePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -1155,13 +1155,13 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         nestedAccessPoliciesSet.add(compositePolicySpecifierSecond);
 
 
-        CompositeAccessPolicySpecifier ParentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
+        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
                 CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
                 accessPoliciesSetSingle, nestedAccessPoliciesSet
         );
 
 
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(ParentCompositePolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(parentCompositePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -1249,13 +1249,13 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         nestedAccessPoliciesSet.add(compositePolicySpecifierSecond);
 
 
-        CompositeAccessPolicySpecifier ParentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
+        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
                 CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
                 accessPoliciesSetSingle, nestedAccessPoliciesSet
         );
 
 
-        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(ParentCompositePolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, CompositeAccessPolicyFactory.getCompositeAccessPolicy(parentCompositePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
