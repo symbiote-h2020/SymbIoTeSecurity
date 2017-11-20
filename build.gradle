@@ -91,3 +91,15 @@ dependencyCheck {
 
 // including code quality extensions into the build
 check.dependsOn(jacocoTestReport)//, 'dependencyCheckAnalyze')
+
+task buildRunnablePAAMKeystoreFactoryJAR(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Build Runnable PAAM Keystore Factory JAR',
+            'Implementation-Version': version,
+            'Main-Class': 'eu.h2020.symbiote.security.helpers.PlatformAAMCertificateKeyStoreFactory'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA' 
+    with jar
+}
