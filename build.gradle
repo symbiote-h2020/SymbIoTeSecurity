@@ -92,9 +92,9 @@ dependencyCheck {
 // including code quality extensions into the build
 check.dependsOn(jacocoTestReport)//, 'dependencyCheckAnalyze')
 
-task runnableJarPAAM(type: Jar) {
+task buildRunnablePAAMKeystoreFactoryJAR(type: Jar) {
     manifest {
-        attributes 'Implementation-Title': 'Gradle Jar File Example',
+        attributes 'Implementation-Title': 'Build Runnable PAAM Keystore Factory JAR',
             'Implementation-Version': version,
             'Main-Class': 'eu.h2020.symbiote.security.helpers.PlatformAAMCertificateKeyStoreFactory'
     }
