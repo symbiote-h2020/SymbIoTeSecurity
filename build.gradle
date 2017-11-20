@@ -91,3 +91,15 @@ dependencyCheck {
 
 // including code quality extensions into the build
 check.dependsOn(jacocoTestReport)//, 'dependencyCheckAnalyze')
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',
+            'Implementation-Version': version,
+            'Main-Class': 'eu.h2020.symbiote.security.helpers.PlatformAAMCertificateKeyStoreFactory'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA' 
+    with jar
+}
