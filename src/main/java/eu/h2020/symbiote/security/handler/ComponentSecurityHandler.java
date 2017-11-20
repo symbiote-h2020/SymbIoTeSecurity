@@ -6,6 +6,7 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
+import eu.h2020.symbiote.security.commons.enums.AnomalyDetectionVerbosityLevel;
 import eu.h2020.symbiote.security.commons.enums.EventType;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.*;
@@ -42,8 +43,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
     private final String componentOwnerUsername;
     private final String componentOwnerPassword;
     private final String combinedClientIdentifier;
-    private final Optional<IAnomalyListenerSecurity> anomalyListenerSecurity;
-    private final int verbosityLevel;
+    private IAnomalyListenerSecurity anomalyListenerSecurity;
 
     public ComponentSecurityHandler(ISecurityHandler securityHandler,
                                     String localAAMAddress,
@@ -51,8 +51,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                                     String componentOwnerUsername,
                                     String componentOwnerPassword,
                                     String componentId,
-                                    IAnomalyListenerSecurity anomalyListenerSecurity,
-                                    int verbosityLevel) throws SecurityHandlerException {
+                                    Optional<IAnomalyListenerSecurity> anomalyListenerSecurity) throws SecurityHandlerException {
         this.securityHandler = securityHandler;
         this.alwaysUseLocalAAMForValidation = alwaysUseLocalAAMForValidation;
         if (componentOwnerUsername.isEmpty()
@@ -70,8 +69,10 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         if (this.localAAM == null) {
             throw new SecurityHandlerException("You are not connected to your local aam");
         }
-        this.anomalyListenerSecurity = Optional.ofNullable(anomalyListenerSecurity);
-        this.verbosityLevel = verbosityLevel;
+        if(anomalyListenerSecurity.isPresent() && anomalyListenerSecurity.get().getVerbosityLevel() != AnomalyDetectionVerbosityLevel.DISABLED)
+            this.anomalyListenerSecurity = anomalyListenerSecurity.get();
+        else
+            this.anomalyListenerSecurity = new NullAnomalyListenerSecurity();
     }
 
 
@@ -97,9 +98,8 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         for (SecurityCredentials securityCredentials : securityRequest.getSecurityCredentials()) {
             try {
                 Token authorizationToken = new Token(securityCredentials.getToken());
-                if (anomalyListenerSecurity.isPresent() && anomalyListenerSecurity.get().isBlocked(authorizationToken.getClaims().getIssuer(), EventType.VALIDATION_FAILED)) {
+                if (anomalyListenerSecurity.isBlocked(authorizationToken.getClaims().getIssuer(), EventType.VALIDATION_FAILED))
                     throw new BlockedUserException();
-                }
                 AAM validationAAM;
                 // set proper validation AAM
                 if (alwaysUseLocalAAMForValidation) {
@@ -131,7 +131,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                 // any invalid token causes the whole validation to fail
                 if (tokenValidationStatus != ValidationStatus.VALID) {
                     log.debug("token was invalidated with the following reason: " + tokenValidationStatus);
-                    aamClient.logAnomalyEvent(new EventLogRequest(authorizationToken.getToken(), EventType.VALIDATION_FAILED, System.currentTimeMillis()));
+                    aamClient.logAnomalyEvent(new EventLogRequest(authorizationToken.getToken(), EventType.VALIDATION_FAILED, System.currentTimeMillis(), null));
                     return tokenValidationStatus;
                 }
             } catch (ValidationException | CertificateException | BlockedUserException e) {

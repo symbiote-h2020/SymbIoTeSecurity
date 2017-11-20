@@ -31,6 +31,7 @@ public class ComponentSecurityHandlerFactory {
      * @param alwaysUseLocalAAMForValidation when wanting to use local AAM for @{@link SecurityRequest} validation
      * @param componentOwnerUsername         local AAM Admin credentials
      * @param componentOwnerPassword         local AAM Admin credentials
+     * @param anomalyListenerSecurity        interface for anomaly handling
      * @return the component security handler ready to talk with Symbiote components
      * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
      */
@@ -42,8 +43,7 @@ public class ComponentSecurityHandlerFactory {
                                                                         boolean alwaysUseLocalAAMForValidation,
                                                                         String componentOwnerUsername,
                                                                         String componentOwnerPassword,
-                                                                        IAnomalyListenerSecurity anomalyListenerSecurity,
-                                                                        int verbosityLevel) throws
+                                                                        Optional<IAnomalyListenerSecurity> anomalyListenerSecurity) throws
             SecurityHandlerException {
         return new ComponentSecurityHandler(
                 new SecurityHandler(keystorePath, keystorePassword, localAAMAddress, componentOwnerUsername),
@@ -52,7 +52,6 @@ public class ComponentSecurityHandlerFactory {
                 componentOwnerUsername,
                 componentOwnerPassword,
                 clientId,
-                anomalyListenerSecurity,
-                verbosityLevel);
+                anomalyListenerSecurity);
     }
 }

@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
 
 import java.io.File;
+import java.util.Optional;
 
 /**
  * @author Mikołaj Dobski (PSNC)
@@ -30,8 +31,7 @@ public class ComponentSecurityHandlerTest {
                 false,
                 "irrelevant",
                 "irrelevant",
-                null,
-                0
+                Optional.empty()
         );
     }
 
@@ -47,8 +47,7 @@ public class ComponentSecurityHandlerTest {
                 false,
                 "irrelevant",
                 "irrelevant",
-                null,
-                0
+                Optional.empty()
         );
     }
 
@@ -63,8 +62,7 @@ public class ComponentSecurityHandlerTest {
                 false,
                 "irrelevant",
                 "irrelevant",
-                null,
-                0
+                Optional.empty()
         );
     }
 
@@ -79,8 +77,7 @@ public class ComponentSecurityHandlerTest {
                 false,
                 "irrelevant",
                 "irrelevant",
-                null,
-                0
+                Optional.empty()
         );
     }
 
@@ -96,8 +93,8 @@ public class ComponentSecurityHandlerTest {
                 "irrelevant",
                 "irrelevant",
                 goodComponentId + "@" + goodPlatformId,
-                null,
-                0);
+                Optional.empty()
+        );
     }
 
     @After

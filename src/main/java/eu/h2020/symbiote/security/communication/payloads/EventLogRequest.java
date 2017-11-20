@@ -20,6 +20,8 @@ public class EventLogRequest {
     private String jti = "";
     private EventType eventType;
     private long timestamp = 0;
+    private String tokenString;
+    private String reason;
 
     /**
      * Standard constructor for creating EventLogRequest object prepared for serializing and deserializing.
@@ -28,18 +30,24 @@ public class EventLogRequest {
      * @param jti                  jti
      * @param eventType            type  of incoming event
      * @param timestamp            time of event in millis
+     * @param tokenString
+     * @param reason
      */
     @JsonCreator
     public EventLogRequest(@JsonProperty("username") String username,
                            @JsonProperty("clientIdentifier") String clientIdentifier,
                            @JsonProperty("jti") String jti,
                            @JsonProperty("eventType") EventType eventType,
-                           @JsonProperty("timestamp") long timestamp) {
+                           @JsonProperty("timestamp") long timestamp,
+                           @JsonProperty("tokenString") String tokenString,
+                           @JsonProperty("reason") String reason){
         this.username = username;
         this.clientIdentifier = clientIdentifier;
         this.jti = jti;
         this.eventType = eventType;
         this.timestamp = timestamp;
+        this.setTokenString(tokenString);
+        this.setReason(reason);
     }
 
     /**
@@ -47,10 +55,11 @@ public class EventLogRequest {
      * @param tokenString          token from which you can extract username, clientIdentified and jti
      * @param eventType            type of incoming event
      * @param timestamp            time of event in millis
+     * @param reason
      */
     public EventLogRequest(String tokenString,
                            EventType eventType,
-                           long timestamp) throws WrongCredentialsException {
+                           long timestamp, String reason) throws WrongCredentialsException {
         JWTClaims claims;
         try {
             claims = JWTEngine.getClaimsFromToken(tokenString);
@@ -66,6 +75,8 @@ public class EventLogRequest {
         this.jti = claims.getJti();
         this.eventType = eventType;
         this.timestamp = timestamp;
+        this.setTokenString(tokenString);
+        this.setReason(reason);
     }
 
     public String getUsername() {
@@ -86,5 +97,21 @@ public class EventLogRequest {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public String getTokenString() {
+        return tokenString;
+    }
+
+    public void setTokenString(String tokenString) {
+        this.tokenString = tokenString;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 }
