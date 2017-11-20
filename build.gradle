@@ -92,7 +92,7 @@ dependencyCheck {
 // including code quality extensions into the build
 check.dependsOn(jacocoTestReport)//, 'dependencyCheckAnalyze')
 
-task fatJar(type: Jar) {
+task runnableJarPAAM(type: Jar) {
     manifest {
         attributes 'Implementation-Title': 'Gradle Jar File Example',
             'Implementation-Version': version,
