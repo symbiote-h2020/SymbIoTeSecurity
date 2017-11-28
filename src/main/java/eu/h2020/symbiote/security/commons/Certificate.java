@@ -45,7 +45,7 @@ public class Certificate {
     @JsonIgnore
     public X509Certificate getX509() throws CertificateException {
         if (certificateString.isEmpty())
-            throw new CertificateException("held PEM certificate is not initialized");
+            throw new CertificateException("internal PEM certificate is not initialized");
         ECDSAHelper.enableECDSAProvider();
         InputStream stream = new ByteArrayInputStream(this.getCertificateString().getBytes(StandardCharsets.UTF_8));
         CertificateFactory cf = CertificateFactory.getInstance("X.509");

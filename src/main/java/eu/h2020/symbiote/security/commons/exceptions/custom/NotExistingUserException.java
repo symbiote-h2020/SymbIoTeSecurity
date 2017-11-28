@@ -13,8 +13,8 @@ import org.springframework.http.HttpStatus;
 public class NotExistingUserException extends SecurityException {
 
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
-    private final static String errorMessage = "USER_NOT_REGISTERED_IN_REPOSITORY";
-    private final static HttpStatus statusCode = HttpStatus.BAD_REQUEST;
+    public final static String errorMessage = "USER_NOT_REGISTERED_IN_REPOSITORY";
+    public final static HttpStatus statusCode = HttpStatus.BAD_REQUEST;
 
     public NotExistingUserException() {
         super(errorMessage);

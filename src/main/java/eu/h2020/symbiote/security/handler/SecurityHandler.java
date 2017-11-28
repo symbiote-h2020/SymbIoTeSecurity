@@ -288,7 +288,14 @@ public class SecurityHandler implements ISecurityHandler {
   public Certificate getCertificate(AAM homeAAM, String username, String password,
                                     String clientId)
       throws SecurityHandlerException {
-    
+    if (homeAAM == null
+            || homeAAM.getAamAddress().isEmpty()
+            || homeAAM.getAamCACertificate().getCertificateString().isEmpty())
+      throw new SecurityHandlerException("The AAM to request the client's certificate from is null has missing details address/certificate");
+    if (username == null || username.isEmpty()
+            || password == null || password.isEmpty()
+            || clientId == null || clientId.isEmpty())
+      throw new SecurityHandlerException("Missing username/password/clientId, those parameters must not be empty");
     
     try {
       KeyPair pair = CryptoHelper.createKeyPair();
@@ -332,7 +339,7 @@ public class SecurityHandler implements ISecurityHandler {
       return certificate;
       
     } catch (CertificateException e) {
-      throw new SecurityHandlerException("Error getting AAM certificate", e);
+      throw new SecurityHandlerException(e.getMessage(), e);
     } catch (IOException e) {
       throw new SecurityHandlerException("Error signing certificate request", e);
     } catch (NoSuchAlgorithmException e) {
