@@ -1,6 +1,7 @@
 package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
+import eu.h2020.symbiote.security.clients.ClientFactory;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
@@ -12,10 +13,7 @@ import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.*;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
 import eu.h2020.symbiote.security.communication.AAMClient;
-import eu.h2020.symbiote.security.communication.payloads.AAM;
-import eu.h2020.symbiote.security.communication.payloads.EventLogRequest;
-import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
-import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
+import eu.h2020.symbiote.security.communication.payloads.*;
 import eu.h2020.symbiote.security.helpers.ABACPolicyHelper;
 import eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper;
 import org.apache.commons.logging.Log;
@@ -23,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpStatus;
 
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.*;
@@ -69,7 +68,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         if (this.localAAM == null) {
             throw new SecurityHandlerException("You are not connected to your local aam");
         }
-        if(anomalyListenerSecurity.isPresent() && anomalyListenerSecurity.get().getVerbosityLevel() != AnomalyDetectionVerbosityLevel.DISABLED)
+        if (anomalyListenerSecurity.isPresent() && anomalyListenerSecurity.get().getVerbosityLevel() != AnomalyDetectionVerbosityLevel.DISABLED)
             this.anomalyListenerSecurity = anomalyListenerSecurity.get();
         else
             this.anomalyListenerSecurity = new NullAnomalyListenerSecurity();
@@ -111,7 +110,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                         validationAAM = localAAM;
                 }
                 ValidationStatus tokenValidationStatus;
-                AAMClient aamClient = new AAMClient(localAAM.getAamAddress());
+                AAMClient aamClient = ClientFactory.getAAMClient(localAAM.getAamAddress());
                 AAM issuer = aamClient.getAvailableAAMs().getAvailableAAMs().get(authorizationToken.getClaims().getIssuer());
                 if (issuer == null
                         || issuer.getAamCACertificate().getCertificateString().isEmpty()) {
@@ -131,7 +130,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                 // any invalid token causes the whole validation to fail
                 if (tokenValidationStatus != ValidationStatus.VALID) {
                     log.debug("token was invalidated with the following reason: " + tokenValidationStatus);
-                    aamClient.logAnomalyEvent(new EventLogRequest(authorizationToken.getToken(), EventType.VALIDATION_FAILED, System.currentTimeMillis(), null));
+                    aamClient.logAnomalyEvent(new EventLogRequest(authorizationToken.getToken(), localAAM.getAamInstanceId(), EventType.VALIDATION_FAILED, System.currentTimeMillis(), tokenValidationStatus.toString()));
                     return tokenValidationStatus;
                 }
             } catch (ValidationException | CertificateException | BlockedUserException e) {
