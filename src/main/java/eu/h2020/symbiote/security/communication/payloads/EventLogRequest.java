@@ -46,12 +46,12 @@ public class EventLogRequest {
                            @JsonProperty("timestamp") long timestamp,
                            @JsonProperty("tokenString") String tokenString,
                            @JsonProperty("reason") String reason){
-        this.username = username;
-        this.clientIdentifier = clientIdentifier;
-        this.jti = jti;
-        this.platformId = platformId;
-        this.eventType = eventType;
-        this.timestamp = timestamp;
+        this.setUsername(username);
+        this.setClientIdentifier(clientIdentifier);
+        this.setJti(jti);
+        this.setPlatformId(platformId);
+        this.setEventType(eventType);
+        this.setTimestamp(timestamp);
         this.setTokenString(tokenString);
         this.setReason(reason);
     }
@@ -72,15 +72,15 @@ public class EventLogRequest {
             throw new WrongCredentialsException(e.getErrorMessage());
         }
         String[] subjectParts = claims.getSub().split("@");
-        this.username = subjectParts[0];
+        this.setUsername(subjectParts[0]);
 
         if (subjectParts.length > 1)
-            this.clientIdentifier = subjectParts[1];
+            this.setClientIdentifier(subjectParts[1]);
 
-        this.jti = claims.getJti();
-        this.platformId = platformId;
-        this.eventType = eventType;
-        this.timestamp = timestamp;
+        this.setJti(claims.getJti());
+        this.setPlatformId(platformId);
+        this.setEventType(eventType);
+        this.setTimestamp(timestamp);
         this.setTokenString(tokenString);
         this.setReason(reason);
     }
@@ -127,5 +127,25 @@ public class EventLogRequest {
 
     public void setReason(String reason) {
         this.reason = Optional.ofNullable(reason).orElse("");
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setClientIdentifier(String clientIdentifier) {
+        this.clientIdentifier = clientIdentifier;
+    }
+
+    public void setJti(String jti) {
+        this.jti = jti;
+    }
+
+    public void setEventType(EventType eventType) {
+        this.eventType = eventType;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }

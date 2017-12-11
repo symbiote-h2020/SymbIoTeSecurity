@@ -111,6 +111,8 @@ public class AAMClient implements IAAMClient {
      */
     @Override
     public String logAnomalyEvent(EventLogRequest eventLogRequest) {
+        if(eventLogRequest == null)
+            return "";
         Response response = feignClient.logAnomalyEvent(eventLogRequest);
         return response.body().toString();
     }

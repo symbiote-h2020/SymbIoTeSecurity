@@ -68,7 +68,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         if (this.localAAM == null) {
             throw new SecurityHandlerException("You are not connected to your local aam");
         }
-        if (anomalyListenerSecurity.isPresent() && anomalyListenerSecurity.get().getVerbosityLevel() != AnomalyDetectionVerbosityLevel.DISABLED)
+        if (anomalyListenerSecurity.isPresent() && anomalyListenerSecurity.get().getVerbosityLevel() != null)
             this.anomalyListenerSecurity = anomalyListenerSecurity.get();
         else
             this.anomalyListenerSecurity = new NullAnomalyListenerSecurity();
@@ -130,7 +130,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                 // any invalid token causes the whole validation to fail
                 if (tokenValidationStatus != ValidationStatus.VALID) {
                     log.debug("token was invalidated with the following reason: " + tokenValidationStatus);
-                    aamClient.logAnomalyEvent(new EventLogRequest(authorizationToken.getToken(), localAAM.getAamInstanceId(), EventType.VALIDATION_FAILED, System.currentTimeMillis(), tokenValidationStatus.toString()));
+                    aamClient.logAnomalyEvent(anomalyListenerSecurity.prepareEventLogRequest(new EventLogRequest(authorizationToken.getToken(), localAAM.getAamInstanceId(), EventType.VALIDATION_FAILED, System.currentTimeMillis(), tokenValidationStatus.toString())));
                     return tokenValidationStatus;
                 }
             } catch (ValidationException | CertificateException | BlockedUserException e) {
