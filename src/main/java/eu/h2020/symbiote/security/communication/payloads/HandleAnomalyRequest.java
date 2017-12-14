@@ -21,11 +21,13 @@ public class HandleAnomalyRequest {
 
     /**
      * Standard constructor for creating HandleAnomalyRequest.
-     * @param username             user's name
-     * @param clientIdentifier     identifier of client
-     * @param jti                  jti
-     * @param eventType            type  of incoming event
-     * @param timestamp            time of event in millis
+     *
+     * @param username         user's name
+     * @param clientIdentifier identifier of client
+     * @param jti              jti
+     * @param eventType        type  of incoming event
+     * @param timestamp        time of event in millis
+     * @param duration         duration of blockade
      */
     public HandleAnomalyRequest(String username, String clientIdentifier, String jti, EventType eventType,
                                 long timestamp, long duration) {

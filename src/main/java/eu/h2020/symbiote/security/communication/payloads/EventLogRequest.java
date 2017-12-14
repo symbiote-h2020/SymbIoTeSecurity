@@ -7,6 +7,7 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTExceptio
 import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
 import eu.h2020.symbiote.security.commons.jwt.JWTClaims;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
+import org.springframework.data.annotation.Id;
 
 import java.util.Optional;
 
@@ -84,6 +85,8 @@ public class EventLogRequest {
         this.setTokenString(tokenString);
         this.setReason(reason);
     }
+
+    public EventLogRequest(){}
 
     public String getUsername() {
         return username;
