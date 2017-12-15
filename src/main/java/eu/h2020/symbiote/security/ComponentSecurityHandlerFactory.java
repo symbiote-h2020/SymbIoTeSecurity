@@ -20,7 +20,6 @@ public class ComponentSecurityHandlerFactory {
     /**
      * Creates an end-user security handler
      *
-     * @param coreAAMAddress                 Symbiote Core AAM address which is available on the symbiote security webpage
      * @param keystorePath                   where the keystore will be stored
      * @param keystorePassword               needed to access security credentials
      * @param clientId                       name of the component in the form of "componentId@platformId"
@@ -31,8 +30,7 @@ public class ComponentSecurityHandlerFactory {
      * @return the component security handler ready to talk with Symbiote components
      * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
      */
-    public static IComponentSecurityHandler getComponentSecurityHandler(String coreAAMAddress,
-                                                                        String keystorePath,
+    public static IComponentSecurityHandler getComponentSecurityHandler(String keystorePath,
                                                                         String keystorePassword,
                                                                         String clientId,
                                                                         String localAAMAddress,
@@ -41,7 +39,7 @@ public class ComponentSecurityHandlerFactory {
                                                                         String componentOwnerPassword) throws
             SecurityHandlerException {
         return new ComponentSecurityHandler(
-                new SecurityHandler(keystorePath, keystorePassword, localAAMAddress, componentOwnerUsername),
+                new SecurityHandler(keystorePath, keystorePassword, localAAMAddress, componentOwnerUsername, clientId.split("@")[1]),
                 localAAMAddress,
                 alwaysUseLocalAAMForValidation,
                 componentOwnerUsername,

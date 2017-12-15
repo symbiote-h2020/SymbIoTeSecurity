@@ -6,12 +6,10 @@ import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
-import eu.h2020.symbiote.security.commons.exceptions.custom.AAMException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
-import eu.h2020.symbiote.security.communication.AAMClient;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -102,8 +100,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                         validationAAM = localAAM;
                 }
                 ValidationStatus tokenValidationStatus;
-                AAMClient aamClient = new AAMClient(localAAM.getAamAddress());
-                AAM issuer = aamClient.getAvailableAAMs().getAvailableAAMs().get(authorizationToken.getClaims().getIssuer());
+                AAM issuer = securityHandler.getAvailableAAMs(localAAM).get(authorizationToken.getClaims().getIssuer());
                 if (issuer == null
                         || issuer.getAamCACertificate().getCertificateString().isEmpty()) {
                     throw new SecurityHandlerException("ISSUER platform certificate is not available");
@@ -124,7 +121,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                     log.debug("token was invalidated with the following reason: " + tokenValidationStatus);
                     return tokenValidationStatus;
                 }
-            } catch (AAMException | ValidationException | CertificateException e) {
+            } catch (ValidationException | CertificateException e) {
                 log.error(e);
                 throw new SecurityHandlerException(e.getMessage());
             }

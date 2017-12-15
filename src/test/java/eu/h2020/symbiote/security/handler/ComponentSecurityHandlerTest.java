@@ -24,7 +24,6 @@ public class ComponentSecurityHandlerTest {
         ComponentSecurityHandlerFactory.getComponentSecurityHandler(
                 "irrelevant",
                 "irrelevant",
-                "irrelevant",
                 badComponentId + "@" + goodPlatformId,
                 "irrelevant",
                 false,
@@ -37,7 +36,6 @@ public class ComponentSecurityHandlerTest {
     @Test(expected = SecurityHandlerException.class)
     public void badPlatformIdTest() throws SecurityHandlerException {
         ComponentSecurityHandlerFactory.getComponentSecurityHandler(
-                "irrelevant",
                 "irrelevant",
                 "irrelevant",
                 goodComponentId + "@" + badPlatformId,
@@ -53,7 +51,6 @@ public class ComponentSecurityHandlerTest {
         ComponentSecurityHandlerFactory.getComponentSecurityHandler(
                 "irrelevant",
                 "irrelevant",
-                "irrelevant",
                 goodComponentId,
                 "irrelevant",
                 false,
@@ -65,7 +62,6 @@ public class ComponentSecurityHandlerTest {
     @Test(expected = SecurityHandlerException.class)
     public void TooManyParts() throws SecurityHandlerException {
         ComponentSecurityHandlerFactory.getComponentSecurityHandler(
-                "irrelevant",
                 "irrelevant",
                 "irrelevant",
                 goodComponentId + "@" + goodPlatformId + "@" + goodPlatformId,

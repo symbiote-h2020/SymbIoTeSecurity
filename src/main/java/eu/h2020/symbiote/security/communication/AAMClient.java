@@ -74,7 +74,6 @@ public class AAMClient implements IAAMClient {
      */
     @Override
     public String signCertificateRequest(CertificateRequest certificateRequest) throws
-            WrongCredentialsException,
             NotExistingUserException,
             ValidationException,
             InvalidArgumentsException,
@@ -214,6 +213,18 @@ public class AAMClient implements IAAMClient {
     public AvailableAAMsCollection getAvailableAAMs() throws AAMException {
         try {
             return feignClient.getAvailableAAMs();
+        } catch (FeignException fe) {
+            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
+        }
+    }
+
+    /**
+     * @return collection of AAMs available in the SymbIoTe ecosystem
+     */
+    @Override
+    public AvailableAAMsCollection getInternalAAMs() throws AAMException {
+        try {
+            return feignClient.getInternalAAMs();
         } catch (FeignException fe) {
             throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
         }
