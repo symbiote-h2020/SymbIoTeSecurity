@@ -1,8 +1,17 @@
-package eu.h2020.symbiote.security.communication.payloads;
+package eu.h2020.symbiote.security.commons.enums;
 
 
-public class AnomalyDetectionVerbosityLevel {
+public enum AnomalyDetectionVerbosityLevel {
 
+    FULL,
+
+    LIMITED,
+
+    DISABLED
+
+
+
+    /*
     private Boolean username = Boolean.FALSE;
     private Boolean clientIdentifier = Boolean.FALSE;
     private Boolean jti = Boolean.FALSE;
@@ -91,4 +100,5 @@ public class AnomalyDetectionVerbosityLevel {
     public void setReason() {
         this.reason = Boolean.TRUE;
     }
+    */
 }

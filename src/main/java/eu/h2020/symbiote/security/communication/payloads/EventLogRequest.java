@@ -24,19 +24,21 @@ public class EventLogRequest {
     private String platformId = "";
     private EventType eventType;
     private long timestamp = 0;
-    private String tokenString;
-    private String reason;
+    private String tokenString = null;
+    private String reason = null;
+    private String sourcePlatformId = null;
 
     /**
      * Standard constructor for creating EventLogRequest object prepared for serializing and deserializing.
-     * @param username             user's name
-     * @param clientIdentifier     identifier of client
-     * @param jti                  jti
-     * @param platformId           identifier of platform verifying token
-     * @param eventType            type  of incoming event
-     * @param timestamp            time of event in millis
-     * @param tokenString          full token
-     * @param reason               text reason of rejection
+     *
+     * @param username         user's name
+     * @param clientIdentifier identifier of client
+     * @param jti              jti
+     * @param platformId       identifier of platform verifying token
+     * @param eventType        type  of incoming event
+     * @param timestamp        time of event in millis
+     * @param tokenString      full token
+     * @param reason           text reason of rejection
      */
     @JsonCreator
     public EventLogRequest(@JsonProperty("username") String username,
@@ -46,7 +48,7 @@ public class EventLogRequest {
                            @JsonProperty("eventType") EventType eventType,
                            @JsonProperty("timestamp") long timestamp,
                            @JsonProperty("tokenString") String tokenString,
-                           @JsonProperty("reason") String reason){
+                           @JsonProperty("reason") String reason) throws WrongCredentialsException {
         this.setUsername(username);
         this.setClientIdentifier(clientIdentifier);
         this.setJti(jti);
@@ -55,30 +57,68 @@ public class EventLogRequest {
         this.setTimestamp(timestamp);
         this.setTokenString(tokenString);
         this.setReason(reason);
+        if (this.getTokenString() != null) {
+            JWTClaims claims = null;
+            try {
+                claims = JWTEngine.getClaimsFromToken(this.getTokenString());
+            } catch (MalformedJWTException ignored) {
+            }
+            if (claims != null) {
+                String[] subjectParts = claims.getSub().split("@");
+
+                switch (claims.getTtyp()) {
+                    case "Home":
+                        this.setSourcePlatformId(this.platformId);
+                        break;
+                    case "Foreign":
+                        if (subjectParts.length == 4)
+                            this.setSourcePlatformId(subjectParts[2]);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
 
     /**
      * Alternative constructor for creating EventLogRequest object. It tries to extract username, clientIdentifier and jti from token.
-     * @param tokenString          token from which you can extract username, clientIdentified and jti
-     * @param eventType            type of incoming event
-     * @param timestamp            time of event in millis
-     * @param reason               text reason of rejection
+     *
+     * @param tokenString token from which you can extract username, clientIdentified and jti
+     * @param eventType   type of incoming event
+     * @param timestamp   time of event in millis
+     * @param reason      text reason of rejection
      */
     public EventLogRequest(String tokenString, String platformId, EventType eventType,
                            long timestamp, String reason) throws WrongCredentialsException {
-        JWTClaims claims;
+        JWTClaims claims = null;
         try {
             claims = JWTEngine.getClaimsFromToken(tokenString);
-        } catch (MalformedJWTException e) {
-            throw new WrongCredentialsException(e.getErrorMessage());
+        } catch (MalformedJWTException ignored) {
         }
-        String[] subjectParts = claims.getSub().split("@");
-        this.setUsername(subjectParts[0]);
 
-        if (subjectParts.length > 1)
-            this.setClientIdentifier(subjectParts[1]);
+        if (claims != null) {
+            String[] subjectParts = claims.getSub().split("@");
 
-        this.setJti(claims.getJti());
+            switch (claims.getTtyp()) {
+                case "Home":
+                    this.setSourcePlatformId(this.platformId);
+                    break;
+                case "Foreign":
+                    if (subjectParts.length == 4)
+                        this.setSourcePlatformId(subjectParts[2]);
+                    break;
+                default:
+                    break;
+            }
+
+            this.setUsername(subjectParts[0]);
+
+            if (subjectParts.length > 1)
+                this.setClientIdentifier(subjectParts[1]);
+            this.setJti(claims.getJti());
+        }
+
         this.setPlatformId(platformId);
         this.setEventType(eventType);
         this.setTimestamp(timestamp);
@@ -86,7 +126,8 @@ public class EventLogRequest {
         this.setReason(reason);
     }
 
-    public EventLogRequest(){}
+    public EventLogRequest() {
+    }
 
     public String getUsername() {
         return username;
@@ -150,5 +191,13 @@ public class EventLogRequest {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getSourcePlatformId() {
+        return sourcePlatformId;
+    }
+
+    public void setSourcePlatformId(String sourcePlatformId) {
+        this.sourcePlatformId = sourcePlatformId;
     }
 }

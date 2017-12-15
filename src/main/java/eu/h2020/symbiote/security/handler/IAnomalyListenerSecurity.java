@@ -1,6 +1,6 @@
 package eu.h2020.symbiote.security.handler;
 
-import eu.h2020.symbiote.security.communication.payloads.AnomalyDetectionVerbosityLevel;
+import eu.h2020.symbiote.security.commons.enums.AnomalyDetectionVerbosityLevel;
 import eu.h2020.symbiote.security.commons.enums.EventType;
 import eu.h2020.symbiote.security.communication.payloads.EventLogRequest;
 import eu.h2020.symbiote.security.communication.payloads.HandleAnomalyRequest;

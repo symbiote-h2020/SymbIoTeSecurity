@@ -7,6 +7,7 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
+import eu.h2020.symbiote.security.commons.enums.AnomalyDetectionVerbosityLevel;
 import eu.h2020.symbiote.security.commons.enums.EventType;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.*;
@@ -66,7 +67,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         if (this.localAAM == null) {
             throw new SecurityHandlerException("You are not connected to your local aam");
         }
-        if (anomalyListenerSecurity.isPresent() && anomalyListenerSecurity.get().getVerbosityLevel() != null)
+        if (anomalyListenerSecurity.isPresent() && anomalyListenerSecurity.get().getVerbosityLevel() != AnomalyDetectionVerbosityLevel.DISABLED)
             this.anomalyListenerSecurity = anomalyListenerSecurity.get();
         else
             this.anomalyListenerSecurity = new NullAnomalyListenerSecurity();

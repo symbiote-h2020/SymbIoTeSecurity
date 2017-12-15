@@ -61,6 +61,7 @@ public class SecurityConstants {
     public static final String LOG_ANOMALY_EVENT = "/log_anomaly_event";
     public static final String LOW_PLATFORM_REPUTATION = "/low_platform_reputation";
     public static final String ANOMALY_DETECTION_MESSAGE = "/anomaly_detection_message";
+    public static final String ANOMALY_SOURCE_AAM_NOTIFICATION = "/anomaly_source_aam_notification";
 
     private SecurityConstants() {
     }
