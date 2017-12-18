@@ -2,6 +2,8 @@ package eu.h2020.symbiote.security.accesspolicies.common.composite;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyType;
+import eu.h2020.symbiote.security.accesspolicies.common.IAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import org.springframework.data.annotation.PersistenceConstructor;
@@ -15,11 +17,12 @@ import java.util.Set;
  * @author Nemanja Ignjatov (UNIVIE)
  * @author Mikołaj Dobski (PSNC)
  */
-public class CompositeAccessPolicySpecifier {
+public class CompositeAccessPolicySpecifier implements IAccessPolicySpecifier {
 
     private final CompositeAccessPolicyRelationOperator policiesRelationOperator;
     private final Set<SingleTokenAccessPolicySpecifier> singleTokenAccessPolicies;
     private final Set<CompositeAccessPolicySpecifier> compositeAccessPolicies;
+    private final AccessPolicyType accessPolicyType;
     /**
      * Constructor of CompositeAccessPolicySpecifier
      *
@@ -42,6 +45,7 @@ public class CompositeAccessPolicySpecifier {
         this.singleTokenAccessPolicies = singleTokenAccessPolicies;
         this.compositeAccessPolicies = compositeAccessPolicies;
         this.policiesRelationOperator = policiesRelationOperator;
+        this.accessPolicyType = AccessPolicyType.CAP;
 
     }
 
@@ -57,6 +61,10 @@ public class CompositeAccessPolicySpecifier {
         return compositeAccessPolicies;
     }
 
+    @Override
+    public AccessPolicyType getPolicyType() {
+        return this.accessPolicyType;
+    }
 
     /**
      * Enumeration for specifying the relation operator between access policies
