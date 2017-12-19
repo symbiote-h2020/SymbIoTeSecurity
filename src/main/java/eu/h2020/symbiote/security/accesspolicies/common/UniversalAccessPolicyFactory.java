@@ -18,12 +18,10 @@ public class UniversalAccessPolicyFactory {
      * @throws InvalidArgumentsException in case of unknown AccessPolicyType
      */
     public static IAccessPolicy getAccessPolicy(IAccessPolicySpecifier specifier) throws InvalidArgumentsException {
-        switch (specifier.getPolicyType()) {
-            case CAP:
-                return CompositeAccessPolicyFactory.getCompositeAccessPolicy((CompositeAccessPolicySpecifier) specifier);
-            default:
-                return SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy((SingleTokenAccessPolicySpecifier) specifier);
+        if (specifier.getPolicyType().equals(AccessPolicyType.CAP)) {
+            return CompositeAccessPolicyFactory.getCompositeAccessPolicy((CompositeAccessPolicySpecifier) specifier);
+        } else {
+            return SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy((SingleTokenAccessPolicySpecifier) specifier);
         }
-
     }
 }
