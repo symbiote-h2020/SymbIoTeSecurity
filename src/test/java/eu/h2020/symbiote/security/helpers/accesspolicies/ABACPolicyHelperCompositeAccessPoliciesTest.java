@@ -2,6 +2,7 @@ package eu.h2020.symbiote.security.helpers.accesspolicies;
 
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
+import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyType;
 import eu.h2020.symbiote.security.accesspolicies.common.CompositeAccessPolicyFactory;
 import eu.h2020.symbiote.security.accesspolicies.common.composite.CompositeAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
@@ -158,7 +159,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -166,7 +167,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -203,7 +204,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -211,7 +212,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -248,7 +249,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -256,7 +257,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -294,7 +295,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -302,7 +303,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -339,7 +340,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -347,7 +348,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -384,7 +385,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -392,7 +393,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -428,7 +429,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -436,7 +437,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -444,7 +445,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapThird
         );
 
@@ -492,7 +493,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -500,7 +501,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -508,7 +509,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapThird
         );
 
@@ -555,7 +556,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -563,7 +564,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -571,7 +572,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapThird
         );
 
@@ -618,7 +619,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -626,7 +627,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -634,7 +635,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapThird
         );
 
@@ -642,7 +643,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFourth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFourth = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFourth
         );
 
@@ -700,7 +701,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -708,7 +709,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -716,7 +717,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapThird
         );
 
@@ -724,7 +725,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFourth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFourth = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFourth
         );
 
@@ -782,7 +783,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -790,7 +791,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -798,7 +799,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapThird
         );
 
@@ -837,7 +838,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -845,7 +846,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -853,7 +854,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapThird
         );
 
@@ -891,7 +892,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -899,7 +900,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -907,7 +908,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapThird
         );
 
@@ -945,7 +946,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -953,7 +954,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -961,7 +962,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapThird
         );
 
@@ -999,7 +1000,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -1007,7 +1008,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -1015,7 +1016,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapThird
         );
 
@@ -1023,7 +1024,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFourth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFourth = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFourth
         );
 
@@ -1032,7 +1033,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFifth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFifth = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFifth
         );
         Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSingle = new HashSet<>();
@@ -1092,7 +1093,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -1100,7 +1101,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -1108,7 +1109,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapThird
         );
 
@@ -1116,7 +1117,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFourth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFourth = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFourth
         );
 
@@ -1125,7 +1126,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFifth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFifth = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFifth
         );
         Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSingle = new HashSet<>();
@@ -1186,7 +1187,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFirst
         );
 
@@ -1194,7 +1195,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapSecond
         );
 
@@ -1202,7 +1203,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapThird
         );
 
@@ -1210,7 +1211,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFourth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFourth = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFourth
         );
 
@@ -1219,7 +1220,7 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         accessPolicyClaimsMapFifth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
 
         SingleTokenAccessPolicySpecifier testPolicySpecifierFifth = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.STAP,
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMapFifth
         );
         Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSingle = new HashSet<>();

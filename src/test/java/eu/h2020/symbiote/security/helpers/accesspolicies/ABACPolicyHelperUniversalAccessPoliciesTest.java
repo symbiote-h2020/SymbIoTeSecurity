@@ -3,8 +3,9 @@ package eu.h2020.symbiote.security.helpers.accesspolicies;
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyType;
-import eu.h2020.symbiote.security.accesspolicies.common.SingleTokenAccessPolicyFactory;
-import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleLocalHomeTokenAccessPolicy;
+import eu.h2020.symbiote.security.accesspolicies.common.IAccessPolicySpecifier;
+import eu.h2020.symbiote.security.accesspolicies.common.UniversalAccessPolicyFactory;
+import eu.h2020.symbiote.security.accesspolicies.common.composite.CompositeAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
@@ -23,7 +24,6 @@ import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
 import eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper;
 import eu.h2020.symbiote.security.utils.DummyTokenIssuer;
-import io.jsonwebtoken.Claims;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,12 +43,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Created by Nemanja on 30.08.2017.
+ * Created by Nemanja on 10.11.2017.
  *
  * @author Nemanja Ignjatov (UNIVIE)
  */
 
-public class ABACPolicyHelperLocalHomeTokenTest {
+public class ABACPolicyHelperUniversalAccessPoliciesTest {
 
     private static final String ISSUING_AAM_CERTIFICATE_ALIAS = "core-1";
     private static final String CLIENT_CERTIFICATE_ALIAS = "client-core-1";
@@ -57,7 +57,6 @@ public class ABACPolicyHelperLocalHomeTokenTest {
     private final String username = "testusername";
     private final String clientId = "testclientid";
     private final String deploymentId = "deploymentId";
-    private final String deploymentIdForeign = "deploymentIdForeign";
 
     private final String goodResourceID = "goodResourceID";
     private final String goodResourceID2 = "goodResourceID2";
@@ -71,10 +70,10 @@ public class ABACPolicyHelperLocalHomeTokenTest {
     private final String nameAttrOKValue = "John";
     private final String nameAttrBadValue = "Mike";
     private final String ageAttrOKValue = "20";
+    private final String ageAttrBadValue = "33";
 
-    private HashSet<AuthorizationCredentials> homePlatformAuthorizationCredentialsSet = new HashSet<>();
-    private HashSet<AuthorizationCredentials> guestAuthorizationCredentialsSet = new HashSet<>();
-    private HashSet<AuthorizationCredentials> foreignPlatformAuthorizationCredentialsSet = new HashSet<>();
+    private HashSet<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<>();
+    private HashSet<AuthorizationCredentials> authorizationCredentialsMultipleTokensSet = new HashSet<>();
 
     @Before
     public void setUp() throws Exception {
@@ -111,7 +110,8 @@ public class ABACPolicyHelperLocalHomeTokenTest {
                 issuingAAMPrivateKey);
 
         AuthorizationCredentials authorizationCredentials = new AuthorizationCredentials(new Token(authorizationToken), homeCredentials.homeAAM, homeCredentials);
-        this.homePlatformAuthorizationCredentialsSet.add(authorizationCredentials);
+        this.authorizationCredentialsSet.add(authorizationCredentials);
+
 
         Map<String, String> attributesFirst = new HashMap<>();
         attributes.put(nameAttr, nameAttrOKValue);
@@ -119,35 +119,32 @@ public class ABACPolicyHelperLocalHomeTokenTest {
         Map<String, String> attributesSecond = new HashMap<>();
         attributes.put(ageAttr, ageAttrOKValue);
 
-        String authorizationTokenGuest = DummyTokenIssuer.buildAuthorizationToken(clientId,
+        String authorizationTokenOne = DummyTokenIssuer.buildAuthorizationToken(clientId,
                 attributesFirst,
                 clientPublicKey.getEncoded(),
-                Token.Type.GUEST,
+                Token.Type.HOME,
                 (long) (36000000),
-                "",
+                deploymentId,
                 issuingAAMPublicKey,
                 issuingAAMPrivateKey);
 
-        AuthorizationCredentials authorizationCredentialsGuest = new AuthorizationCredentials(new Token(authorizationTokenGuest), homeCredentials.homeAAM, homeCredentials);
-        this.guestAuthorizationCredentialsSet.add(authorizationCredentialsGuest);
-
-        String authorizationTokenForeign = DummyTokenIssuer.buildAuthorizationToken(clientId,
+        String authorizationTokenTwo = DummyTokenIssuer.buildAuthorizationToken(clientId,
                 attributesSecond,
                 clientPublicKey.getEncoded(),
-                Token.Type.FOREIGN,
+                Token.Type.HOME,
                 (long) (36000000),
-                deploymentIdForeign,
+                deploymentId,
                 issuingAAMPublicKey,
                 issuingAAMPrivateKey);
 
-        AuthorizationCredentials authorizationCredentialsForeign = new AuthorizationCredentials(new Token(authorizationTokenForeign), homeCredentials.homeAAM, homeCredentials);
-        this.foreignPlatformAuthorizationCredentialsSet.add(authorizationCredentialsForeign);
-
-
+        AuthorizationCredentials authorizationCredentialsFirst = new AuthorizationCredentials(new Token(authorizationTokenOne), homeCredentials.homeAAM, homeCredentials);
+        AuthorizationCredentials authorizationCredentialsSecond = new AuthorizationCredentials(new Token(authorizationTokenTwo), homeCredentials.homeAAM, homeCredentials);
+        this.authorizationCredentialsMultipleTokensSet.add(authorizationCredentialsFirst);
+        this.authorizationCredentialsMultipleTokensSet.add(authorizationCredentialsSecond);
     }
 
     @Test
-    public void singleResourceSingleLocalHomeTokenCheckSuccess() throws
+    public void compositeSpecifierBasedAccessPolicyCheckSuccess() throws
             NoSuchAlgorithmException,
             MalformedJWTException,
             SecurityHandlerException,
@@ -155,21 +152,110 @@ public class ABACPolicyHelperLocalHomeTokenTest {
             CertificateException,
             WrongCredentialsException {
 
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.homePlatformAuthorizationCredentialsSet, false);
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
+        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapFirst
+        );
+
+        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
+        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapSecond
+        );
+
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSet = new HashSet<>();
+        accessPoliciesSet.add(testPolicySpecifierFirst);
+        accessPoliciesSet.add(testPolicySpecifierSecond);
+
+        IAccessPolicySpecifier accessPolicySpecifier = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.OR,
+                accessPoliciesSet, null
+        );
+
+        resourceAccessPolicyMap.put(goodResourceID, UniversalAccessPolicyFactory.getAccessPolicy(accessPolicySpecifier));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void compositeSpecifierBasedAccessPolicyCheckFailure() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException,
+            InvalidArgumentsException,
+            CertificateException,
+            WrongCredentialsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
+        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapFirst
+        );
+
+        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
+        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapSecond
+        );
+
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSet = new HashSet<>();
+        accessPoliciesSet.add(testPolicySpecifierFirst);
+        accessPoliciesSet.add(testPolicySpecifierSecond);
+
+        IAccessPolicySpecifier accessPolicySpecifier = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSet, null
+        );
+
+        resourceAccessPolicyMap.put(goodResourceID, UniversalAccessPolicyFactory.getAccessPolicy(accessPolicySpecifier));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleTokenSpecifierBasedAccessPolicyCheckSuccess() throws
+            NoSuchAlgorithmException,
+            MalformedJWTException,
+            SecurityHandlerException,
+            InvalidArgumentsException,
+            CertificateException,
+            WrongCredentialsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
         Map<String, String> accessPolicyClaimsMap = new HashMap<>();
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
         accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-        accessPolicyClaimsMap.put(Claims.ISSUER, deploymentId);
 
-        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(
-                AccessPolicyType.SLHTAP,
+        IAccessPolicySpecifier singlePolicySpecifier = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
                 accessPolicyClaimsMap
         );
 
-        resourceAccessPolicyMap.put(goodResourceID, SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, UniversalAccessPolicyFactory.getAccessPolicy(singlePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -177,115 +263,31 @@ public class ABACPolicyHelperLocalHomeTokenTest {
     }
 
     @Test
-    public void singleResourceSingleLocalHomeTokenCheckFailure() throws
+    public void singleTokenSpecifierBasedAccessPolicyCheckFailure() throws
             NoSuchAlgorithmException,
             MalformedJWTException,
             SecurityHandlerException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            CertificateException,
+            WrongCredentialsException {
 
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.homePlatformAuthorizationCredentialsSet, false);
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
         Map<String, String> accessPolicyClaimsMap = new HashMap<>();
-        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
-        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
+        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrBadValue);
 
-        resourceAccessPolicyMap.put(badResourceID, new SingleLocalHomeTokenAccessPolicy(deploymentId, accessPolicyClaimsMap));
+        IAccessPolicySpecifier singlePolicySpecifier = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMap
+        );
 
-        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-
-        assertFalse(resp.keySet().contains(badResourceID));
-
-    }
-
-    @Test
-    public void singleResourceSingleLocalHomeTokenMissingAttribute() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException {
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.homePlatformAuthorizationCredentialsSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        Map<String, String> accessPolicyClaimsMap = new HashMap<>();
-        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
-        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + missingAttr, "");
-
-        resourceAccessPolicyMap.put(badResourceID, new SingleLocalHomeTokenAccessPolicy(deploymentId, accessPolicyClaimsMap));
+        resourceAccessPolicyMap.put(goodResourceID, UniversalAccessPolicyFactory.getAccessPolicy(singlePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
-        assertFalse(resp.keySet().contains(badResourceID));
-
-    }
-
-    @Test
-    public void singleResourceEmptyPolicySuccess() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException {
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.homePlatformAuthorizationCredentialsSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-
-        resourceAccessPolicyMap.put(goodResourceID, new SingleLocalHomeTokenAccessPolicy(deploymentId, null));
-
-        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-
-        assertTrue(resp.keySet().contains(goodResourceID));
-
-    }
-
-    @Test
-    public void singleResourceSingleLocalGuestTokenCheckFailure() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException {
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.guestAuthorizationCredentialsSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        Map<String, String> accessPolicyClaimsMap = new HashMap<>();
-        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
-        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        resourceAccessPolicyMap.put(badResourceID, new SingleLocalHomeTokenAccessPolicy(deploymentId, accessPolicyClaimsMap));
-
-        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-
-        assertFalse(resp.keySet().contains(badResourceID));
-
-    }
-
-    @Test
-    public void singleResourceSingleForeignPlatformTokenCheckFailure() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException {
-
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.foreignPlatformAuthorizationCredentialsSet, false);
-        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
-        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        Map<String, String> accessPolicyClaimsMap = new HashMap<>();
-        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrBadValue);
-        accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
-
-        resourceAccessPolicyMap.put(badResourceID, new SingleLocalHomeTokenAccessPolicy(deploymentId, accessPolicyClaimsMap));
-
-        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
-
-        assertFalse(resp.keySet().contains(badResourceID));
-
+        assertFalse(resp.keySet().contains(goodResourceID));
     }
 }
