@@ -2,9 +2,9 @@ package eu.h2020.symbiote.security.helpers.accesspolicies;
 
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
+import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyFactory;
 import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyType;
 import eu.h2020.symbiote.security.accesspolicies.common.IAccessPolicySpecifier;
-import eu.h2020.symbiote.security.accesspolicies.common.UniversalAccessPolicyFactory;
 import eu.h2020.symbiote.security.accesspolicies.common.composite.CompositeAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
 import eu.h2020.symbiote.security.commons.Certificate;
@@ -48,7 +48,7 @@ import static org.junit.Assert.assertTrue;
  * @author Nemanja Ignjatov (UNIVIE)
  */
 
-public class ABACPolicyHelperUniversalAccessPoliciesTest {
+public class ABACPolicyHelperAccessPoliciesTest {
 
     private static final String ISSUING_AAM_CERTIFICATE_ALIAS = "core-1";
     private static final String CLIENT_CERTIFICATE_ALIAS = "client-core-1";
@@ -181,7 +181,7 @@ public class ABACPolicyHelperUniversalAccessPoliciesTest {
                 accessPoliciesSet, null
         );
 
-        resourceAccessPolicyMap.put(goodResourceID, UniversalAccessPolicyFactory.getAccessPolicy(accessPolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(accessPolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -226,7 +226,7 @@ public class ABACPolicyHelperUniversalAccessPoliciesTest {
                 accessPoliciesSet, null
         );
 
-        resourceAccessPolicyMap.put(goodResourceID, UniversalAccessPolicyFactory.getAccessPolicy(accessPolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(accessPolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -255,7 +255,7 @@ public class ABACPolicyHelperUniversalAccessPoliciesTest {
                 accessPolicyClaimsMap
         );
 
-        resourceAccessPolicyMap.put(goodResourceID, UniversalAccessPolicyFactory.getAccessPolicy(singlePolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(singlePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
@@ -284,7 +284,7 @@ public class ABACPolicyHelperUniversalAccessPoliciesTest {
                 accessPolicyClaimsMap
         );
 
-        resourceAccessPolicyMap.put(goodResourceID, UniversalAccessPolicyFactory.getAccessPolicy(singlePolicySpecifier));
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(singlePolicySpecifier));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 

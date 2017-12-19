@@ -5,9 +5,9 @@ import eu.h2020.symbiote.security.accesspolicies.common.composite.CompositeAcces
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 
-public class UniversalAccessPolicyFactory {
+public class AccessPolicyFactory {
 
-    private UniversalAccessPolicyFactory() {
+    private AccessPolicyFactory() {
     }
 
     /**
