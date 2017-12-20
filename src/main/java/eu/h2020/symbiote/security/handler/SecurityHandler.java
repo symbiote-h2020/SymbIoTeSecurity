@@ -152,7 +152,7 @@ public class SecurityHandler implements ISecurityHandler {
             }
         } else
             try {
-                return ClientFactory.getAAMClient(homeAAMAddress).getInternalAAMs().getAvailableAAMs();
+                return ClientFactory.getAAMClient(homeAAMAddress).getAAMsInternally().getAvailableAAMs();
             } catch (AAMException e) { // communication fail with the AAM
                 throw new SecurityHandlerException(e.getMessage(), e);
 

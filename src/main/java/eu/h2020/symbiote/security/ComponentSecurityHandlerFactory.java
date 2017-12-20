@@ -20,6 +20,7 @@ public class ComponentSecurityHandlerFactory {
     /**
      * Creates an end-user security handler
      *
+     * @param coreAAMAddress                 address to Core AAM
      * @param keystorePath                   where the keystore will be stored
      * @param keystorePassword               needed to access security credentials
      * @param clientId                       name of the component in the form of "componentId@platformId"
@@ -30,7 +31,8 @@ public class ComponentSecurityHandlerFactory {
      * @return the component security handler ready to talk with Symbiote components
      * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
      */
-    public static IComponentSecurityHandler getComponentSecurityHandler(String keystorePath,
+    public static IComponentSecurityHandler getComponentSecurityHandler(String coreAAMAddress,
+                                                                        String keystorePath,
                                                                         String keystorePassword,
                                                                         String clientId,
                                                                         String localAAMAddress,
@@ -38,6 +40,9 @@ public class ComponentSecurityHandlerFactory {
                                                                         String componentOwnerUsername,
                                                                         String componentOwnerPassword) throws
             SecurityHandlerException {
+        if (clientId.split("@").length != 2) {
+            throw new SecurityHandlerException("Component Id has bad form, must be componentId@platformId");
+        }
         return new ComponentSecurityHandler(
                 new SecurityHandler(keystorePath, keystorePassword, localAAMAddress, componentOwnerUsername, clientId.split("@")[1]),
                 localAAMAddress,

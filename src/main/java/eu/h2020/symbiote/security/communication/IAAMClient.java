@@ -80,7 +80,7 @@ public interface IAAMClient {
     /**
      * @return collection of AAMs available in the SymbIoTe ecosystem
      */
-    AvailableAAMsCollection getInternalAAMs() throws AAMException;
+    AvailableAAMsCollection getAAMsInternally() throws AAMException;
 
     /**
      * @return collection of AAMs available in the SymbIoTe ecosystem

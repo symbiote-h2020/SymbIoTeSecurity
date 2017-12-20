@@ -222,9 +222,9 @@ public class AAMClient implements IAAMClient {
      * @return collection of AAMs available in the SymbIoTe ecosystem
      */
     @Override
-    public AvailableAAMsCollection getInternalAAMs() throws AAMException {
+    public AvailableAAMsCollection getAAMsInternally() throws AAMException {
         try {
-            return feignClient.getInternalAAMs();
+            return feignClient.getAAMsInternally();
         } catch (FeignException fe) {
             throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
         }
