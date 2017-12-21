@@ -133,19 +133,26 @@ public class SecurityHandler implements ISecurityHandler {
     }
 
     public Map<String, AAM> getAvailableAAMs(String aamAddress) throws SecurityHandlerException {
+        // end-client
         if (platformId.isEmpty()) {
             try {
                 return ClientFactory.getAAMClient(aamAddress).getAvailableAAMs().getAvailableAAMs();
             } catch (AAMException e) { // communication fail with the AAM
                 throw new SecurityHandlerException(e.getMessage(), e);
             }
-        } else
+        }
+        // local component option
+        try {
+            return ClientFactory.getAAMClient(homeAAMAddress).getAAMsInternally().getAvailableAAMs();
+        } catch (AAMException e) {
+            // failed to communicate over new API
             try {
-                return ClientFactory.getAAMClient(homeAAMAddress).getAAMsInternally().getAvailableAAMs();
-            } catch (AAMException e) { // communication fail with the AAM
-                throw new SecurityHandlerException(e.getMessage(), e);
-
+                // trying fallback to old API when AAM wasn't updated to the new protocol
+                return ClientFactory.getAAMClient(homeAAMAddress).getAvailableAAMs().getAvailableAAMs();
+            } catch (AAMException e2) { // communication fail with the AAM
+                throw new SecurityHandlerException(e.getMessage(), e2);
             }
+        }
     }
 
     public Token login(AAM homeAAMId) throws SecurityHandlerException, ValidationException {
