@@ -84,7 +84,6 @@ public class ComponentSecurityHandlerTest {
         ComponentSecurityHandler componentSecurityHandler = new ComponentSecurityHandler(
                 mock,
                 "irrelevant",
-                false,
                 "irrelevant",
                 "irrelevant",
                 goodComponentId + "@" + goodPlatformId);

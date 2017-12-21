@@ -21,15 +21,33 @@ public class ClientSecurityHandlerFactory {
      * @param coreAAMAddress   Symbiote Core AAM address which is available on the symbiote security webpage
      * @param keystorePath     where the keystore will be stored
      * @param keystorePassword needed to access security credentials
+     * @param userId           no longer used
+     * @return the security handler ready to talk with Symbiote Security Layer
+     * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
+     * @deprecated use {@link #getSecurityHandler(String, String, String)}
+     */
+    @Deprecated
+    public static ISecurityHandler getSecurityHandler(String coreAAMAddress,
+                                                      String keystorePath,
+                                                      String keystorePassword,
+                                                      String userId) throws
+            SecurityHandlerException {
+        return getSecurityHandler(coreAAMAddress, keystorePath, keystorePassword);
+    }
+
+    /**
+     * Creates an end-user security handler
+     *
+     * @param coreAAMAddress   Symbiote Core AAM address which is available on the symbiote security webpage
+     * @param keystorePath     where the keystore will be stored
+     * @param keystorePassword needed to access security credentials
      * @return the security handler ready to talk with Symbiote Security Layer
      * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
      */
     public static ISecurityHandler getSecurityHandler(String coreAAMAddress,
                                                       String keystorePath,
-                                                      String keystorePassword,
-                                                      //TODO: Dirty hack to be removed as it should be present in persistent storage in the future
-                                                      String userId) throws
+                                                      String keystorePassword) throws
             SecurityHandlerException {
-        return new SecurityHandler(keystorePath, keystorePassword, coreAAMAddress, userId);
+        return new SecurityHandler(keystorePath, keystorePassword, coreAAMAddress);
     }
 }

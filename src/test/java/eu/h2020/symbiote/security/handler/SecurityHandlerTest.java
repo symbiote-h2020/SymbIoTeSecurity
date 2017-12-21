@@ -92,7 +92,7 @@ public class SecurityHandlerTest {
     
         
         createEmptyKeystore();
-        testclient = new SecurityHandler(keystorePath, keystorePassword, "http://test", "user1");
+        testclient = new SecurityHandler(keystorePath, keystorePassword, "http://test");
     
     
     }
@@ -153,7 +153,7 @@ public class SecurityHandlerTest {
         Iterator<Entry<String, AAM>> entries = result.entrySet().iterator();
         while (entries.hasNext()) {
             Entry<String, AAM> entry = entries.next();
-            String key = (String) entry.getKey();
+            String key = entry.getKey();
 
             if (ammList.get(key) == null)
                 res = false;
@@ -224,7 +224,7 @@ public class SecurityHandlerTest {
     }
 
     @Test
-    public void testLoginAsGuest() throws Throwable, Throwable {
+    public void testLoginAsGuest() throws Throwable {
         logger.info("----------------------------");
         logger.info("testLoginAsGuest starts");
 
@@ -268,7 +268,7 @@ public class SecurityHandlerTest {
     private AAM getAMMfromList(List<AAM> ammlist, String testaamInstanceId2) {
         for (int x = 0; x < ammlist.size(); x++) {
 
-            AAM a = (AAM) ammlist.get(x);
+            AAM a = ammlist.get(x);
             if (a.getAamInstanceId().equals(testaamInstanceId2))
                 return a;
         }

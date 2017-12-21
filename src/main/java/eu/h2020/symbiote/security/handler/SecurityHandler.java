@@ -40,12 +40,10 @@ public class SecurityHandler implements ISecurityHandler {
 
     private static final Log logger = LogFactory.getLog(SecurityHandler.class);
 
-
     private final String keystorePath;
     private final String keystorePassword;
     private final String homeAAMAddress;
 
-    private final String userId;
     private final String platformId;
     //In memory credentials wallet by Home AAM id -> Client ID -> User ID -> Credentials
     private Map<String, BoundCredentials> credentialsWallet =
@@ -54,41 +52,33 @@ public class SecurityHandler implements ISecurityHandler {
     private Map<String, BoundCredentials> tokenCredentials = new HashMap<>();
     private AAM coreAAM = null;
 
-
     /**
-     * Creates a new instance of the Security Handler
+     * Creates a new instance of end-user oriented Security Handler
      *
+     * @param keystorePath     required to find the persisted keystore for this client
      * @param keystorePassword required to unlock the persisted keystore for this client
+     * @param homeAAMAddress   needed to initialize the client
      * @throws SecurityHandlerException on instantiation errors
      */
     public SecurityHandler(String keystorePath,
                            String keystorePassword,
-                           String homeAAMAddress,
-                           //TODO: Dirty hack to be removed as it should be present in persistent storage in the future
-                           String userId)
+                           String homeAAMAddress)
             throws SecurityHandlerException {
-        // enabling support for elliptic curve certificates
-        ECDSAHelper.enableECDSAProvider();
-
-        // rest of the constructor code
-        this.keystorePath = keystorePath;
-        this.keystorePassword = keystorePassword;
-        this.homeAAMAddress = homeAAMAddress;
-        this.userId = userId;
-        this.platformId = "";
-
-        try {
-            buildCredentialsWallet();
-        } catch (Exception e) {
-            throw new SecurityHandlerException("Error generating credentials wallet", e);
-        }
+        this(keystorePath, keystorePassword, homeAAMAddress, "");
     }
 
+    /**
+     * To be used only by the {@link eu.h2020.symbiote.security.ComponentSecurityHandlerFactory} !!!
+     *
+     * @param keystorePath     required to find the persisted keystore for this client
+     * @param keystorePassword required to unlock the persisted keystore for this client
+     * @param homeAAMAddress   needed to initialize the client
+     * @param platformId       used by the {@link ComponentSecurityHandler} to identify its local AAM
+     * @throws SecurityHandlerException
+     */
     public SecurityHandler(String keystorePath,
                            String keystorePassword,
                            String homeAAMAddress,
-                           //TODO: Dirty hack to be removed as it should be present in persistent storage in the future
-                           String userId,
                            String platformId)
             throws SecurityHandlerException {
         // enabling support for elliptic curve certificates
@@ -98,7 +88,6 @@ public class SecurityHandler implements ISecurityHandler {
         this.keystorePath = keystorePath;
         this.keystorePassword = keystorePassword;
         this.homeAAMAddress = homeAAMAddress;
-        this.userId = userId;
         this.platformId = platformId;
 
         try {
@@ -231,7 +220,8 @@ public class SecurityHandler implements ISecurityHandler {
     public ValidationStatus validate(AAM validationAuthority, String token,
                                      Optional<String> clientCertificate,
                                      Optional<String> clientCertificateSigningAAMCertificate,
-                                     Optional<String> foreignTokenIssuingAAMCertificate) throws SecurityHandlerException {
+                                     Optional<String> foreignTokenIssuingAAMCertificate) throws
+            SecurityHandlerException {
 
 
         try {
@@ -360,14 +350,24 @@ public class SecurityHandler implements ISecurityHandler {
 
     }
 
-    private KeyStore getKeystore() throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+    private KeyStore getKeystore() throws
+            IOException,
+            KeyStoreException,
+            CertificateException,
+            NoSuchAlgorithmException {
         return getKeystore(keystorePath, keystorePassword);
     }
 
     /**
      * Read all certificates in the keystore and populate the credentialsWallet
      */
-    private void buildCredentialsWallet() throws SecurityHandlerException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, UnrecoverableEntryException {
+    private void buildCredentialsWallet() throws
+            SecurityHandlerException,
+            CertificateException,
+            NoSuchAlgorithmException,
+            KeyStoreException,
+            IOException,
+            UnrecoverableEntryException {
 
         KeyStore trustStore = getKeystore();
 
@@ -422,7 +422,11 @@ public class SecurityHandler implements ISecurityHandler {
         }
     }
 
-    private void saveCertificate(HomeCredentials credentials) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+    private void saveCertificate(HomeCredentials credentials) throws
+            IOException,
+            KeyStoreException,
+            CertificateException,
+            NoSuchAlgorithmException {
 
         KeyStore trustStore = getKeystore();
 

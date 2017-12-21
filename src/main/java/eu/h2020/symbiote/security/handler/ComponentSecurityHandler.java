@@ -36,19 +36,16 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
     private static final Log log = LogFactory.getLog(ComponentSecurityHandler.class);
     private final ISecurityHandler securityHandler;
     private final AAM localAAM;
-    private final boolean alwaysUseLocalAAMForValidation;
     private final String componentOwnerUsername;
     private final String componentOwnerPassword;
     private final String combinedClientIdentifier;
 
     public ComponentSecurityHandler(ISecurityHandler securityHandler,
                                     String localAAMAddress,
-                                    boolean alwaysUseLocalAAMForValidation,
                                     String componentOwnerUsername,
                                     String componentOwnerPassword,
                                     String componentId) throws SecurityHandlerException {
         this.securityHandler = securityHandler;
-        this.alwaysUseLocalAAMForValidation = alwaysUseLocalAAMForValidation;
         if (componentOwnerUsername.isEmpty()
                 || !componentOwnerUsername.matches("^(([\\w-])+)$")
                 || componentOwnerPassword.isEmpty())
@@ -81,24 +78,10 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
             throw new SecurityHandlerException(e.getMessage());
         }
 
-        Map<String, AAM> availableAAMs = new HashMap<>();
-        if (!alwaysUseLocalAAMForValidation)
-            availableAAMs = securityHandler.getAvailableAAMs(localAAM); // retrieving AAMs available to use them for validation
-
         // validating the authorization tokens
         for (SecurityCredentials securityCredentials : securityRequest.getSecurityCredentials()) {
             try {
                 Token authorizationToken = new Token(securityCredentials.getToken());
-                AAM validationAAM;
-                // set proper validation AAM
-                if (alwaysUseLocalAAMForValidation) {
-                    validationAAM = localAAM;
-                } else {
-                    // try to resolve the issuing AAM
-                    validationAAM = availableAAMs.get(authorizationToken.getClaims().getIssuer());
-                    if (validationAAM == null)// fallback to local AAM
-                        validationAAM = localAAM;
-                }
                 ValidationStatus tokenValidationStatus;
                 AAM issuer = securityHandler.getAvailableAAMs(localAAM).get(authorizationToken.getClaims().getIssuer());
                 if (issuer == null
@@ -111,7 +94,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
 
                 // validate
                 tokenValidationStatus = securityHandler.validate(
-                        validationAAM,
+                        localAAM,
                         authorizationToken.getToken(),
                         Optional.of(securityCredentials.getClientCertificate()),
                         Optional.of(securityCredentials.getClientCertificateSigningAAMCertificate()),
