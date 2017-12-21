@@ -9,6 +9,8 @@ import eu.h2020.symbiote.security.communication.interfaces.IFeignAAMClient;
 import eu.h2020.symbiote.security.communication.payloads.*;
 import feign.Feign;
 import feign.FeignException;
+import feign.Logger;
+import feign.Logger.Level;
 import feign.Response;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
@@ -30,16 +32,27 @@ public class AAMClient implements IAAMClient {
      * @param serverAddress of the AAM server the client wants to interact with.
      */
     public AAMClient(String serverAddress) {
+    		this(serverAddress, new Logger.NoOpLogger());
+    }
+
+    /**
+     * @param serverAddress of the AAM server the client wants to interact with.
+     * @param logger feign logger
+     */
+    public AAMClient(String serverAddress, Logger logger) {
         this.serverAddress = serverAddress;
-        this.feignClient = getJsonClient();
+        this.feignClient = getJsonClient(new Logger.NoOpLogger());
     }
 
     /**
      * @return Instance of feign client with all necessary parameters set
      */
-    private IFeignAAMClient getJsonClient() {
-        return Feign.builder().encoder(new JacksonEncoder()).decoder(new JacksonDecoder())
-                .target(IFeignAAMClient.class, serverAddress);
+    private IFeignAAMClient getJsonClient(Logger logger) {
+        return Feign.builder()
+        		.encoder(new JacksonEncoder())
+        		.decoder(new JacksonDecoder())
+        		.logLevel(Level.FULL)
+            .target(IFeignAAMClient.class, serverAddress);
     }
 
 
