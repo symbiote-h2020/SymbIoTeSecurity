@@ -29,24 +29,6 @@ apply plugin: 'maven-publish'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId = 'eu.h2020.symbiote'
-            version = project.version
-            from components.java
-
-            artifact sourceJar {
-                classifier "sources"
-            }
-        }
-    }
-}
-
-task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
-}
-
 // dependencies section
 repositories {
     mavenCentral()
@@ -66,11 +48,43 @@ dependencies {
     testCompile('org.powermock:powermock-module-junit4:1.6.4')
 }
 
-// code quality below
+// sources and javadocs
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
 task generateJavaDocs(type: Javadoc) {
     source = sourceSets.main.allJava
+    classpath = configurations.compileClasspath
     destinationDir = reporting.file("javadocs")
 }
+
+task javadocJar(type: Jar, dependsOn: generateJavaDocs) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourceJar
+    archives javadocJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = 'eu.h2020.symbiote'
+            version = project.version
+            from components.java
+
+            artifact sourceJar {
+                classifier "sources"
+            }
+            artifact javadocJar
+        }
+    }
+}
+
+// code quality below
 
 // jacoco configuration section
 jacoco {
@@ -90,7 +104,7 @@ dependencyCheck {
 }
 
 // including code quality extensions into the build
-check.dependsOn(jacocoTestReport)//, 'dependencyCheckAnalyze')
+check.dependsOn(jacocoTestReport, 'dependencyCheckAnalyze')
 
 task buildRunnablePAAMKeystoreFactoryJAR(type: Jar) {
     manifest {
