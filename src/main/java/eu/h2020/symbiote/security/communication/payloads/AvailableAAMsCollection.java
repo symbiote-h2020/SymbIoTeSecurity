@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
 
 /**
- * Available AAMs map wrapper for JAX-RS & Jackson compatibility
+ * Available AAMs map wrapper for JAX-RS &amp; Jackson compatibility
  */
 public class AvailableAAMsCollection {
     private final Map<String, AAM> availableAAMs;

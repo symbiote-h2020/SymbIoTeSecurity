@@ -40,7 +40,6 @@ public class SecurityRequest {
      * Used to generate the security request needed to access public resources
      *
      * @param guestToken acquired from whichever symbIoTe AAM
-     * @return the required payload for client's authentication and authorization
      */
     public SecurityRequest(String guestToken) {
         this.timestamp = ZonedDateTime.now().toInstant().toEpochMilli();

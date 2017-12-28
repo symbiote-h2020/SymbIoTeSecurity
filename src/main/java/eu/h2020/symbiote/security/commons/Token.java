@@ -15,7 +15,7 @@ import org.springframework.data.annotation.Transient;
  * @author Mikołaj Dobski (PSNC)
  * @author Elena Garrido (ATOS)
  * @author Nemanja Ignjatov (UNIVIE)
- * @{@link eu.h2020.symbiote.security.commons.jwt.JWTClaims}
+ * @see eu.h2020.symbiote.security.commons.jwt.JWTClaims
  */
 public class Token {
 
