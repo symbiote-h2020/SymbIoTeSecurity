@@ -51,6 +51,14 @@ public interface IAAMClient {
             AAMException;
 
     /**
+     * Sends information about event to Anomaly Detection Module
+     *
+     * @param eventLogRequest contains information about event
+     * @return true/false depending on event report status
+     */
+    String logAnomalyEvent(EventLogRequest eventLogRequest);
+
+    /**
      * @return GUEST token used to access public resources offered in SymbIoTe
      */
     String getGuestToken() throws JWTCreationException, AAMException;

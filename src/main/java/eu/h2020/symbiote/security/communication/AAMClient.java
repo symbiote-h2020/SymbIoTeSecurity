@@ -127,6 +127,20 @@ public class AAMClient implements IAAMClient {
     }
 
     /**
+     * Sends information about event to Anomaly Detection Module
+     *
+     * @param eventLogRequest contains information about event
+     * @return true/false depending on event report status
+     */
+    @Override
+    public String logAnomalyEvent(EventLogRequest eventLogRequest) {
+        if(eventLogRequest == null)
+            return "";
+        Response response = feignClient.logAnomalyEvent(eventLogRequest);
+        return response.body().toString();
+    }
+
+    /**
      * @return GUEST token used to access public resources offered in SymbIoTe
      */
     @Override

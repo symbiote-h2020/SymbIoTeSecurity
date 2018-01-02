@@ -5,12 +5,14 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
+import eu.h2020.symbiote.security.commons.enums.AnomalyDetectionVerbosityLevel;
+import eu.h2020.symbiote.security.commons.enums.EventType;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
-import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.*;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
+import eu.h2020.symbiote.security.communication.AAMClient;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
+import eu.h2020.symbiote.security.communication.payloads.EventLogRequest;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 import eu.h2020.symbiote.security.helpers.ABACPolicyHelper;
@@ -39,12 +41,14 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
     private final String componentOwnerUsername;
     private final String componentOwnerPassword;
     private final String combinedClientIdentifier;
+    private IAnomalyListenerSecurity anomalyListenerSecurity;
 
     public ComponentSecurityHandler(ISecurityHandler securityHandler,
                                     String localAAMAddress,
                                     String componentOwnerUsername,
                                     String componentOwnerPassword,
-                                    String componentId) throws SecurityHandlerException {
+                                    String componentId,
+                                    Optional<IAnomalyListenerSecurity> anomalyListenerSecurity) throws SecurityHandlerException {
         this.securityHandler = securityHandler;
         if (componentOwnerUsername.isEmpty()
                 || !componentOwnerUsername.matches("^(([\\w-])+)$")
@@ -61,11 +65,15 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         if (this.localAAM == null) {
             throw new SecurityHandlerException("You are not connected to your local aam");
         }
+        if (anomalyListenerSecurity.isPresent() && anomalyListenerSecurity.get().getVerbosityLevel() != AnomalyDetectionVerbosityLevel.DISABLED)
+            this.anomalyListenerSecurity = anomalyListenerSecurity.get();
+        else
+            this.anomalyListenerSecurity = new NullAnomalyListenerSecurity();
     }
 
 
     private ValidationStatus isReceivedSecurityRequestValid(SecurityRequest securityRequest) throws
-            SecurityHandlerException {
+            SecurityHandlerException, WrongCredentialsException {
 
         // verifying that the request is integral and the client should posses the tokens in it
         try {
@@ -82,6 +90,8 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         for (SecurityCredentials securityCredentials : securityRequest.getSecurityCredentials()) {
             try {
                 Token authorizationToken = new Token(securityCredentials.getToken());
+                if (anomalyListenerSecurity.isBlocked(authorizationToken.getClaims().getIssuer(), EventType.VALIDATION_FAILED))
+                    throw new BlockedUserException();
                 ValidationStatus tokenValidationStatus;
                 AAM issuer = securityHandler.getAvailableAAMs(localAAM).get(authorizationToken.getClaims().getIssuer());
                 if (issuer == null
@@ -102,9 +112,11 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                 // any invalid token causes the whole validation to fail
                 if (tokenValidationStatus != ValidationStatus.VALID) {
                     log.debug("token was invalidated with the following reason: " + tokenValidationStatus);
+                    AAMClient aamClient = new AAMClient(localAAM.getAamAddress());
+                    aamClient.logAnomalyEvent(anomalyListenerSecurity.prepareEventLogRequest(new EventLogRequest(authorizationToken.getToken(), localAAM.getAamInstanceId(), EventType.VALIDATION_FAILED, System.currentTimeMillis(), tokenValidationStatus.toString())));
                     return tokenValidationStatus;
                 }
-            } catch (ValidationException | CertificateException e) {
+            } catch (ValidationException | CertificateException | BlockedUserException e) {
                 log.error(e);
                 throw new SecurityHandlerException(e.getMessage());
             }
@@ -169,7 +181,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                         validatedCredentials++;
                     else
                         log.debug(freshValidationStatus);
-                } catch (SecurityHandlerException e) {
+                } catch (SecurityHandlerException | WrongCredentialsException e) {
                     // validation failed, storing with unknown status
                     log.debug(e);
                     alreadyValidatedCredentialsCache.put(partialPolicyCredentials, ValidationStatus.UNKNOWN);

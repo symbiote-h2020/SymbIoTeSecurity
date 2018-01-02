@@ -301,7 +301,7 @@ public class SecurityHandlerTest {
         Map<String, AAM> aamMap = new HashMap<>();
         
         aamMap.put(homeAAMId, homeAAM);
-        
+
         Certificate certificate = new Certificate(getCertString(serverkeystorePath, serverkeystorePassword, serveralias));
 
         for (int i = 0; i < 3; i++) {

@@ -59,6 +59,10 @@ public enum ValidationStatus {
      * when the validation procedure failed for whatever reason (e.g. internal server error)
      */
     UNKNOWN,
+    /**
+     * when anomaly detection module found suspicious behaviour.
+     */
+    BLOCKED,
 
     /**
      * uninitialized value of this enum
