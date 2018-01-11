@@ -174,6 +174,8 @@ public class SecurityHandler implements ISecurityHandler {
                 throw new SecurityHandlerException("Malformed token sent", e);
             } catch (AAMException e) { // communication fail with the AAM
                 throw new SecurityHandlerException(e.getMessage(), e);
+            } catch (BlockedUserException e) {
+                throw new SecurityHandlerException("User was blocked. Try again in 60s", e);
             }
         } else {
             throw new SecurityHandlerException("Can't find certificate for AAM " + homeAAMId.getAamInstanceId());

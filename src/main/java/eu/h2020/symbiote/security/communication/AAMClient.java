@@ -168,7 +168,8 @@ public class AAMClient implements IAAMClient {
             WrongCredentialsException,
             JWTCreationException,
             MalformedJWTException,
-            AAMException {
+            AAMException,
+            BlockedUserException {
         Response response;
         try {
             response = feignClient.getHomeToken(loginRequest);
@@ -180,6 +181,8 @@ public class AAMClient implements IAAMClient {
                 throw new MalformedJWTException("Unable to read malformed token");
             case 401:
                 throw new WrongCredentialsException("Could not validate token with incorrect credentials");
+            case 403:
+                throw new BlockedUserException("User was blocked due to incorrect credentials. Please, try again after 60s.");
             case 500:
                 throw new JWTCreationException("Server failed to create a home token");
             default:
@@ -307,7 +310,8 @@ public class AAMClient implements IAAMClient {
     @Override
     public UserDetails getUserDetails(Credentials credentials) throws
             UserManagementException,
-            AAMException {
+            AAMException,
+            BlockedUserException {
         try {
             return feignClient.getUserDetails(credentials);
         } catch (FeignException exc) {
@@ -316,6 +320,8 @@ public class AAMClient implements IAAMClient {
                     throw new UserManagementException("Requested user is not in database");
                 case 401: //Error 401 - Unauthorized, Wrong password was provided for existing user
                     throw new UserManagementException("Wrong password was provided");
+                case 403:
+                    throw new BlockedUserException("User was blocked due to incorrect credentials. Please, try again after 60s.");
                 default:
                     throw new AAMException(AAM_COMMS_ERROR_MESSAGE + exc.getMessage());
             }

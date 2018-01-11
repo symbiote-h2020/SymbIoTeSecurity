@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.h2020.symbiote.security.commons.enums.EventType;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
 import eu.h2020.symbiote.security.commons.jwt.JWTClaims;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
-import org.springframework.data.annotation.Id;
 
 import java.util.Optional;
 
@@ -21,6 +19,7 @@ public class EventLogRequest {
     private String username = "";
     private String clientIdentifier = "";
     private String jti = "";
+    private String componentId = "";
     private String platformId = "";
     private EventType eventType;
     private long timestamp = 0;
@@ -44,14 +43,16 @@ public class EventLogRequest {
     public EventLogRequest(@JsonProperty("username") String username,
                            @JsonProperty("clientIdentifier") String clientIdentifier,
                            @JsonProperty("jti") String jti,
+                           @JsonProperty("componentId") String componentId,
                            @JsonProperty("platformId") String platformId,
                            @JsonProperty("eventType") EventType eventType,
                            @JsonProperty("timestamp") long timestamp,
                            @JsonProperty("tokenString") String tokenString,
-                           @JsonProperty("reason") String reason) throws WrongCredentialsException {
+                           @JsonProperty("reason") String reason) {
         this.setUsername(username);
         this.setClientIdentifier(clientIdentifier);
         this.setJti(jti);
+        this.setComponentId(componentId);
         this.setPlatformId(platformId);
         this.setEventType(eventType);
         this.setTimestamp(timestamp);
@@ -90,7 +91,7 @@ public class EventLogRequest {
      * @param reason      text reason of rejection
      */
     public EventLogRequest(String tokenString, String platformId, EventType eventType,
-                           long timestamp, String reason) throws WrongCredentialsException {
+                           long timestamp, String reason) {
         JWTClaims claims = null;
         try {
             claims = JWTEngine.getClaimsFromToken(tokenString);
@@ -200,4 +201,13 @@ public class EventLogRequest {
     public void setSourcePlatformId(String sourcePlatformId) {
         this.sourcePlatformId = sourcePlatformId;
     }
+
+    public String getComponentId() {
+        return componentId;
+    }
+
+    public void setComponentId(String componentId) {
+        this.componentId = componentId;
+    }
+
 }

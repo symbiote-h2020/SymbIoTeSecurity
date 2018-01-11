@@ -3,14 +3,12 @@ package eu.h2020.symbiote.security.handler;
 import eu.h2020.symbiote.security.ComponentSecurityHandlerFactory;
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.SingleTokenAccessPolicyFactory;
-import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleLocalHomeTokenAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
 import eu.h2020.symbiote.security.clients.ClientFactory;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
-import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
@@ -37,7 +35,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -142,6 +139,7 @@ public class ComponentSecurityHandlerTest {
 
         //aamClient.getAvailableAAMs
         Mockito.when(aamClient.getAvailableAAMs()).thenReturn(new AvailableAAMsCollection(getAMMMap(issuingAAM)));
+        Mockito.when(aamClient.getAAMsInternally()).thenReturn(new AvailableAAMsCollection(getAMMMap(issuingAAM)));
 
         //aamClient.getHomeToken
         Mockito.when(aamClient.getHomeToken(Matchers.anyString())).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
@@ -173,7 +171,7 @@ public class ComponentSecurityHandlerTest {
 
     public String getTokenString(String keystoreFilename, String spassword, String alias) throws Throwable {
 
-        String result = null;
+        String result;
 
         char[] password = spassword.toCharArray();
 
@@ -216,12 +214,10 @@ public class ComponentSecurityHandlerTest {
     public void testComponentSecurityHandlerSuccess() throws Throwable {
 
         IComponentSecurityHandler a = ComponentSecurityHandlerFactory.getComponentSecurityHandler(
-                "irrelevant",
                 serverkeystorePath,
                 serverkeystorePassword,
                 goodComponentId + "@" + goodPlatformId,
                 "http://test",
-                false,
                 username,
                 "irrelevant",
                 Optional.empty()
@@ -230,8 +226,8 @@ public class ComponentSecurityHandlerTest {
 
         Set<String> b = a.getSatisfiedPoliciesIdentifiers(this.resourceAccessPolicyMap, securityRequest);
 
-        assertEquals(b.size(), 1);
-        assertEquals(b.toArray()[0], goodResourceID);
+        assertEquals(1, b.size());
+        assertEquals(goodResourceID, b.toArray()[0]);
 
         ISecurityHandler c = a.getSecurityHandler();
         assertEquals(c.getAvailableAAMs().size(), 2);
@@ -244,12 +240,10 @@ public class ComponentSecurityHandlerTest {
     public void testComponentSecurityHandlerNonExistingCert() throws SecurityHandlerException {
 
         IComponentSecurityHandler a = ComponentSecurityHandlerFactory.getComponentSecurityHandler(
-                "irrelevant",
                 serverkeystorePath,
                 serverkeystorePassword,
                 goodComponentId + "@" + badPlatformId,
                 "http://test",
-                false,
                 "testUser",
                 "irrelevant",
                 Optional.empty()
@@ -261,10 +255,8 @@ public class ComponentSecurityHandlerTest {
         ComponentSecurityHandlerFactory.getComponentSecurityHandler(
                 "irrelevant",
                 "irrelevant",
-                "irrelevant",
                 badComponentId + "@" + goodPlatformId,
                 "irrelevant",
-                false,
                 "irrelevant",
                 "irrelevant",
                 Optional.empty()
@@ -277,10 +269,8 @@ public class ComponentSecurityHandlerTest {
         ComponentSecurityHandlerFactory.getComponentSecurityHandler(
                 "irrelevant",
                 "irrelevant",
-                "irrelevant",
                 goodComponentId + "@" + badPlatformId,
                 "irrelevant",
-                false,
                 "irrelevant",
                 "irrelevant",
                 Optional.empty()
@@ -292,10 +282,8 @@ public class ComponentSecurityHandlerTest {
         ComponentSecurityHandlerFactory.getComponentSecurityHandler(
                 "irrelevant",
                 "irrelevant",
-                "irrelevant",
                 goodComponentId,
                 "irrelevant",
-                false,
                 "irrelevant",
                 "irrelevant",
                 Optional.empty()
@@ -307,10 +295,8 @@ public class ComponentSecurityHandlerTest {
         ComponentSecurityHandlerFactory.getComponentSecurityHandler(
                 "irrelevant",
                 "irrelevant",
-                "irrelevant",
                 goodComponentId + "@" + goodPlatformId + "@" + goodPlatformId,
                 "irrelevant",
-                false,
                 "irrelevant",
                 "irrelevant",
                 Optional.empty()

@@ -8,7 +8,10 @@ import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.AnomalyDetectionVerbosityLevel;
 import eu.h2020.symbiote.security.commons.enums.EventType;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
-import eu.h2020.symbiote.security.commons.exceptions.custom.*;
+import eu.h2020.symbiote.security.commons.exceptions.custom.BlockedUserException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
 import eu.h2020.symbiote.security.communication.AAMClient;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
@@ -73,7 +76,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
 
 
     private ValidationStatus isReceivedSecurityRequestValid(SecurityRequest securityRequest) throws
-            SecurityHandlerException, WrongCredentialsException {
+            SecurityHandlerException {
 
         // verifying that the request is integral and the client should posses the tokens in it
         try {
@@ -90,7 +93,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         for (SecurityCredentials securityCredentials : securityRequest.getSecurityCredentials()) {
             try {
                 Token authorizationToken = new Token(securityCredentials.getToken());
-                if (anomalyListenerSecurity.isBlocked(authorizationToken.getClaims().getIssuer(), EventType.VALIDATION_FAILED))
+                if (anomalyListenerSecurity.isBlocked(Optional.empty(), Optional.empty(), Optional.ofNullable(authorizationToken.getClaims().getId()), Optional.empty(), Optional.empty(), EventType.VALIDATION_FAILED))
                     throw new BlockedUserException();
                 ValidationStatus tokenValidationStatus;
                 AAM issuer = securityHandler.getAvailableAAMs(localAAM).get(authorizationToken.getClaims().getIssuer());
@@ -181,7 +184,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                         validatedCredentials++;
                     else
                         log.debug(freshValidationStatus);
-                } catch (SecurityHandlerException | WrongCredentialsException e) {
+                } catch (SecurityHandlerException e) {
                     // validation failed, storing with unknown status
                     log.debug(e);
                     alreadyValidatedCredentialsCache.put(partialPolicyCredentials, ValidationStatus.UNKNOWN);

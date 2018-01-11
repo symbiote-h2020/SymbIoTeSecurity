@@ -72,7 +72,8 @@ public interface IAAMClient {
             WrongCredentialsException,
             JWTCreationException,
             MalformedJWTException,
-            AAMException;
+            AAMException,
+            BlockedUserException;
 
     /**
      * @param remoteHomeToken   that an actor wants to exchange in this AAM for a FOREIGN token
@@ -125,5 +126,6 @@ public interface IAAMClient {
      */
     UserDetails getUserDetails(Credentials credentials) throws
             UserManagementException,
-            AAMException;
+            AAMException,
+            BlockedUserException;
 }

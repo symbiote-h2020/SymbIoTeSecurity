@@ -13,7 +13,7 @@ public class BlockedUserException extends SecurityException {
 
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
     private final static String errorMessage = "ERR_BLOCKED_USER";
-    private final static HttpStatus statusCode = HttpStatus.UNAUTHORIZED;
+    private final static HttpStatus statusCode = HttpStatus.FORBIDDEN;
 
     public BlockedUserException() {
         super(errorMessage);
