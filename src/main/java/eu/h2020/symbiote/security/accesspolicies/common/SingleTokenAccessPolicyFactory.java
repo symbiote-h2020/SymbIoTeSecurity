@@ -40,7 +40,7 @@ public class SingleTokenAccessPolicyFactory {
             case STAP: {
                 return new SingleTokenAccessPolicy(specifier.getRequiredClaims());
             }
-            case SFTAP:
+            case SFTAP: {
                 String homePlatformIdentifier = specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_HOME_PLATFORM_ID);
                 String federationIdentifier = specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_IDENTIFIER_KEY);
                 Set<String> federationMembers = new HashSet<>(Integer.parseInt(specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_SIZE)));
@@ -49,6 +49,7 @@ public class SingleTokenAccessPolicyFactory {
                         federationMembers.add(specifier.getRequiredClaims().get(claimKey));
                 }
                 return new SingleFederatedTokenAccessPolicy(federationMembers, homePlatformIdentifier, federationIdentifier);
+            }
             case SLHTAP: {
                 String platformIdentifier = specifier.getRequiredClaims().get(Claims.ISSUER);
                 Map<String, String> filteredClaims = new HashMap<>(specifier.getRequiredClaims());
@@ -64,7 +65,7 @@ public class SingleTokenAccessPolicyFactory {
                 return new SingleLocalHomeTokenIdentityBasedAccessPolicy(platformIdentifier, username,
                         filteredClaims);
             }
-            case CHTAP:
+            case CHTAP: {
                 String platformIdentifier = specifier.getRequiredClaims().get(Claims.ISSUER);
                 String clientId = specifier.getRequiredClaims().get(Claims.SUBJECT);
                 Map<String, String> filteredClaims = new HashMap<>(specifier.getRequiredClaims());
@@ -72,8 +73,10 @@ public class SingleTokenAccessPolicyFactory {
                 filteredClaims.remove(Claims.SUBJECT);
                 return new ComponentHomeTokenAccessPolicy(platformIdentifier, clientId,
                         filteredClaims);
-            default:
+            }
+            default: {
                 throw new InvalidArgumentsException("The type of the access policy was not recognized");
+            }
         }
     }
 }

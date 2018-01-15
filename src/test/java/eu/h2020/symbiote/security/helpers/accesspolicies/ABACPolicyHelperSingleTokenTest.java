@@ -11,9 +11,6 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -30,7 +27,6 @@ import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
@@ -140,11 +136,7 @@ public class ABACPolicyHelperSingleTokenTest {
     @Test
     public void singleResourceSingleTokenCheckSuccess() throws
             NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException {
+            InvalidArgumentsException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -167,10 +159,7 @@ public class ABACPolicyHelperSingleTokenTest {
     }
 
     @Test
-    public void singleResourceEmptyCredentialsCheckFailure() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException {
+    public void singleResourceEmptyCredentialsCheckFailure() {
 
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
@@ -186,10 +175,7 @@ public class ABACPolicyHelperSingleTokenTest {
     }
 
     @Test
-    public void singleResourceMalformedCredentialsCheckFailure() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException {
+    public void singleResourceMalformedCredentialsCheckFailure() {
 
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
@@ -208,9 +194,7 @@ public class ABACPolicyHelperSingleTokenTest {
 
     @Test
     public void singleResourceSingleTokenCheckFailure() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException {
+            NoSuchAlgorithmException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -230,9 +214,7 @@ public class ABACPolicyHelperSingleTokenTest {
 
     @Test
     public void singleResourceSingleTokenMissingAttribute() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException {
+            NoSuchAlgorithmException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -253,9 +235,7 @@ public class ABACPolicyHelperSingleTokenTest {
 
     @Test
     public void multipleResourceSingleTokenCheckOneSuccessOneFailure() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException {
+            NoSuchAlgorithmException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -282,9 +262,7 @@ public class ABACPolicyHelperSingleTokenTest {
 
     @Test
     public void multipleResourceSingleTokenAllSuccess() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException {
+            NoSuchAlgorithmException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -311,9 +289,7 @@ public class ABACPolicyHelperSingleTokenTest {
 
     @Test
     public void multipleResourceSingleTokenAllFailure() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException {
+            NoSuchAlgorithmException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -340,9 +316,7 @@ public class ABACPolicyHelperSingleTokenTest {
 
     @Test
     public void singleResourceMultipleTokensFailure() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException {
+            NoSuchAlgorithmException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -363,9 +337,7 @@ public class ABACPolicyHelperSingleTokenTest {
 
     @Test
     public void singleResourceEmptyPolicySuccess() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException {
+            NoSuchAlgorithmException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -381,9 +353,7 @@ public class ABACPolicyHelperSingleTokenTest {
 
     @Test
     public void singleResourceNullPolicySuccess() throws
-            NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException {
+            NoSuchAlgorithmException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());

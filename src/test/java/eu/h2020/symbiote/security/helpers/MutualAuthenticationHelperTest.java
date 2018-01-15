@@ -95,14 +95,7 @@ public class MutualAuthenticationHelperTest {
 
     @Test
     public void getSecurityRequestSuccess() throws
-            InvalidAlgorithmParameterException,
-            NoSuchAlgorithmException,
-            NoSuchProviderException,
-            KeyStoreException,
-            IOException,
-            CertificateException,
-            UnrecoverableKeyException,
-            ValidationException {
+            NoSuchAlgorithmException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
         // check online request
@@ -128,13 +121,7 @@ public class MutualAuthenticationHelperTest {
 
     @Test
     public void isSecurityRequestVerifiedSuccess() throws
-            InvalidAlgorithmParameterException,
             NoSuchAlgorithmException,
-            NoSuchProviderException,
-            KeyStoreException,
-            IOException,
-            CertificateException,
-            UnrecoverableKeyException,
             ValidationException,
             MalformedJWTException,
             InvalidKeySpecException {
@@ -183,7 +170,6 @@ public class MutualAuthenticationHelperTest {
 
     @Test(expected = ValidationException.class)
     public void isSecurityRequestVerifiedFailsWrongAuthenticationChallenge() throws
-            InvalidAlgorithmParameterException,
             NoSuchAlgorithmException,
             NoSuchProviderException,
             KeyStoreException,
@@ -192,7 +178,7 @@ public class MutualAuthenticationHelperTest {
             UnrecoverableKeyException,
             ValidationException,
             MalformedJWTException,
-            InvalidKeySpecException, InterruptedException {
+            InvalidKeySpecException {
 
         KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
         ks.load(new FileInputStream(CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
@@ -241,7 +227,6 @@ public class MutualAuthenticationHelperTest {
 
     @Test
     public void isSecurityRequestVerifiedFailsOldToken() throws
-            InvalidAlgorithmParameterException,
             NoSuchAlgorithmException,
             NoSuchProviderException,
             KeyStoreException,
@@ -269,8 +254,6 @@ public class MutualAuthenticationHelperTest {
         AAM issuingAAM = new AAM("", "", "", new Certificate(CryptoHelper.convertX509ToPEM(issuingAAMCertificate)), new HashMap<>());
         HomeCredentials homeCredentials = new HomeCredentials(issuingAAM, username, clientId, new Certificate(CryptoHelper.convertX509ToPEM(clientCertificate)), clientPrivateKey);
 
-        KeyPair a = CryptoHelper.createKeyPair();
-
         String wrongAuthorizationToken = DummyTokenIssuer.buildAuthorizationToken(clientId,
                 null,
                 clientPublicKey.getEncoded(),
@@ -289,12 +272,7 @@ public class MutualAuthenticationHelperTest {
     }
 
     @Test
-    public void getSecurityRequestForGuestSuccess() throws
-            MalformedJWTException,
-            ValidationException,
-            NoSuchAlgorithmException,
-            InvalidKeySpecException,
-            IOException {
+    public void getSecurityRequestForGuestSuccess() {
 
         SecurityRequest securityRequest = new SecurityRequest(this.guestToken.getToken());
         assertEquals(this.guestToken.toString(), securityRequest.getSecurityCredentials().iterator().next().getToken());
@@ -305,8 +283,7 @@ public class MutualAuthenticationHelperTest {
             MalformedJWTException,
             ValidationException,
             NoSuchAlgorithmException,
-            InvalidKeySpecException,
-            IOException {
+            InvalidKeySpecException {
 
         SecurityRequest securityRequest = new SecurityRequest(this.guestToken.getToken());
         assertEquals(this.guestToken.toString(), securityRequest.getSecurityCredentials().iterator().next().getToken());

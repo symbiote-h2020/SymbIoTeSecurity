@@ -10,9 +10,6 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -30,7 +27,6 @@ import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,9 +56,7 @@ public class ABACPolicyHelperLocalHomeIdentityBasedTokenTest {
     private final String badUsername = "badUsername";
 
     private final String goodResourceID = "goodResourceID";
-    private final String goodResourceID2 = "goodResourceID2";
     private final String badResourceID = "badResourceID";
-    private final String badResourceID2 = "badResourceID2";
 
     private HashSet<AuthorizationCredentials> homePlatformAuthorizationCredentialsSet = new HashSet<>();
     private HashSet<AuthorizationCredentials> badHomePlatformAuthorizationCredentialsSet = new HashSet<>();
@@ -148,11 +142,7 @@ public class ABACPolicyHelperLocalHomeIdentityBasedTokenTest {
     @Test
     public void singleResourceSingleLocalHomeTokenIdentityCheckSuccess() throws
             NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException {
+            InvalidArgumentsException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.homePlatformAuthorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -177,8 +167,6 @@ public class ABACPolicyHelperLocalHomeIdentityBasedTokenTest {
     @Test
     public void singleResourceSingleLocalHomeTokenIdentityCheckFailure() throws
             NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
             InvalidArgumentsException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.badHomePlatformAuthorizationCredentialsSet, false);
@@ -197,8 +185,6 @@ public class ABACPolicyHelperLocalHomeIdentityBasedTokenTest {
     @Test
     public void singleResourceSingleLocalGuestTokenCheckFailure() throws
             NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
             InvalidArgumentsException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.guestAuthorizationCredentialsSet, false);
@@ -217,8 +203,6 @@ public class ABACPolicyHelperLocalHomeIdentityBasedTokenTest {
     @Test
     public void singleResourceSingleForeignPlatformTokenCheckFailure() throws
             NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
             InvalidArgumentsException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.foreignPlatformAuthorizationCredentialsSet, false);

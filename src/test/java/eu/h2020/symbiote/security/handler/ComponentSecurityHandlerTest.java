@@ -20,7 +20,8 @@ public class ComponentSecurityHandlerTest {
     private final String goodPlatformId = "Platform-id_1";
 
     @Test(expected = SecurityHandlerException.class)
-    public void badComponentIdTest() throws SecurityHandlerException {
+    public void badComponentIdTest() throws
+            SecurityHandlerException {
         ComponentSecurityHandlerFactory.getComponentSecurityHandler(
                 "irrelevant",
                 "irrelevant",
@@ -35,7 +36,8 @@ public class ComponentSecurityHandlerTest {
 
 
     @Test(expected = SecurityHandlerException.class)
-    public void badPlatformIdTest() throws SecurityHandlerException {
+    public void badPlatformIdTest() throws
+            SecurityHandlerException {
         ComponentSecurityHandlerFactory.getComponentSecurityHandler(
                 "irrelevant",
                 "irrelevant",
@@ -49,7 +51,8 @@ public class ComponentSecurityHandlerTest {
     }
 
     @Test(expected = SecurityHandlerException.class)
-    public void missingPartOfTheIdTest() throws SecurityHandlerException {
+    public void missingPartOfTheIdTest() throws
+            SecurityHandlerException {
         ComponentSecurityHandlerFactory.getComponentSecurityHandler(
                 "irrelevant",
                 "irrelevant",
@@ -63,7 +66,8 @@ public class ComponentSecurityHandlerTest {
     }
 
     @Test(expected = SecurityHandlerException.class)
-    public void TooManyParts() throws SecurityHandlerException {
+    public void TooManyParts() throws
+            SecurityHandlerException {
         ComponentSecurityHandlerFactory.getComponentSecurityHandler(
                 "irrelevant",
                 "irrelevant",
@@ -77,14 +81,14 @@ public class ComponentSecurityHandlerTest {
     }
 
     @Test(expected = SecurityHandlerException.class)
-    public void noConnectionComponentIdTest() throws SecurityHandlerException {
+    public void noConnectionComponentIdTest() throws
+            SecurityHandlerException {
 
         ISecurityHandler mock = PowerMockito.mock(ISecurityHandler.class);
 
         ComponentSecurityHandler componentSecurityHandler = new ComponentSecurityHandler(
                 mock,
                 "irrelevant",
-                false,
                 "irrelevant",
                 "irrelevant",
                 goodComponentId + "@" + goodPlatformId);

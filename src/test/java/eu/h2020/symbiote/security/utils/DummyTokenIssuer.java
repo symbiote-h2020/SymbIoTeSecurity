@@ -6,8 +6,6 @@ import eu.h2020.symbiote.security.helpers.ECDSAHelper;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -22,7 +20,6 @@ import java.util.Map;
  */
 public class DummyTokenIssuer {
 
-    private static Log log = LogFactory.getLog(DummyTokenIssuer.class);
     private static SecureRandom random = new SecureRandom();
 
     public static String buildAuthorizationToken(String userId, Map<String, String> attributes, byte[] userPublicKey,

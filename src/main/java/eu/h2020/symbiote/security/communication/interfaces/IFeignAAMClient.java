@@ -21,6 +21,10 @@ public interface IFeignAAMClient {
     @Headers("Content-Type: application/json")
     AvailableAAMsCollection getAvailableAAMs();
 
+    @RequestLine("GET " + SecurityConstants.AAM_GET_AAMS_INTERNALLY)
+    @Headers("Content-Type: application/json")
+    AvailableAAMsCollection getAAMsInternally();
+
     @RequestLine("GET " + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
     Response getComponentCertificate(@Param("componentIdentifier") String componentIdentifier,
                                      @Param("platformIdentifier") String platformIdentifier);

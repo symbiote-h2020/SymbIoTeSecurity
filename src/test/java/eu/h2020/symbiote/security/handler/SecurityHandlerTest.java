@@ -60,7 +60,8 @@ public class SecurityHandlerTest {
     AAM homeAAM = null;
 
     @Before
-    public void prepare() throws Throwable {
+    public void prepare() throws
+            Throwable {
 
 
         PowerMockito.mockStatic(ClientFactory.class);
@@ -92,7 +93,7 @@ public class SecurityHandlerTest {
     
         
         createEmptyKeystore();
-        testclient = new SecurityHandler(keystorePath, keystorePassword, "http://test", "user1");
+        testclient = new SecurityHandler(keystorePath, keystorePassword, "http://test");
     
     
     }
@@ -106,8 +107,9 @@ public class SecurityHandlerTest {
         File file = new File(keystorePath);
         file.delete();
     }
-    
-    private void createEmptyKeystore() throws Exception {
+
+    private void createEmptyKeystore() throws
+            Exception {
         deleteKeystore();
     
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -122,7 +124,8 @@ public class SecurityHandlerTest {
     }
 
     @Test
-    public void testGetAvailableAAMs() throws Throwable {
+    public void testGetAvailableAAMs() throws
+            Throwable {
 
         logger.info("----------------------------");
         logger.info("testGetAvailableAAMs starts");
@@ -153,7 +156,7 @@ public class SecurityHandlerTest {
         Iterator<Entry<String, AAM>> entries = result.entrySet().iterator();
         while (entries.hasNext()) {
             Entry<String, AAM> entry = entries.next();
-            String key = (String) entry.getKey();
+            String key = entry.getKey();
 
             if (ammList.get(key) == null)
                 res = false;
@@ -163,7 +166,8 @@ public class SecurityHandlerTest {
     }
 
     @Test
-    public void testGetCertificate() throws Throwable {
+    public void testGetCertificate() throws
+            Throwable {
 
         logger.info("----------------------------");
         logger.info("testGetCertificate starts");
@@ -179,7 +183,8 @@ public class SecurityHandlerTest {
 
 
     @Test
-    public void testLoginHomeCredentials() throws Throwable {
+    public void testLoginHomeCredentials() throws
+            Throwable {
         logger.info("----------------------------");
         logger.info("testLoginHomeCredentials starts");
     
@@ -199,7 +204,8 @@ public class SecurityHandlerTest {
 
 
     @Test
-    public void testLoginListOfAAMHomeCredentials() throws Throwable {
+    public void testLoginListOfAAMHomeCredentials() throws
+            Throwable {
         logger.info("----------------------------");
         logger.info("testLoginListOfAAMHomeCredentials starts");
     
@@ -224,7 +230,8 @@ public class SecurityHandlerTest {
     }
 
     @Test
-    public void testLoginAsGuest() throws Throwable, Throwable {
+    public void testLoginAsGuest() throws
+            Throwable {
         logger.info("----------------------------");
         logger.info("testLoginAsGuest starts");
 
@@ -243,7 +250,8 @@ public class SecurityHandlerTest {
     }
 
     @Test
-    public void testValidate() throws Throwable {
+    public void testValidate() throws
+            Throwable {
         logger.info("----------------------------");
         logger.info("testValidate starts");
 
@@ -268,14 +276,15 @@ public class SecurityHandlerTest {
     private AAM getAMMfromList(List<AAM> ammlist, String testaamInstanceId2) {
         for (int x = 0; x < ammlist.size(); x++) {
 
-            AAM a = (AAM) ammlist.get(x);
+            AAM a = ammlist.get(x);
             if (a.getAamInstanceId().equals(testaamInstanceId2))
                 return a;
         }
         return null;
     }
 
-    public AAM getHomeAMM(String aamInstanceId) throws Throwable {
+    public AAM getHomeAMM(String aamInstanceId) throws
+            Throwable {
 
         String aamAddress = "https:\\www.aamserver";
         String aamInstanceFriendlyName = "name-friendly-" + aamInstanceId;
@@ -283,8 +292,9 @@ public class SecurityHandlerTest {
 
         return new AAM(aamAddress, aamInstanceFriendlyName, aamInstanceId, certificate, new HashMap<>());
     }
-    
-    public java.security.cert.Certificate getCertificate(String keystoreFilename, String spassword, String alias) throws Throwable {
+
+    public java.security.cert.Certificate getCertificate(String keystoreFilename, String spassword, String alias) throws
+            Throwable {
         
         KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
     
@@ -293,11 +303,13 @@ public class SecurityHandlerTest {
         return keystore.getCertificate(alias);
     }
 
-    public String getCertString(String keystoreFilename, String spassword, String alias) throws Throwable {
+    public String getCertString(String keystoreFilename, String spassword, String alias) throws
+            Throwable {
         return CryptoHelper.convertX509ToPEM((X509Certificate) getCertificate(keystoreFilename, spassword, alias));
     }
-    
-    public Map<String, AAM> getAMMMap() throws Throwable {
+
+    public Map<String, AAM> getAMMMap() throws
+            Throwable {
         Map<String, AAM> aamMap = new HashMap<>();
         
         aamMap.put(homeAAMId, homeAAM);
@@ -313,9 +325,10 @@ public class SecurityHandlerTest {
     }
 
 
-    public String getTokenString(String keystoreFilename, String spassword, String alias) throws Throwable {
+    public String getTokenString(String keystoreFilename, String spassword, String alias) throws
+            Throwable {
 
-        String result = null;
+        String result;
 
         char[] password = spassword.toCharArray();
 
@@ -325,12 +338,6 @@ public class SecurityHandlerTest {
         //Leer
         keystore.load(fIn, password);
         java.security.cert.Certificate cert = keystore.getCertificate(alias);
-//		System.out.println("cert:");
-//		System.out.println("keystoreFilename: "+keystoreFilename);
-//		System.out.println("spassword: "+spassword);
-//		System.out.println("alias: "+alias);
-//		System.out.println(cert);	
-
 
         String userId = "testClient";
         HashMap<String, String> attributes = new HashMap<>();

@@ -6,12 +6,10 @@ import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
-import eu.h2020.symbiote.security.commons.exceptions.custom.AAMException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
-import eu.h2020.symbiote.security.communication.AAMClient;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -38,19 +36,16 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
     private static final Log log = LogFactory.getLog(ComponentSecurityHandler.class);
     private final ISecurityHandler securityHandler;
     private final AAM localAAM;
-    private final boolean alwaysUseLocalAAMForValidation;
     private final String componentOwnerUsername;
     private final String componentOwnerPassword;
     private final String combinedClientIdentifier;
 
     public ComponentSecurityHandler(ISecurityHandler securityHandler,
                                     String localAAMAddress,
-                                    boolean alwaysUseLocalAAMForValidation,
                                     String componentOwnerUsername,
                                     String componentOwnerPassword,
                                     String componentId) throws SecurityHandlerException {
         this.securityHandler = securityHandler;
-        this.alwaysUseLocalAAMForValidation = alwaysUseLocalAAMForValidation;
         if (componentOwnerUsername.isEmpty()
                 || !componentOwnerUsername.matches("^(([\\w-])+)$")
                 || componentOwnerPassword.isEmpty())
@@ -83,27 +78,12 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
             throw new SecurityHandlerException(e.getMessage());
         }
 
-        Map<String, AAM> availableAAMs = new HashMap<>();
-        if (!alwaysUseLocalAAMForValidation)
-            availableAAMs = securityHandler.getAvailableAAMs(localAAM); // retrieving AAMs available to use them for validation
-
         // validating the authorization tokens
         for (SecurityCredentials securityCredentials : securityRequest.getSecurityCredentials()) {
             try {
                 Token authorizationToken = new Token(securityCredentials.getToken());
-                AAM validationAAM;
-                // set proper validation AAM
-                if (alwaysUseLocalAAMForValidation) {
-                    validationAAM = localAAM;
-                } else {
-                    // try to resolve the issuing AAM
-                    validationAAM = availableAAMs.get(authorizationToken.getClaims().getIssuer());
-                    if (validationAAM == null)// fallback to local AAM
-                        validationAAM = localAAM;
-                }
                 ValidationStatus tokenValidationStatus;
-                AAMClient aamClient = new AAMClient(localAAM.getAamAddress());
-                AAM issuer = aamClient.getAvailableAAMs().getAvailableAAMs().get(authorizationToken.getClaims().getIssuer());
+                AAM issuer = securityHandler.getAvailableAAMs(localAAM).get(authorizationToken.getClaims().getIssuer());
                 if (issuer == null
                         || issuer.getAamCACertificate().getCertificateString().isEmpty()) {
                     throw new SecurityHandlerException("ISSUER platform certificate is not available");
@@ -114,7 +94,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
 
                 // validate
                 tokenValidationStatus = securityHandler.validate(
-                        validationAAM,
+                        localAAM,
                         authorizationToken.getToken(),
                         Optional.of(securityCredentials.getClientCertificate()),
                         Optional.of(securityCredentials.getClientCertificateSigningAAMCertificate()),
@@ -124,7 +104,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                     log.debug("token was invalidated with the following reason: " + tokenValidationStatus);
                     return tokenValidationStatus;
                 }
-            } catch (AAMException | ValidationException | CertificateException e) {
+            } catch (ValidationException | CertificateException e) {
                 log.error(e);
                 throw new SecurityHandlerException(e.getMessage());
             }

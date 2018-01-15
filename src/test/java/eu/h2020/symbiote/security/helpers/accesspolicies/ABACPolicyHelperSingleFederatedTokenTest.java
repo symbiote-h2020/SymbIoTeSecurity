@@ -9,9 +9,6 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -28,7 +25,6 @@ import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,17 +54,6 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
     private final String federatedPlatformId = "federatedPlatfomrId";
 
     private final String goodResourceID = "goodResourceID";
-    private final String goodResourceID2 = "goodResourceID2";
-    private final String badResourceID = "badResourceID";
-    private final String badResourceID2 = "badResourceID2";
-
-    private final String nameAttr = "name";
-    private final String ageAttr = "age";
-    private final String missingAttr = "youAreGonnaMissMe";
-
-    private final String nameAttrOKValue = "John";
-    private final String nameAttrBadValue = "Mike";
-    private final String ageAttrOKValue = "20";
 
     private HashSet<AuthorizationCredentials> authorizationCredentialsForeignTokenSet = new HashSet<>();
     private HashSet<AuthorizationCredentials> authorizationCredentialsHomeTokenSet = new HashSet<>();
@@ -126,11 +111,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
     @Test
     public void singleResourceSingleTokenCheckSuccess() throws
             NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException {
+            InvalidArgumentsException {
 
         Set<String> federationMembers = new HashSet<>();
         federationMembers.add(federatedPlatformId);
@@ -157,11 +138,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
     @Test
     public void singleResourceSingleTokenCheckFailWrongFederationId() throws
             NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException {
+            InvalidArgumentsException {
 
         Set<String> federationMembers = new HashSet<>();
         federationMembers.add(deploymentId);

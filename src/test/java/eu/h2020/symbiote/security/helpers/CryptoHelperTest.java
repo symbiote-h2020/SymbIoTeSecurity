@@ -3,7 +3,6 @@ package eu.h2020.symbiote.security.helpers;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.JWTCreationException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.commons.jwt.JWTClaims;
@@ -32,21 +31,26 @@ import static org.junit.Assert.assertTrue;
 
 public class CryptoHelperTest {
 
+    private static final String CERTIFICATE_ALIAS = "core-2";
+    private static final String CERTIFICATE_LOCATION = "./src/test/resources/platform_1.p12";
+    private static final String CERTIFICATE_PASSWORD = "1234567";
     private final String username = "testusername";
     private final String clientId = "testclientid";
     private final String platformId = "platformid";
     private final String componentId = "componentid";
-    private static final String CERTIFICATE_ALIAS = "core-2";
-    private static final String CERTIFICATE_LOCATION = "./src/test/resources/platform_1.p12";
-    private static final String CERTIFICATE_PASSWORD = "1234567";
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         ECDSAHelper.enableECDSAProvider();
     }
 
     @Test
-    public void buildLoginRequestTest() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, JWTCreationException, MalformedJWTException, ValidationException, CertificateException {
+    public void buildLoginRequestTest() throws
+            InvalidAlgorithmParameterException,
+            NoSuchAlgorithmException,
+            NoSuchProviderException,
+            MalformedJWTException,
+            ValidationException {
         KeyPair keyPair = CryptoHelper.createKeyPair();
         HomeCredentials homeCredentials = new HomeCredentials(null, username, clientId, null, keyPair.getPrivate());
         String loginRequest = CryptoHelper.buildHomeTokenAcquisitionRequest(homeCredentials);
@@ -57,7 +61,16 @@ public class CryptoHelperTest {
     }
 
     @Test
-    public void buildCertificateSigningRequestTest() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, IOException, CertificateException, OperatorCreationException, PKCSException, SignatureException, InvalidKeyException, InvalidArgumentsException {
+    public void buildCertificateSigningRequestTest() throws
+            InvalidAlgorithmParameterException,
+            NoSuchAlgorithmException,
+            NoSuchProviderException,
+            KeyStoreException,
+            IOException,
+            CertificateException,
+            OperatorCreationException,
+            PKCSException,
+            InvalidArgumentsException {
         KeyPair keyPair = CryptoHelper.createKeyPair();
         KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
         ks.load(new FileInputStream(CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
@@ -69,7 +82,14 @@ public class CryptoHelperTest {
     }
 
     @Test
-    public void buildPlatformCertificateSigningRequestTest() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, IOException, CertificateException, OperatorCreationException, PKCSException, SignatureException, InvalidKeyException, InvalidArgumentsException {
+    public void buildPlatformCertificateSigningRequestTest() throws
+            InvalidAlgorithmParameterException,
+            NoSuchAlgorithmException,
+            NoSuchProviderException,
+            IOException,
+            OperatorCreationException,
+            PKCSException,
+            InvalidArgumentsException {
         KeyPair keyPair = CryptoHelper.createKeyPair();
         //KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
         //ks.load(new FileInputStream(CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
@@ -81,7 +101,14 @@ public class CryptoHelperTest {
     }
 
     @Test
-    public void buildComponentCertificateSigningRequestTest() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, IOException, CertificateException, OperatorCreationException, PKCSException, SignatureException, InvalidKeyException, InvalidArgumentsException {
+    public void buildComponentCertificateSigningRequestTest() throws
+            InvalidAlgorithmParameterException,
+            NoSuchAlgorithmException,
+            NoSuchProviderException,
+            IOException,
+            OperatorCreationException,
+            PKCSException,
+            InvalidArgumentsException {
         KeyPair keyPair = CryptoHelper.createKeyPair();
         //KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
         //ks.load(new FileInputStream(CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
