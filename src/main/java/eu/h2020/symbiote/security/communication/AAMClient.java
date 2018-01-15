@@ -41,7 +41,7 @@ public class AAMClient implements IAAMClient {
      */
     public AAMClient(String serverAddress, Logger logger) {
         this.serverAddress = serverAddress;
-        this.feignClient = getJsonClient(new Logger.NoOpLogger());
+        this.feignClient = getJsonClient(logger);
     }
 
     /**
@@ -51,6 +51,7 @@ public class AAMClient implements IAAMClient {
         return Feign.builder()
         		.encoder(new JacksonEncoder())
         		.decoder(new JacksonDecoder())
+                .logger(logger)
         		.logLevel(Level.FULL)
             .target(IFeignAAMClient.class, serverAddress);
     }
