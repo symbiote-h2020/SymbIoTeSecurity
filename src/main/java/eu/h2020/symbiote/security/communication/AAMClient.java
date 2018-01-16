@@ -7,6 +7,7 @@ import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.*;
 import eu.h2020.symbiote.security.communication.interfaces.IFeignAAMClient;
 import eu.h2020.symbiote.security.communication.payloads.*;
+import eu.h2020.symbiote.security.handler.SecurityHandler;
 import feign.Feign;
 import feign.FeignException;
 import feign.Logger;
@@ -17,12 +18,16 @@ import feign.jackson.JacksonEncoder;
 
 import java.util.Optional;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Crude RMI-like client's implementation to the AAM module that communicates with it over REST.
  *
  * @author Dariusz Krajewski (PSNC)
  */
 public class AAMClient implements IAAMClient {
+    private static final Log logger = LogFactory.getLog(AAMClient.class);
 
     private static final String AAM_COMMS_ERROR_MESSAGE = "Failed to communicate with the AAM: ";
     private String serverAddress;
@@ -32,7 +37,7 @@ public class AAMClient implements IAAMClient {
      * @param serverAddress of the AAM server the client wants to interact with.
      */
     public AAMClient(String serverAddress) {
-    		this(serverAddress, new Logger.NoOpLogger());
+    		this(serverAddress, new ApacheCommonsLogger4Feign(logger));
     }
 
     /**
