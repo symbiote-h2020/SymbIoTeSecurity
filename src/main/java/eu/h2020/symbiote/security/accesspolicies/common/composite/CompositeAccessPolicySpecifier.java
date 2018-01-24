@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyType;
 import eu.h2020.symbiote.security.accesspolicies.common.IAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
+import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import org.springframework.data.annotation.PersistenceConstructor;
 
@@ -32,9 +33,9 @@ public class CompositeAccessPolicySpecifier implements IAccessPolicySpecifier {
     @JsonCreator
     @PersistenceConstructor
     public CompositeAccessPolicySpecifier(
-            @JsonProperty("policiesRelationOperator") CompositeAccessPolicyRelationOperator policiesRelationOperator,
-            @JsonProperty("singleTokenAccessPolicies") Set<SingleTokenAccessPolicySpecifier> singleTokenAccessPolicies,
-            @JsonProperty("compositeAccessPolicies") Set<CompositeAccessPolicySpecifier> compositeAccessPolicies)
+            @JsonProperty(SecurityConstants.ACCESS_POLICY_JSON_FIELD_OPERATOR) CompositeAccessPolicyRelationOperator policiesRelationOperator,
+            @JsonProperty(SecurityConstants.ACCESS_POLICY_JSON_FIELD_SINGLE_TOKEN_AP) Set<SingleTokenAccessPolicySpecifier> singleTokenAccessPolicies,
+            @JsonProperty(SecurityConstants.ACCESS_POLICY_JSON_FIELD_COMPOSITE_AP) Set<CompositeAccessPolicySpecifier> compositeAccessPolicies)
             throws InvalidArgumentsException {
 
         if (((singleTokenAccessPolicies == null) || (singleTokenAccessPolicies.isEmpty())) &&

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyType;
 import eu.h2020.symbiote.security.accesspolicies.common.IAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.SingleTokenAccessPolicyFactory;
+import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import io.jsonwebtoken.Claims;
 import org.springframework.data.annotation.PersistenceConstructor;
@@ -38,8 +39,8 @@ public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier 
     @JsonCreator
     @PersistenceConstructor
     public SingleTokenAccessPolicySpecifier(
-            @JsonProperty("policyType") AccessPolicyType policyType,
-            @JsonProperty("requiredClaims") Map<String, String> requiredClaims)
+            @JsonProperty(SecurityConstants.ACCESS_POLICY_JSON_FIELD_TYPE) AccessPolicyType policyType,
+            @JsonProperty(SecurityConstants.ACCESS_POLICY_JSON_FIELD_CLAIMS) Map<String, String> requiredClaims)
             throws InvalidArgumentsException {
         switch (policyType) {
             case SLHTIBAP:

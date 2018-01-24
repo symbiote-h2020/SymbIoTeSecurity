@@ -56,6 +56,17 @@ public class SecurityConstants {
     public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "x-auth-";
     public static final String SECURITY_RESPONSE_HEADER = "x-auth-response";
 
+    //Access Policy JSON fields
+    //Single Token
+    public static final String ACCESS_POLICY_JSON_FIELD_TYPE = "policyType";
+    public static final String ACCESS_POLICY_JSON_FIELD_CLAIMS = "requiredClaims";
+
+    //Composite AP
+    public static final String ACCESS_POLICY_JSON_FIELD_OPERATOR = "policiesRelationOperator";
+    public static final String ACCESS_POLICY_JSON_FIELD_SINGLE_TOKEN_AP = "singleTokenAccessPolicies";
+    public static final String ACCESS_POLICY_JSON_FIELD_COMPOSITE_AP = "compositeAccessPolicies";
+
+
     private SecurityConstants() {
     }
 }
