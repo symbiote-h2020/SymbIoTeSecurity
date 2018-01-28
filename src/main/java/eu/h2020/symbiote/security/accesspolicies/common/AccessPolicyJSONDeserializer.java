@@ -31,20 +31,36 @@ public class AccessPolicyJSONDeserializer extends JsonDeserializer<IAccessPolicy
             ObjectMapper mapper = new ObjectMapper();
             //Read type of access policy in JSON
             JsonNode policyType = node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_TYPE);
-            //Only SingleToken access policies have this field
-            if (policyType != null) {
-                Map<String, String> requiredClaims = mapper.convertValue(node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_CLAIMS), Map.class);
-                return new SingleTokenAccessPolicySpecifier(AccessPolicyType.valueOf(policyType.asText()), requiredClaims);
-            } else {
-                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator operators = mapper.convertValue(node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_OPERATOR), CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.class);
-                Set<SingleTokenAccessPolicySpecifier> staps = mapper.convertValue(node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_SINGLE_TOKEN_AP), Set.class);
-                Set<CompositeAccessPolicySpecifier> caps = mapper.convertValue(node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_COMPOSITE_AP), Set.class);
-                return new CompositeAccessPolicySpecifier(operators, staps, caps);
+            //Invoke required deserializer from IAccessPolicy specifier
+            AccessPolicyType apType = AccessPolicyType.valueOf(policyType.asText());
+            switch (apType) {
+                case CAP:
+                    return deserializeCompositeAccessPolicyJSON(mapper, node);
+                case SLHTIBAP:
+                case SLHTAP:
+                case SFTAP:
+                case STAP:
+                case CHTAP:
+                case PUBLIC:
+                    return deserializeSingleTokenAccessPolicyJSON(mapper, node, apType);
+                default:
+                    throw new IOException(SecurityConstants.ERROR_DESC_UNSUPPORTED_ACCESS_POLICY_TYPE);
+
             }
         } catch (InvalidArgumentsException e) {
-            return null;
+            throw new IOException(e);
         }
     }
 
+    private CompositeAccessPolicySpecifier deserializeCompositeAccessPolicyJSON(ObjectMapper mapper, JsonNode node) throws InvalidArgumentsException {
+        CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator operators = mapper.convertValue(node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_OPERATOR), CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.class);
+        Set<SingleTokenAccessPolicySpecifier> staps = mapper.convertValue(node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_SINGLE_TOKEN_AP), Set.class);
+        Set<CompositeAccessPolicySpecifier> caps = mapper.convertValue(node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_COMPOSITE_AP), Set.class);
+        return new CompositeAccessPolicySpecifier(operators, staps, caps);
+    }
 
+    private SingleTokenAccessPolicySpecifier deserializeSingleTokenAccessPolicyJSON(ObjectMapper mapper, JsonNode node, AccessPolicyType policyType) throws InvalidArgumentsException {
+        Map<String, String> requiredClaims = mapper.convertValue(node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_CLAIMS), Map.class);
+        return new SingleTokenAccessPolicySpecifier(policyType, requiredClaims);
+    }
 }
