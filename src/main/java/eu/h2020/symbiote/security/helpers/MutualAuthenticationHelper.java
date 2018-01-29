@@ -20,11 +20,7 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.*;
-
-import static java.time.temporal.ChronoField.INSTANT_SECONDS;
 
 
 /**
@@ -71,9 +67,10 @@ public class MutualAuthenticationHelper {
                                                      boolean attachCertificates) throws
             NoSuchAlgorithmException {
 
-        ZonedDateTime timestampDate = ZonedDateTime.now();
-        long timestamp1Seconds = timestampDate.getLong(INSTANT_SECONDS) * 1000;
-        Date expiryDate = Date.from(Instant.ofEpochMilli(timestamp1Seconds + THRESHOLD_SECONDS * 1000));
+        Date timestampDate = new Date();
+        // JWT rounds to seconds
+        long timestampMilliseconds = timestampDate.getTime() - timestampDate.getTime() % 1000;
+        Date expiryDate = new Date(timestampMilliseconds + THRESHOLD_SECONDS * 1000);
 
         Iterator<AuthorizationCredentials> iteratorAC = authorizationCredentials.iterator();
         Set<SecurityCredentials> securityCredentialsSet = new HashSet<>();
@@ -82,7 +79,7 @@ public class MutualAuthenticationHelper {
             AuthorizationCredentials credentials = iteratorAC.next();
 
             String token = credentials.authorizationToken.toString();
-            String hexHash = hashSHA256(credentials.authorizationToken.toString() + timestamp1Seconds);
+            String hexHash = hashSHA256(credentials.authorizationToken.toString() + timestampMilliseconds);
 
             JwtBuilder jwtBuilder = Jwts.builder();
             jwtBuilder.setId(String.valueOf(random.nextInt())); // random -> jti
@@ -90,7 +87,7 @@ public class MutualAuthenticationHelper {
             jwtBuilder.setIssuer(credentials.authorizationToken.getClaims().getSubject()); // token sub -> iss
             jwtBuilder.claim("ipk", credentials.authorizationToken.getClaims().get("spk")); // token spk -> ipk
             jwtBuilder.claim("hash", hexHash); // SHA256(token+timestamp)
-            jwtBuilder.setIssuedAt(Date.from(timestampDate.toInstant())); // iat
+            jwtBuilder.setIssuedAt(timestampDate); // iat
             jwtBuilder.setExpiration(expiryDate);  // exp
             jwtBuilder.signWith(SignatureAlgorithm.ES256, credentials.homeCredentials.privateKey);
             String authenticationChallenge = jwtBuilder.compact();
@@ -119,7 +116,7 @@ public class MutualAuthenticationHelper {
             }
         }
 
-        return new SecurityRequest(securityCredentialsSet, timestamp1Seconds);
+        return new SecurityRequest(securityCredentialsSet, timestampMilliseconds);
     }
 
     /**
@@ -134,7 +131,9 @@ public class MutualAuthenticationHelper {
             ValidationException,
             InvalidKeySpecException {
 
-        Long timestamp2 = ZonedDateTime.now().toInstant().toEpochMilli();
+        Long timestamp2 = new Date().getTime();
+        // JWT rounds to seconds
+        timestamp2 = timestamp2 - timestamp2 % 1000;
         Long timestamp1 = securityRequest.getTimestamp();
 
         Set<SecurityCredentials> securityCredentialsSet = securityRequest.getSecurityCredentials();
@@ -240,7 +239,9 @@ public class MutualAuthenticationHelper {
             NoSuchAlgorithmException,
             CertificateException {
 
-        Long timestamp3 = ZonedDateTime.now().toInstant().toEpochMilli();
+        Long timestamp3 = new Date().getTime();
+        // JWT rounds to seconds
+        timestamp3 = timestamp3 - timestamp3 % 1000;
         PublicKey servicePublicKey = serviceCertificate.getX509().getPublicKey();
 
         Long timestamp2;

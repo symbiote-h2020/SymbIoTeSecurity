@@ -9,11 +9,7 @@ import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 
 import java.io.IOException;
-import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Utility class for containing a set of {@link SecurityCredentials} objects and current timestamp used in the
@@ -42,7 +38,9 @@ public class SecurityRequest {
      * @param guestToken acquired from whichever symbIoTe AAM
      */
     public SecurityRequest(String guestToken) {
-        this.timestamp = ZonedDateTime.now().toInstant().toEpochMilli();
+        // JWT rounds to seconds
+        long now = new Date().getTime();
+        this.timestamp = now - now % 1000;
         this.securityCredentials = new HashSet<>();
         securityCredentials.add(new SecurityCredentials(guestToken));
     }
