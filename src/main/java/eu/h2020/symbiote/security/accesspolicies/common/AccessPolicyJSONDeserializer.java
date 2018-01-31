@@ -71,7 +71,6 @@ public class AccessPolicyJSONDeserializer extends JsonDeserializer<IAccessPolicy
         if ((capsJsonNode != null) && !capsJsonNode.isNull()) {
             caps = new HashSet<CompositeAccessPolicySpecifier>();
             for (final JsonNode capNode : capsJsonNode) {
-                JsonNode apJsonNode = node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_COMPOSITE_AP);
                 caps.add(deserializeCompositeAccessPolicyJSON(mapper, capNode));
             }
         }
