@@ -13,7 +13,6 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsExce
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,26 +53,25 @@ public class AccessPolicyJSONDeserializer extends JsonDeserializer<IAccessPolicy
         }
     }
 
-    private CompositeAccessPolicySpecifier deserializeCompositeAccessPolicyJSON(ObjectMapper mapper, JsonNode node) throws InvalidArgumentsException {
+    private CompositeAccessPolicySpecifier deserializeCompositeAccessPolicyJSON(ObjectMapper mapper, JsonNode node) throws InvalidArgumentsException, IOException {
 
         CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator operators = mapper.convertValue(node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_OPERATOR), CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.class);
 
-        Set<LinkedHashMap> stapMaps = mapper.convertValue(node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_SINGLE_TOKEN_AP), Set.class);
         Set<SingleTokenAccessPolicySpecifier> staps = null;
-        if (stapMaps != null) {
+        JsonNode stapsJsonNode = node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_SINGLE_TOKEN_AP);
+        if ((stapsJsonNode != null) && !stapsJsonNode.isNull()) {
             staps = new HashSet<SingleTokenAccessPolicySpecifier>();
-            for (LinkedHashMap stapMap : stapMaps) {
-                JsonNode stapNode = mapper.convertValue(stapMap, JsonNode.class);
+            for (final JsonNode stapNode : stapsJsonNode) {
                 staps.add(deserializeSingleTokenAccessPolicyJSON(mapper, stapNode));
             }
         }
 
-        Set<LinkedHashMap> capMaps = mapper.convertValue(node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_COMPOSITE_AP), Set.class);
         Set<CompositeAccessPolicySpecifier> caps = null;
-        if (capMaps != null) {
+        JsonNode capsJsonNode = node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_COMPOSITE_AP);
+        if ((capsJsonNode != null) && !capsJsonNode.isNull()) {
             caps = new HashSet<CompositeAccessPolicySpecifier>();
-            for (LinkedHashMap capMap : capMaps) {
-                JsonNode capNode = mapper.convertValue(capMap, JsonNode.class);
+            for (final JsonNode capNode : capsJsonNode) {
+                JsonNode apJsonNode = node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_COMPOSITE_AP);
                 caps.add(deserializeCompositeAccessPolicyJSON(mapper, capNode));
             }
         }
