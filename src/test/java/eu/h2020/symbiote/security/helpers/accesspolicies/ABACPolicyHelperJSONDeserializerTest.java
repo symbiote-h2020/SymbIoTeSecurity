@@ -215,6 +215,437 @@ public class ABACPolicyHelperJSONDeserializerTest {
         assertCompositeAPObjectEquality(parentCompositePolicySpecifier, deserializedObj);
     }
 
+    @Test
+    public void tripleNestedCompositeAccessPolicyAPDeserialization() throws
+            IOException, InvalidArgumentsException {
+
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
+        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapFirst
+        );
+
+        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
+        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapSecond
+        );
+
+        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
+        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapThird
+        );
+
+        Map<String, String> accessPolicyClaimsMapFourth = new HashMap<>();
+        accessPolicyClaimsMapFourth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierFourth = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapFourth
+        );
+
+
+        Map<String, String> accessPolicyClaimsMapFifth = new HashMap<>();
+        accessPolicyClaimsMapFifth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierFifth = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapFifth
+        );
+
+        Map<String, String> accessPolicyClaimsMapSixth = new HashMap<>();
+        accessPolicyClaimsMapSixth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierSixth = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapSixth
+        );
+
+        Map<String, String> accessPolicyClaimsMapSeventh = new HashMap<>();
+        accessPolicyClaimsMapSeventh.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierSeventh = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapSeventh
+        );
+
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSingle = new HashSet<>();
+        accessPoliciesSetSingle.add(testPolicySpecifierFifth);
+
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetFirst = new HashSet<>();
+        accessPoliciesSetFirst.add(testPolicySpecifierFirst);
+        accessPoliciesSetFirst.add(testPolicySpecifierSecond);
+
+        CompositeAccessPolicySpecifier compositePolicySpecifierFirst = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSetFirst, null
+        );
+
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSecond = new HashSet<>();
+        accessPoliciesSetSecond.add(testPolicySpecifierThird);
+        accessPoliciesSetSecond.add(testPolicySpecifierFourth);
+
+        CompositeAccessPolicySpecifier compositePolicySpecifierSecond = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSetSecond, null
+        );
+
+
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetThird = new HashSet<>();
+        accessPoliciesSetThird.add(testPolicySpecifierSixth);
+        accessPoliciesSetThird.add(testPolicySpecifierSeventh);
+
+        CompositeAccessPolicySpecifier compositePolicySpecifierThird = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSetThird, null
+        );
+        //triple nesting
+        Set<CompositeAccessPolicySpecifier> nestedAccessPoliciesSet = new HashSet<>();
+        nestedAccessPoliciesSet.add(compositePolicySpecifierFirst);
+        nestedAccessPoliciesSet.add(compositePolicySpecifierSecond);
+        nestedAccessPoliciesSet.add(compositePolicySpecifierThird);
+
+        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSetSingle, nestedAccessPoliciesSet
+        );
+
+
+        String apJson = objMapper.writeValueAsString(parentCompositePolicySpecifier);
+
+        JsonParser parser = jsonFactory.createParser(apJson);
+
+        IAccessPolicySpecifier deserializedObj = jsonDeserializer.deserialize(parser, null);
+
+        assertCompositeAPObjectEquality(parentCompositePolicySpecifier, deserializedObj);
+
+    }
+
+    @Test
+    public void twoNestedCompositeAccessPolicyAPDeserialization() throws
+            IOException, InvalidArgumentsException {
+
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
+        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapFirst
+        );
+
+        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
+        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapSecond
+        );
+
+        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
+        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapThird
+        );
+
+        Map<String, String> accessPolicyClaimsMapFourth = new HashMap<>();
+        accessPolicyClaimsMapFourth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierFourth = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapFourth
+        );
+
+
+        Map<String, String> accessPolicyClaimsMapFifth = new HashMap<>();
+        accessPolicyClaimsMapFifth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierFifth = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapFifth
+        );
+
+        Map<String, String> accessPolicyClaimsMapSixth = new HashMap<>();
+        accessPolicyClaimsMapSixth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierSixth = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapSixth
+        );
+
+        Map<String, String> accessPolicyClaimsMapSeventh = new HashMap<>();
+        accessPolicyClaimsMapSeventh.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierSeventh = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapSeventh
+        );
+
+        Map<String, String> accessPolicyClaimsMapEigth = new HashMap<>();
+        accessPolicyClaimsMapEigth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierEigth = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapEigth
+        );
+
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSingle = new HashSet<>();
+        accessPoliciesSetSingle.add(testPolicySpecifierFifth);
+
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSingleSecond = new HashSet<>();
+        accessPoliciesSetSingleSecond.add(testPolicySpecifierEigth);
+
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetFirst = new HashSet<>();
+        accessPoliciesSetFirst.add(testPolicySpecifierFirst);
+        accessPoliciesSetFirst.add(testPolicySpecifierSecond);
+
+        CompositeAccessPolicySpecifier compositePolicySpecifierFirst = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSetFirst, null
+        );
+
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSecond = new HashSet<>();
+        accessPoliciesSetSecond.add(testPolicySpecifierThird);
+        accessPoliciesSetSecond.add(testPolicySpecifierFourth);
+
+        CompositeAccessPolicySpecifier compositePolicySpecifierSecond = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSetSecond, null
+        );
+
+
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetThird = new HashSet<>();
+        accessPoliciesSetThird.add(testPolicySpecifierSixth);
+        accessPoliciesSetThird.add(testPolicySpecifierSeventh);
+
+        CompositeAccessPolicySpecifier compositePolicySpecifierThird = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSetThird, null
+        );
+
+        Set<CompositeAccessPolicySpecifier> nestedAccessPoliciesSet = new HashSet<>();
+        nestedAccessPoliciesSet.add(compositePolicySpecifierFirst);
+        nestedAccessPoliciesSet.add(compositePolicySpecifierSecond);
+
+
+        Set<CompositeAccessPolicySpecifier> nestedAccessPoliciesSetSecond = new HashSet<>();
+        nestedAccessPoliciesSetSecond.add(compositePolicySpecifierThird);
+
+        CompositeAccessPolicySpecifier secondLevelCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSetSingleSecond, nestedAccessPoliciesSetSecond
+        );
+
+        CompositeAccessPolicySpecifier secondLevelCompositePolicySpecifierSecond = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSetSingle, nestedAccessPoliciesSet
+        );
+
+        Set<CompositeAccessPolicySpecifier> topLevelCompositePolicySpecifier = new HashSet<>();
+        topLevelCompositePolicySpecifier.add(secondLevelCompositePolicySpecifier);
+        topLevelCompositePolicySpecifier.add(secondLevelCompositePolicySpecifierSecond);
+
+        CompositeAccessPolicySpecifier parentCompositePolicySpecifier = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                null, topLevelCompositePolicySpecifier
+        );
+
+        String apJson = objMapper.writeValueAsString(parentCompositePolicySpecifier);
+
+        JsonParser parser = jsonFactory.createParser(apJson);
+
+        IAccessPolicySpecifier deserializedObj = jsonDeserializer.deserialize(parser, null);
+
+        assertCompositeAPObjectEquality(parentCompositePolicySpecifier, deserializedObj);
+
+    }
+    @Test
+    public void threeSingleTokenCompositeAccessPolicyAPDeserialization() throws
+            IOException, InvalidArgumentsException {
+
+        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
+        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapFirst
+        );
+
+        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
+        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapSecond
+        );
+
+        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
+        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapThird
+        );
+
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSingle = new HashSet<>();
+        accessPoliciesSetSingle.add(testPolicySpecifierFirst);
+        accessPoliciesSetSingle.add(testPolicySpecifierSecond);
+        accessPoliciesSetSingle.add(testPolicySpecifierThird);
+
+
+        CompositeAccessPolicySpecifier compositePolicySpecifier = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSetSingle, null
+        );
+
+        String apJson = objMapper.writeValueAsString(compositePolicySpecifier);
+
+        JsonParser parser = jsonFactory.createParser(apJson);
+
+        IAccessPolicySpecifier deserializedObj = jsonDeserializer.deserialize(parser, null);
+
+        assertCompositeAPObjectEquality(compositePolicySpecifier, deserializedObj);
+
+
+    }
+
+    @Test
+    public void fourSingleTokenCompositeAccessPolicyAPDeserialization() throws
+            IOException, InvalidArgumentsException {
+
+        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
+        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapFirst
+        );
+
+        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
+        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapSecond
+        );
+
+        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
+        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapThird
+        );
+
+        Map<String, String> accessPolicyClaimsMapFourth = new HashMap<>();
+        accessPolicyClaimsMapFourth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierFourth = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapFourth
+        );
+
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSingle = new HashSet<>();
+        accessPoliciesSetSingle.add(testPolicySpecifierFirst);
+        accessPoliciesSetSingle.add(testPolicySpecifierSecond);
+        accessPoliciesSetSingle.add(testPolicySpecifierThird);
+        accessPoliciesSetSingle.add(testPolicySpecifierFourth);
+
+        CompositeAccessPolicySpecifier compositePolicySpecifier = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSetSingle, null
+        );
+
+        String apJson = objMapper.writeValueAsString(compositePolicySpecifier);
+
+        JsonParser parser = jsonFactory.createParser(apJson);
+
+        IAccessPolicySpecifier deserializedObj = jsonDeserializer.deserialize(parser, null);
+
+        assertCompositeAPObjectEquality(compositePolicySpecifier, deserializedObj);
+
+
+    }
+
+    @Test
+    public void threeSingleTokenCompositeOneSingleAccessPolicyAPDeserialization() throws
+            IOException, InvalidArgumentsException {
+
+        Map<String, String> accessPolicyClaimsMapFirst = new HashMap<>();
+        accessPolicyClaimsMapFirst.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, nameAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierFirst = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapFirst
+        );
+
+        Map<String, String> accessPolicyClaimsMapSecond = new HashMap<>();
+        accessPolicyClaimsMapSecond.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierSecond = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapSecond
+        );
+
+        Map<String, String> accessPolicyClaimsMapThird = new HashMap<>();
+        accessPolicyClaimsMapThird.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierThird = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapThird
+        );
+
+        Map<String, String> accessPolicyClaimsMapFourth = new HashMap<>();
+        accessPolicyClaimsMapFourth.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, ageAttrOKValue);
+
+        SingleTokenAccessPolicySpecifier testPolicySpecifierFourth = new SingleTokenAccessPolicySpecifier(
+                AccessPolicyType.STAP,
+                accessPolicyClaimsMapFourth
+        );
+
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSingle = new HashSet<>();
+        accessPoliciesSetSingle.add(testPolicySpecifierFirst);
+        accessPoliciesSetSingle.add(testPolicySpecifierSecond);
+        accessPoliciesSetSingle.add(testPolicySpecifierThird);
+
+        CompositeAccessPolicySpecifier compositePolicySpecifier = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSetSingle, null
+        );
+
+        Set<SingleTokenAccessPolicySpecifier> accessPoliciesSetSingleSecond = new HashSet<>();
+        accessPoliciesSetSingleSecond.add(testPolicySpecifierFourth);
+
+        Set<CompositeAccessPolicySpecifier> compositeAccessPolicySpecifiers = new HashSet<>();
+        compositeAccessPolicySpecifiers.add(compositePolicySpecifier);
+
+        CompositeAccessPolicySpecifier parentPolicySpecifier = new CompositeAccessPolicySpecifier(
+                CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND,
+                accessPoliciesSetSingleSecond, compositeAccessPolicySpecifiers
+        );
+
+        String apJson = objMapper.writeValueAsString(parentPolicySpecifier);
+
+        JsonParser parser = jsonFactory.createParser(apJson);
+
+        IAccessPolicySpecifier deserializedObj = jsonDeserializer.deserialize(parser, null);
+
+        assertCompositeAPObjectEquality(parentPolicySpecifier, deserializedObj);
+
+
+    }
 
     private void assertSingleTokenAPObjectEquality(SingleTokenAccessPolicySpecifier refAPObject, IAccessPolicySpecifier deserializedAPObject) throws InvalidArgumentsException {
 
