@@ -2,7 +2,9 @@ package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
+import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
+import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 
 import java.util.Map;
@@ -27,6 +29,20 @@ public interface IComponentSecurityHandler {
      */
     Set<String> getSatisfiedPoliciesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
                                                 SecurityRequest securityRequest);
+
+    /**
+     * Used by a service to filter the {@link SecurityRequest#getSecurityCredentials()} to only those relevant to the business request,
+     * namely satisfying any of the given {@link IAccessPolicy} and performing full verification of the refined {@link SecurityRequest}
+     *
+     * @param accessPolicies                   of the resources/operations that need to be checked against the given {@link SecurityRequest}
+     * @param securityRequest                  that might satisfy the given access policies
+     * @param alreadyValidatedCredentialsCache used to persist state of remotely (in)validated credentials. Must be an empty map each time the securityRequest changes.
+     * @return set of identifiers of policies (e.g. resources identifiers) whose access policies are satisfied with the security verified {@link SecurityRequest#getSecurityCredentials()}
+     */
+    Set<String> getSatisfiedPoliciesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
+                                                SecurityRequest securityRequest,
+                                                Map<SecurityCredentials, ValidationStatus> alreadyValidatedCredentialsCache);
+
 
     /**
      * Used by a service to generate the response payload to be encapsulated in a JWS required by

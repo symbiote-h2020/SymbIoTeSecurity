@@ -132,13 +132,18 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
     @Override
     public Set<String> getSatisfiedPoliciesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
                                                        SecurityRequest securityRequest) {
+        return getSatisfiedPoliciesIdentifiers(accessPolicies, securityRequest, new HashMap<>());
+    }
+
+    @Override
+    public Set<String> getSatisfiedPoliciesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
+                                                       SecurityRequest securityRequest,
+                                                       Map<SecurityCredentials, ValidationStatus> alreadyValidatedCredentialsCache) {
 
         Set<String> accessiblePolicies = new HashSet<>();
         // resolving which tokens authorize access to resources -> filtering the security request to only contain business request relevant credentials
         Map<String, Set<SecurityCredentials>> abacResolverResponse = ABACPolicyHelper.checkRequestedOperationAccess(accessPolicies, securityRequest);
 
-        // useful to avoid duplicated validations
-        Map<SecurityCredentials, ValidationStatus> alreadyValidatedCredentialsCache = new HashMap<>();
         // validating credentials for each resource
         for (Map.Entry<String, Set<SecurityCredentials>> authorizedPolicy : abacResolverResponse.entrySet()) {
             int neededCredentials = authorizedPolicy.getValue().size();
