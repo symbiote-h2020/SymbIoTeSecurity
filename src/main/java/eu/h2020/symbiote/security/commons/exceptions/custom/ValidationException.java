@@ -17,9 +17,18 @@ public class ValidationException extends SecurityException {
 
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
 
+    public static final String VALIDATION_ERROR_OCCURRED = "Validation error occurred";
+    public static final String USING_REVOKED_KEY = "Using revoked key";
+    public static final String WRONG_DEPLOYMENT_ID = "Deployment id's mismatch";
+    public static final String USER_NOT_FOUND_IN_DB = "User not found in db";
+    public static final String ISSUING_FOREIGN_TOKEN_ERROR = "Someone tried issuing a foreign token using a home token";
+    public static final String INVALID_TOKEN = "Invalid token";
+    public static final String NO_RIGHTS_TO_TOKEN = "You have no rights to this token";
+    public static final String FOREIGN_TOKEN_NOT_MATCH_REMOTE_HOME_TOKEN = "Foreign token is invalid and does not mach remote Home Token";
     //todo review if status codes and change of parent are valid
-    private final static String errorMessage = "VALIDATION_ERROR";
-    private final static HttpStatus statusCode = HttpStatus.UNAUTHORIZED;
+    private static final String errorMessage = "VALIDATION_ERROR";
+    private static final HttpStatus statusCode = HttpStatus.UNAUTHORIZED;
+
     public ValidationException(String validationStatus) {
         super(validationStatus);
     }

@@ -12,9 +12,10 @@ import org.springframework.http.HttpStatus;
  */
 public class JWTCreationException extends SecurityException {
 
-    private static final long serialVersionUID = SecurityConstants.serialVersionUID;
+    public static final String MISCONFIGURED_AAM_DEPLOYMENT_TYPE = "Misconfigured AAM deployment type";
     private final static String errorMessage = "UNABLE_CREATE_JWT_TOKEN";
     private final static HttpStatus statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+    private final static long serialVersionUID = SecurityConstants.serialVersionUID;
 
     public JWTCreationException() {
         super(errorMessage);

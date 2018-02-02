@@ -13,8 +13,16 @@ import org.springframework.http.HttpStatus;
 public class WrongCredentialsException extends SecurityException {
 
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
-    private final static String errorMessage = "ERR_WRONG_CREDENTIALS";
-    private final static HttpStatus statusCode = HttpStatus.UNAUTHORIZED;
+    public static final String AUTHENTICATION_OF_USER_FAILED = "Authentication of user failed";
+    public static final String CLIENT_NOT_EXIST = "Client doesn't exist";
+    public static final String NO_SUCH_PLATFORM = "There is no such platform";
+    public static final String USER_NOT_EQUALS_CN = "User is not equal to user from CN";
+    public static final String CERTIFICATE_NOT_EQUALS_DB = "Passed certificate do not equals with this in DB";
+    public static final String USER_OR_CLIENT_NOT_EXIST = "User or client doesn't exist";
+    public static final String AAM_CAN_REVOKE_ONLY_LOCAL_COMPONENTS = "AAM can revoke only local components certificates";
+    public static final String CERTIFICATE_COMMON_NAME_IS_WRONG = "Certificate common name is wrong";
+    private static final String errorMessage = "ERR_WRONG_CREDENTIALS";
+    private static final HttpStatus statusCode = HttpStatus.UNAUTHORIZED;
 
     public WrongCredentialsException() {
         super(errorMessage);

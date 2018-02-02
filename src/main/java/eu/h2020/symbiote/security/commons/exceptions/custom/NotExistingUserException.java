@@ -15,6 +15,7 @@ public class NotExistingUserException extends SecurityException {
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
     public final static String errorMessage = "USER_NOT_REGISTERED_IN_REPOSITORY";
     public final static HttpStatus statusCode = HttpStatus.BAD_REQUEST;
+    public static final String AUTHENTICATION_OF_USER_FAILED = "Authentication of user failed";
 
     public NotExistingUserException() {
         super(errorMessage);

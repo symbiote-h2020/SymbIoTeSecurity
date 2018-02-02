@@ -12,9 +12,17 @@ import org.springframework.http.HttpStatus;
  */
 public class PlatformManagementException extends SecurityException {
 
-    public final static String errorMessage = "PLATFORM_MANAGEMENT_ERROR";
+    public static final String errorMessage = "PLATFORM_MANAGEMENT_ERROR";
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
+    public static final String INVALID_OPERATION = "Invalid operation";
+    public static final String USER_IS_NOT_A_PLATFORM_OWNER = "User is not a Platform Owner";
+    public static final String WRONG_WAY_TO_ISSUE_AAM_CERTIFICATE = "This is not the way to issue AAM certificate";
     public static HttpStatus statusCode = HttpStatus.BAD_REQUEST;
+
+    public static final String AWKWARD_PLATFORM = "That is an awkward platform, please change an instance id or platform interworking interface address";
+    public static final String PLATFORM_NOT_EXIST = "Platform with this instance id doesn't exist";
+    public static final String PLATFORM_INTERWARKING_INTERFACE_IN_USE = "Platform interworking interface already in use";
+    public static final String PLATFORM_EXISTS = "Platform with this instance id already exists";
 
     public PlatformManagementException() {
         super(errorMessage);

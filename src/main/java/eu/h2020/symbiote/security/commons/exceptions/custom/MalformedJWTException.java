@@ -13,7 +13,8 @@ import org.springframework.http.HttpStatus;
 public class MalformedJWTException extends SecurityException {
 
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
-    private final static String errorMessage = "UNABLE_MALFORMED_JWT_TOKEN";
+    public static final String TOKEN_SUBJECT_HAS_WRONG_STRUCTURE = "Token subject has wrong structure";
+    private static final String errorMessage = "UNABLE_MALFORMED_JWT_TOKEN";
     private final HttpStatus statusCode = HttpStatus.BAD_REQUEST;
 
     public MalformedJWTException() {

@@ -14,6 +14,7 @@ public class AAMException extends SecurityException {
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
     private final static String errorMessage = "AAM_SERVER_ERROR";
     private final static HttpStatus statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+    public static final String SELECTED_CERTIFICATE_NOT_FOUND = "Selected certificate could not be found/retrieved";
 
     public AAMException() {
         super(errorMessage);
