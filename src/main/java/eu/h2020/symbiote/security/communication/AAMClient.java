@@ -7,7 +7,6 @@ import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.*;
 import eu.h2020.symbiote.security.communication.interfaces.IFeignAAMClient;
 import eu.h2020.symbiote.security.communication.payloads.*;
-import eu.h2020.symbiote.security.handler.SecurityHandler;
 import feign.Feign;
 import feign.FeignException;
 import feign.Logger;
@@ -15,11 +14,11 @@ import feign.Logger.Level;
 import feign.Response;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
-
-import java.util.Optional;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.Collection;
+import java.util.Optional;
 
 /**
  * Crude RMI-like client's implementation to the AAM module that communicates with it over REST.
@@ -77,12 +76,19 @@ public class AAMClient implements IAAMClient {
         } catch (FeignException fe) {
             throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
         }
-        if (response.status() == 500)
-            throw new AAMException(response.body().toString());
-        if (response.status() == 404)
-            throw new AAMException("Certificate not found");
-        return response.body().toString();
-
+        switch (response.status()) {
+            case 500:
+                throw new AAMException(response.body().toString());
+            case 404:
+                throw new AAMException("Certificate not found");
+            case 200:
+                if (response.body().toString().isEmpty()) {
+                    throw new AAMException(AAMException.RESPONSE_IS_EMPTY);
+                }
+                return response.body().toString();
+            default:
+                throw new AAMException("Error occured. Error code: " + response.status() + ". Message: " + response.body().toString());
+        }
     }
 
     /**
@@ -111,8 +117,13 @@ public class AAMClient implements IAAMClient {
             case 401:
                 //TODO: Find a way to differentiate ValidationException from WrongCredentialsException since response's body is empty on error
                 throw new ValidationException("Could not validate - Invalid certificate / credentials");
-            default:
+            case 200:
+                if (response.body().toString().isEmpty()) {
+                    throw new AAMException("Error occured. Response is empty!");
+                }
                 return response.body().toString();
+            default:
+                throw new AAMException("Error occured. Error code: " + response.status() + ". Message: " + response.body().toString());
         }
 
     }
@@ -139,8 +150,13 @@ public class AAMClient implements IAAMClient {
                 throw new InvalidArgumentsException(response.body().toString());
             case 401:
                 throw new WrongCredentialsException();
-            default:
+            case 200:
+                if (response.body().toString().isEmpty()) {
+                    throw new AAMException("Error occured. Response is empty!");
+                }
                 return response.body().toString();
+            default:
+                throw new AAMException("Error occured. Error code: " + response.status() + ". Message: " + response.body().toString());
         }
 
     }
@@ -158,9 +174,19 @@ public class AAMClient implements IAAMClient {
         } catch (FeignException fe) {
             throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
         }
-        if (response.status() == 500)
-            throw new JWTCreationException("Server failed to create a guest token");
-        return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toString();
+        switch (response.status()) {
+            case 500:
+                throw new JWTCreationException("Server failed to create a guest token");
+            case 200:
+                Collection headers = response.headers().get(SecurityConstants.TOKEN_HEADER_NAME);
+                if (headers == null ||
+                        headers.toArray().length == 0) {
+                    throw new AAMException(AAMException.NO_TOKEN_IN_RESPONSE);
+                }
+                return headers.toArray()[0].toString();
+            default:
+                throw new AAMException("Error occured. Error code: " + response.status() + ". Message: " + response.body().toString());
+        }
     }
 
     /**
@@ -187,8 +213,15 @@ public class AAMClient implements IAAMClient {
                 throw new WrongCredentialsException("Could not validate token with incorrect credentials");
             case 500:
                 throw new JWTCreationException("Server failed to create a home token");
+            case 200:
+                Collection headers = response.headers().get(SecurityConstants.TOKEN_HEADER_NAME);
+                if (headers == null ||
+                        headers.toArray().length == 0) {
+                    throw new AAMException(AAMException.NO_TOKEN_IN_RESPONSE);
+                }
+                return headers.toArray()[0].toString();
             default:
-                return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
+                throw new AAMException("Error occured. Error code: " + response.status() + ". Message: " + response.body().toString());
         }
     }
 
@@ -219,8 +252,15 @@ public class AAMClient implements IAAMClient {
                 throw new ValidationException("Failed to validate homeToken");
             case 500:
                 throw new JWTCreationException("Server failed to create a foreign token");
+            case 200:
+                Collection headers = response.headers().get(SecurityConstants.TOKEN_HEADER_NAME);
+                if (headers == null ||
+                        headers.toArray().length == 0) {
+                    throw new AAMException(AAMException.NO_TOKEN_IN_RESPONSE);
+                }
+                return headers.toArray()[0].toString();
             default:
-                return response.headers().get(SecurityConstants.TOKEN_HEADER_NAME).toArray()[0].toString();
+                throw new AAMException("Error occured. Error code: " + response.status() + ". Message: " + response.body().toString());
         }
 
     }
