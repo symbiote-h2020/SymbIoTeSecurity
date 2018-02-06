@@ -5,6 +5,7 @@ package eu.h2020.symbiote.security.accesspolicies.common;
  *
  * @author Vasileios Glykantzis (ICOM)
  * @author Jakub Toczek (PSNC)
+ * @author Nemanja Ignjatov (UNIVIE)
  */
 public enum AccessPolicyType {
     /**
@@ -34,6 +35,10 @@ public enum AccessPolicyType {
     /**
      * Composite access policy
      */
-    CAP
+    CAP,
+    /**
+     * Attribute-oriented access policy
+     */
+    AOAP
 
 }

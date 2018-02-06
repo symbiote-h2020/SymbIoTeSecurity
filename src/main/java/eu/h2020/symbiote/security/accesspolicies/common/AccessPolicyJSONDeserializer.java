@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.AttributeOrientedAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.composite.CompositeAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
@@ -37,6 +38,8 @@ public class AccessPolicyJSONDeserializer extends JsonDeserializer<IAccessPolicy
             switch (apType) {
                 case CAP:
                     return deserializeCompositeAccessPolicyJSON(mapper, node);
+                case AOAP:
+                    return deserializeAttributeOrientedAccessPolicyJSON(mapper, node);
                 case SLHTIBAP:
                 case SLHTAP:
                 case SFTAP:
@@ -77,6 +80,10 @@ public class AccessPolicyJSONDeserializer extends JsonDeserializer<IAccessPolicy
         return new CompositeAccessPolicySpecifier(operators, staps, caps);
     }
 
+    private AttributeOrientedAccessPolicySpecifier deserializeAttributeOrientedAccessPolicyJSON(ObjectMapper mapper, JsonNode node) throws InvalidArgumentsException, IOException {
+        //TODO implement once AttributeOrientedAccessPolicySpecifier is developed
+        return new AttributeOrientedAccessPolicySpecifier();
+    }
     private SingleTokenAccessPolicySpecifier deserializeSingleTokenAccessPolicyJSON(ObjectMapper mapper, JsonNode node) throws InvalidArgumentsException {
 
         JsonNode policyType = node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_TYPE);
