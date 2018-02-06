@@ -12,9 +12,11 @@ import org.springframework.http.HttpStatus;
 public class AAMException extends SecurityException {
 
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
-    private final static String errorMessage = "AAM_SERVER_ERROR";
-    private final static HttpStatus statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+    public static final String NO_TOKEN_IN_RESPONSE = "Error occured. There is no token in response!";
+    public static final String RESPONSE_IS_EMPTY = "Error occured. Response is empty!";
     public static final String SELECTED_CERTIFICATE_NOT_FOUND = "Selected certificate could not be found/retrieved";
+    private static final String errorMessage = "AAM_SERVER_ERROR";
+    private static final HttpStatus statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
 
     public AAMException() {
         super(errorMessage);
