@@ -4,14 +4,14 @@ package eu.h2020.symbiote.security.helpers.accesspolicies;
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyFactory;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.AttributeOrientedAccessPolicySpecifier;
+import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.BooleanAccessRule;
+import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.NumericAccessRule;
 import eu.h2020.symbiote.security.commons.Certificate;
+import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -28,7 +28,6 @@ import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,10 +58,12 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     private final String badResourceID = "badResourceID";
     private final String badResourceID2 = "badResourceID2";
 
+    private final String fromEUAttr = "fromEU";
     private final String nameAttr = "name";
     private final String ageAttr = "age";
     private final String missingAttr = "youAreGonnaMissMe";
 
+    private final String fromEUAttrOKValue = "false";
     private final String nameAttrOKValue = "John";
     private final String nameAttrBadValue = "Mike";
     private final String ageAttrOKValue = "20";
@@ -95,7 +96,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         Map<String, String> attributes = new HashMap<>();
         attributes.put(nameAttr, nameAttrOKValue);
         attributes.put(ageAttr, ageAttrOKValue);
-
+        attributes.put(fromEUAttr, fromEUAttrOKValue);
         String authorizationToken = DummyTokenIssuer.buildAuthorizationToken(clientId,
                 attributes,
                 clientPublicKey.getEncoded(),
@@ -140,24 +141,40 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singleResourceMultipleTokensOrOperatorCheckSuccess() throws
+    public void singleNumberAccessRuleCheckSuccess() throws
             NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException {
+            InvalidArgumentsException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
 
-        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier()));
+        NumericAccessRule numAccessRule = new NumericAccessRule(20, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.EQUALS);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 
         assertTrue(resp.keySet().contains(goodResourceID));
     }
 
+    @Test
+    public void singleBooleanAccessRuleCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        BooleanAccessRule booleanAccessRule = new BooleanAccessRule(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + fromEUAttr, BooleanAccessRule.BooleanRelationalOperator.IS_FALSE);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(booleanAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
 }

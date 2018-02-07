@@ -79,6 +79,8 @@ public class SecurityConstants {
     public static final String ACCESS_POLICY_JSON_FIELD_SINGLE_TOKEN_AP = "singleTokenAccessPolicySpecifiers";
     public static final String ACCESS_POLICY_JSON_FIELD_COMPOSITE_AP = "compositeAccessPolicySpecifiers";
 
+    //Attribute-oriented AP
+    public static final String ACCESS_POLICY_JSON_ACCESS_RULES = "accessRules";
     public static final String ERROR_DESC_UNSUPPORTED_ACCESS_POLICY_TYPE = "Access policy type not suppoted!";
 
     //Bartening and Traiding Module REST paths
@@ -90,6 +92,9 @@ public class SecurityConstants {
     public static final String BTM_CLEANUP_COUPONS = "/cleanup_coupons";
     public static final String BTM_REVOKE_COUPON = "/revoke_coupon";
 
+
+    public static final String BOOLEAN_STRING_VALUE_TRUE = "true";
+    public static final String BOOLEAN_STRING_VALUE_FALSE = "false";
     private SecurityConstants() {
     }
 }

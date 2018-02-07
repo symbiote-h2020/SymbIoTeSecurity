@@ -26,7 +26,7 @@ public class AttributeOrientedAccessPolicyFactory {
     public static IAccessPolicy getAttributeOrientedAccessPolicy(AttributeOrientedAccessPolicySpecifier specifier) throws
             InvalidArgumentsException {
 
-        return new AttributeOrientedAccessPolicy();
+        return new AttributeOrientedAccessPolicy(specifier.getAccessRules());
 
     }
 }

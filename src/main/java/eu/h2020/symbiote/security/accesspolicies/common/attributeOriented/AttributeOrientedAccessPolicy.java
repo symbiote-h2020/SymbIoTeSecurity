@@ -1,10 +1,9 @@
 package eu.h2020.symbiote.security.accesspolicies.common.attributeOriented;
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
+import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.commons.IAccessRule;
 import eu.h2020.symbiote.security.commons.Token;
-import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -14,20 +13,19 @@ import java.util.Set;
  */
 public class AttributeOrientedAccessPolicy implements IAccessPolicy {
 
+    private final IAccessRule accessRules;
+
     /**
      * Creates a new access policy object
      */
-    public AttributeOrientedAccessPolicy() throws
-            InvalidArgumentsException {
-
+    public AttributeOrientedAccessPolicy(IAccessRule accessRules) {
+        this.accessRules = accessRules;
     }
 
     @Override
     public Set<Token> isSatisfiedWith(Set<Token> authorizationTokens) {
 
-        Set<Token> returnTokensSet = new HashSet<>();
-        returnTokensSet.addAll(authorizationTokens);
-        return returnTokensSet;
+        return accessRules.isMet(authorizationTokens);
     }
 
 }

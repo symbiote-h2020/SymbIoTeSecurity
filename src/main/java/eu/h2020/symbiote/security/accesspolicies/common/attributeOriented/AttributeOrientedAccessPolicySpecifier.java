@@ -1,9 +1,11 @@
 package eu.h2020.symbiote.security.accesspolicies.common.attributeOriented;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyType;
 import eu.h2020.symbiote.security.accesspolicies.common.IAccessPolicySpecifier;
-import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
+import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.commons.IAccessRule;
+import eu.h2020.symbiote.security.commons.SecurityConstants;
 import org.springframework.data.annotation.PersistenceConstructor;
 
 /**
@@ -14,17 +16,20 @@ import org.springframework.data.annotation.PersistenceConstructor;
  */
 public class AttributeOrientedAccessPolicySpecifier implements IAccessPolicySpecifier {
 
+    private final IAccessRule accessRules;
     private final AccessPolicyType accessPolicyType;
 
     @JsonCreator
     @PersistenceConstructor
-    public AttributeOrientedAccessPolicySpecifier()
-            throws InvalidArgumentsException {
-
+    public AttributeOrientedAccessPolicySpecifier(@JsonProperty(SecurityConstants.ACCESS_POLICY_JSON_ACCESS_RULES) IAccessRule accessRules) {
+        this.accessRules = accessRules;
         this.accessPolicyType = AccessPolicyType.AOAP;
 
     }
 
+    public IAccessRule getAccessRules() {
+        return accessRules;
+    }
 
     @Override
     public AccessPolicyType getPolicyType() {

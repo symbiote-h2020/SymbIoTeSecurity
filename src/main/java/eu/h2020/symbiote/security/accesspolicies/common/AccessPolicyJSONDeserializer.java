@@ -82,7 +82,7 @@ public class AccessPolicyJSONDeserializer extends JsonDeserializer<IAccessPolicy
 
     private AttributeOrientedAccessPolicySpecifier deserializeAttributeOrientedAccessPolicyJSON(ObjectMapper mapper, JsonNode node) throws InvalidArgumentsException, IOException {
         //TODO implement once AttributeOrientedAccessPolicySpecifier is developed
-        return new AttributeOrientedAccessPolicySpecifier();
+        return new AttributeOrientedAccessPolicySpecifier(null);
     }
     private SingleTokenAccessPolicySpecifier deserializeSingleTokenAccessPolicyJSON(ObjectMapper mapper, JsonNode node) throws InvalidArgumentsException {
 
