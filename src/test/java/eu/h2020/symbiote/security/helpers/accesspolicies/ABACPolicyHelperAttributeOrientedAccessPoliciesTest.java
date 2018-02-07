@@ -128,7 +128,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         attributes.put(nameAttr, nameAttrOKValue);
 
         Map<String, String> attributesSecond = new HashMap<>();
-        attributes.put(ageAttr, String.valueOf(ageAttrOKValue));
+        attributes.put(ageAttr, ageAttrOKValue);
 
         String authorizationTokenOne = DummyTokenIssuer.buildAuthorizationToken(clientId,
                 attributesFirst,
