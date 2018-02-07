@@ -305,6 +305,9 @@ public class SecurityHandler implements ISecurityHandler {
                 || clientId == null || clientId.isEmpty())
             throw new SecurityHandlerException("Missing username/password/clientId, those parameters must not be empty");
 
+        if (!username.matches("^(([\\w-])+)$")) {
+            throw new SecurityHandlerException("Username contains invalid characters");
+        }
         try {
             KeyPair pair = CryptoHelper.createKeyPair();
 
@@ -314,6 +317,9 @@ public class SecurityHandler implements ISecurityHandler {
                 csr = CryptoHelper.buildComponentCertificateSigningRequestPEM(
                         componentInfo[0], componentInfo[1], pair);
             } else {
+                if (!clientId.matches("^(([\\w-])+)$")) {
+                    throw new SecurityHandlerException("Client Id contains invalid characters");
+                }
                 csr = CryptoHelper.buildCertificateSigningRequestPEM(
                         homeAAM.getAamCACertificate().getX509(), username, clientId, pair);
             }
