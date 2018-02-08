@@ -1,6 +1,8 @@
 package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
+import eu.h2020.symbiote.security.commons.Certificate;
+import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
@@ -242,6 +244,16 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
             localAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(localAAM.getAamInstanceId());
         }
 
+        //checking if aam certificate changed during the component runtime
+
+        Certificate platformCertificate = securityHandler.getComponentCertificate(SecurityConstants.AAM_COMPONENT_NAME,
+                localAAM.getAamInstanceId());
+        if (!platformCertificate.getCertificateString().equals(
+                localAAMBoundCredentials.homeCredentials.homeAAM.getAamCACertificate().getCertificateString())) {
+            log.error(SecurityHandlerException.AAM_CERTIFICATE_DIFFERENT_THAN_IN_KEYSTORE);
+            throw new SecurityHandlerException(SecurityHandlerException.AAM_CERTIFICATE_DIFFERENT_THAN_IN_KEYSTORE);
+        }
+
         // check that we have a valid token
         boolean isLocalTokenRefreshNeeded = false;
         try {
@@ -254,7 +266,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
             isLocalTokenRefreshNeeded = true;
         }
 
-        // fetching the core token using the security handler
+        // fetching the local token using the security handler
         if (isLocalTokenRefreshNeeded) {
             // gets the token and puts it in the wallet
             try {
@@ -276,7 +288,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                 localAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(localAAM.getAamInstanceId());
             } catch (ValidationException e) {
                 log.error(e);
-                throw new SecurityHandlerException("Can't refresh the platformOwner's CoreAAM HOME token", e);
+                throw new SecurityHandlerException("Can't refresh the components LocalAAM HOME token", e);
             }
 
         }
