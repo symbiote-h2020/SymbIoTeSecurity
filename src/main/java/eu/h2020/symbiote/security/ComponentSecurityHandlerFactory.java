@@ -1,9 +1,19 @@
 package eu.h2020.symbiote.security;
 
+import eu.h2020.symbiote.security.commons.Certificate;
+import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
+import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.handler.ComponentSecurityHandler;
 import eu.h2020.symbiote.security.handler.IComponentSecurityHandler;
 import eu.h2020.symbiote.security.handler.SecurityHandler;
+import eu.h2020.symbiote.security.helpers.CryptoHelper;
+
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
+import java.util.Map;
 
 /**
  * Builds a component security Handler
@@ -75,8 +85,24 @@ public class ComponentSecurityHandlerFactory {
         if (clientId.split("@").length != 2) {
             throw new SecurityHandlerException("Component Id has bad form, must be componentId@platformId");
         }
+        String platformId = clientId.split("@")[1];
+        SecurityHandler securityHandler = new SecurityHandler(keystorePath, keystorePassword, localAAMAddress, platformId);
+        if (securityHandler.getAcquiredCredentials().containsKey(platformId)) {
+            Map<String, AAM> availableAAMs = securityHandler.getAvailableAAMs(localAAMAddress);
+            Certificate componentCertificate = securityHandler.getAcquiredCredentials().get(platformId).homeCredentials.certificate;
+            try {
+                if (!CryptoHelper.isClientCertificateChainTrusted(availableAAMs.get(SecurityConstants.CORE_AAM_INSTANCE_ID).getAamCACertificate().getCertificateString(),
+                        availableAAMs.get(platformId).getAamCACertificate().getCertificateString(),
+                        componentCertificate.getCertificateString())) {
+                    throw new SecurityHandlerException(SecurityHandlerException.AAM_CERTIFICATE_DIFFERENT_THAN_IN_KEYSTORE);
+                }
+            } catch (NoSuchAlgorithmException | CertificateException | NoSuchProviderException | IOException e) {
+                throw new SecurityHandlerException("Error during checking the certificate trust chain occured");
+            }
+        }
+
         return new ComponentSecurityHandler(
-                new SecurityHandler(keystorePath, keystorePassword, localAAMAddress, clientId.split("@")[1]),
+                securityHandler,
                 localAAMAddress,
                 componentOwnerUsername,
                 componentOwnerPassword,

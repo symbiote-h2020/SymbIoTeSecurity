@@ -25,10 +25,9 @@ import org.bouncycastle.util.io.pem.PemReader;
 import javax.security.auth.x500.X500Principal;
 import java.io.*;
 import java.security.*;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import java.security.spec.ECGenParameterSpec;
-import java.util.Date;
+import java.util.*;
 
 /**
  * Utility class containing helper methods for PKI related operation (keys, certificates, conversions)
@@ -212,5 +211,58 @@ public class CryptoHelper {
             throw new SecurityException(ex.getMessage(), ex.getCause());
         }
         return csr;
+    }
+
+    public static boolean isClientCertificateChainTrusted(String coreAAMCertificateString,
+                                                          String signingAAMCertificateString,
+                                                          String clientCertificateString) throws
+            NoSuchAlgorithmException,
+            CertificateException,
+            NoSuchProviderException,
+            IOException {
+
+        // convert certificates to X509
+        X509Certificate coreAAMCertificate = CryptoHelper.convertPEMToX509(coreAAMCertificateString);
+        X509Certificate clientCertificate = CryptoHelper.convertPEMToX509(clientCertificateString);
+        X509Certificate signingAAMCertificate = CryptoHelper.convertPEMToX509(signingAAMCertificateString);
+
+        // Create the selector that specifies the starting certificate
+        X509CertSelector target = new X509CertSelector();
+        target.setCertificate(clientCertificate);
+
+        // Create the trust anchors (set of root CA certificates)
+        Set<TrustAnchor> trustAnchors = new HashSet<>();
+        TrustAnchor trustAnchor = new TrustAnchor(coreAAMCertificate, null);
+        trustAnchors.add(trustAnchor);
+
+        // List of intermediate certificates
+        List<X509Certificate> intermediateCertificates = new ArrayList<>();
+        intermediateCertificates.add(signingAAMCertificate);
+        intermediateCertificates.add(clientCertificate);
+
+        /*
+         * If build() returns successfully, the certificate is valid. More details
+         * about the valid path can be obtained through the PKIXCertPathBuilderResult.
+         * If no valid path can be found, a CertPathBuilderException is thrown.
+         */
+        try {
+            // Create the selector that specifies the starting certificate
+            PKIXBuilderParameters params = new PKIXBuilderParameters(trustAnchors, target);
+            // Disable CRL checks (this is done manually as additional step)
+            params.setRevocationEnabled(false);
+
+            // Specify a list of intermediate certificates
+            CertStore intermediateCertStore = CertStore.getInstance("Collection",
+                    new CollectionCertStoreParameters(intermediateCertificates), "BC");
+            params.addCertStore(intermediateCertStore);
+
+            // Build and verify the certification chain
+            CertPathBuilder builder = CertPathBuilder.getInstance("PKIX", "BC");
+            PKIXCertPathBuilderResult result = (PKIXCertPathBuilderResult) builder.build(params);
+            // path should have 2 certs in symbIoTe architecture
+            return result.getCertPath().getCertificates().size() == 2;
+        } catch (CertPathBuilderException | InvalidAlgorithmParameterException e) {
+            return false;
+        }
     }
 }
