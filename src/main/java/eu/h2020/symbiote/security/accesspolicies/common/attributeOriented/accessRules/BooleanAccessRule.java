@@ -1,10 +1,13 @@
 package eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.commons.AccessRuleType;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.commons.IAccessRule;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,7 +20,7 @@ public class BooleanAccessRule implements IAccessRule {
 
     private String attributeName;
     private BooleanRelationalOperator operator;
-    private final AccessRuleType ruleType = AccessRuleType.BOOLEAN;
+    private final AccessRuleType accessRuleType = AccessRuleType.BOOLEAN;
 
     /**
      * @param attributeName - Name of the attribute whose value should be compared
@@ -28,13 +31,20 @@ public class BooleanAccessRule implements IAccessRule {
         this.operator = operator;
     }
 
-    public void setAttributeName(String attributeName) {
-        this.attributeName = attributeName;
+    public BooleanAccessRule() {
     }
 
-    public void setOperator(BooleanRelationalOperator operator) {
-        this.operator = operator;
+    /**
+     * @param accessRuleJson - String containing JSON formatted Boolean access rule
+     * @throws IOException
+     */
+    public BooleanAccessRule(String accessRuleJson) throws IOException {
+        ObjectMapper objMapper = new ObjectMapper();
+        BooleanAccessRule boolArObj = objMapper.readValue(accessRuleJson, BooleanAccessRule.class);
+        this.attributeName = boolArObj.attributeName;
+        this.operator = boolArObj.operator;
     }
+
 
     @Override
     public Set<Token> isMet(Set<Token> authorizationTokens) {
@@ -65,7 +75,21 @@ public class BooleanAccessRule implements IAccessRule {
 
     @Override
     public AccessRuleType getAccessRuleType() {
-        return this.ruleType;
+        return this.accessRuleType;
+    }
+
+    @Override
+    public String toJSONString() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(this);
+    }
+
+    public String getAttributeName() {
+        return attributeName;
+    }
+
+    public BooleanRelationalOperator getOperator() {
+        return operator;
     }
 
     /**

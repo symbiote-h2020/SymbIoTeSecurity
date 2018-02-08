@@ -1,9 +1,12 @@
 package eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.commons.AccessRuleType;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.commons.IAccessRule;
 import eu.h2020.symbiote.security.commons.Token;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,7 +20,7 @@ public class StringAccessRule implements IAccessRule {
     private String attributeName;
     private String expectedValue;
     private StringRelationalOperator operator;
-    private final AccessRuleType ruleType = AccessRuleType.STRING;
+    private AccessRuleType accessRuleType = AccessRuleType.STRING;
 
     /**
      * @param expectedValue - String value that is to be compared
@@ -30,12 +33,19 @@ public class StringAccessRule implements IAccessRule {
         this.operator = operator;
     }
 
-    public void setAttributeName(String attributeName) {
-        this.attributeName = attributeName;
+    public StringAccessRule() {
     }
 
-    public void setOperator(StringRelationalOperator operator) {
-        this.operator = operator;
+    /**
+     * @param accessRuleJson - String containing JSON formatted String access rule
+     * @throws IOException -
+     */
+    public StringAccessRule(String accessRuleJson) throws IOException {
+        ObjectMapper objMapper = new ObjectMapper();
+        StringAccessRule strARObj = objMapper.readValue(accessRuleJson, StringAccessRule.class);
+        this.expectedValue = strARObj.expectedValue;
+        this.attributeName = strARObj.attributeName;
+        this.operator = strARObj.operator;
     }
 
     @Override
@@ -56,7 +66,26 @@ public class StringAccessRule implements IAccessRule {
 
     @Override
     public AccessRuleType getAccessRuleType() {
-        return this.ruleType;
+        return this.accessRuleType;
+    }
+
+    public String getAttributeName() {
+        return attributeName;
+    }
+
+    public String getExpectedValue() {
+        return expectedValue;
+    }
+
+    public StringRelationalOperator getOperator() {
+        return operator;
+    }
+
+
+    @Override
+    public String toJSONString() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(this);
     }
 
     private boolean evaluateStringExpression(String expectedVal, String controlledVal, StringRelationalOperator operator) {

@@ -1,11 +1,15 @@
 package eu.h2020.symbiote.security.helpers.accesspolicies;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyFactory;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.AttributeOrientedAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.BooleanAccessRule;
+import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.CompositeAccessRule;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.NumericAccessRule;
+import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.StringAccessRule;
+import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.commons.IAccessRule;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
@@ -24,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -66,7 +71,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     private final String fromEUAttrOKValue = "false";
     private final String nameAttrOKValue = "John";
     private final String nameAttrBadValue = "Mike";
-    private final String ageAttrOKValue = "20";
+    private final int ageAttrOKValue = 20;
     private final String ageAttrBadValue = "33";
 
     private HashSet<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<>();
@@ -95,7 +100,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
 
         Map<String, String> attributes = new HashMap<>();
         attributes.put(nameAttr, nameAttrOKValue);
-        attributes.put(ageAttr, ageAttrOKValue);
+        attributes.put(ageAttr, String.valueOf(ageAttrOKValue));
         attributes.put(fromEUAttr, fromEUAttrOKValue);
         String authorizationToken = DummyTokenIssuer.buildAuthorizationToken(clientId,
                 attributes,
@@ -114,7 +119,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         attributes.put(nameAttr, nameAttrOKValue);
 
         Map<String, String> attributesSecond = new HashMap<>();
-        attributes.put(ageAttr, ageAttrOKValue);
+        attributes.put(ageAttr, String.valueOf(ageAttrOKValue));
 
         String authorizationTokenOne = DummyTokenIssuer.buildAuthorizationToken(clientId,
                 attributesFirst,
@@ -150,7 +155,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
 
-        NumericAccessRule numAccessRule = new NumericAccessRule(20, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.EQUALS);
+        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.EQUALS);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
 
@@ -172,6 +177,62 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         BooleanAccessRule booleanAccessRule = new BooleanAccessRule(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + fromEUAttr, BooleanAccessRule.BooleanRelationalOperator.IS_FALSE);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(booleanAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleStringAccessRuleCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule(nameAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.EQUALS);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void compositeAccessRuleCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            JsonProcessingException,
+            IOException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        BooleanAccessRule booleanAccessRule = new BooleanAccessRule(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + fromEUAttr, BooleanAccessRule.BooleanRelationalOperator.IS_TRUE);
+
+        NumericAccessRule numAccessRule = new NumericAccessRule(18, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.GREATER_THAN);
+
+        StringAccessRule stringAccessRule = new StringAccessRule(nameAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.EQUALS);
+
+        Set<IAccessRule> arSet1 = new HashSet<>();
+        arSet1.add(stringAccessRule);
+        arSet1.add(booleanAccessRule);
+
+        CompositeAccessRule compositeAR1 = new CompositeAccessRule(arSet1, CompositeAccessRule.CompositeAccessRulesOperator.OR);
+
+        Set<IAccessRule> arSet2 = new HashSet<>();
+        arSet2.add(compositeAR1);
+        arSet2.add(numAccessRule);
+
+        CompositeAccessRule compositeAR2 = new CompositeAccessRule(arSet2, CompositeAccessRule.CompositeAccessRulesOperator.AND);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(compositeAR2)));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
 

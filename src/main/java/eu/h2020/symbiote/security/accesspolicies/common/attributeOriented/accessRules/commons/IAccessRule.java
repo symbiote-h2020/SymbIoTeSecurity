@@ -1,5 +1,6 @@
 package eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.commons;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.h2020.symbiote.security.commons.Token;
 
 import java.util.Set;
@@ -21,5 +22,10 @@ public interface IAccessRule {
      * @return Access rules type of the implementing class
      */
     AccessRuleType getAccessRuleType();
+
+    /**
+     * @return JSON printout of the access rule fields
+     */
+    String toJSONString() throws JsonProcessingException;
 
 }

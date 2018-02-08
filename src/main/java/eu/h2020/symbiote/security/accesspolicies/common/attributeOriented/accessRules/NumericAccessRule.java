@@ -1,9 +1,12 @@
 package eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.commons.AccessRuleType;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.commons.IAccessRule;
 import eu.h2020.symbiote.security.commons.Token;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,7 +21,7 @@ public class NumericAccessRule implements IAccessRule {
     private Number expectedValue;
     private String attributeName;
     private NumericRelationalOperator operator;
-    private final AccessRuleType ruleType = AccessRuleType.NUMERIC;
+    private final AccessRuleType accessRuleType = AccessRuleType.NUMERIC;
 
     /**
      * @param expectedValue - Numeric value that is to be compared
@@ -31,16 +34,19 @@ public class NumericAccessRule implements IAccessRule {
         this.operator = operator;
     }
 
-    public void setExpectedValue(Number expectedValue) {
-        this.expectedValue = expectedValue;
+    public NumericAccessRule() {
     }
 
-    public void setControlledValue(String attributeName) {
-        this.attributeName = attributeName;
-    }
-
-    public void setOperator(NumericRelationalOperator operator) {
-        this.operator = operator;
+    /**
+     * @param accessRuleJson - String containing JSON formatted Numeric access rule
+     * @throws IOException -
+     */
+    public NumericAccessRule(String accessRuleJson) throws IOException {
+        ObjectMapper objMapper = new ObjectMapper();
+        NumericAccessRule numARObj = objMapper.readValue(accessRuleJson, NumericAccessRule.class);
+        this.expectedValue = numARObj.expectedValue;
+        this.attributeName = numARObj.attributeName;
+        this.operator = numARObj.operator;
     }
 
     @Override
@@ -64,7 +70,25 @@ public class NumericAccessRule implements IAccessRule {
 
     @Override
     public AccessRuleType getAccessRuleType() {
-        return this.ruleType;
+        return this.accessRuleType;
+    }
+
+    @Override
+    public String toJSONString() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(this);
+    }
+
+    public Number getExpectedValue() {
+        return expectedValue;
+    }
+
+    public String getAttributeName() {
+        return attributeName;
+    }
+
+    public NumericRelationalOperator getOperator() {
+        return operator;
     }
 
     private boolean evaluateNumericExpression(BigDecimal expectedVal, BigDecimal controlledVal, NumericRelationalOperator operator) {
