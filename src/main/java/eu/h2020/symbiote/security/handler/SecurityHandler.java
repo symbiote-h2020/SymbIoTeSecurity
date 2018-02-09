@@ -425,6 +425,16 @@ public class SecurityHandler implements ISecurityHandler {
 
                     if (aam != null) {
                         Certificate certificate = new Certificate(CryptoHelper.convertX509ToPEM(cert));
+                        try {
+                            if (!CryptoHelper.isClientCertificateChainTrusted(aamList.get(SecurityConstants.CORE_AAM_INSTANCE_ID).getAamCACertificate().getCertificateString(),
+                                    aamList.get(aamId).getAamCACertificate().getCertificateString(),
+                                    certificate.getCertificateString())) {
+                                logger.error("The AAMs certificate changed since the client received its certificate. Please verify with the platform, if this action was on purpose or indicates compromise. Nonetheless the current login won't work until the client requests a new certificate. It mustn't be done without consideration.");
+                                //TODO upgrade at r5 - do not load this cert to credential wallet, mark this AAM as suspicious.
+                            }
+                        } catch (NoSuchAlgorithmException | CertificateException | NoSuchProviderException | IOException e) {
+                            logger.error("Couldn't verify clients certificate");
+                        }
                         BoundCredentials boundCredentials =
                                 new BoundCredentials(new HomeCredentials(aam, user, client, certificate, pvKey));
 
