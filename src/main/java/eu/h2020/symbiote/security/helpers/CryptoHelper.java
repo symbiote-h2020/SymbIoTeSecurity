@@ -259,6 +259,10 @@ public class CryptoHelper {
             // Build and verify the certification chain
             CertPathBuilder builder = CertPathBuilder.getInstance("PKIX", "BC");
             PKIXCertPathBuilderResult result = (PKIXCertPathBuilderResult) builder.build(params);
+            // path should have 1 cert in symbIoTe architecture (if client is Core component - used in componentSecurityHandler)
+            if (coreAAMCertificateString.equals(signingAAMCertificateString)) {
+                return result.getCertPath().getCertificates().size() == 1;
+            }
             // path should have 2 certs in symbIoTe architecture
             return result.getCertPath().getCertificates().size() == 2;
         } catch (CertPathBuilderException | InvalidAlgorithmParameterException e) {
