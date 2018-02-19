@@ -23,6 +23,7 @@ public class PlatformManagementException extends SecurityException {
     public static final String PLATFORM_NOT_EXIST = "Platform with this instance id doesn't exist";
     public static final String PLATFORM_INTERWARKING_INTERFACE_IN_USE = "Platform interworking interface already in use";
     public static final String PLATFORM_EXISTS = "Platform with this instance id already exists";
+    public static final String NOT_OWNED_PLATFORM = "Platform Owner does not have rights to this platform.";
 
     public PlatformManagementException() {
         super(errorMessage);
