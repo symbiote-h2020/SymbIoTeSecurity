@@ -17,7 +17,7 @@ public class InvalidArgumentsException extends SecurityException {
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
     public static final String MISSING_PLATFORM_AAM_URL = "Missing Platform AAM URL";
     public static final String MISSING_USERNAME_OR_PASSWORD = "Missing username or password";
-    public static final String MISSING_PLATFORM_INSTANCE_FRIENDLY_NAME = "Missing Platform Instance Friendly Name";
+    public static final String MISSING_INSTANCE_FRIENDLY_NAME = "Missing Instance Friendly Name";
     public static final String MISSING_CREDENTIALS = "Missing credentials";
     public static final String REQUEST_IS_INCORRECTLY_BUILT = "Request is incorrectly built";
     public static final String COULD_NOT_CREATE_USER_WITH_GIVEN_USERNAME = "Could not create user with given Username";
@@ -26,6 +26,9 @@ public class InvalidArgumentsException extends SecurityException {
     public static final String COMMON_NAME_IS_WRONG = "Common name is wrong";
     public static final String RULE_ID_ALREADY_EXISTS = "Rule with this id already exists";
     private static final HttpStatus statusCode = HttpStatus.BAD_REQUEST;
+    public static final String MISSING_INTERWORKING_INTERFACES = "Missing external and internal interworking interfaces";
+    public static final String MISSING_EXPOSED_INTERWORKING_INTERFACE = "Exposed interworking interface should be provided";
+    public static final String NO_SSP_PREFIX = "Ssp identifier should start with 'SSP_' constant.";
 
     public InvalidArgumentsException() {
         super(errorMessage);

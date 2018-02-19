@@ -12,13 +12,13 @@ import eu.h2020.symbiote.security.commons.enums.ManagementStatus;
  */
 public class SspManagementResponse {
     private final String sspId;
-    private final ManagementStatus registrationStatus;
+    private final ManagementStatus managementStatus;
 
     @JsonCreator
     public SspManagementResponse(@JsonProperty("sspId") String sspId,
-                                 @JsonProperty("registrationStatus") ManagementStatus registrationStatus) {
+                                 @JsonProperty("managementStatus") ManagementStatus managementStatus) {
         this.sspId = sspId;
-        this.registrationStatus = registrationStatus;
+        this.managementStatus = managementStatus;
     }
 
     /**
@@ -28,7 +28,7 @@ public class SspManagementResponse {
         return sspId;
     }
 
-    public ManagementStatus getRegistrationStatus() {
-        return registrationStatus;
+    public ManagementStatus getManagementStatus() {
+        return managementStatus;
     }
 }
