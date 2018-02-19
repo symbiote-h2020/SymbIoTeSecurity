@@ -104,9 +104,11 @@ public class CompositeAccessRule implements IAccessRule {
                 validTokens = validateOrRelatedAccessRules(authorizationTokens);
                 break;
             case NAND:
-                break; //TODO implement
+                validTokens = validateNandRelatedAccessRules(authorizationTokens);
+                break;
             case NOR:
-                break; //TODO implement
+                validTokens = validateNorRelatedAccessRules(authorizationTokens);
+                break;
             default:
         }
 
@@ -156,6 +158,41 @@ public class CompositeAccessRule implements IAccessRule {
         if (this.accessRules != null) {
             for (IAccessRule accessRule : this.accessRules) {
                 validTokens.addAll(accessRule.isMet(authorizationTokens));
+            }
+        }
+        return validTokens;
+    }
+    //FIXME @Nemanja maybe not entirely correct (especially returned set of Tokens)
+    public Set<Token> validateNandRelatedAccessRules(Set<Token> authorizationTokens) {
+        Set<Token> validTokens = new HashSet<>();
+        if (this.accessRules != null){
+            int validAccessRules = 0;
+            for (IAccessRule accessRule : this.accessRules){
+                Set<Token> ruleValidTokens = accessRule.isMet(authorizationTokens);
+                if (ruleValidTokens != null && ruleValidTokens.size() > 0) {
+                    validAccessRules++;
+                    validTokens.addAll(ruleValidTokens);
+                }
+            }
+            if(validAccessRules >= this.accessRules.size()){
+                validTokens.clear();
+            }
+        }
+        return validTokens;
+    }
+    //FIXME @Nemanja returns full set of tokens if zero rules met, empty otherwise
+    public Set<Token>validateNorRelatedAccessRules(Set<Token> authorizationTokens) {
+        Set<Token> validTokens = new HashSet<>();
+        if(this.accessRules != null){
+            int validAccessRules = 0;
+            for (IAccessRule accessRule : this.accessRules) {
+                Set<Token> ruleValidTokens = accessRule.isMet(authorizationTokens);
+                if(ruleValidTokens != null && ruleValidTokens.size() > 0) {
+                    validAccessRules++;
+                }
+            }
+            if(validAccessRules==0){
+                return authorizationTokens;
             }
         }
         return validTokens;
