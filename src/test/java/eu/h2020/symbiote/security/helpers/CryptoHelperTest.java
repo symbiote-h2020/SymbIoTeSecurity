@@ -149,7 +149,7 @@ public class CryptoHelperTest {
         //KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
         //ks.load(new FileInputStream(CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
         //X509Certificate certificate = (X509Certificate) ks.getAamCACertificate(CERTIFICATE_ALIAS);
-        String csr = CryptoHelper.buildPlatformCertificateSigningRequestPEM(platformId, keyPair);
+        String csr = CryptoHelper.buildServiceCertificateSigningRequestPEM(platformId, keyPair);
         PKCS10CertificationRequest pkcsCSR = convertPemToPKCS10CertificationRequest(csr);
         assertEquals(platformId, pkcsCSR.getSubject().toString().split("CN=")[1]);
         assertTrue(pkcsCSR.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(keyPair.getPublic())));

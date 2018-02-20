@@ -142,17 +142,17 @@ public class CryptoHelper {
     }
 
     /**
-     * @param platformId platform's id
+     * @param serviceId platform's or smart space's id
      * @param keyPair    actor's key pair
-     * @return String platform certificate signing request
+     * @return String service certificate signing request
      * @throws IOException
      */
-    public static String buildPlatformCertificateSigningRequestPEM(String platformId, KeyPair keyPair) throws IOException, InvalidArgumentsException {
-        if (platformId.contains(illegalSign))
+    public static String buildServiceCertificateSigningRequestPEM(String serviceId, KeyPair keyPair) throws IOException, InvalidArgumentsException {
+        if (serviceId.contains(illegalSign))
             throw new InvalidArgumentsException();
 
         try {
-            String cn = "CN=" + platformId;
+            String cn = "CN=" + serviceId;
             PKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(
                     new X500Principal(cn), keyPair.getPublic());
             JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder(SecurityConstants.SIGNATURE_ALGORITHM);

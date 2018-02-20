@@ -147,7 +147,7 @@ public class PlatformAAMCertificateKeyStoreFactory {
         log.info("Key Store generated.");
         KeyPair pair = CryptoHelper.createKeyPair();
         log.info("Key pair for the platform AAM generated.");
-        String csr = CryptoHelper.buildPlatformCertificateSigningRequestPEM(platformId, pair);
+        String csr = CryptoHelper.buildServiceCertificateSigningRequestPEM(platformId, pair);
         log.info("CSR for the platform AAM generated.");
         CertificateRequest request = new CertificateRequest(platformOwnerUsername, platformOwnerPassword, platformId, csr);
         log.info("Request created");

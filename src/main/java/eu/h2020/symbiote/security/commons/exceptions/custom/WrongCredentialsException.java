@@ -15,7 +15,7 @@ public class WrongCredentialsException extends SecurityException {
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
     public static final String AUTHENTICATION_OF_USER_FAILED = "Authentication of user failed";
     public static final String CLIENT_NOT_EXIST = "Client doesn't exist";
-    public static final String NO_SUCH_PLATFORM = "There is no such platform";
+    public static final String NO_SUCH_SERVICE = "There is no such service";
     public static final String USER_NOT_EQUALS_CN = "User is not equal to user from CN";
     public static final String CERTIFICATE_NOT_EQUALS_DB = "Passed certificate do not equals with this in DB";
     public static final String USER_OR_CLIENT_NOT_EXIST = "User or client doesn't exist";
