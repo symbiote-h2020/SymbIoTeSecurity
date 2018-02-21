@@ -15,7 +15,7 @@ public class UserManagementException extends SecurityException {
     public static final String errorMessage = "USER_MANAGEMENT_ERROR";
     public static final String USER_NOT_IN_DATABASE = "User not in database";
     public static final String INCORRECT_LOGIN_PASSWORD = "Incorrect login / password";
-    public static final String CANNOT_REMOVE_PLATFORM_OWNER_WITH_PLATFORMS = "Cannot remove platform owner with platforms";
+    public static final String CANNOT_REMOVE_SERVICE_OWNER_WITH_SERVICES = "Cannot remove service owner with services";
     public static HttpStatus statusCode = HttpStatus.BAD_REQUEST;
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
 
