@@ -31,7 +31,7 @@ public class UserDetails {
      * @param userCredentials Credentials identifying user
      * @param federatedId     federatedID
      * @param recoveryMail    Recovery mail of the user
-     * @param role            Role of the user (USER, PLATFORM_OWNER, NULL)
+     * @param role            Role of the user (USER, SERVICE_OWNER, NULL)
      * @param attributes      This user attributes. NOTE: during update, in case of empty map, attributes also will be updated (removed)
      * @param clients         user's clients
      */

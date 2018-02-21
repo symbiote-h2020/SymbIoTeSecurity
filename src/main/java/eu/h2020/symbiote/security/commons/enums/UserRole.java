@@ -9,13 +9,9 @@ public enum UserRole {
      */
     USER,
     /**
-     * symbIoTe-enabled platform's owner account type, used to release administration attributes
+     * symbIoTe-enabled service's (platforms and ssps) owner account type, used to release administration attributes.
      */
-    PLATFORM_OWNER,
-    /**
-     * symbIoTe-enabled ssp's owner account type, used to release administration attributes
-     */
-    SSP_OWNER,
+    SERVICE_OWNER,
     /**
      * uninitialized value of this enum
      */

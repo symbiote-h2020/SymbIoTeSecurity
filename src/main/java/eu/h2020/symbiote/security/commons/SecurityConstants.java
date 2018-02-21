@@ -57,7 +57,7 @@ public class SecurityConstants {
     public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "x-auth-";
     public static final String SECURITY_RESPONSE_HEADER = "x-auth-response";
 
-    public static final String SSP_IDENTIFIER_PREFIX = "SSP_";
+    public static final String SMART_SPACE_IDENTIFIER_PREFIX = "SSP_";
 
     private SecurityConstants() {
     }

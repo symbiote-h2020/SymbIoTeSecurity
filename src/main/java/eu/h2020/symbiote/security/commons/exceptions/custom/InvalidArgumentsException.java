@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
  * @author Daniele Caldarola (CNIT)
  * @author Nemanja Ignjatov (UNIVIE)
  * @author Mikolaj Dobski (PSNC)
+ * @author Jakub Toczek (PSNC)
  */
 public class InvalidArgumentsException extends SecurityException {
 
@@ -28,7 +29,7 @@ public class InvalidArgumentsException extends SecurityException {
     private static final HttpStatus statusCode = HttpStatus.BAD_REQUEST;
     public static final String MISSING_INTERWORKING_INTERFACES = "Missing external and internal interworking interfaces";
     public static final String MISSING_EXPOSED_INTERWORKING_INTERFACE = "Exposed interworking interface should be provided";
-    public static final String NO_SSP_PREFIX = "Ssp identifier should start with 'SSP_' constant.";
+    public static final String NO_SSP_PREFIX = "Smart space identifier should start with 'SSP_' constant.";
 
     public InvalidArgumentsException() {
         super(errorMessage);
