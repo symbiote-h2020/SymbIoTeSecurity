@@ -36,22 +36,22 @@ repositories {
 }
 
 dependencies {
-    compile('io.jsonwebtoken:jjwt:0.7+')
-    compile('org.bouncycastle:bcprov-jdk15on:1.56+')
-    compile('org.bouncycastle:bcpkix-jdk15on:1.56+')
-    compile('io.github.openfeign:feign-jackson:9.5.1')
-    compile('commons-logging:commons-logging:1.2+')
+    compile('io.jsonwebtoken:jjwt:[0.7, 0.7.999]')
+    compile('org.bouncycastle:bcprov-jdk15on:[1.56, 1.999]')
+    compile('org.bouncycastle:bcpkix-jdk15on:[1.56, 1.999]')
+    compile('io.github.openfeign:feign-jackson:[9.5.1, 9.999]')
+    compile('commons-logging:commons-logging:[1.2, 1.999]')
 
     // JDK 9 runtime fixes
     if(JavaVersion.current() == JavaVersion.VERSION_1_9){
-        runtime('javax.xml.bind:jaxb-api:+')
+        runtime('javax.xml.bind:jaxb-api:[2.3.0, 2.3.999]')
     }
 
     // common testing
-    testCompile('junit:junit:4.+')
-    testCompile('org.powermock:powermock-api-mockito2:2.+')
-    testCompile('org.powermock:powermock-core:2.+')
-    testCompile('org.powermock:powermock-module-junit4:2.+')
+    testCompile('junit:junit:[4.12, 4.999]')
+    testCompile('org.powermock:powermock-api-mockito2:[2.0, 2.999]')
+    testCompile('org.powermock:powermock-core:[2.0, 2.999]')
+    testCompile('org.powermock:powermock-module-junit4:[2.0, 2.999]')
 }
 
 // sources and javadocs
