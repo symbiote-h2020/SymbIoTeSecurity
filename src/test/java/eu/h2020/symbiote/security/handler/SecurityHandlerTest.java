@@ -290,7 +290,7 @@ public class SecurityHandlerTest {
         String aamInstanceFriendlyName = "name-friendly-" + aamInstanceId;
         Certificate certificate = new Certificate(serverCertString);
 
-        return new AAM(aamAddress, aamInstanceFriendlyName, aamInstanceId, aamLocalAddress, certificate, new HashMap<>());
+        return new AAM(aamAddress, aamInstanceFriendlyName, aamInstanceId, certificate, new HashMap<>());
     }
 
     public java.security.cert.Certificate getCertificate(String keystoreFilename, String spassword, String alias) throws
@@ -332,23 +332,33 @@ public class SecurityHandlerTest {
 
         char[] password = spassword.toCharArray();
 
-        FileInputStream fIn = new FileInputStream(keystoreFilename);
-        KeyStore keystore = KeyStore.getInstance("JKS");
+        KeyStore keystore;
+        java.security.cert.Certificate cert;
+        String userId;
+        HashMap<String, String> attributes;
+        byte[] userPublicKey;
+        Long tokenValidity;
+        String deploymentID;
+        PublicKey aamPublicKey;
+        Key key;
+        try (FileInputStream fIn = new FileInputStream(keystoreFilename)) {
+            keystore = KeyStore.getInstance("JKS");
 
-        //Leer
-        keystore.load(fIn, password);
-        java.security.cert.Certificate cert = keystore.getCertificate(alias);
+            //Leer
+            keystore.load(fIn, password);
+        }
+        cert = keystore.getCertificate(alias);
 
-        String userId = "testClient";
-        HashMap<String, String> attributes = new HashMap<>();
+        userId = "testClient";
+        attributes = new HashMap<>();
         attributes.put("name", "testClient");
 
-        byte[] userPublicKey = (cert.getPublicKey()).getEncoded();
-        Long tokenValidity = DateUtil.addDays(new Date(), 1).getTime();
-        String deploymentID = "testUser";
-        PublicKey aamPublicKey = cert.getPublicKey();
+        userPublicKey = (cert.getPublicKey()).getEncoded();
+        tokenValidity = DateUtil.addDays(new Date(), 1).getTime();
+        deploymentID = "testUser";
+        aamPublicKey = cert.getPublicKey();
 
-        Key key = keystore.getKey(alias, spassword.toCharArray());
+        key = keystore.getKey(alias, spassword.toCharArray());
 
 
         result = DummyTokenIssuer.buildAuthorizationToken(userId, attributes, userPublicKey, Token.Type.HOME, tokenValidity, deploymentID, aamPublicKey, (PrivateKey) key);
