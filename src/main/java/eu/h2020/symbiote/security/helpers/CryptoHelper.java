@@ -120,7 +120,9 @@ public class CryptoHelper {
      * @return String certificate signing request
      * @throws IOException
      */
-    public static String buildCertificateSigningRequestPEM(X509Certificate homeAAMCertificate, String username, String clientId, KeyPair clientKey) throws IOException, InvalidArgumentsException {
+    public static String buildCertificateSigningRequestPEM(X509Certificate homeAAMCertificate, String username, String clientId, KeyPair clientKey) throws
+            IOException,
+            InvalidArgumentsException {
         if (username.contains(illegalSign) || clientId.contains(illegalSign))
             throw new InvalidArgumentsException();
 
@@ -143,11 +145,13 @@ public class CryptoHelper {
 
     /**
      * @param serviceId platform's or smart space's id
-     * @param keyPair    actor's key pair
+     * @param keyPair   actor's key pair
      * @return String service certificate signing request
      * @throws IOException
      */
-    public static String buildServiceCertificateSigningRequestPEM(String serviceId, KeyPair keyPair) throws IOException, InvalidArgumentsException {
+    public static String buildServiceCertificateSigningRequestPEM(String serviceId, KeyPair keyPair) throws
+            IOException,
+            InvalidArgumentsException {
         if (serviceId.contains(illegalSign))
             throw new InvalidArgumentsException();
 

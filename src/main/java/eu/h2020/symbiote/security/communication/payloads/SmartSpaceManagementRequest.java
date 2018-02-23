@@ -18,9 +18,9 @@ public class SmartSpaceManagementRequest {
     private final String instanceFriendlyName;
     private final OperationType operationType;
     private final boolean exposingSiteLocalAddress;
-    private String gatewayAddress;
-    private String siteLocalAddress;
-    private String instanceId;
+    private final String gatewayAddress;
+    private final String siteLocalAddress;
+    private final String instanceId;
 
 
     /**
@@ -29,11 +29,11 @@ public class SmartSpaceManagementRequest {
      * @param aamOwnerCredentials        used to authorize this request
      * @param serviceOwnerCredentials    used to register the smartSpaceOwner in the database
      * @param gatewayAddress             used to point symbiote users to possible entry points available from Internet
-     * @param siteLocalAddress           used to point symbiote users to possible entry points available from internal smart space network
+     * @param siteLocalAddress           used to point symbiote users to possible entry points available from within the smart space local network
      * @param instanceFriendlyName       a label for the end user to be able to identify the login entry point
      * @param operationType              operation, that smart space owner wants to perform (CREATE, UPDATE, DELETE)
      * @param instanceId                 when a Smart Space Owner prefers his own Smart Space identifier
-     * @param exposingSiteLocalAddress   should siteLocalAddress be exposed
+     * @param exposingSiteLocalAddress   should the Core AAM advertise/expose the SSP's siteLocalAddress
      */
     @JsonCreator
     public SmartSpaceManagementRequest(@JsonProperty("aamOwnerCredentials") Credentials aamOwnerCredentials,
@@ -46,12 +46,15 @@ public class SmartSpaceManagementRequest {
                                        @JsonProperty("exposingSiteLocalAddress") boolean exposingSiteLocalAddress) {
         this.aamOwnerCredentials = aamOwnerCredentials;
         this.serviceOwnerCredentials = serviceOwnerCredentials;
+        // TODO check https
         this.gatewayAddress = gatewayAddress;
-        this.siteLocalAddress = siteLocalAddress;
+
         this.instanceFriendlyName = instanceFriendlyName;
         this.operationType = operationType;
         this.instanceId = instanceId;
         this.exposingSiteLocalAddress = exposingSiteLocalAddress;
+        // TODO check if not empty depending on exposingSiteLocalAddress
+        this.siteLocalAddress = siteLocalAddress;
     }
 
     public Credentials getAamOwnerCredentials() {
@@ -66,17 +69,10 @@ public class SmartSpaceManagementRequest {
         return gatewayAddress;
     }
 
-    public void setGatewayAddress(String gatewayAddress) {
-        this.gatewayAddress = gatewayAddress;
-    }
-
     public String getSiteLocalAddress() {
         return siteLocalAddress;
     }
 
-    public void setSiteLocalAddress(String siteLocalAddress) {
-        this.siteLocalAddress = siteLocalAddress;
-    }
 
     public String getInstanceFriendlyName() {
         return instanceFriendlyName;
@@ -88,10 +84,6 @@ public class SmartSpaceManagementRequest {
 
     public String getInstanceId() {
         return instanceId;
-    }
-
-    public void setInstanceId(String instanceId) {
-        this.instanceId = instanceId;
     }
 
     public boolean isExposingSiteLocalAddress() {

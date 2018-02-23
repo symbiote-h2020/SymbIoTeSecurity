@@ -15,7 +15,7 @@ public class UserManagementException extends SecurityException {
     public static final String errorMessage = "USER_MANAGEMENT_ERROR";
     public static final String USER_NOT_IN_DATABASE = "User not in database";
     public static final String INCORRECT_LOGIN_PASSWORD = "Incorrect login / password";
-    public static final String CANNOT_REMOVE_SERVICE_OWNER_WITH_SERVICES = "Cannot remove service owner with services";
+    public static final String CANNOT_REMOVE_SERVICE_OWNER_WITH_SERVICES = "Cannot remove service owner due to existing registered services";
     public static HttpStatus statusCode = HttpStatus.BAD_REQUEST;
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
 
@@ -25,12 +25,12 @@ public class UserManagementException extends SecurityException {
 
     public UserManagementException(HttpStatus statusCode) {
         super(errorMessage);
-        this.statusCode = statusCode;
+        UserManagementException.statusCode = statusCode;
     }
 
     public UserManagementException(String message, HttpStatus statusCode) {
         super(message);
-        this.statusCode = statusCode;
+        UserManagementException.statusCode = statusCode;
     }
 
     public UserManagementException(String message) {
@@ -43,12 +43,12 @@ public class UserManagementException extends SecurityException {
 
     public UserManagementException(Throwable cause, HttpStatus statusCode) {
         super(cause);
-        this.statusCode = statusCode;
+        UserManagementException.statusCode = statusCode;
     }
 
     public UserManagementException(String message, Throwable cause, HttpStatus statusCode) {
         super(message, cause);
-        this.statusCode = statusCode;
+        UserManagementException.statusCode = statusCode;
     }
 
     @Override

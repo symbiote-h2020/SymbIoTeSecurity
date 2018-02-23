@@ -9,7 +9,7 @@ public enum UserRole {
      */
     USER,
     /**
-     * symbIoTe-enabled service's (platforms and ssps) owner account type, used to release administration attributes.
+     * symbIoTe-enabled service's (platform's and smart space's) owner account type, used to release administration attributes.
      */
     SERVICE_OWNER,
     /**

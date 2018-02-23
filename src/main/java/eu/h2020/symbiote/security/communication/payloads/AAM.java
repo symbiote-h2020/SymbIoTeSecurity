@@ -60,14 +60,13 @@ public class AAM {
             String aamInstanceId,
             Certificate aamCACertificate,
             Map<String, Certificate> componentCertificates) {
-        this.aamAddress = aamAddress;
-        this.aamInstanceFriendlyName = aamInstanceFriendlyName;
-        this.aamInstanceId = aamInstanceId;
-        this.siteLocalAddress = "";
-        this.aamCACertificate = aamCACertificate;
-        this.componentCertificates = componentCertificates;
+        this(aamAddress,
+                aamInstanceFriendlyName,
+                aamInstanceId,
+                "",
+                aamCACertificate,
+                componentCertificates);
     }
-
 
     /**
      * @return SymbIoTe-unique identifier (the same as the platform instance it is bound to)

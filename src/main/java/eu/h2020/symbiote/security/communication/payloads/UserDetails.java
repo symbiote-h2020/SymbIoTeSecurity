@@ -12,11 +12,12 @@ import java.util.Map;
  * @author Mikołaj Dobski (PSNC)
  */
 public class UserDetails {
+    // TODO harden
 
     private Credentials userCredentials = new Credentials();
     private String recoveryMail = "";
     private UserRole role = UserRole.NULL;
-    // TODO review for R4
+    // TODO remove for R4
     private String federatedId = "";
     private Map<String, String> attributes = new HashMap<>();
     private Map<String, Certificate> clients = new HashMap<>();
@@ -87,5 +88,9 @@ public class UserDetails {
 
     public void setRole(UserRole role) {
         this.role = role;
+    }
+
+    public Map<String, Certificate> getClients() {
+        return clients;
     }
 }

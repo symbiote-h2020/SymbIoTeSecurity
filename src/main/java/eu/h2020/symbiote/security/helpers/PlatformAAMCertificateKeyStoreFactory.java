@@ -146,9 +146,9 @@ public class PlatformAAMCertificateKeyStoreFactory {
         KeyStore ks = getKeystore(keyStoreFileName, keyStorePassword);
         log.info("Key Store generated.");
         KeyPair pair = CryptoHelper.createKeyPair();
-        log.info("Key pair for the service AAM generated.");
+        log.info("Key pair for the service's AAM generated.");
         String csr = CryptoHelper.buildServiceCertificateSigningRequestPEM(serviceId, pair);
-        log.info("CSR for the service AAM generated.");
+        log.info("CSR for the service's AAM generated.");
         CertificateRequest request = new CertificateRequest(serviceOwnerUsername, serviceOwnerPassword, serviceId, csr);
         log.info("Request created");
         AAMClient aamClient = new AAMClient(coreAAMAddress);
