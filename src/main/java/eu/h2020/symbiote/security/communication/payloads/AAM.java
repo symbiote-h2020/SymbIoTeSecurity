@@ -12,11 +12,13 @@ import java.util.Map;
  * SymbIoTe AAM's details. Acts as a security entry point.
  *
  * @author Mikołaj Dobski (PSNC)
+ * @author Jakub Toczek (PSNC)
  */
 public class AAM {
 
     private final String aamInstanceId;
     private final String aamAddress;
+    private final String siteLocalAddress;
     private final String aamInstanceFriendlyName;
     private final Certificate aamCACertificate;
     private final Map<String, Certificate> componentCertificates;
@@ -25,6 +27,7 @@ public class AAM {
      * @param aamAddress              Address where the user can reach REST endpoints used in security layer of SymbIoTe
      * @param aamInstanceFriendlyName a label for the end user to be able to identify the login endrypoint
      * @param aamInstanceId           SymbIoTe-unique identifier (the same as the platform instance it is bound to)
+     * @param siteLocalAddress        Address where the user can reach REST endpoints used in security layer of SymbIoTe in local service net
      * @param aamCACertificate        CA aamCACertificate used by the AAM for its users and issued tokens
      * @param componentCertificates   contains the certificates used by SymbIoTe components for @{@link MutualAuthenticationHelper#isServiceResponseVerified(String, Certificate)}
      */
@@ -33,11 +36,34 @@ public class AAM {
             @JsonProperty("aamAddress") String aamAddress,
             @JsonProperty("aamInstanceFriendlyName") String aamInstanceFriendlyName,
             @JsonProperty("aamInstanceId") String aamInstanceId,
+            @JsonProperty("siteLocalAddress") String siteLocalAddress,
             @JsonProperty("aamCACertificate") Certificate aamCACertificate,
             @JsonProperty("componentCertificates") Map<String, Certificate> componentCertificates) {
         this.aamAddress = aamAddress;
         this.aamInstanceFriendlyName = aamInstanceFriendlyName;
         this.aamInstanceId = aamInstanceId;
+        this.siteLocalAddress = siteLocalAddress;
+        this.aamCACertificate = aamCACertificate;
+        this.componentCertificates = componentCertificates;
+    }
+
+    /**
+     * @param aamAddress              Address where the user can reach REST endpoints used in security layer of SymbIoTe
+     * @param aamInstanceFriendlyName a label for the end user to be able to identify the login endrypoint
+     * @param aamInstanceId           SymbIoTe-unique identifier (the same as the platform instance it is bound to)
+     * @param aamCACertificate        CA aamCACertificate used by the AAM for its users and issued tokens
+     * @param componentCertificates   contains the certificates used by SymbIoTe components for @{@link MutualAuthenticationHelper#isServiceResponseVerified(String, Certificate)}
+     */
+    public AAM(
+            String aamAddress,
+            String aamInstanceFriendlyName,
+            String aamInstanceId,
+            Certificate aamCACertificate,
+            Map<String, Certificate> componentCertificates) {
+        this.aamAddress = aamAddress;
+        this.aamInstanceFriendlyName = aamInstanceFriendlyName;
+        this.aamInstanceId = aamInstanceId;
+        this.siteLocalAddress = "";
         this.aamCACertificate = aamCACertificate;
         this.componentCertificates = componentCertificates;
     }
@@ -76,5 +102,12 @@ public class AAM {
      */
     public Map<String, Certificate> getComponentCertificates() {
         return componentCertificates;
+    }
+
+    /**
+     * @return Address where the user can reach REST endpoints used in security layer of SymbIoTe in local service net
+     */
+    public String getSiteLocalAddress() {
+        return siteLocalAddress;
     }
 }

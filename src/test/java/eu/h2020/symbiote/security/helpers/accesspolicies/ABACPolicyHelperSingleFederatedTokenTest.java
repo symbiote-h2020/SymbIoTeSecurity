@@ -76,7 +76,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         PrivateKey clientPrivateKey = (PrivateKey) ks.getKey(CLIENT_CERTIFICATE_ALIAS, CERTIFICATE_PASSWORD.toCharArray());
 
         // client home credentials
-        AAM issuingAAM = new AAM("", "", "", new Certificate(CryptoHelper.convertX509ToPEM(issuingAAMCertificate)), new HashMap<>());
+        AAM issuingAAM = new AAM("", "", "", aamLocalAddress, new Certificate(CryptoHelper.convertX509ToPEM(issuingAAMCertificate)), new HashMap<>());
         HomeCredentials homeCredentials = new HomeCredentials(issuingAAM, username, clientId, new Certificate(CryptoHelper.convertX509ToPEM(clientCertificate)), clientPrivateKey);
 
         Map<String, String> attributesFirst = new HashMap<>();

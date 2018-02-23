@@ -14,88 +14,88 @@ public class SmartSpaceManagementRequest {
 
 
     private final Credentials aamOwnerCredentials;
-    private final Credentials smartSpaceOwnerCredentials;
-    private final String smartSpaceInstanceFriendlyName;
+    private final Credentials serviceOwnerCredentials;
+    private final String instanceFriendlyName;
     private final OperationType operationType;
-    private final boolean exposedInternalInterworkingInterfaceAddress;
-    private String smartSpaceExternalInterworkingInterfaceAddress;
-    private String smartSpaceInternalInterworkingInterfaceAddress;
-    private String smartSpaceInstanceId;
+    private final boolean exposingSiteLocalAddress;
+    private String gatewayAddress;
+    private String siteLocalAddress;
+    private String instanceId;
 
 
     /**
      * For use when a Smart Space Owner wants a preferred smart space identifier
      *
-     * @param aamOwnerCredentials                         used to authorize this request
-     * @param smartSpaceOwnerCredentials                         used to register the smartSpaceOwner in the database
-     * @param smartSpaceExternalInterworkingInterfaceAddress     used to point symbiote users to possible login entry points
-     * @param smartSpaceInternalInterworkingInterfaceAddress     used to point symbiote users to possible login entry points inside internal smart space network
-     * @param smartSpaceInstanceFriendlyName                     a label for the end user to be able to identify the login entry point
-     * @param operationType                               operation, that smart space owner wants to perform (CREATE, UPDATE, DELETE)
-     * @param smartSpaceInstanceId                               when a Smart Space Owner preferres his own Smart Space identifier
-     * @param exposedInternalInterworkingInterfaceAddress should InternalInterworkingInterface be exposed
+     * @param aamOwnerCredentials        used to authorize this request
+     * @param serviceOwnerCredentials    used to register the smartSpaceOwner in the database
+     * @param gatewayAddress             used to point symbiote users to possible entry points available from Internet
+     * @param siteLocalAddress           used to point symbiote users to possible entry points available from internal smart space network
+     * @param instanceFriendlyName       a label for the end user to be able to identify the login entry point
+     * @param operationType              operation, that smart space owner wants to perform (CREATE, UPDATE, DELETE)
+     * @param instanceId                 when a Smart Space Owner prefers his own Smart Space identifier
+     * @param exposingSiteLocalAddress   should siteLocalAddress be exposed
      */
     @JsonCreator
     public SmartSpaceManagementRequest(@JsonProperty("aamOwnerCredentials") Credentials aamOwnerCredentials,
-                                       @JsonProperty("smartSpaceOwnerCredentials") Credentials smartSpaceOwnerCredentials,
-                                       @JsonProperty("smartSpaceExternalInterworkingInterfaceAddress") String smartSpaceExternalInterworkingInterfaceAddress,
-                                       @JsonProperty("smartSpaceInternalInterworkingInterfaceAddress") String smartSpaceInternalInterworkingInterfaceAddress,
-                                       @JsonProperty("smartSpaceInstanceFriendlyName") String smartSpaceInstanceFriendlyName,
+                                       @JsonProperty("serviceOwnerCredentials") Credentials serviceOwnerCredentials,
+                                       @JsonProperty("gatewayAddress") String gatewayAddress,
+                                       @JsonProperty("siteLocalAddress") String siteLocalAddress,
+                                       @JsonProperty("instanceFriendlyName") String instanceFriendlyName,
                                        @JsonProperty("operationType") OperationType operationType,
-                                       @JsonProperty("smartSpaceInstanceId") String smartSpaceInstanceId,
-                                       @JsonProperty("exposedInternalInterworkingInterfaceAddress") boolean exposedInternalInterworkingInterfaceAddress) {
+                                       @JsonProperty("instanceId") String instanceId,
+                                       @JsonProperty("exposingSiteLocalAddress") boolean exposingSiteLocalAddress) {
         this.aamOwnerCredentials = aamOwnerCredentials;
-        this.smartSpaceOwnerCredentials = smartSpaceOwnerCredentials;
-        this.smartSpaceExternalInterworkingInterfaceAddress = smartSpaceExternalInterworkingInterfaceAddress;
-        this.smartSpaceInternalInterworkingInterfaceAddress = smartSpaceInternalInterworkingInterfaceAddress;
-        this.smartSpaceInstanceFriendlyName = smartSpaceInstanceFriendlyName;
+        this.serviceOwnerCredentials = serviceOwnerCredentials;
+        this.gatewayAddress = gatewayAddress;
+        this.siteLocalAddress = siteLocalAddress;
+        this.instanceFriendlyName = instanceFriendlyName;
         this.operationType = operationType;
-        this.smartSpaceInstanceId = smartSpaceInstanceId;
-        this.exposedInternalInterworkingInterfaceAddress = exposedInternalInterworkingInterfaceAddress;
+        this.instanceId = instanceId;
+        this.exposingSiteLocalAddress = exposingSiteLocalAddress;
     }
 
     public Credentials getAamOwnerCredentials() {
         return aamOwnerCredentials;
     }
 
-    public Credentials getSmartSpaceOwnerCredentials() {
-        return smartSpaceOwnerCredentials;
+    public Credentials getServiceOwnerCredentials() {
+        return serviceOwnerCredentials;
     }
 
-    public String getSmartSpaceExternalInterworkingInterfaceAddress() {
-        return smartSpaceExternalInterworkingInterfaceAddress;
+    public String getGatewayAddress() {
+        return gatewayAddress;
     }
 
-    public void setSmartSpaceExternalInterworkingInterfaceAddress(String smartSpaceExternalInterworkingInterfaceAddress) {
-        this.smartSpaceExternalInterworkingInterfaceAddress = smartSpaceExternalInterworkingInterfaceAddress;
+    public void setGatewayAddress(String gatewayAddress) {
+        this.gatewayAddress = gatewayAddress;
     }
 
-    public String getSmartSpaceInternalInterworkingInterfaceAddress() {
-        return smartSpaceInternalInterworkingInterfaceAddress;
+    public String getSiteLocalAddress() {
+        return siteLocalAddress;
     }
 
-    public void setSmartSpaceInternalInterworkingInterfaceAddress(String smartSpaceInternalInterworkingInterfaceAddress) {
-        this.smartSpaceInternalInterworkingInterfaceAddress = smartSpaceInternalInterworkingInterfaceAddress;
+    public void setSiteLocalAddress(String siteLocalAddress) {
+        this.siteLocalAddress = siteLocalAddress;
     }
 
-    public String getSmartSpaceInstanceFriendlyName() {
-        return smartSpaceInstanceFriendlyName;
+    public String getInstanceFriendlyName() {
+        return instanceFriendlyName;
     }
 
     public OperationType getOperationType() {
         return operationType;
     }
 
-    public String getSmartSpaceInstanceId() {
-        return smartSpaceInstanceId;
+    public String getInstanceId() {
+        return instanceId;
     }
 
-    public void setSmartSpaceInstanceId(String smartSpaceInstanceId) {
-        this.smartSpaceInstanceId = smartSpaceInstanceId;
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 
-    public boolean isExposedInternalInterworkingInterfaceAddress() {
-        return exposedInternalInterworkingInterfaceAddress;
+    public boolean isExposingSiteLocalAddress() {
+        return exposingSiteLocalAddress;
     }
 
 }

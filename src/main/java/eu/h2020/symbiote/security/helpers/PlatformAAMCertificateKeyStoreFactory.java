@@ -115,9 +115,9 @@ public class PlatformAAMCertificateKeyStoreFactory {
     }
 
     public static void getPlatformAAMKeystore(String coreAAMAddress,
-                                              String platformOwnerUsername,
-                                              String platformOwnerPassword,
-                                              String platformId,
+                                              String serviceOwnerUsername,
+                                              String serviceOwnerPassword,
+                                              String serviceId,
                                               String keyStoreFileName,
                                               String keyStorePassword,
                                               String rootCACertificateAlias,
@@ -146,17 +146,17 @@ public class PlatformAAMCertificateKeyStoreFactory {
         KeyStore ks = getKeystore(keyStoreFileName, keyStorePassword);
         log.info("Key Store generated.");
         KeyPair pair = CryptoHelper.createKeyPair();
-        log.info("Key pair for the platform AAM generated.");
-        String csr = CryptoHelper.buildServiceCertificateSigningRequestPEM(platformId, pair);
-        log.info("CSR for the platform AAM generated.");
-        CertificateRequest request = new CertificateRequest(platformOwnerUsername, platformOwnerPassword, platformId, csr);
+        log.info("Key pair for the service AAM generated.");
+        String csr = CryptoHelper.buildServiceCertificateSigningRequestPEM(serviceId, pair);
+        log.info("CSR for the service AAM generated.");
+        CertificateRequest request = new CertificateRequest(serviceOwnerUsername, serviceOwnerPassword, serviceId, csr);
         log.info("Request created");
         AAMClient aamClient = new AAMClient(coreAAMAddress);
         log.info("Connection with AAMClient established");
-        String platformAAMCertificate = aamClient.signCertificateRequest(request);
-        log.info("Platform Certificate acquired");
-        if (!aamClient.getComponentCertificate(SecurityConstants.AAM_COMPONENT_NAME, platformId).equals(platformAAMCertificate)) {
-            throw new CertificateException("Wrong certificate under the platformId");
+        String serviceAAMCertificate = aamClient.signCertificateRequest(request);
+        log.info("Service Certificate acquired");
+        if (!aamClient.getComponentCertificate(SecurityConstants.AAM_COMPONENT_NAME, serviceId).equals(serviceAAMCertificate)) {
+            throw new CertificateException("Wrong certificate under the platform / smart space Id");
         }
         // rootCA part
         Certificate rootAAMCertificate = aamClient.getAvailableAAMs().getAvailableAAMs().get(SecurityConstants.CORE_AAM_INSTANCE_ID).getAamCACertificate();
@@ -179,7 +179,7 @@ public class PlatformAAMCertificateKeyStoreFactory {
         */
 
         ks.setKeyEntry(aamCertificateAlias, pair.getPrivate(), keyStorePassword.toCharArray(),
-                new java.security.cert.Certificate[]{CryptoHelper.convertPEMToX509(platformAAMCertificate), rootAAMCertificate.getX509()});
+                new java.security.cert.Certificate[]{CryptoHelper.convertPEMToX509(serviceAAMCertificate), rootAAMCertificate.getX509()});
         FileOutputStream fOut = new FileOutputStream(keyStoreFile);
         try {
             ks.store(fOut, keyStorePassword.toCharArray());

@@ -290,7 +290,7 @@ public class SecurityHandlerTest {
         String aamInstanceFriendlyName = "name-friendly-" + aamInstanceId;
         Certificate certificate = new Certificate(serverCertString);
 
-        return new AAM(aamAddress, aamInstanceFriendlyName, aamInstanceId, certificate, new HashMap<>());
+        return new AAM(aamAddress, aamInstanceFriendlyName, aamInstanceId, aamLocalAddress, certificate, new HashMap<>());
     }
 
     public java.security.cert.Certificate getCertificate(String keystoreFilename, String spassword, String alias) throws

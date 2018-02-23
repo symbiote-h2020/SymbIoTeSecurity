@@ -132,11 +132,33 @@ public class SecurityHandler implements ISecurityHandler {
         return getAvailableAAMs(homeAAM.getAamAddress());
     }
 
+    private Map<String, AAM> changeSAAMAddressToLocal(Map<String, AAM> availableAAMsCollection) {
+        Set<String> keys = availableAAMsCollection.keySet();
+        //TODO dirty hack for clients to use SiteLocalAddress to communicate with their smartspace
+
+        for (String key : keys) {
+            if (key.startsWith(SecurityConstants.SMART_SPACE_IDENTIFIER_PREFIX)
+                    && !availableAAMsCollection.get(key).getSiteLocalAddress().isEmpty()) {
+                AAM aam = availableAAMsCollection.get(key);
+                AAM siteLocalAddressAAM = new AAM(
+                        aam.getSiteLocalAddress(),
+                        aam.getAamInstanceFriendlyName(),
+                        aam.getAamInstanceId(),
+                        aam.getSiteLocalAddress(),
+                        aam.getAamCACertificate(),
+                        aam.getComponentCertificates()
+                );
+                availableAAMsCollection.put(key, siteLocalAddressAAM);
+            }
+        }
+        return availableAAMsCollection;
+    }
     public Map<String, AAM> getAvailableAAMs(String aamAddress) throws SecurityHandlerException {
         // end-client
         if (platformId.isEmpty()) {
             try {
-                return ClientFactory.getAAMClient(aamAddress).getAvailableAAMs().getAvailableAAMs();
+
+                return changeSAAMAddressToLocal(ClientFactory.getAAMClient(aamAddress).getAvailableAAMs().getAvailableAAMs());
             } catch (AAMException e) { // communication fail with the AAM
                 throw new SecurityHandlerException(e.getMessage(), e);
             }
@@ -148,7 +170,7 @@ public class SecurityHandler implements ISecurityHandler {
             // failed to communicate over new API
             try {
                 // trying fallback to old API when AAM wasn't updated to the new protocol
-                return ClientFactory.getAAMClient(homeAAMAddress).getAvailableAAMs().getAvailableAAMs();
+                return changeSAAMAddressToLocal(ClientFactory.getAAMClient(homeAAMAddress).getAvailableAAMs().getAvailableAAMs());
             } catch (AAMException e2) { // communication fail with the AAM
                 throw new SecurityHandlerException(e.getMessage(), e2);
             }
