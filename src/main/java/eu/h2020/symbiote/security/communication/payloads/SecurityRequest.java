@@ -58,8 +58,10 @@ public class SecurityRequest {
 
         // SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER
         String timestampString = securityRequestHeaderParams.get(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER);
-        if (timestampString == null || timestampString.isEmpty())
-            throw new InvalidArgumentsException("Missing/malformed required header: " + SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER);
+        if (timestampString == null )
+            throw new InvalidArgumentsException("Missing required header: " + SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER);
+        if(timestampString.isEmpty())
+            throw new InvalidArgumentsException("Header '" + SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER + "' can not be empty.");
         try {
             this.timestamp = Long.parseLong(timestampString);
         } catch (NumberFormatException e) {
@@ -68,8 +70,10 @@ public class SecurityRequest {
 
         // SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER parsing
         String credentialsSetSizeString = securityRequestHeaderParams.get(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER);
-        if (credentialsSetSizeString == null || credentialsSetSizeString.isEmpty())
-            throw new InvalidArgumentsException("Missing/malformed required header: " + SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER);
+        if (credentialsSetSizeString == null)
+            throw new InvalidArgumentsException("Missing required header: " + SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER);
+        if(credentialsSetSizeString.isEmpty())
+            throw new InvalidArgumentsException("Header  '" + SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER + "' can not be empty.");
         int credentialsSetSize;
         try {
             credentialsSetSize = Integer.parseInt(credentialsSetSizeString);
@@ -81,8 +85,10 @@ public class SecurityRequest {
         this.securityCredentials = new HashSet<>();
         for (int i = 1; i <= credentialsSetSize; i++) {
             String securityCredentialsString = securityRequestHeaderParams.get(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + i);
-            if (securityCredentialsString == null || securityCredentialsString.isEmpty())
+            if (securityCredentialsString == null)
                 throw new InvalidArgumentsException("Missing/malformed required header: " + SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + i);
+            if(securityCredentialsString.isEmpty())
+                throw new InvalidArgumentsException("Header '" + SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + i + "' can not be empty.");
             try {
                 this.securityCredentials.add(om.readValue(securityCredentialsString, SecurityCredentials.class));
             } catch (IOException e) {
