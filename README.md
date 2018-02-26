@@ -69,44 +69,49 @@ where the componentIdentifier can be read from the table available [here](#compo
 
 ## Non java developers
 1. To acquire a GUEST Token, send empty HTTP POST request on:
-   ```
-   https://<coreInterfaceAdress>/get_guest_token
-   ```
-   or
-   ```
-   https://<platformInterworkingInterface>/paam/get_guest_token
-   ```
-   depending which platform you want to acquire the GUEST token from. Please be aware that either of them has the same authorization power.
-   In return you will get empty response which header *x-auth-token* contains your GUEST token.
+```
+https://<coreInterfaceAdress>/get_guest_token
+```
+or
+```
+https://<platformInterworkingInterface>/paam/get_guest_token
+```
+depending which platform you want to acquire the GUEST token from. Please be aware that either of them has the same authorization power.
+In return you will get empty response which header *x-auth-token* contains your GUEST token.
 
 2. Create Security Request
 
-   To make use of your GUEST token you need to wrap it into our SecurityRequest. For standardized communication we deploy it into the following HTTP headers:
-   * current timestamp in miliseconds goes into header
-     * x-auth-timestamp
-   * don't change just include
-     * x-auth-size=1
-   * special JSON structure
-     * under header x-auth-1
-     * containing populated field:
-       * "token":"HERE_COMES_THE_TOKEN_STRING",
-     * and empty fields which you don't need to care about, just put the there:
-       * "authenticationChallenge":"",
-       * "clientCertificate":"",
-       * "clientCertificateSigningAAMCertificate":"",
-       * "foreignTokenIssuingAAMCertificate":""
-   
-   Please find the example of x-auth-1 contents below:
-   ```java
-   {
-       "token":"[eyJhbGciOiJFUzI1NiJ9.eyJ0dHlwIjoiR1VFU1QiLCJzdWIiOiJndWVzdCIsImlwayI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRVBhZURDNElnT3VITlBmWCtURG5adXZuTHdUbHMwMERQb294aVZCTE8za3I0N0N3TXFYSm4yN3lpdFdZUkRRKzBmWG52MzFIbGJLbkxSWktqSmF5U3p3PT0iLCJpc3MiOiJTeW1iSW9UZV9Db3JlX0FBTSIsImV4cCI6MTUxMDU2Nzg2NywiaWF0IjoxNTEwNTY3MjY3LCJqdGkiOiI2MzI4NDUxMzAiLCJzcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVsdlNwYVhDa2RFZ3lYM2xJeWQ1VCs2VFgyQ0hXMDluekNjL05aY2krcGEvdmtQSG5DeFZESkpLTkZwL1hQc0g2T1hvSTkxQXJFcUJ1SlJtd3k2dWZSdz09In0.zn7xjwUq89YSNptLTFCZSpb8n65n4o24HPOw2WPTJSglfaO8paW1O5vC3n9072ktm327kj44Kgs5qqMhRy22cA]",
+To make use of your GUEST token you need to wrap it into our SecurityRequest. For standardized communication we deploy it into the following HTTP headers:
+* current timestamp in miliseconds goes into header
+  * x-auth-timestamp
+* don't change just include
+  * x-auth-size=1
+* special JSON structure
+  * under header x-auth-1
+  * containing populated field:
+    * "token":"HERE_COMES_THE_TOKEN_STRING",
+  * and empty fields which you don't need to care about, just put the there:
+    * "authenticationChallenge":"",
+    * "clientCertificate":"",
+    * "clientCertificateSigningAAMCertificate":"",
+    * "foreignTokenIssuingAAMCertificate":""
+
+**Example:**
+ - x-auth-timestamp: 1519652051000
+ - x-auth-size: 1
+ - x-auth-1:
+     ```java
+     {
+       "token":"eyJhbGciOiJFUzI1NiJ9.eyJ0dHlwIjoiR1VFU1QiLCJzdWIiOiJndWVzdCIsImlwayI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRVBhZURDNElnT3VITlBmWCtURG5adXZuTHdUbHMwMERQb294aVZCTE8za3I0N0N3TXFYSm4yN3lpdFdZUkRRKzBmWG52MzFIbGJLbkxSWktqSmF5U3p3PT0iLCJpc3MiOiJTeW1iSW9UZV9Db3JlX0FBTSIsImV4cCI6MTUxMDU2Nzg2NywiaWF0IjoxNTEwNTY3MjY3LCJqdGkiOiI2MzI4NDUxMzAiLCJzcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVsdlNwYVhDa2RFZ3lYM2xJeWQ1VCs2VFgyQ0hXMDluekNjL05aY2krcGEvdmtQSG5DeFZESkpLTkZwL1hQc0g2T1hvSTkxQXJFcUJ1SlJtd3k2dWZSdz09In0.zn7xjwUq89YSNptLTFCZSpb8n65n4o24HPOw2WPTJSglfaO8paW1O5vC3n9072ktm327kj44Kgs5qqMhRy22cA",
        "authenticationChallenge":"",
        "clientCertificate":"",
        "clientCertificateSigningAAMCertificate":"",
        "foreignTokenIssuingAAMCertificate":""
-   }
-    ```
-3. With such prepared headers you can access SymbIoTe resources offered publicly.
+     } 
+     ```
+
+3. With such prepared headers you can access SymbIoTe resources offered publicly, e.g. execute search queries.
+
 4. After receiving a business response from a symbiote component, you should check if it came from component you are interested in. To do so, please see [Service Response payload](#service_response)
 
 # Access and offering resources with restricted access 
@@ -590,7 +595,42 @@ If everything is ok, AAM sends back Home Authorization Token.
 ### Authentication and Authorization payloads
 
 All symbiote services that consume Authorization tokens need to verify the the client (sender) should be in possession of given token.
-For that the client needs to generate a token ownership proof - challenge. Striving for best interoperability, we also use the JWS as the challenge payload.
+For that the client needs to generate a token ownership proof - challenge. All those need to be put in relevant headers in [SecurityRequest](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/master/src/main/java/eu/h2020/symbiote/security/communication/payloads/SecurityRequest.java). 
+The SecurityRequest is split into the following HTTP security headers for communication.
+ ```java
+ // timestamp header
+ public static final String SECURITY_CREDENTIALS_TIMESTAMP_HEADER = "x-auth-timestamp";
+ // each SecurityCredentials entry header prefix, they are number 1..size
+ public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "x-auth-"; 
+// SecurityCredentials set size header
+ public static final String SECURITY_CREDENTIALS_SIZE_HEADER = "x-auth-size";
+
+ ```
+The SECURITY_CREDENTIALS_HEADER_PREFIX of each token is created according the value of last header, which specifies the number of provided tokens.
+Prefix contains JSON structure that consists of following [SecurityCredentials](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/documentation/src/main/java/eu/h2020/symbiote/security/communication/payloads/SecurityCredentials.java):
+ - `String token` - type of token: only home or foreign;
+ - `String authenticationChallenge` - generated using MutualAuthenticationHelper;
+ - `String clientCertificate` - (optional for offline validation) matching token SPK claim
+ - `String clientCertificateSigningAAMCertificate` - (optional for offline validation) matching clientCertificate signature
+ - `String foreignTokenIssuingAAMCertificate` - (optional for offline validation) matching @{@link Type#FOREIGN} ISS and IPK claims 
+
+**Example:**
+```java
+{
+   "token":"eyJhbGciOiJFUzI1NiJ9.eyJ0dHlwIjoiR1VFU1QiLCJzdWIiOiJndWVzdCIsImlwayI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRVBhZURDNElnT3VITlBmWCtURG5adXZuTHdUbHMwMERQb294aVZCTE8za3I0N0N3TXFYSm4yN3lpdFdZUkRRKzBmWG52MzFIbGJLbkxSWktqSmF5U3p3PT0iLCJpc3MiOiJTeW1iSW9UZV9Db3JlX0FBTSIsImV4cCI6MTUxMDU2Nzg2NywiaWF0IjoxNTEwNTY3MjY3LCJqdGkiOiI2MzI4NDUxMzAiLCJzcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVsdlNwYVhDa2RFZ3lYM2xJeWQ1VCs2VFgyQ0hXMDluekNjL05aY2krcGEvdmtQSG5DeFZESkpLTkZwL1hQc0g2T1hvSTkxQXJFcUJ1SlJtd3k2dWZSdz09In0.zn7xjwUq89YSNptLTFCZSpb8n65n4o24HPOw2WPTJSglfaO8paW1O5vC3n9072ktm327kj44Kgs5qqMhRy22cA",
+   "authenticationChallenge":"",
+   "clientCertificate":"",
+   "clientCertificateSigningAAMCertificate":"",
+   "foreignTokenIssuingAAMCertificate":""
+} 
+```
+
+The ServiceResponseJWS is in communication just a String and can be read from the following header
+ ```java
+ public static final SECURITY_RESPONSE_HEADER = "x-auth-response";
+ ```
+
+Striving for best interoperability, we also use the JWS as the challenge payload.
 
 ![Challenge payload structure](media/challenge-payload.PNG)
 
@@ -631,7 +671,7 @@ Example Challenge JWS compact token:
 ```
 eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ0ZXN0Y2xpZW50aWQiLCJzdWIiOiJBdXRob3JpemF0aW9uVG9rZW5KVEkiLCJpcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUU3dThiZzVuT09zeFp2a2RtSytaY3Z4K2J5aTkzaVErbE1XSHNBY09hT0F3Ym1jU1UzbEtFWEt1M2dwL3ltaVhVaEl5RnV3MlBreGZlN1QxZTRIU21xQT09IiwiaGFzaCI6ImVjNTNkYmEwZjkzNzYyMzEwMzVjNWM1ZjFmNDIwM2UzNDgyNDcwOWUwOTkyZDU3NTZhYmY3N2VhNjc2ZWJkNjQiLCJpYXQiOjE1MDE1MDk3ODIsImV4cCI6MTUwMTUwOTg0Mn0.HjomIkzFXbTjokKDwGTgdHOsU19HdM3xXZFRoHqqIdY
 ```
- Full Challenge JSON:
+The foregoing token in compact JWS readable JSON format:
 ```json
 {
   "alg": "ES256",
@@ -666,17 +706,3 @@ Full Response JSON:
   "timestamp": 1504771337000
 }
 ```
-#### Communication details
-The SecurityRequest is split into the following HTTP security headers for communication.
- ```
- // timestamp header
- public static final String SECURITY_CREDENTIALS_TIMESTAMP_HEADER = "x-auth-timestamp";
- // SecurityCredentials set size header
- public static final String SECURITY_CREDENTIALS_SIZE_HEADER = "x-auth-size";
- // each SecurityCredentials entry header prefix, they are number 1..size
- public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "x-auth-";
- ```
-whereas the ServiceResponseJWS is in communication just a String and can be read from the following header
- ```
- public static final SECURITY_RESPONSE_HEADER = "x-auth-response";
- ```
