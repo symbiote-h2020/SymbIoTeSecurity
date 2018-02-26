@@ -2,6 +2,7 @@ package eu.h2020.symbiote.security.helpers.accesspolicies;
 
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
+import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyType;
 import eu.h2020.symbiote.security.accesspolicies.common.SingleTokenAccessPolicyFactory;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleLocalHomeTokenIdentityBasedAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
@@ -153,7 +154,7 @@ public class ABACPolicyHelperLocalHomeIdentityBasedTokenTest {
         accessPolicyClaimsMap.put(Claims.ISSUER, deploymentId);
         accessPolicyClaimsMap.put(Claims.SUBJECT, username);
         SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(
-                SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.SLHTIBAP,
+                AccessPolicyType.SLHTIBAP,
                 accessPolicyClaimsMap
         );
 

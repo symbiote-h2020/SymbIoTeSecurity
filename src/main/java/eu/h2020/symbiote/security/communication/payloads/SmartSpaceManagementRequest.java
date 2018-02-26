@@ -57,10 +57,11 @@ public class SmartSpaceManagementRequest {
         this.operationType = operationType;
         this.instanceId = instanceId;
 
-        if (exposingSiteLocalAddress && operationType != OperationType.DELETE) {
-            if (siteLocalAddress == null || siteLocalAddress.isEmpty())
+        if (exposingSiteLocalAddress
+                && operationType != OperationType.DELETE
+                && (siteLocalAddress == null || siteLocalAddress.isEmpty()))
                 throw new InvalidArgumentsException(InvalidArgumentsException.MISSING_SITE_LOCAL_ADDRESS);
-        }
+
         this.siteLocalAddress = siteLocalAddress;
         this.exposingSiteLocalAddress = exposingSiteLocalAddress;
     }

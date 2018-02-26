@@ -2,7 +2,10 @@ package eu.h2020.symbiote.security.accesspolicies.common.singletoken;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyType;
+import eu.h2020.symbiote.security.accesspolicies.common.IAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.SingleTokenAccessPolicyFactory;
+import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import io.jsonwebtoken.Claims;
 import org.springframework.data.annotation.PersistenceConstructor;
@@ -18,12 +21,12 @@ import java.util.Set;
  * @author Vasileios Glykantzis (ICOM)
  * @author Mikołaj Dobski (PSNC)
  */
-public class SingleTokenAccessPolicySpecifier {
+public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier {
     public static final String FEDERATION_MEMBER_KEY_PREFIX = "fed_m_";
     public static final String FEDERATION_SIZE = "fed_s";
     public static final String FEDERATION_HOME_PLATFORM_ID = "fed_h";
     public static final String FEDERATION_IDENTIFIER_KEY = "fed_id";
-    private final SingleTokenAccessPolicyType policyType;
+    private final AccessPolicyType policyType;
     private final Map<String, String> requiredClaims;
 
     /**
@@ -36,8 +39,8 @@ public class SingleTokenAccessPolicySpecifier {
     @JsonCreator
     @PersistenceConstructor
     public SingleTokenAccessPolicySpecifier(
-            @JsonProperty("policyType") SingleTokenAccessPolicyType policyType,
-            @JsonProperty("requiredClaims") Map<String, String> requiredClaims)
+            @JsonProperty(SecurityConstants.ACCESS_POLICY_JSON_FIELD_TYPE) AccessPolicyType policyType,
+            @JsonProperty(SecurityConstants.ACCESS_POLICY_JSON_FIELD_CLAIMS) Map<String, String> requiredClaims)
             throws InvalidArgumentsException {
         switch (policyType) {
             case SLHTIBAP:
@@ -111,7 +114,7 @@ public class SingleTokenAccessPolicySpecifier {
                 || !federationMembers.contains(homePlatformIdentifier))
             throw new InvalidArgumentsException("Missing federation definition contents required to build this policy type");
 
-        policyType = SingleTokenAccessPolicyType.SFTAP;
+        policyType = AccessPolicyType.SFTAP;
         // building the map
         requiredClaims = new HashMap<>(federationMembers.size() + 2);
         requiredClaims.put(FEDERATION_IDENTIFIER_KEY, federationIdentifier);
@@ -140,7 +143,7 @@ public class SingleTokenAccessPolicySpecifier {
                 || homePlatformIdentifier.isEmpty())
             throw new InvalidArgumentsException("Missing componentId, homePlatformIdentifier or SH required to build this policy type");
 
-        policyType = SingleTokenAccessPolicyType.CHTAP;
+        policyType = AccessPolicyType.CHTAP;
         // building the map
         requiredClaims = new HashMap<>(2);
         requiredClaims.put(Claims.ISSUER, homePlatformIdentifier);
@@ -148,43 +151,12 @@ public class SingleTokenAccessPolicySpecifier {
     }
 
 
-    public SingleTokenAccessPolicyType getPolicyType() {
-        return policyType;
-    }
-
     public Map<String, String> getRequiredClaims() {
         return requiredClaims;
     }
 
-    /**
-     * Enumeration for specifying the policyType of the sample access policy.
-     *
-     * @author Vasileios Glykantzis (ICOM)
-     */
-    public enum SingleTokenAccessPolicyType {
-        /**
-         * SingleLocalHomeTokenIdentityBasedAccessPolicy
-         */
-        SLHTIBAP,
-        /**
-         * SingleLocalHomeTokenAccessPolicy
-         */
-        SLHTAP,
-        /**
-         * SingleFederatedTokenAccessPolicy
-         */
-        SFTAP,
-        /**
-         * SingleTokenAccessPolicy
-         */
-        STAP,
-        /**
-         * ComponentHomeTokenAccessPolicy
-         */
-        CHTAP,
-        /**
-         * Public access policy
-         */
-        PUBLIC
+    @Override
+    public AccessPolicyType getPolicyType() {
+        return policyType;
     }
 }
