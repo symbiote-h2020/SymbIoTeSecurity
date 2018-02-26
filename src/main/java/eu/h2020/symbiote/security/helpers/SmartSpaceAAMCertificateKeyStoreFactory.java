@@ -18,7 +18,7 @@ import java.util.Properties;
  *
  * @author Jakub Toczek (PSNC)
  */
-public class SmartSpaceAAMCertificateKeyStoreFactory {
+public class SmartSpaceAAMCertificateKeyStoreFactory extends AbstractAAMCertificateKeyStoreFactory {
 
     private static Log log = LogFactory.getLog(SmartSpaceAAMCertificateKeyStoreFactory.class);
 
@@ -79,7 +79,7 @@ public class SmartSpaceAAMCertificateKeyStoreFactory {
         String rootCACertificateAlias = props.getProperty("rootCACertificateAlias", "caam");
 
         try {
-            PlatformAAMCertificateKeyStoreFactory.getPlatformAAMKeystore(
+            PlatformAAMCertificateKeyStoreFactory.getServiceAAMKeystore(
                     coreAAMAddress,
                     smartSpaceOwnerUsername,
                     smartSpaceOwnerPassword,
@@ -87,7 +87,8 @@ public class SmartSpaceAAMCertificateKeyStoreFactory {
                     keyStoreFileName,
                     keyStorePassword,
                     rootCACertificateAlias,
-                    aamCertificateAlias
+                    aamCertificateAlias,
+                    log
             );
             log.info("OK");
         } catch (SecurityException
@@ -100,12 +101,4 @@ public class SmartSpaceAAMCertificateKeyStoreFactory {
             log.error(e);
         }
     }
-
-    private static String exit(String msg) {
-        System.err.println(msg);
-        System.exit(3);
-        return null;
-    }
-
-
 }
