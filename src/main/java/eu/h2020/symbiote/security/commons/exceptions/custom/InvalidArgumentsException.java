@@ -27,11 +27,9 @@ public class InvalidArgumentsException extends SecurityException {
     public static final String COMMON_NAME_IS_WRONG = "Common name is wrong";
     public static final String RULE_ID_ALREADY_EXISTS = "Rule with this id already exists";
     private static final HttpStatus statusCode = HttpStatus.BAD_REQUEST;
-    //TODO rename properly to gateway / interworking interface
-    public static final String MISSING_INTERWORKING_INTERFACES = "Missing external and internal interworking interfaces";
-    // TODO rename to match site locality
-    public static final String MISSING_EXPOSED_INTERWORKING_INTERFACE = "Exposed site-local address must be provided";
+    public static final String MISSING_SITE_LOCAL_ADDRESS = "Exposed site-local address must be provided";
     public static final String NO_SSP_PREFIX = "Smart space identifier must start with 'SSP_' prefix.";
+    public static final String GATEWAY_ADDRESS_SHOULD_START_WITH_HTTPS = "Gateway Address should start with https.";
 
     public InvalidArgumentsException() {
         super(errorMessage);

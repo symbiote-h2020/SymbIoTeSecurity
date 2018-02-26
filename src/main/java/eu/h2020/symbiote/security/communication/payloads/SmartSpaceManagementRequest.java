@@ -3,6 +3,7 @@ package eu.h2020.symbiote.security.communication.payloads;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.h2020.symbiote.security.commons.enums.OperationType;
+import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 
 /**
  * Describes smart space registration in AAM payload.
@@ -43,18 +44,25 @@ public class SmartSpaceManagementRequest {
                                        @JsonProperty("instanceFriendlyName") String instanceFriendlyName,
                                        @JsonProperty("operationType") OperationType operationType,
                                        @JsonProperty("instanceId") String instanceId,
-                                       @JsonProperty("exposingSiteLocalAddress") boolean exposingSiteLocalAddress) {
+                                       @JsonProperty("exposingSiteLocalAddress") boolean exposingSiteLocalAddress) throws
+            InvalidArgumentsException {
         this.aamOwnerCredentials = aamOwnerCredentials;
         this.serviceOwnerCredentials = serviceOwnerCredentials;
-        // TODO check https
+
+        if (!gatewayAddress.isEmpty() && !gatewayAddress.startsWith("https://"))
+            throw new InvalidArgumentsException(InvalidArgumentsException.GATEWAY_ADDRESS_SHOULD_START_WITH_HTTPS);
         this.gatewayAddress = gatewayAddress;
 
         this.instanceFriendlyName = instanceFriendlyName;
         this.operationType = operationType;
         this.instanceId = instanceId;
-        this.exposingSiteLocalAddress = exposingSiteLocalAddress;
-        // TODO check if not empty depending on exposingSiteLocalAddress
+
+        if (exposingSiteLocalAddress && operationType != OperationType.DELETE) {
+            if (siteLocalAddress == null || siteLocalAddress.isEmpty())
+                throw new InvalidArgumentsException(InvalidArgumentsException.MISSING_SITE_LOCAL_ADDRESS);
+        }
         this.siteLocalAddress = siteLocalAddress;
+        this.exposingSiteLocalAddress = exposingSiteLocalAddress;
     }
 
     public Credentials getAamOwnerCredentials() {

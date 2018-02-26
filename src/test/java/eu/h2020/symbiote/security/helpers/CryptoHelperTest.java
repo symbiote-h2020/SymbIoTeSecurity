@@ -20,8 +20,8 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+import static eu.h2020.symbiote.security.helpers.CryptoHelper.FIELDS_DELIMITER;
 import static eu.h2020.symbiote.security.helpers.CryptoHelper.convertPemToPKCS10CertificationRequest;
-import static eu.h2020.symbiote.security.helpers.CryptoHelper.illegalSign;
 import static org.junit.Assert.*;
 
 /**
@@ -132,7 +132,7 @@ public class CryptoHelperTest {
         X509Certificate certificate = (X509Certificate) ks.getCertificate(CERTIFICATE_ALIAS);
         String csr = CryptoHelper.buildCertificateSigningRequestPEM(certificate, username, clientId, keyPair);
         PKCS10CertificationRequest pkcsCSR = convertPemToPKCS10CertificationRequest(csr);
-        assertEquals(username + illegalSign + clientId + illegalSign + certificate.getSubjectX500Principal().getName().split("CN=")[1].split(",")[0], pkcsCSR.getSubject().toString().split("CN=")[1]);
+        assertEquals(username + FIELDS_DELIMITER + clientId + FIELDS_DELIMITER + certificate.getSubjectX500Principal().getName().split("CN=")[1].split(",")[0], pkcsCSR.getSubject().toString().split("CN=")[1]);
         assertTrue(pkcsCSR.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(keyPair.getPublic())));
     }
 
@@ -170,7 +170,7 @@ public class CryptoHelperTest {
         //X509Certificate certificate = (X509Certificate) ks.getAamCACertificate(CERTIFICATE_ALIAS);
         String csr = CryptoHelper.buildComponentCertificateSigningRequestPEM(componentId, platformId, keyPair);
         PKCS10CertificationRequest pkcsCSR = convertPemToPKCS10CertificationRequest(csr);
-        assertEquals(componentId + illegalSign + platformId, pkcsCSR.getSubject().toString().split("CN=")[1]);
+        assertEquals(componentId + FIELDS_DELIMITER + platformId, pkcsCSR.getSubject().toString().split("CN=")[1]);
         assertTrue(pkcsCSR.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(keyPair.getPublic())));
     }
 

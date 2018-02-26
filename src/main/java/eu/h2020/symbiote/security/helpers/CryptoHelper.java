@@ -39,7 +39,7 @@ import java.util.*;
 public class CryptoHelper {
     // Provider is used from the implementation
     public static final String PROVIDER_NAME = BouncyCastleProvider.PROVIDER_NAME;
-    public static final String illegalSign = "@";
+    public static final String FIELDS_DELIMITER = "@";
 
     public static KeyPair createKeyPair() throws NoSuchProviderException, NoSuchAlgorithmException,
             InvalidAlgorithmParameterException {
@@ -123,7 +123,7 @@ public class CryptoHelper {
     public static String buildCertificateSigningRequestPEM(X509Certificate homeAAMCertificate, String username, String clientId, KeyPair clientKey) throws
             IOException,
             InvalidArgumentsException {
-        if (username.contains(illegalSign) || clientId.contains(illegalSign))
+        if (username.contains(FIELDS_DELIMITER) || clientId.contains(FIELDS_DELIMITER))
             throw new InvalidArgumentsException();
 
         try {
@@ -152,7 +152,7 @@ public class CryptoHelper {
     public static String buildServiceCertificateSigningRequestPEM(String serviceId, KeyPair keyPair) throws
             IOException,
             InvalidArgumentsException {
-        if (serviceId.contains(illegalSign))
+        if (serviceId.contains(FIELDS_DELIMITER))
             throw new InvalidArgumentsException();
 
         try {
@@ -175,7 +175,7 @@ public class CryptoHelper {
     public static String buildComponentCertificateSigningRequestPEM(String componentId, String platformId, KeyPair keyPair) throws
             InvalidArgumentsException,
             IOException {
-        if (platformId.contains(illegalSign) || componentId.contains(illegalSign))
+        if (platformId.contains(FIELDS_DELIMITER) || componentId.contains(FIELDS_DELIMITER))
             throw new InvalidArgumentsException();
 
         try {

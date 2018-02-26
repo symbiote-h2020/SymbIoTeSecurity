@@ -20,8 +20,7 @@ public class ServiceManagementException extends SecurityException {
     public static final String NO_RIGHTS = "User has no rights to this service. Check user's role and owned services.";
     public static final String AWKWARD_SERVICE = "That is an awkward service, please change an instance id or interworking interface address";
     public static final String SERVICE_NOT_EXIST = "Service with this instance id doesn't exist";
-    // TODO rename to match the gateway / II address and/or the site-local address
-    public static final String SERVICE_INTERWORKING_INTERFACE_IN_USE = "Service exposed interworking interface already in use";
+    public static final String SERVICE_ADDRESSES_IN_USE = "Service gateway address already in use";
     public static final String SERVICE_EXISTS = "Service with this instance id already exists";
     public static final String NOT_OWNED_SERVICE = "Service Owner does not have rights to this service.";
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;

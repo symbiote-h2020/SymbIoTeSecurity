@@ -30,7 +30,7 @@ import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static eu.h2020.symbiote.security.helpers.CryptoHelper.illegalSign;
+import static eu.h2020.symbiote.security.helpers.CryptoHelper.FIELDS_DELIMITER;
 
 /**
  * Abstract implementation of the {@link ISecurityHandler} that all concrete implementations should
@@ -363,7 +363,7 @@ public class SecurityHandler implements ISecurityHandler {
             Certificate certificate = new Certificate(certificateValue);
             HomeCredentials credentials;
             if (clientId.contains("@")) {
-                credentials = new HomeCredentials(homeAAM, clientId.split(illegalSign)[1], clientId.split(illegalSign)[0], certificate,
+                credentials = new HomeCredentials(homeAAM, clientId.split(FIELDS_DELIMITER)[1], clientId.split(FIELDS_DELIMITER)[0], certificate,
                         pair.getPrivate());
             } else {
                 credentials = new HomeCredentials(homeAAM, username, clientId, certificate,
