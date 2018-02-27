@@ -304,7 +304,7 @@ Feign.builder().decoder(new JacksonDecoder())
 So now, if you want it to manage the security headers automatically, all you have to do is:
 
 
-  1. Get an instance of the IComponentSecurityHandler:
+ 1. Get an instance of the IComponentSecurityHandler:
    ```java
 
 IComponentSecurityHandler secHandler = ComponentSecurityHandlerFactory
@@ -492,7 +492,7 @@ In return, headers with *x-auth-token* containing Guest Token should be received
 #### <a name="home_token"></a>Home Token 
 Home Token is a authorization token, for registered actors only. It can give access to public and private resources (depending on actors privileges).
 
-To log in into a service and acquire Home Token, actor has to generate and send Login Request to the Local AAM in which he is registered. 
+To log in into a service and acquire Home Token, actor has to generate and send Login Request to the AAM in which he is registered. 
 Login Request is a [JSON Web Token](https://jwt.io/introduction/), with right claims, wrapped into JWS. In *iss*, actor's unique identifier is sent, *sub* contains one of the actor's client identifier. 
 Issue (“iat”) and expiration date (“exp”) limit the validity of the token. Login Request can be created for registered actors with issued certificate in local AAM or for guest.
 
@@ -709,8 +709,53 @@ Full Response JSON:
 
 ### Example REST scenario of accessing to private resources for non-java developers
 0. Register user in relevant PAAM
-1. Get [client certificate](#client_certificate)
-2. Acquire [home token](#home_token)
+1. Get client certificate
+
+**Example:**
+```java
+-----BEGIN CERTIFICATE-----
+MIIBgjCCASigAwIBAgIBATAKBggqhkjOPQQDAjBJMQ0wCwYDVQQHEwR0ZXN0MQ0w
+CwYDVQQKEwR0ZXN0MQ0wCwYDVQQLEwR0ZXN0MRowGAYDVQQDDBFTeW1iSW9UZV9D
+b3JlX0FBTTAeFw0xNzEwMTIxMDQ5MDVaFw0xODEwMTIxMDQ5MDVaMD0xOzA5BgNV
+BAMMMnRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkQFN5bWJJb1RlX0Nv
+cmVfQUFNMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE22XrQOVU5dOYI7nWWE+M
+3xNc//0kvpiT/tqOA3AL6Jj1ZZbsui8pQKKJzWjhOTgw0NHULbnqDO8eZ9F63b7D
+MKMNMAswCQYDVR0TBAIwADAKBggqhkjOPQQDAgNIADBFAiEA5MwiGcLYFj/9x/80
+CR6oAmE3HVBkstwcAaYUsy3kUIECIAPGWPh++7In2oM/PirBFZoR8xKqufypo1lm
+61fUd+FJ
+-----END CERTIFICATE-----
+```
+Please look [here](#client_certificate) how to get client certificate.
+
+2. Acquire home token
+
+**Example login request JWS compact token:**
+
+```
+eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJ0ZXN0dXNlcm5hbWUiLCJzdWIiOiJ0ZXN0Y2xpZW50aWQiLCJpYXQiOjE1MDE1MDk3ODIsImV4cCI6MTUwMTUwOTg0Mn0.SGNpyl3zRA_ptRhA0lFH0o7-nhf3mpxE95ss37_jHYbCnwlRb4zDvVaYCj9DlpppU4U0y3vIPEqM44vV2UZ5Iw
+```
+
+Compact JWS readable JSON format:
+
+HEADER:
+```json
+{
+    "alg": "ES256"
+}
+```
+PAYLOAD:
+```json
+{
+    "iss": "testusername",
+    "sub": "testclientid",
+    "iat": 1501509782,
+    "exp": 1501509842
+}
+```
+ 
+[Here](#home_token) you can see how to acquire home token.
+
+
 3. Create Security Request Headers
    
    To make use of your home token you need to wrap it into our SecurityRequest. For standardized communication we deploy it into the following HTTP headers:
