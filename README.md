@@ -110,7 +110,7 @@ To make use of your GUEST token you need to wrap it into our SecurityRequest. Fo
      } 
      ```
 
-3. With such prepared headers you can access SymbIoTe resources offered publicly, e.g. execute search queries.
+3. With such prepared headers you can access SymbIoTe resources offered publicly, e.g. execute search queries or send request to Resource Access Proxy.
 
 4. After receiving a business response from a symbiote component, you should check if it came from component you are interested in. To do so, please see [Service Response payload](#service_response)
 
@@ -615,6 +615,9 @@ Prefix contains JSON structure that consists of following [SecurityCredentials](
  - `String foreignTokenIssuingAAMCertificate` - (optional for offline validation) matching @{@link Type#FOREIGN} ISS and IPK claims 
 
 **Example:**
+ - x-auth-timestamp: 1519652051000
+ - x-auth-size: 1
+ - x-auth-1:
 ```java
 {
    "token":"eyJhbGciOiJFUzI1NiJ9.eyJ0dHlwIjoiR1VFU1QiLCJzdWIiOiJndWVzdCIsImlwayI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRVBhZURDNElnT3VITlBmWCtURG5adXZuTHdUbHMwMERQb294aVZCTE8za3I0N0N3TXFYSm4yN3lpdFdZUkRRKzBmWG52MzFIbGJLbkxSWktqSmF5U3p3PT0iLCJpc3MiOiJTeW1iSW9UZV9Db3JlX0FBTSIsImV4cCI6MTUxMDU2Nzg2NywiaWF0IjoxNTEwNTY3MjY3LCJqdGkiOiI2MzI4NDUxMzAiLCJzcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVsdlNwYVhDa2RFZ3lYM2xJeWQ1VCs2VFgyQ0hXMDluekNjL05aY2krcGEvdmtQSG5DeFZESkpLTkZwL1hQc0g2T1hvSTkxQXJFcUJ1SlJtd3k2dWZSdz09In0.zn7xjwUq89YSNptLTFCZSpb8n65n4o24HPOw2WPTJSglfaO8paW1O5vC3n9072ktm327kj44Kgs5qqMhRy22cA",
@@ -624,7 +627,9 @@ Prefix contains JSON structure that consists of following [SecurityCredentials](
    "foreignTokenIssuingAAMCertificate":""
 } 
 ```
+Such SecurityRequest can be used to get access to the proper resource. It is also used in Resource Access Proxy and in Search to execute search queries.  
 
+As a response to all of ours SecurityRequests, ServiceResponse is received with business response from a symbiote component, thanks to which we can check if it came from component we are interested in.
 The ServiceResponseJWS is in communication just a String and can be read from the following header
  ```java
  public static final SECURITY_RESPONSE_HEADER = "x-auth-response";
@@ -784,3 +789,129 @@ PAYLOAD:
    
 4. With such prepared headers you can access SymbIoTe resources offered privately, e.g. execute search queries.
 5. After receiving a business response from a symbiote component, you should check if it came from component you are interested in. To do so, please see [Service Response payload](#service_response)
+
+# Credentials revocation 
+## Java developers:
+To revoke credentials, proper Revocation Request should be sent using AAMClient.
+
+### Revocation of home token
+In case of our security breach of our home token, it can be revoked in the issuing platform by sending Revocation Request with following payload:
+```java
+RevocationRequest revocationRequest = new RevocationRequest();
+        revocationRequest.setCredentialType(RevocationRequest.CredentialType.USER);
+        revocationRequest.setHomeTokenString(homeToken.toString());             // homeToken for the revocation
+        revocationRequest.setCredentials(new Credentials(username, password));  // credentials of the token Owner
+// payload should be sent to the issuer of the homeToken
+IAAMClient restClient = new AAMClient(issuerAAMOfHomeTokenAddress);
+// as response, boolean is received (true if revocation was successful)
+boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
+```
+#### Example
+Full payload sent:
+```java
+{
+  "credentials" : {
+    "username" : "testApplicationUsername",
+    "password" : "testApplicationPassword"
+  },
+  "homeTokenString" : "eyJhbGciOiJFUzI1NiJ9.eyJTWU1CSU9URV9Sb2xlIjoiVVNFUiIsInR0eXAiOiJIT01FIiwic3ViIjoidGVzdEFwcGxpY2F0aW9uVXNlcm5hbWVAY2xpZW50SWQiLCJpcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVQYWVEQzRJZ091SE5QZlgrVERuWnV2bkx3VGxzMDBEUG9veGlWQkxPM2tyNDdDd01xWEpuMjd5aXRXWVJEUSswZlhudjMxSGxiS25MUlpLakpheVN6dz09IiwiaXNzIjoiU3ltYklvVGVfQ29yZV9BQU0iLCJleHAiOjE1MTk3NDIwOTcsImlhdCI6MTUxOTc0MjA5NSwianRpIjoiMjA5NTg2NDcxOCIsInNwayI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRUlhY1JZbGVNOUYyWmNQV09UYW00L3J4eFBoeW5yOXllVDV0SVpLTU4vSDhQQzJ4cVFZVUJvVWFLQjliV1BFZlBGdThTT2IvVTBmQWRvWVBqSXFSdU93PT0ifQ.7LtJREqMYX_281zhWOuut0DZ5WLpuHF06lX1gx_KTJEg9BiHbp8jmzSr8Se1gISQD5Kxyh711a-cYZAS5y55cg",
+  "foreignTokenString" : "",
+  "certificatePEMString" : "",
+  "certificateCommonName" : "",
+  "credentialType" : "USER"
+}
+```
+### Revocation of foreign token
+In case of our security breach of our foreign token, it can be revoked in the issuing platform by sending Revocation Request with following payload:
+```java
+RevocationRequest revocationRequest = new RevocationRequest();
+        revocationRequest.setHomeTokenString(token.toString());
+        revocationRequest.setForeignTokenString(foreignToken.toString());
+IAAMClient restClient = new AAMClient(issuerAAMOfHomeTokenAddress);
+// as response, boolean is received (true if revocation was successful)
+boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
+```
+#### Example
+Full payload sent:
+{
+  "credentials" : {
+    "username" : "",
+    "password" : ""
+  },
+  "homeTokenString" : "eyJhbGciOiJFUzI1NiJ9.eyJ0dHlwIjoiSE9NRSIsInN1YiI6InRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkIiwiaXBrIjoiTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFN2VTYUlicWNRSnNpUWRmRXpPWkZuZlVQZWpTSkpDb1R4SSt2YWZiS1dyclZSUVNkS3cwdlYvUmRkZ3U1SXhWTnFkV0tsa3dpcldsTVpYTFJHcWZ3aHc9PSIsIlNZTUJJT1RFX25hbWUiOiJ0ZXN0MiIsImlzcyI6InBsYXRmb3JtLTEiLCJleHAiOjMwMzk0ODUxNzcsImlhdCI6MTUxOTc0MjU1OCwianRpIjoiNTY5MjYxMzExIiwic3BrIjoiTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFVWg5eTBLcHRmU0RveUhXU2F5WFRUT3lGZlZiV3RWQWYycm9tU25CQlE0NE5FaWFrU3ZGSTliL1FhK0Iwd2g3WkZVT29xeXl4MFdGOEZoQ3dyODJQMkE9PSJ9.fT1AiZudp2W7RcntF13rvP1O_n0gknuSC_UHuvuZYHFLNmdsHT3sbZMgttLSlOO-RM9EEz_CR_K0n20_MWGR3A",
+  "foreignTokenString" : "eyJhbGciOiJFUzI1NiJ9.eyJTWU1CSU9URV9mZWRlcmF0aW9uXzEiOiJmZWRlcmF0aW9uSWQiLCJ0dHlwIjoiRk9SRUlHTiIsInN1YiI6InRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkQHBsYXRmb3JtLTFANTY5MjYxMzExIiwiaXBrIjoiTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFUGFlREM0SWdPdUhOUGZYK1REblp1dm5Md1RsczAwRFBvb3hpVkJMTzNrcjQ3Q3dNcVhKbjI3eWl0V1lSRFErMGZYbnYzMUhsYktuTFJaS2pKYXlTenc9PSIsImlzcyI6IlN5bWJJb1RlX0NvcmVfQUFNIiwiZXhwIjoxNTE5NzQyNTYyLCJpYXQiOjE1MTk3NDI1NjAsImp0aSI6IjIxMDUzMjk3MDIiLCJzcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVVaDl5MEtwdGZTRG95SFdTYXlYVFRPeUZmVmJXdFZBZjJyb21TbkJCUTQ0TkVpYWtTdkZJOWIvUWErQjB3aDdaRlVPb3F5eXgwV0Y4RmhDd3I4MlAyQT09In0.VbsuXGjfExPxUrhRHTLp8qtmsoej9I8C3GS1R3SMb7KQ7UUyaFrUmkWoC0fFRceKZwifW1MX5szdeypiKoxFIQ",
+  "certificatePEMString" : "",
+  "certificateCommonName" : "",
+  "credentialType" : "NULL"
+}
+
+### Revocation of client certificate
+In case of our security breach of our client's certificate, it can be revoked in the issuing platform by sending Revocation Request with following payload:
+```java
+RevocationRequest revocationRequest = new RevocationRequest();
+        revocationRequest.setCredentials(new Credentials(username, password));
+        revocationRequest.setCredentialType(RevocationRequest.CredentialType.USER);
+        revocationRequest.setCertificatePEMString(clientCertificate);
+        // or it can be revoked using its commonName
+        // String commonName = username + illegalSign + clientId;
+        // revocationRequest.setCertificateCommonName(commonName);
+// as response, boolean is received (true if revocation was successful)
+boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
+```
+#### Example
+Full payload sent:
+```java
+{
+  "credentials" : {
+    "username" : "testApplicationUsername",
+    "password" : "testApplicationPassword"
+  },
+  "homeTokenString" : "",
+  "foreignTokenString" : "",
+  "certificatePEMString" : "-----BEGIN CERTIFICATE-----\r\nMIIBgTCCASigAwIBAgIBATAKBggqhkjOPQQDAjBJMQ0wCwYDVQQHEwR0ZXN0MQ0w\r\nCwYDVQQKEwR0ZXN0MQ0wCwYDVQQLEwR0ZXN0MRowGAYDVQQDDBFTeW1iSW9UZV9D\r\nb3JlX0FBTTAeFw0xODAyMjcxNDQ3MTNaFw0xOTAyMjcxNDQ3MTNaMD0xOzA5BgNV\r\nBAMMMnRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkQFN5bWJJb1RlX0Nv\r\ncmVfQUFNMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEs8QnAVC9r4j11mik9dl9\r\nU5g1WbId/bZOSvyMMcskH+Gz/3McMEg0/yY6YkV/Zmr46oQ6xnHEHXipE3Rywigu\r\n2qMNMAswCQYDVR0TBAIwADAKBggqhkjOPQQDAgNHADBEAiBWNmuWEUgLHRZ6YpHn\r\n5UlbPvWVn0y9k4RlKNFTDPpSKAIgWfJL34k28sG5+RKEZEXn8xsrMcS9LQYVLzVD\r\nHBdYUz8=\r\n-----END CERTIFICATE-----\r\n",
+  "certificateCommonName" : "",
+  "credentialType" : "USER"
+}
+```
+### Revocation of platform certificate
+Platform owners can also revoke their platforms certificate using Revocation Request with following payload:
+```java
+RevocationRequest revocationRequest = new RevocationRequest();
+        revocationRequest.setCredentials(new Credentials(platformOwnerUsername, platformOwnerPassword));
+        revocationRequest.setCredentialType(RevocationRequest.CredentialType.USER);
+        revocationRequest.setCertificatePEMString(platformCertificate);
+        // or it can be revoked using its commonName
+        // String commonName = platformId;
+        // revocationRequest.setCertificateCommonName(commonName);
+// as response, boolean is received (true if revocation was successful)
+boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
+```
+#### Example
+```java 
+{
+  "credentials" : {
+    "username" : "testApplicationPOUsername",
+    "password" : "testApplicationPOPassword"
+  },
+  "homeTokenString" : "",
+  "foreignTokenString" : "",
+  "certificatePEMString" : "-----BEGIN CERTIFICATE-----\r\nMIIBZTCCAQqgAwIBAgIBATAKBggqhkjOPQQDAjBJMQ0wCwYDVQQHEwR0ZXN0MQ0w\r\nCwYDVQQKEwR0ZXN0MQ0wCwYDVQQLEwR0ZXN0MRowGAYDVQQDDBFTeW1iSW9UZV9D\r\nb3JlX0FBTTAeFw0xODAyMjcxNDUzNTdaFw0xOTAyMjcxNDUzNTdaMBkxFzAVBgNV\r\nBAMTDnRlc3RQbGF0Zm9ybUlkMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEKWmQ\r\nUU7YDa08g8xP8YdLBYdkjuNG6QD06gW6EATbM37x8UQr+xWbJ0jqi5S/mwYo8j1s\r\nI6R4zRBBqUEUTFnDyaMTMBEwDwYDVR0TBAgwBgEB/wIBADAKBggqhkjOPQQDAgNJ\r\nADBGAiEAxcxy3aB3Q7FLHIZ/kM+1azkDZnUgF9RNt9PEnwiwHhYCIQDR2DHxmJgE\r\nZyWWMICJJKx22IxdXM0cfAdtu9xX/Gbcmw==\r\n-----END CERTIFICATE-----\r\n",
+  "certificateCommonName" : "",
+  "credentialType" : "USER"
+}
+```
+## Non Java developers:
+To revoke credentials, proper Revocation Request should be sent on following urls:
+```
+https://<coreInterfaceAdress>/revoke_credentials 
+```
+or
+```
+https://<platformInterworkingInterface>/paam/revoke_credentials
+```
+depending on the issuer of that credential (token/certificate).
+### Revocation Request
+TODO
+
+
+
