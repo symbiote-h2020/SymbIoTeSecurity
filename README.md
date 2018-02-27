@@ -406,7 +406,7 @@ new SingleTokenAccessPolicy(null);
 This will be satisfied by any valid symbiote token.
 
 ## Instructions for non java developers
-### Acquiring client certificates needed to get authorization credentials
+### <a name="client_certificate"></a>Acquiring client certificates needed to get authorization credentials
 The following image depicts in general how to get a symbIoTe authentication certificate:
 ![Certificate acquisition procedure](media/acquire_user_cert.png)
 
@@ -489,7 +489,7 @@ https://<platformInterworkingInterface>/paam/get_guest_token
 ```
 depending from which platform we want to acquire Guest Token.
 In return, headers with *x-auth-token* containing Guest Token should be received.
-#### Home Token 
+#### <a name="home_token"></a>Home Token 
 Home Token is a authorization token, for registered actors only. It can give access to public and private resources (depending on actors privileges).
 
 To log in into a service and acquire Home Token, actor has to generate and send Login Request to the Local AAM in which he is registered. 
@@ -706,3 +706,36 @@ Full Response JSON:
   "timestamp": 1504771337000
 }
 ```
+
+### Example REST scenario of accessing to private resources for non-java developers
+0. Register user in relevant PAAM
+1. Get [client certificate](#client_certificate)
+2. Acquire [home token](#home_token)
+3. Create Security Request Headers
+   
+   To make use of your home token you need to wrap it into our SecurityRequest. For standardized communication we deploy it into the following HTTP headers:
+   * x-auth-timestamp - current timestamp in miliseconds
+   * x-auth-size=1 - don't change just include
+   * x-auth-1 containing fields:
+     * "token":"HERE_COMES_THE_TOKEN_STRING",
+     * "authenticationChallenge":"",
+     * "clientCertificate":"",
+     * "clientCertificateSigningAAMCertificate":"",
+     * "foreignTokenIssuingAAMCertificate":""
+   
+   **Example:**
+   - x-auth-timestamp: 1519723453000
+   - x-auth-size: 1
+   - x-auth-1:
+        ```java
+        {
+          "token":"eyJhbGciOiJFUzI1NiJ9.eyJ0dHlwIjoiSE9NRSIsInN1YiI6InJoIiwiaXBrIjoiTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFN2VTYUlicWNRSnNpUWRmRXpPWkZuZlVQZWpTSkpDb1R4SSt2YWZiS1dyclZSUVNkS3cwdlYvUmRkZ3U1SXhWTnFkV0tsa3dpcldsTVpYTFJHcWZ3aHc9PSIsImlzcyI6InBsYXRmb3JtLTEiLCJleHAiOjE1MTk3MjM0NTUsImlhdCI6MTUxOTcyMzQ1MywianRpIjoiMTY0ODE2NzgxNiIsInNwayI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRWVwK1VPTHFVbGRuamJwL0V4UGNpNHV3ZDk0bzRpczM0SXFCYmlhS2VmMXlPd2hUQ2wzcEw2Y1ErNXhRMFN5ajd2NEtscngvamRVUEhGN2dpQktUVnVBPT0ifQ.82rEpMSdLs3VFfsrKkS17wjtnP5A2dZm8J70CG-YNrp-GwvDeRSj1DJiR0qKYfu5oOm5-cTsqJm7UGVjZaorCQ",
+          "authenticationChallenge":"eyJhbGciOiJFUzI1NiJ9.eyJqdGkiOiIzNzk3OTg3MjAiLCJzdWIiOiIxNjQ4MTY3ODE2IiwiaXNzIjoicmgiLCJpcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVlcCtVT0xxVWxkbmpicC9FeFBjaTR1d2Q5NG80aXMzNElxQmJpYUtlZjF5T3doVENsM3BMNmNRKzV4UTBTeWo3djRLbHJ4L2pkVVBIRjdnaUJLVFZ1QT09IiwiaGFzaCI6IjNmNjkyMmQwMGQzMWY2NmFlOWE3ODQ1ZWIzNjRhZjVlN2UzODNmZDA2ODQxYTMzZGFlZTZmZTVlNDg5ZTI1MjMiLCJpYXQiOjE1MTk3MjM0NTMsImV4cCI6MTUxOTcyMzUxM30.PJpwjkL672KGYzipFqzNJeBzxRDL51p8zo0y70tM5wJWsluYVpjkQ6yQtt4jAiWJhSrtYmyHybE1MXbAdxkyBw",
+          "clientCertificate":"",
+          "clientCertificateSigningAAMCertificate":"",
+          "foreignTokenIssuingAAMCertificate":""
+        } 
+        ```
+   
+4. With such prepared headers you can access SymbIoTe resources offered privately, e.g. execute search queries.
+5. After receiving a business response from a symbiote component, you should check if it came from component you are interested in. To do so, please see [Service Response payload](#service_response)
