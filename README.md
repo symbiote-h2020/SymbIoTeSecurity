@@ -791,117 +791,60 @@ PAYLOAD:
 5. After receiving a business response from a symbiote component, you should check if it came from component you are interested in. To do so, please see [Service Response payload](#service_response)
 
 # Credentials revocation 
+In case of security breach, there may be need to revoke credentials such as certificates or tokens. 
 ## Java developers:
-To revoke credentials, proper Revocation Request should be sent using AAMClient.
-
+To revoke credentials, proper Revocation Request should be sent to the issuer AAM using AAMClient.
+Revocation Request has following structure:
+```java
+private Credentials credentials = new Credentials();
+private String homeTokenString = "";
+private String foreignTokenString = "";
+private String certificatePEMString = "";
+private String certificateCommonName = "";
+private CredentialType credentialType = CredentialType.NULL;
+```
+Appropriate fields have to be set using setters, depending on the kind of credentials we want to revoke.
+To send the payload, AAMClient should be used:
+```java
+// payload should be sent to the issuer of the token/certificate
+IAAMClient restClient = new AAMClient(issuerAAMOfCredentialsAddress);
+// as response, boolean is received
+boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
+``` 
+As the response, boolean value is received. 'true' stands for success, 'false' for failure of the revocation.
 ### Revocation of home token
-In case of our security breach of our home token, it can be revoked in the issuing platform by sending Revocation Request with following payload:
+To revoke home token and prevent any user from using it, following fields have to be set:
 ```java
 RevocationRequest revocationRequest = new RevocationRequest();
-        revocationRequest.setCredentialType(RevocationRequest.CredentialType.USER);
-        revocationRequest.setHomeTokenString(homeToken.toString());             // homeToken for the revocation
-        revocationRequest.setCredentials(new Credentials(username, password));  // credentials of the token Owner
-// payload should be sent to the issuer of the homeToken
-IAAMClient restClient = new AAMClient(issuerAAMOfHomeTokenAddress);
-// as response, boolean is received (true if revocation was successful)
-boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
+revocationRequest.setCredentialType(RevocationRequest.CredentialType.USER);
+revocationRequest.setHomeTokenString(homeToken.toString());                 // homeToken for the revocation
+revocationRequest.setCredentials(new Credentials(username, password));      // credentials of the token Owner
 ```
-#### Example
-Full payload sent:
-```java
-{
-  "credentials" : {
-    "username" : "testApplicationUsername",
-    "password" : "testApplicationPassword"
-  },
-  "homeTokenString" : "eyJhbGciOiJFUzI1NiJ9.eyJTWU1CSU9URV9Sb2xlIjoiVVNFUiIsInR0eXAiOiJIT01FIiwic3ViIjoidGVzdEFwcGxpY2F0aW9uVXNlcm5hbWVAY2xpZW50SWQiLCJpcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVQYWVEQzRJZ091SE5QZlgrVERuWnV2bkx3VGxzMDBEUG9veGlWQkxPM2tyNDdDd01xWEpuMjd5aXRXWVJEUSswZlhudjMxSGxiS25MUlpLakpheVN6dz09IiwiaXNzIjoiU3ltYklvVGVfQ29yZV9BQU0iLCJleHAiOjE1MTk3NDIwOTcsImlhdCI6MTUxOTc0MjA5NSwianRpIjoiMjA5NTg2NDcxOCIsInNwayI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRUlhY1JZbGVNOUYyWmNQV09UYW00L3J4eFBoeW5yOXllVDV0SVpLTU4vSDhQQzJ4cVFZVUJvVWFLQjliV1BFZlBGdThTT2IvVTBmQWRvWVBqSXFSdU93PT0ifQ.7LtJREqMYX_281zhWOuut0DZ5WLpuHF06lX1gx_KTJEg9BiHbp8jmzSr8Se1gISQD5Kxyh711a-cYZAS5y55cg",
-  "foreignTokenString" : "",
-  "certificatePEMString" : "",
-  "certificateCommonName" : "",
-  "credentialType" : "USER"
-}
-```
-### Revocation of foreign token
-In case of our security breach of our foreign token, it can be revoked in the issuing platform by sending Revocation Request with following payload:
-```java
-RevocationRequest revocationRequest = new RevocationRequest();
-        revocationRequest.setHomeTokenString(token.toString());
-        revocationRequest.setForeignTokenString(foreignToken.toString());
-IAAMClient restClient = new AAMClient(issuerAAMOfHomeTokenAddress);
-// as response, boolean is received (true if revocation was successful)
-boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
-```
-#### Example
-Full payload sent:
-{
-  "credentials" : {
-    "username" : "",
-    "password" : ""
-  },
-  "homeTokenString" : "eyJhbGciOiJFUzI1NiJ9.eyJ0dHlwIjoiSE9NRSIsInN1YiI6InRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkIiwiaXBrIjoiTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFN2VTYUlicWNRSnNpUWRmRXpPWkZuZlVQZWpTSkpDb1R4SSt2YWZiS1dyclZSUVNkS3cwdlYvUmRkZ3U1SXhWTnFkV0tsa3dpcldsTVpYTFJHcWZ3aHc9PSIsIlNZTUJJT1RFX25hbWUiOiJ0ZXN0MiIsImlzcyI6InBsYXRmb3JtLTEiLCJleHAiOjMwMzk0ODUxNzcsImlhdCI6MTUxOTc0MjU1OCwianRpIjoiNTY5MjYxMzExIiwic3BrIjoiTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFVWg5eTBLcHRmU0RveUhXU2F5WFRUT3lGZlZiV3RWQWYycm9tU25CQlE0NE5FaWFrU3ZGSTliL1FhK0Iwd2g3WkZVT29xeXl4MFdGOEZoQ3dyODJQMkE9PSJ9.fT1AiZudp2W7RcntF13rvP1O_n0gknuSC_UHuvuZYHFLNmdsHT3sbZMgttLSlOO-RM9EEz_CR_K0n20_MWGR3A",
-  "foreignTokenString" : "eyJhbGciOiJFUzI1NiJ9.eyJTWU1CSU9URV9mZWRlcmF0aW9uXzEiOiJmZWRlcmF0aW9uSWQiLCJ0dHlwIjoiRk9SRUlHTiIsInN1YiI6InRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkQHBsYXRmb3JtLTFANTY5MjYxMzExIiwiaXBrIjoiTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFUGFlREM0SWdPdUhOUGZYK1REblp1dm5Md1RsczAwRFBvb3hpVkJMTzNrcjQ3Q3dNcVhKbjI3eWl0V1lSRFErMGZYbnYzMUhsYktuTFJaS2pKYXlTenc9PSIsImlzcyI6IlN5bWJJb1RlX0NvcmVfQUFNIiwiZXhwIjoxNTE5NzQyNTYyLCJpYXQiOjE1MTk3NDI1NjAsImp0aSI6IjIxMDUzMjk3MDIiLCJzcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVVaDl5MEtwdGZTRG95SFdTYXlYVFRPeUZmVmJXdFZBZjJyb21TbkJCUTQ0TkVpYWtTdkZJOWIvUWErQjB3aDdaRlVPb3F5eXgwV0Y4RmhDd3I4MlAyQT09In0.VbsuXGjfExPxUrhRHTLp8qtmsoej9I8C3GS1R3SMb7KQ7UUyaFrUmkWoC0fFRceKZwifW1MX5szdeypiKoxFIQ",
-  "certificatePEMString" : "",
-  "certificateCommonName" : "",
-  "credentialType" : "NULL"
-}
+Payload should be sent to the issuer of this token.
 
-### Revocation of client certificate
-In case of our security breach of our client's certificate, it can be revoked in the issuing platform by sending Revocation Request with following payload:
+### Revocation of foreign token
+To revoke home token and prevent any user from using it, following fields have to be set:
 ```java
 RevocationRequest revocationRequest = new RevocationRequest();
-        revocationRequest.setCredentials(new Credentials(username, password));
-        revocationRequest.setCredentialType(RevocationRequest.CredentialType.USER);
-        revocationRequest.setCertificatePEMString(clientCertificate);
-        // or it can be revoked using its commonName
-        // String commonName = username + illegalSign + clientId;
-        // revocationRequest.setCertificateCommonName(commonName);
-// as response, boolean is received (true if revocation was successful)
-boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
+revocationRequest.setHomeTokenString(token.toString());           //homeToken based on which foreign token was issued
+revocationRequest.setForeignTokenString(foreignToken.toString()); //foreign token to revoke
 ```
-#### Example
-Full payload sent:
-```java
-{
-  "credentials" : {
-    "username" : "testApplicationUsername",
-    "password" : "testApplicationPassword"
-  },
-  "homeTokenString" : "",
-  "foreignTokenString" : "",
-  "certificatePEMString" : "-----BEGIN CERTIFICATE-----\r\nMIIBgTCCASigAwIBAgIBATAKBggqhkjOPQQDAjBJMQ0wCwYDVQQHEwR0ZXN0MQ0w\r\nCwYDVQQKEwR0ZXN0MQ0wCwYDVQQLEwR0ZXN0MRowGAYDVQQDDBFTeW1iSW9UZV9D\r\nb3JlX0FBTTAeFw0xODAyMjcxNDQ3MTNaFw0xOTAyMjcxNDQ3MTNaMD0xOzA5BgNV\r\nBAMMMnRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkQFN5bWJJb1RlX0Nv\r\ncmVfQUFNMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEs8QnAVC9r4j11mik9dl9\r\nU5g1WbId/bZOSvyMMcskH+Gz/3McMEg0/yY6YkV/Zmr46oQ6xnHEHXipE3Rywigu\r\n2qMNMAswCQYDVR0TBAIwADAKBggqhkjOPQQDAgNHADBEAiBWNmuWEUgLHRZ6YpHn\r\n5UlbPvWVn0y9k4RlKNFTDPpSKAIgWfJL34k28sG5+RKEZEXn8xsrMcS9LQYVLzVD\r\nHBdYUz8=\r\n-----END CERTIFICATE-----\r\n",
-  "certificateCommonName" : "",
-  "credentialType" : "USER"
-}
-```
-### Revocation of platform certificate
-Platform owners can also revoke their platforms certificate using Revocation Request with following payload:
+Payload should be sent to the issuer of the foreign token.
+
+### Revocation of certificate
+In case of security breach of our private key, certificate associated with it can be revoked to prevent impersonation. This applies to platforms and clients. It is possible to revoke certificate using its PEM or common name. Following fields have to be set: 
 ```java
 RevocationRequest revocationRequest = new RevocationRequest();
-        revocationRequest.setCredentials(new Credentials(platformOwnerUsername, platformOwnerPassword));
-        revocationRequest.setCredentialType(RevocationRequest.CredentialType.USER);
-        revocationRequest.setCertificatePEMString(platformCertificate);
-        // or it can be revoked using its commonName
-        // String commonName = platformId;
-        // revocationRequest.setCertificateCommonName(commonName);
-// as response, boolean is received (true if revocation was successful)
-boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
+revocationRequest.setCredentials(new Credentials(username, password)); //user or platformOwner credentials
+revocationRequest.setCredentialType(RevocationRequest.CredentialType.USER);
+revocationRequest.setCertificatePEMString(clientCertificate); //in case of revocation using PEM
+// common name for client certs: username@clientId
+// common name for platform certs: platformId
+// revocationRequest.setCertificateCommonName(commonName); //in case of revocation using common Name
 ```
-#### Example
-```java 
-{
-  "credentials" : {
-    "username" : "testApplicationPOUsername",
-    "password" : "testApplicationPOPassword"
-  },
-  "homeTokenString" : "",
-  "foreignTokenString" : "",
-  "certificatePEMString" : "-----BEGIN CERTIFICATE-----\r\nMIIBZTCCAQqgAwIBAgIBATAKBggqhkjOPQQDAjBJMQ0wCwYDVQQHEwR0ZXN0MQ0w\r\nCwYDVQQKEwR0ZXN0MQ0wCwYDVQQLEwR0ZXN0MRowGAYDVQQDDBFTeW1iSW9UZV9D\r\nb3JlX0FBTTAeFw0xODAyMjcxNDUzNTdaFw0xOTAyMjcxNDUzNTdaMBkxFzAVBgNV\r\nBAMTDnRlc3RQbGF0Zm9ybUlkMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEKWmQ\r\nUU7YDa08g8xP8YdLBYdkjuNG6QD06gW6EATbM37x8UQr+xWbJ0jqi5S/mwYo8j1s\r\nI6R4zRBBqUEUTFnDyaMTMBEwDwYDVR0TBAgwBgEB/wIBADAKBggqhkjOPQQDAgNJ\r\nADBGAiEAxcxy3aB3Q7FLHIZ/kM+1azkDZnUgF9RNt9PEnwiwHhYCIQDR2DHxmJgE\r\nZyWWMICJJKx22IxdXM0cfAdtu9xX/Gbcmw==\r\n-----END CERTIFICATE-----\r\n",
-  "certificateCommonName" : "",
-  "credentialType" : "USER"
-}
-```
+Payload should be sent to the issuer of the certificate (CoreAAM in case of platform certificate, proper platform in case of client one).
 ## Non Java developers:
-To revoke credentials, proper Revocation Request should be sent on following urls:
+To revoke credentials, proper payload, Revocation Request, should be sent on following urls:
 ```
 https://<coreInterfaceAdress>/revoke_credentials 
 ```
@@ -909,9 +852,80 @@ or
 ```
 https://<platformInterworkingInterface>/paam/revoke_credentials
 ```
-depending on the issuer of that credential (token/certificate).
+depending on the issuer of that credentials.
 ### Revocation Request
-TODO
+Revocation Request is a json payload carrying information needed to revoke compromised credentials. It contains fields such as:
+```java
+{
+  "credentials" : {
+    "username" : "",
+    "password" : ""
+  },
+  "homeTokenString" : "",
+  "foreignTokenString" : "",
+  "certificatePEMString" : "",
+  "certificateCommonName" : "",
+  "credentialType" : "NULL"
+}
+```
+Depending on the kind of credentials we want to revoke, proper fields should be filled.
 
+### Revocation of home token
+To revoke home token and prevent any user from using it, following fields have to be set:
+```java
+{
+  "credentials" : {
+    "username" : "tokenOwnerUsername", 
+    "password" : "tokenOwnerPassword"
+  },
+  "homeTokenString" : "homeTokenString",        //home token to revoke
+  "foreignTokenString" : "",
+  "certificatePEMString" : "",
+  "certificateCommonName" : "",
+  "credentialType" : "USER"                     //DO NOT CHANGE THAT VALUE
+}
+```
+Payload should be sent to the issuer of this token.
 
+### Revocation of foreign token
+To revoke home token and prevent any user from using it, following fields have to be set:
+```java 
+{
+  "credentials" : {
+    "username" : "tokenOwnerUsername",
+    "password" : "tokenOwnerPassword"
+  },
+  "homeTokenString" : "homeTokenString",        //homeToken based on which foreign token was issued
+  "foreignTokenString" : "foreignTokenString",  //foreign token for revocation
+  "certificatePEMString" : "",
+  "certificateCommonName" : "",
+  "credentialType" : "NULL"                     //DO NOT CHANGE THAT VALUE
+}
+```
+Payload should be sent to the issuer of the foreign token.
 
+### Revocation of certificate
+In case of security breach of our private key, certificate associated with it can be revoked to prevent impersonation. This applies to platforms and clients. It is possible to revoke certificate using its PEM or common name. Following fields have to be set: 
+```java
+{
+  "credentials" : {
+    "username" : "username",                    //user or platformOwner credentials
+    "password" : "password"
+  },
+  "homeTokenString" : "",
+  "foreignTokenString" : "",
+  //certificate PEM strink to revoke
+  "certificatePEMString" : "-----BEGIN CERTIFICATE-----\r\nMIIBgTCCASigAwIBAgIBATAKBggqhkjOPQQDAjBJMQ0wCwYDVQQHEwR0ZXN0MQ0w\r\nCwYDVQQKEwR0ZXN0MQ0wCwYDVQQLEwR0ZXN0MRowGAYDVQQDDBFTeW1iSW9UZV9D\r\nb3JlX0FBTTAeFw0xODAyMjcxNDQ3MTNaFw0xOTAyMjcxNDQ3MTNaMD0xOzA5BgNV\r\nBAMMMnRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkQFN5bWJJb1RlX0Nv\r\ncmVfQUFNMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEs8QnAVC9r4j11mik9dl9\r\nU5g1WbId/bZOSvyMMcskH+Gz/3McMEg0/yY6YkV/Zmr46oQ6xnHEHXipE3Rywigu\r\n2qMNMAswCQYDVR0TBAIwADAKBggqhkjOPQQDAgNHADBEAiBWNmuWEUgLHRZ6YpHn\r\n5UlbPvWVn0y9k4RlKNFTDPpSKAIgWfJL34k28sG5+RKEZEXn8xsrMcS9LQYVLzVD\r\nHBdYUz8=\r\n-----END CERTIFICATE-----\r\n",
+  //certificate common name to revoke (instead of PEM)
+  "certificateCommonName" : "",
+  "credentialType" : "USER"                     //DO NOT CHANGE THAT VALUE
+}
+```
+Common name structure:
+```java
+username@clientId - for client certificates to revoke
+platformId - for platform certificate
+```
+Sending payload with certificate commonName AND PEM will result in taking into consideration only commonName.
+  
+Payload should be sent to the issuer of the certificate (CoreAAM in case of platform certificate, proper platform in case of client one).
