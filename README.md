@@ -69,44 +69,49 @@ where the componentIdentifier can be read from the table available [here](#compo
 
 ## Non java developers
 1. To acquire a GUEST Token, send empty HTTP POST request on:
-   ```
-   https://<coreInterfaceAdress>/get_guest_token
-   ```
-   or
-   ```
-   https://<platformInterworkingInterface>/paam/get_guest_token
-   ```
-   depending which platform you want to acquire the GUEST token from. Please be aware that either of them has the same authorization power.
-   In return you will get empty response which header *x-auth-token* contains your GUEST token.
+```
+https://<coreInterfaceAdress>/get_guest_token
+```
+or
+```
+https://<platformInterworkingInterface>/paam/get_guest_token
+```
+depending which platform you want to acquire the GUEST token from. Please be aware that either of them has the same authorization power.
+In return you will get empty response which header *x-auth-token* contains your GUEST token.
 
 2. Create Security Request
 
-   To make use of your GUEST token you need to wrap it into our SecurityRequest. For standardized communication we deploy it into the following HTTP headers:
-   * current timestamp in miliseconds goes into header
-     * x-auth-timestamp
-   * don't change just include
-     * x-auth-size=1
-   * special JSON structure
-     * under header x-auth-1
-     * containing populated field:
-       * "token":"HERE_COMES_THE_TOKEN_STRING",
-     * and empty fields which you don't need to care about, just put the there:
-       * "authenticationChallenge":"",
-       * "clientCertificate":"",
-       * "clientCertificateSigningAAMCertificate":"",
-       * "foreignTokenIssuingAAMCertificate":""
-   
-   Please find the example of x-auth-1 contents below:
-   ```java
-   {
-       "token":"[eyJhbGciOiJFUzI1NiJ9.eyJ0dHlwIjoiR1VFU1QiLCJzdWIiOiJndWVzdCIsImlwayI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRVBhZURDNElnT3VITlBmWCtURG5adXZuTHdUbHMwMERQb294aVZCTE8za3I0N0N3TXFYSm4yN3lpdFdZUkRRKzBmWG52MzFIbGJLbkxSWktqSmF5U3p3PT0iLCJpc3MiOiJTeW1iSW9UZV9Db3JlX0FBTSIsImV4cCI6MTUxMDU2Nzg2NywiaWF0IjoxNTEwNTY3MjY3LCJqdGkiOiI2MzI4NDUxMzAiLCJzcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVsdlNwYVhDa2RFZ3lYM2xJeWQ1VCs2VFgyQ0hXMDluekNjL05aY2krcGEvdmtQSG5DeFZESkpLTkZwL1hQc0g2T1hvSTkxQXJFcUJ1SlJtd3k2dWZSdz09In0.zn7xjwUq89YSNptLTFCZSpb8n65n4o24HPOw2WPTJSglfaO8paW1O5vC3n9072ktm327kj44Kgs5qqMhRy22cA]",
+To make use of your GUEST token you need to wrap it into our SecurityRequest. For standardized communication we deploy it into the following HTTP headers:
+* current timestamp in miliseconds goes into header
+  * x-auth-timestamp
+* don't change just include
+  * x-auth-size=1
+* special JSON structure
+  * under header x-auth-1
+  * containing populated field:
+    * "token":"HERE_COMES_THE_TOKEN_STRING",
+  * and empty fields which you don't need to care about, just put the there:
+    * "authenticationChallenge":"",
+    * "clientCertificate":"",
+    * "clientCertificateSigningAAMCertificate":"",
+    * "foreignTokenIssuingAAMCertificate":""
+
+**Example:**
+ - x-auth-timestamp: 1519652051000
+ - x-auth-size: 1
+ - x-auth-1:
+     ```java
+     {
+       "token":"eyJhbGciOiJFUzI1NiJ9.eyJ0dHlwIjoiR1VFU1QiLCJzdWIiOiJndWVzdCIsImlwayI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRVBhZURDNElnT3VITlBmWCtURG5adXZuTHdUbHMwMERQb294aVZCTE8za3I0N0N3TXFYSm4yN3lpdFdZUkRRKzBmWG52MzFIbGJLbkxSWktqSmF5U3p3PT0iLCJpc3MiOiJTeW1iSW9UZV9Db3JlX0FBTSIsImV4cCI6MTUxMDU2Nzg2NywiaWF0IjoxNTEwNTY3MjY3LCJqdGkiOiI2MzI4NDUxMzAiLCJzcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVsdlNwYVhDa2RFZ3lYM2xJeWQ1VCs2VFgyQ0hXMDluekNjL05aY2krcGEvdmtQSG5DeFZESkpLTkZwL1hQc0g2T1hvSTkxQXJFcUJ1SlJtd3k2dWZSdz09In0.zn7xjwUq89YSNptLTFCZSpb8n65n4o24HPOw2WPTJSglfaO8paW1O5vC3n9072ktm327kj44Kgs5qqMhRy22cA",
        "authenticationChallenge":"",
        "clientCertificate":"",
        "clientCertificateSigningAAMCertificate":"",
        "foreignTokenIssuingAAMCertificate":""
-   }
-    ```
-3. With such prepared headers you can access SymbIoTe resources offered publicly.
+     } 
+     ```
+
+3. With such prepared headers you can access SymbIoTe resources offered publicly, e.g. execute search queries or send request to Resource Access Proxy.
+
 4. After receiving a business response from a symbiote component, you should check if it came from component you are interested in. To do so, please see [Service Response payload](#service_response)
 
 # Access and offering resources with restricted access 
@@ -299,7 +304,7 @@ Feign.builder().decoder(new JacksonDecoder())
 So now, if you want it to manage the security headers automatically, all you have to do is:
 
 
-  1. Get an instance of the IComponentSecurityHandler:
+ 1. Get an instance of the IComponentSecurityHandler:
    ```java
 
 IComponentSecurityHandler secHandler = ComponentSecurityHandlerFactory
@@ -401,7 +406,7 @@ new SingleTokenAccessPolicy(null);
 This will be satisfied by any valid symbiote token.
 
 ## Instructions for non java developers
-### Acquiring client certificates needed to get authorization credentials
+### <a name="client_certificate"></a>Acquiring client certificates needed to get authorization credentials
 The following image depicts in general how to get a symbIoTe authentication certificate:
 ![Certificate acquisition procedure](media/acquire_user_cert.png)
 
@@ -484,10 +489,10 @@ https://<platformInterworkingInterface>/paam/get_guest_token
 ```
 depending from which platform we want to acquire Guest Token.
 In return, headers with *x-auth-token* containing Guest Token should be received.
-#### Home Token 
+#### <a name="home_token"></a>Home Token 
 Home Token is a authorization token, for registered actors only. It can give access to public and private resources (depending on actors privileges).
 
-To log in into a service and acquire Home Token, actor has to generate and send Login Request to the Local AAM in which he is registered. 
+To log in into a service and acquire Home Token, actor has to generate and send Login Request to the AAM in which he is registered. 
 Login Request is a [JSON Web Token](https://jwt.io/introduction/), with right claims, wrapped into JWS. In *iss*, actor's unique identifier is sent, *sub* contains one of the actor's client identifier. 
 Issue (“iat”) and expiration date (“exp”) limit the validity of the token. Login Request can be created for registered actors with issued certificate in local AAM or for guest.
 
@@ -590,7 +595,47 @@ If everything is ok, AAM sends back Home Authorization Token.
 ### Authentication and Authorization payloads
 
 All symbiote services that consume Authorization tokens need to verify the the client (sender) should be in possession of given token.
-For that the client needs to generate a token ownership proof - challenge. Striving for best interoperability, we also use the JWS as the challenge payload.
+For that the client needs to generate a token ownership proof - challenge. All those need to be put in relevant headers in [SecurityRequest](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/master/src/main/java/eu/h2020/symbiote/security/communication/payloads/SecurityRequest.java). 
+The SecurityRequest is split into the following HTTP security headers for communication.
+ ```java
+ // timestamp header
+ public static final String SECURITY_CREDENTIALS_TIMESTAMP_HEADER = "x-auth-timestamp";
+ // each SecurityCredentials entry header prefix, they are number 1..size
+ public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "x-auth-"; 
+// SecurityCredentials set size header
+ public static final String SECURITY_CREDENTIALS_SIZE_HEADER = "x-auth-size";
+
+ ```
+The SECURITY_CREDENTIALS_HEADER_PREFIX of each token is created according the value of last header, which specifies the number of provided tokens.
+Prefix contains JSON structure that consists of following [SecurityCredentials](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/documentation/src/main/java/eu/h2020/symbiote/security/communication/payloads/SecurityCredentials.java):
+ - `String token` - type of token: only home or foreign;
+ - `String authenticationChallenge` - generated using MutualAuthenticationHelper;
+ - `String clientCertificate` - (optional for offline validation) matching token SPK claim
+ - `String clientCertificateSigningAAMCertificate` - (optional for offline validation) matching clientCertificate signature
+ - `String foreignTokenIssuingAAMCertificate` - (optional for offline validation) matching @{@link Type#FOREIGN} ISS and IPK claims 
+
+**Example:**
+ - x-auth-timestamp: 1519652051000
+ - x-auth-size: 1
+ - x-auth-1:
+```java
+{
+   "token":"eyJhbGciOiJFUzI1NiJ9.eyJ0dHlwIjoiR1VFU1QiLCJzdWIiOiJndWVzdCIsImlwayI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRVBhZURDNElnT3VITlBmWCtURG5adXZuTHdUbHMwMERQb294aVZCTE8za3I0N0N3TXFYSm4yN3lpdFdZUkRRKzBmWG52MzFIbGJLbkxSWktqSmF5U3p3PT0iLCJpc3MiOiJTeW1iSW9UZV9Db3JlX0FBTSIsImV4cCI6MTUxMDU2Nzg2NywiaWF0IjoxNTEwNTY3MjY3LCJqdGkiOiI2MzI4NDUxMzAiLCJzcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVsdlNwYVhDa2RFZ3lYM2xJeWQ1VCs2VFgyQ0hXMDluekNjL05aY2krcGEvdmtQSG5DeFZESkpLTkZwL1hQc0g2T1hvSTkxQXJFcUJ1SlJtd3k2dWZSdz09In0.zn7xjwUq89YSNptLTFCZSpb8n65n4o24HPOw2WPTJSglfaO8paW1O5vC3n9072ktm327kj44Kgs5qqMhRy22cA",
+   "authenticationChallenge":"",
+   "clientCertificate":"",
+   "clientCertificateSigningAAMCertificate":"",
+   "foreignTokenIssuingAAMCertificate":""
+} 
+```
+Such SecurityRequest can be used to get access to the proper resource. It is also used in Resource Access Proxy and in Search to execute search queries.  
+
+As a response to all of ours SecurityRequests, ServiceResponse is received with business response from a symbiote component, thanks to which we can check if it came from component we are interested in.
+The ServiceResponseJWS is in communication just a String and can be read from the following header
+ ```java
+ public static final SECURITY_RESPONSE_HEADER = "x-auth-response";
+ ```
+
+Striving for best interoperability, we also use the JWS as the challenge payload.
 
 ![Challenge payload structure](media/challenge-payload.PNG)
 
@@ -631,7 +676,7 @@ Example Challenge JWS compact token:
 ```
 eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ0ZXN0Y2xpZW50aWQiLCJzdWIiOiJBdXRob3JpemF0aW9uVG9rZW5KVEkiLCJpcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUU3dThiZzVuT09zeFp2a2RtSytaY3Z4K2J5aTkzaVErbE1XSHNBY09hT0F3Ym1jU1UzbEtFWEt1M2dwL3ltaVhVaEl5RnV3MlBreGZlN1QxZTRIU21xQT09IiwiaGFzaCI6ImVjNTNkYmEwZjkzNzYyMzEwMzVjNWM1ZjFmNDIwM2UzNDgyNDcwOWUwOTkyZDU3NTZhYmY3N2VhNjc2ZWJkNjQiLCJpYXQiOjE1MDE1MDk3ODIsImV4cCI6MTUwMTUwOTg0Mn0.HjomIkzFXbTjokKDwGTgdHOsU19HdM3xXZFRoHqqIdY
 ```
- Full Challenge JSON:
+The foregoing token in compact JWS readable JSON format:
 ```json
 {
   "alg": "ES256",
@@ -666,17 +711,207 @@ Full Response JSON:
   "timestamp": 1504771337000
 }
 ```
-#### Communication details
-The SecurityRequest is split into the following HTTP security headers for communication.
- ```
- // timestamp header
- public static final String SECURITY_CREDENTIALS_TIMESTAMP_HEADER = "x-auth-timestamp";
- // SecurityCredentials set size header
- public static final String SECURITY_CREDENTIALS_SIZE_HEADER = "x-auth-size";
- // each SecurityCredentials entry header prefix, they are number 1..size
- public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "x-auth-";
- ```
-whereas the ServiceResponseJWS is in communication just a String and can be read from the following header
- ```
- public static final SECURITY_RESPONSE_HEADER = "x-auth-response";
- ```
+
+### Example REST scenario of accessing to private resources for non-java developers
+0. Register user in relevant PAAM
+1. Get client certificate
+
+**Example:**
+```java
+-----BEGIN CERTIFICATE-----
+MIIBgjCCASigAwIBAgIBATAKBggqhkjOPQQDAjBJMQ0wCwYDVQQHEwR0ZXN0MQ0w
+CwYDVQQKEwR0ZXN0MQ0wCwYDVQQLEwR0ZXN0MRowGAYDVQQDDBFTeW1iSW9UZV9D
+b3JlX0FBTTAeFw0xNzEwMTIxMDQ5MDVaFw0xODEwMTIxMDQ5MDVaMD0xOzA5BgNV
+BAMMMnRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkQFN5bWJJb1RlX0Nv
+cmVfQUFNMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE22XrQOVU5dOYI7nWWE+M
+3xNc//0kvpiT/tqOA3AL6Jj1ZZbsui8pQKKJzWjhOTgw0NHULbnqDO8eZ9F63b7D
+MKMNMAswCQYDVR0TBAIwADAKBggqhkjOPQQDAgNIADBFAiEA5MwiGcLYFj/9x/80
+CR6oAmE3HVBkstwcAaYUsy3kUIECIAPGWPh++7In2oM/PirBFZoR8xKqufypo1lm
+61fUd+FJ
+-----END CERTIFICATE-----
+```
+Please look [here](#client_certificate) how to get client certificate.
+
+2. Acquire home token
+
+**Example login request JWS compact token:**
+
+```
+eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJ0ZXN0dXNlcm5hbWUiLCJzdWIiOiJ0ZXN0Y2xpZW50aWQiLCJpYXQiOjE1MDE1MDk3ODIsImV4cCI6MTUwMTUwOTg0Mn0.SGNpyl3zRA_ptRhA0lFH0o7-nhf3mpxE95ss37_jHYbCnwlRb4zDvVaYCj9DlpppU4U0y3vIPEqM44vV2UZ5Iw
+```
+
+Compact JWS readable JSON format:
+
+HEADER:
+```json
+{
+    "alg": "ES256"
+}
+```
+PAYLOAD:
+```json
+{
+    "iss": "testusername",
+    "sub": "testclientid",
+    "iat": 1501509782,
+    "exp": 1501509842
+}
+```
+ 
+[Here](#home_token) you can see how to acquire home token.
+
+
+3. Create Security Request Headers
+   
+   To make use of your home token you need to wrap it into our SecurityRequest. For standardized communication we deploy it into the following HTTP headers:
+   * x-auth-timestamp - current timestamp in miliseconds
+   * x-auth-size=1 - don't change just include
+   * x-auth-1 containing fields:
+     * "token":"HERE_COMES_THE_TOKEN_STRING",
+     * "authenticationChallenge":"",
+     * "clientCertificate":"",
+     * "clientCertificateSigningAAMCertificate":"",
+     * "foreignTokenIssuingAAMCertificate":""
+   
+   **Example:**
+   - x-auth-timestamp: 1519723453000
+   - x-auth-size: 1
+   - x-auth-1:
+        ```java
+        {
+          "token":"eyJhbGciOiJFUzI1NiJ9.eyJ0dHlwIjoiSE9NRSIsInN1YiI6InJoIiwiaXBrIjoiTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFN2VTYUlicWNRSnNpUWRmRXpPWkZuZlVQZWpTSkpDb1R4SSt2YWZiS1dyclZSUVNkS3cwdlYvUmRkZ3U1SXhWTnFkV0tsa3dpcldsTVpYTFJHcWZ3aHc9PSIsImlzcyI6InBsYXRmb3JtLTEiLCJleHAiOjE1MTk3MjM0NTUsImlhdCI6MTUxOTcyMzQ1MywianRpIjoiMTY0ODE2NzgxNiIsInNwayI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRWVwK1VPTHFVbGRuamJwL0V4UGNpNHV3ZDk0bzRpczM0SXFCYmlhS2VmMXlPd2hUQ2wzcEw2Y1ErNXhRMFN5ajd2NEtscngvamRVUEhGN2dpQktUVnVBPT0ifQ.82rEpMSdLs3VFfsrKkS17wjtnP5A2dZm8J70CG-YNrp-GwvDeRSj1DJiR0qKYfu5oOm5-cTsqJm7UGVjZaorCQ",
+          "authenticationChallenge":"eyJhbGciOiJFUzI1NiJ9.eyJqdGkiOiIzNzk3OTg3MjAiLCJzdWIiOiIxNjQ4MTY3ODE2IiwiaXNzIjoicmgiLCJpcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVlcCtVT0xxVWxkbmpicC9FeFBjaTR1d2Q5NG80aXMzNElxQmJpYUtlZjF5T3doVENsM3BMNmNRKzV4UTBTeWo3djRLbHJ4L2pkVVBIRjdnaUJLVFZ1QT09IiwiaGFzaCI6IjNmNjkyMmQwMGQzMWY2NmFlOWE3ODQ1ZWIzNjRhZjVlN2UzODNmZDA2ODQxYTMzZGFlZTZmZTVlNDg5ZTI1MjMiLCJpYXQiOjE1MTk3MjM0NTMsImV4cCI6MTUxOTcyMzUxM30.PJpwjkL672KGYzipFqzNJeBzxRDL51p8zo0y70tM5wJWsluYVpjkQ6yQtt4jAiWJhSrtYmyHybE1MXbAdxkyBw",
+          "clientCertificate":"",
+          "clientCertificateSigningAAMCertificate":"",
+          "foreignTokenIssuingAAMCertificate":""
+        } 
+        ```
+   
+4. With such prepared headers you can access SymbIoTe resources offered privately, e.g. execute search queries.
+5. After receiving a business response from a symbiote component, you should check if it came from component you are interested in. To do so, please see [Service Response payload](#service_response)
+
+# Credentials revocation 
+## Java developers:
+To revoke credentials, proper Revocation Request should be sent using AAMClient.
+
+### Revocation of home token
+In case of our security breach of our home token, it can be revoked in the issuing platform by sending Revocation Request with following payload:
+```java
+RevocationRequest revocationRequest = new RevocationRequest();
+        revocationRequest.setCredentialType(RevocationRequest.CredentialType.USER);
+        revocationRequest.setHomeTokenString(homeToken.toString());             // homeToken for the revocation
+        revocationRequest.setCredentials(new Credentials(username, password));  // credentials of the token Owner
+// payload should be sent to the issuer of the homeToken
+IAAMClient restClient = new AAMClient(issuerAAMOfHomeTokenAddress);
+// as response, boolean is received (true if revocation was successful)
+boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
+```
+#### Example
+Full payload sent:
+```java
+{
+  "credentials" : {
+    "username" : "testApplicationUsername",
+    "password" : "testApplicationPassword"
+  },
+  "homeTokenString" : "eyJhbGciOiJFUzI1NiJ9.eyJTWU1CSU9URV9Sb2xlIjoiVVNFUiIsInR0eXAiOiJIT01FIiwic3ViIjoidGVzdEFwcGxpY2F0aW9uVXNlcm5hbWVAY2xpZW50SWQiLCJpcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVQYWVEQzRJZ091SE5QZlgrVERuWnV2bkx3VGxzMDBEUG9veGlWQkxPM2tyNDdDd01xWEpuMjd5aXRXWVJEUSswZlhudjMxSGxiS25MUlpLakpheVN6dz09IiwiaXNzIjoiU3ltYklvVGVfQ29yZV9BQU0iLCJleHAiOjE1MTk3NDIwOTcsImlhdCI6MTUxOTc0MjA5NSwianRpIjoiMjA5NTg2NDcxOCIsInNwayI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRUlhY1JZbGVNOUYyWmNQV09UYW00L3J4eFBoeW5yOXllVDV0SVpLTU4vSDhQQzJ4cVFZVUJvVWFLQjliV1BFZlBGdThTT2IvVTBmQWRvWVBqSXFSdU93PT0ifQ.7LtJREqMYX_281zhWOuut0DZ5WLpuHF06lX1gx_KTJEg9BiHbp8jmzSr8Se1gISQD5Kxyh711a-cYZAS5y55cg",
+  "foreignTokenString" : "",
+  "certificatePEMString" : "",
+  "certificateCommonName" : "",
+  "credentialType" : "USER"
+}
+```
+### Revocation of foreign token
+In case of our security breach of our foreign token, it can be revoked in the issuing platform by sending Revocation Request with following payload:
+```java
+RevocationRequest revocationRequest = new RevocationRequest();
+        revocationRequest.setHomeTokenString(token.toString());
+        revocationRequest.setForeignTokenString(foreignToken.toString());
+IAAMClient restClient = new AAMClient(issuerAAMOfHomeTokenAddress);
+// as response, boolean is received (true if revocation was successful)
+boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
+```
+#### Example
+Full payload sent:
+{
+  "credentials" : {
+    "username" : "",
+    "password" : ""
+  },
+  "homeTokenString" : "eyJhbGciOiJFUzI1NiJ9.eyJ0dHlwIjoiSE9NRSIsInN1YiI6InRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkIiwiaXBrIjoiTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFN2VTYUlicWNRSnNpUWRmRXpPWkZuZlVQZWpTSkpDb1R4SSt2YWZiS1dyclZSUVNkS3cwdlYvUmRkZ3U1SXhWTnFkV0tsa3dpcldsTVpYTFJHcWZ3aHc9PSIsIlNZTUJJT1RFX25hbWUiOiJ0ZXN0MiIsImlzcyI6InBsYXRmb3JtLTEiLCJleHAiOjMwMzk0ODUxNzcsImlhdCI6MTUxOTc0MjU1OCwianRpIjoiNTY5MjYxMzExIiwic3BrIjoiTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFVWg5eTBLcHRmU0RveUhXU2F5WFRUT3lGZlZiV3RWQWYycm9tU25CQlE0NE5FaWFrU3ZGSTliL1FhK0Iwd2g3WkZVT29xeXl4MFdGOEZoQ3dyODJQMkE9PSJ9.fT1AiZudp2W7RcntF13rvP1O_n0gknuSC_UHuvuZYHFLNmdsHT3sbZMgttLSlOO-RM9EEz_CR_K0n20_MWGR3A",
+  "foreignTokenString" : "eyJhbGciOiJFUzI1NiJ9.eyJTWU1CSU9URV9mZWRlcmF0aW9uXzEiOiJmZWRlcmF0aW9uSWQiLCJ0dHlwIjoiRk9SRUlHTiIsInN1YiI6InRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkQHBsYXRmb3JtLTFANTY5MjYxMzExIiwiaXBrIjoiTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFUGFlREM0SWdPdUhOUGZYK1REblp1dm5Md1RsczAwRFBvb3hpVkJMTzNrcjQ3Q3dNcVhKbjI3eWl0V1lSRFErMGZYbnYzMUhsYktuTFJaS2pKYXlTenc9PSIsImlzcyI6IlN5bWJJb1RlX0NvcmVfQUFNIiwiZXhwIjoxNTE5NzQyNTYyLCJpYXQiOjE1MTk3NDI1NjAsImp0aSI6IjIxMDUzMjk3MDIiLCJzcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVVaDl5MEtwdGZTRG95SFdTYXlYVFRPeUZmVmJXdFZBZjJyb21TbkJCUTQ0TkVpYWtTdkZJOWIvUWErQjB3aDdaRlVPb3F5eXgwV0Y4RmhDd3I4MlAyQT09In0.VbsuXGjfExPxUrhRHTLp8qtmsoej9I8C3GS1R3SMb7KQ7UUyaFrUmkWoC0fFRceKZwifW1MX5szdeypiKoxFIQ",
+  "certificatePEMString" : "",
+  "certificateCommonName" : "",
+  "credentialType" : "NULL"
+}
+
+### Revocation of client certificate
+In case of our security breach of our client's certificate, it can be revoked in the issuing platform by sending Revocation Request with following payload:
+```java
+RevocationRequest revocationRequest = new RevocationRequest();
+        revocationRequest.setCredentials(new Credentials(username, password));
+        revocationRequest.setCredentialType(RevocationRequest.CredentialType.USER);
+        revocationRequest.setCertificatePEMString(clientCertificate);
+        // or it can be revoked using its commonName
+        // String commonName = username + illegalSign + clientId;
+        // revocationRequest.setCertificateCommonName(commonName);
+// as response, boolean is received (true if revocation was successful)
+boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
+```
+#### Example
+Full payload sent:
+```java
+{
+  "credentials" : {
+    "username" : "testApplicationUsername",
+    "password" : "testApplicationPassword"
+  },
+  "homeTokenString" : "",
+  "foreignTokenString" : "",
+  "certificatePEMString" : "-----BEGIN CERTIFICATE-----\r\nMIIBgTCCASigAwIBAgIBATAKBggqhkjOPQQDAjBJMQ0wCwYDVQQHEwR0ZXN0MQ0w\r\nCwYDVQQKEwR0ZXN0MQ0wCwYDVQQLEwR0ZXN0MRowGAYDVQQDDBFTeW1iSW9UZV9D\r\nb3JlX0FBTTAeFw0xODAyMjcxNDQ3MTNaFw0xOTAyMjcxNDQ3MTNaMD0xOzA5BgNV\r\nBAMMMnRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkQFN5bWJJb1RlX0Nv\r\ncmVfQUFNMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEs8QnAVC9r4j11mik9dl9\r\nU5g1WbId/bZOSvyMMcskH+Gz/3McMEg0/yY6YkV/Zmr46oQ6xnHEHXipE3Rywigu\r\n2qMNMAswCQYDVR0TBAIwADAKBggqhkjOPQQDAgNHADBEAiBWNmuWEUgLHRZ6YpHn\r\n5UlbPvWVn0y9k4RlKNFTDPpSKAIgWfJL34k28sG5+RKEZEXn8xsrMcS9LQYVLzVD\r\nHBdYUz8=\r\n-----END CERTIFICATE-----\r\n",
+  "certificateCommonName" : "",
+  "credentialType" : "USER"
+}
+```
+### Revocation of platform certificate
+Platform owners can also revoke their platforms certificate using Revocation Request with following payload:
+```java
+RevocationRequest revocationRequest = new RevocationRequest();
+        revocationRequest.setCredentials(new Credentials(platformOwnerUsername, platformOwnerPassword));
+        revocationRequest.setCredentialType(RevocationRequest.CredentialType.USER);
+        revocationRequest.setCertificatePEMString(platformCertificate);
+        // or it can be revoked using its commonName
+        // String commonName = platformId;
+        // revocationRequest.setCertificateCommonName(commonName);
+// as response, boolean is received (true if revocation was successful)
+boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
+```
+#### Example
+```java 
+{
+  "credentials" : {
+    "username" : "testApplicationPOUsername",
+    "password" : "testApplicationPOPassword"
+  },
+  "homeTokenString" : "",
+  "foreignTokenString" : "",
+  "certificatePEMString" : "-----BEGIN CERTIFICATE-----\r\nMIIBZTCCAQqgAwIBAgIBATAKBggqhkjOPQQDAjBJMQ0wCwYDVQQHEwR0ZXN0MQ0w\r\nCwYDVQQKEwR0ZXN0MQ0wCwYDVQQLEwR0ZXN0MRowGAYDVQQDDBFTeW1iSW9UZV9D\r\nb3JlX0FBTTAeFw0xODAyMjcxNDUzNTdaFw0xOTAyMjcxNDUzNTdaMBkxFzAVBgNV\r\nBAMTDnRlc3RQbGF0Zm9ybUlkMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEKWmQ\r\nUU7YDa08g8xP8YdLBYdkjuNG6QD06gW6EATbM37x8UQr+xWbJ0jqi5S/mwYo8j1s\r\nI6R4zRBBqUEUTFnDyaMTMBEwDwYDVR0TBAgwBgEB/wIBADAKBggqhkjOPQQDAgNJ\r\nADBGAiEAxcxy3aB3Q7FLHIZ/kM+1azkDZnUgF9RNt9PEnwiwHhYCIQDR2DHxmJgE\r\nZyWWMICJJKx22IxdXM0cfAdtu9xX/Gbcmw==\r\n-----END CERTIFICATE-----\r\n",
+  "certificateCommonName" : "",
+  "credentialType" : "USER"
+}
+```
+## Non Java developers:
+To revoke credentials, proper Revocation Request should be sent on following urls:
+```
+https://<coreInterfaceAdress>/revoke_credentials 
+```
+or
+```
+https://<platformInterworkingInterface>/paam/revoke_credentials
+```
+depending on the issuer of that credential (token/certificate).
+### Revocation Request
+TODO
+
+
+
