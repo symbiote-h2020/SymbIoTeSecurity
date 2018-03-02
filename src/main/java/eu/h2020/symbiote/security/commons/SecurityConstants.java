@@ -43,6 +43,8 @@ public class SecurityConstants {
     public static final int JWT_PARTS_COUNT = 3; //Header, body and signature
     public static final String CLAIM_NAME_TOKEN_TYPE = "ttyp";
     public static final String SYMBIOTE_ATTRIBUTES_PREFIX = "SYMBIOTE_";
+    public static final String SMART_SPACE_IDENTIFIER_PREFIX = "SSP_";
+    public static final String PLATFORM_AGENT_IDENTIFIER_PREFIX = "PA_";
     public static final String FEDERATION_CLAIM_KEY_PREFIX = "federation_";
     public static final String GUEST_NAME = "guest";
 
@@ -57,7 +59,6 @@ public class SecurityConstants {
     public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "x-auth-";
     public static final String SECURITY_RESPONSE_HEADER = "x-auth-response";
 
-    public static final String SMART_SPACE_IDENTIFIER_PREFIX = "SSP_";
 
     //Access Policy JSON fields
     //Single Token
