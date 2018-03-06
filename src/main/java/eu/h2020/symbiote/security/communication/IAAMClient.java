@@ -100,12 +100,6 @@ public interface IAAMClient {
                                          Optional<String> foreignTokenIssuingAAMCertificate) throws AAMException;
 
     /**
-     * @param platformManagementRequest related to associated platforms' management operation.
-     * @return Management Status informing about a result of completing requested management operation
-     */
-    ManagementStatus managePlatform(PlatformManagementRequest platformManagementRequest) throws AAMException;
-
-    /**
      * @param userManagementRequest related to associated users' management operation.
      * @return Management Status informing about a result of completing requested management operation
      */

@@ -314,22 +314,6 @@ public class AAMClient implements IAAMClient {
     }
 
     /**
-     * @param platformManagementRequest related to associated platforms' management operation.
-     * @return Management Status informing about a result of completing requested management operation
-     */
-    @Override
-    public ManagementStatus managePlatform(PlatformManagementRequest platformManagementRequest) throws
-            AAMException {
-        try {
-            return feignClient.managePlatform(platformManagementRequest).getRegistrationStatus();
-        } catch (FeignException fe) {
-            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
-        } catch (Exception e) {
-            throw new AAMException("Internal Platform Management Error");
-        }
-    }
-
-    /**
      * @param userManagementRequest related to associated users' management operation.
      * @return Management Status informing about a result of completing requested management operation
      */
