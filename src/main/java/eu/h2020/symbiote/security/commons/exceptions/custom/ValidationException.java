@@ -25,6 +25,7 @@ public class ValidationException extends SecurityException {
     public static final String INVALID_TOKEN = "Invalid token";
     public static final String NO_RIGHTS_TO_TOKEN = "You have no rights to this token";
     public static final String FOREIGN_TOKEN_NOT_MATCH_REMOTE_HOME_TOKEN = "Foreign token is invalid and does not mach remote Home Token";
+    public static final String CERTIFICATE_MISMATCH = "Core AAM certificate does not match certificate known to us, possibly malicious core";
     //todo review if status codes and change of parent are valid
     private static final String errorMessage = "VALIDATION_ERROR";
     private static final HttpStatus statusCode = HttpStatus.UNAUTHORIZED;
