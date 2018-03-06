@@ -144,10 +144,7 @@ public class SecurityHandler implements ISecurityHandler {
                     && !availableAAMsCollection.get(key).getSiteLocalAddress().isEmpty()) {
                 AAM aam = availableAAMsCollection.get(key);
                 AAM siteLocalAddressAAM = new AAM(
-                        aam.getSiteLocalAddress(),
-                        aam.getAamInstanceFriendlyName(),
-                        aam.getAamInstanceId(),
-                        aam.getSiteLocalAddress(),
+                        aam.getSiteLocalAddress(), aam.getSiteLocalAddress(), aam.getAamInstanceId(), aam.getAamInstanceFriendlyName(),
                         aam.getAamCACertificate(),
                         aam.getComponentCertificates()
                 );

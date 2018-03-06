@@ -50,7 +50,7 @@ public class SmartSpaceManagementRequest {
         this.serviceOwnerCredentials = serviceOwnerCredentials;
 
         if (!gatewayAddress.isEmpty() && !gatewayAddress.startsWith("https://"))
-            throw new InvalidArgumentsException(InvalidArgumentsException.GATEWAY_ADDRESS_SHOULD_START_WITH_HTTPS);
+            throw new InvalidArgumentsException(InvalidArgumentsException.GATEWAY_ADDRESS_MUST_START_WITH_HTTPS);
         this.gatewayAddress = gatewayAddress;
 
         this.instanceFriendlyName = instanceFriendlyName;
@@ -81,7 +81,6 @@ public class SmartSpaceManagementRequest {
     public String getSiteLocalAddress() {
         return siteLocalAddress;
     }
-
 
     public String getInstanceFriendlyName() {
         return instanceFriendlyName;

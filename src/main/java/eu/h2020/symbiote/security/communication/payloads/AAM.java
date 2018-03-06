@@ -13,6 +13,8 @@ import java.util.Map;
  *
  * @author Mikołaj Dobski (PSNC)
  * @author Jakub Toczek (PSNC)
+ *
+ * @apiNote due to keeping API compliance the getters where not renamed.
  */
 public class AAM {
 
@@ -24,87 +26,87 @@ public class AAM {
     private final Map<String, Certificate> componentCertificates;
 
     /**
-     * @param aamAddress              Address where the user can reach REST endpoints used in security layer of SymbIoTe
-     * @param aamInstanceFriendlyName a label for the end user to be able to identify the login endrypoint
-     * @param aamInstanceId           SymbIoTe-unique identifier (the same as the platform instance it is bound to)
-     * @param siteLocalAddress        Address where the user can reach REST endpoints used in security layer of SymbIoTe in local service net
-     * @param aamCACertificate        CA aamCACertificate used by the AAM for its users and issued tokens
-     * @param componentCertificates   contains the certificates used by SymbIoTe components for @{@link MutualAuthenticationHelper#isServiceResponseVerified(String, Certificate)}
+     * @param externalAddress                        address where the AAM is available from the Internet e.g. the Core, Platforms and SmartSpaces' gateways
+     * @param siteLocalAddress                       address where the AAM is available for clients residing in the same network that the server (e.g. local WiFi of a smart space)
+     * @param instanceIdentifier                     identifier of this AAM (the same as the platform / smart space instance it is bound to)
+     * @param instanceFriendlyName                   a label for the end users to be able to identify this platform / smart space
+     * @param localCertificationAuthorityCertificate the Certification Authority certificate that this AAM uses to sign its clients certificates and tokens
+     * @param componentCertificates                  contains the certificates signed by this AAM for components that belong to the same platform / smart space, used by SymbIoTe components for @{@link MutualAuthenticationHelper#isServiceResponseVerified(String, Certificate)}
      */
     @JsonCreator
     public AAM(
-            @JsonProperty("aamAddress") String aamAddress,
-            @JsonProperty("aamInstanceFriendlyName") String aamInstanceFriendlyName,
-            @JsonProperty("aamInstanceId") String aamInstanceId,
+            @JsonProperty("aamAddress") String externalAddress,
             @JsonProperty("siteLocalAddress") String siteLocalAddress,
-            @JsonProperty("aamCACertificate") Certificate aamCACertificate,
+            @JsonProperty("aamInstanceId") String instanceIdentifier,
+            @JsonProperty("aamInstanceFriendlyName") String instanceFriendlyName,
+            @JsonProperty("aamCACertificate") Certificate localCertificationAuthorityCertificate,
             @JsonProperty("componentCertificates") Map<String, Certificate> componentCertificates) {
-        this.aamAddress = aamAddress;
-        this.aamInstanceFriendlyName = aamInstanceFriendlyName;
-        this.aamInstanceId = aamInstanceId;
+        this.aamAddress = externalAddress;
+        this.aamInstanceFriendlyName = instanceFriendlyName;
+        this.aamInstanceId = instanceIdentifier;
         this.siteLocalAddress = siteLocalAddress;
-        this.aamCACertificate = aamCACertificate;
+        this.aamCACertificate = localCertificationAuthorityCertificate;
         this.componentCertificates = componentCertificates;
     }
 
     /**
-     * @param aamAddress              Address where the user can reach REST endpoints used in security layer of SymbIoTe
-     * @param aamInstanceFriendlyName a label for the end user to be able to identify the login endrypoint
-     * @param aamInstanceId           SymbIoTe-unique identifier (the same as the platform instance it is bound to)
-     * @param aamCACertificate        CA aamCACertificate used by the AAM for its users and issued tokens
-     * @param componentCertificates   contains the certificates used by SymbIoTe components for @{@link MutualAuthenticationHelper#isServiceResponseVerified(String, Certificate)}
+     * @param externalAddress                        Address where the AAM is available from the Internet e.g. the Core, Platforms and SmartSpaces' gateways
+     * @param instanceIdentifier                     identifier of this AAM (the same as the platform / smart space instance it is bound to)
+     * @param instanceFriendlyName                   a label for the end users to be able to identify this platform / smart space
+     * @param localCertificationAuthorityCertificate the Certification Authority certificate that this AAM uses to sign its clients certificates and tokens
+     * @param componentCertificates                  contains the certificates signed by this AAM for components that belong to the same platform / smart space, used by SymbIoTe components for @{@link MutualAuthenticationHelper#isServiceResponseVerified(String, Certificate)}
      */
     public AAM(
-            String aamAddress,
-            String aamInstanceFriendlyName,
-            String aamInstanceId,
-            Certificate aamCACertificate,
+            String externalAddress,
+            String instanceIdentifier,
+            String instanceFriendlyName,
+            Certificate localCertificationAuthorityCertificate,
             Map<String, Certificate> componentCertificates) {
-        this(aamAddress,
-                aamInstanceFriendlyName,
-                aamInstanceId,
-                "",
-                aamCACertificate,
+        this(externalAddress,
+                "", // useful only by smart spaces
+                instanceIdentifier,
+                instanceFriendlyName,
+                localCertificationAuthorityCertificate,
                 componentCertificates);
     }
 
     /**
-     * @return SymbIoTe-unique identifier (the same as the platform instance it is bound to)
+     * @return identifier of this AAM (the same as the platform / smart space instance it is bound to)
      */
     public String getAamInstanceId() {
         return aamInstanceId;
     }
 
     /**
-     * @return Address where the user can reach REST endpoints used in security layer of SymbIoTe
+     * @return address where the AAM is available from the Internet e.g. the Core, Platforms and SmartSpaces' gateways
      */
     public String getAamAddress() {
         return aamAddress;
     }
 
     /**
-     * @return a label for the end user to be able to identify the login entry point
+     * @return a label for the end users to be able to identify this platform / smart space
      */
     public String getAamInstanceFriendlyName() {
         return aamInstanceFriendlyName;
     }
 
     /**
-     * @return the AAM Certification Authority certificate used by it for its signing its users' and components' certificates as well as the issued tokens
+     * @return the Certification Authority certificate that this AAM uses to sign its clients certificates and tokens
      */
     public Certificate getAamCACertificate() {
         return aamCACertificate;
     }
 
     /**
-     * @return the certificates used by SymbIoTe components for @{@link MutualAuthenticationHelper#isServiceResponseVerified(String, Certificate)}
+     * @return contains the certificates signed by this AAM for components that belong to the same platform / smart space, used by SymbIoTe components for @{@link MutualAuthenticationHelper#isServiceResponseVerified(String, Certificate)}
      */
     public Map<String, Certificate> getComponentCertificates() {
         return componentCertificates;
     }
 
     /**
-     * @return Address where the user can reach REST endpoints used in security layer of SymbIoTe in local service net
+     * @return address where the AAM is available for clients residing in the same network that the server (e.g. local WiFi of a smart space)
      */
     public String getSiteLocalAddress() {
         return siteLocalAddress;

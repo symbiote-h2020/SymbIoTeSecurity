@@ -12,13 +12,11 @@ import java.util.Map;
  * @author Mikołaj Dobski (PSNC)
  */
 public class UserDetails {
-    // TODO harden
+    // TODO R5 harden
 
     private Credentials userCredentials = new Credentials();
     private String recoveryMail = "";
     private UserRole role = UserRole.NULL;
-    // TODO remove for R4
-    private String federatedId = "";
     private Map<String, String> attributes = new HashMap<>();
     private Map<String, Certificate> clients = new HashMap<>();
 
@@ -30,20 +28,17 @@ public class UserDetails {
      * UserDetails constructor
      *
      * @param userCredentials Credentials identifying user
-     * @param federatedId     federatedID
      * @param recoveryMail    Recovery mail of the user
      * @param role            Role of the user (USER, SERVICE_OWNER, NULL)
      * @param attributes      This user attributes. NOTE: during update, in case of empty map, attributes also will be updated (removed)
      * @param clients         user's clients
      */
     public UserDetails(Credentials userCredentials,
-                       String federatedId,
                        String recoveryMail,
                        UserRole role,
                        Map<String, String> attributes,
                        Map<String, Certificate> clients) {
         this.userCredentials = userCredentials;
-        this.federatedId = federatedId;
         this.recoveryMail = recoveryMail;
         this.role = role;
         this.attributes = attributes;
@@ -64,14 +59,6 @@ public class UserDetails {
 
     public void setCredentials(Credentials userCredentials) {
         this.userCredentials = userCredentials;
-    }
-
-    public String getFederatedId() {
-        return federatedId;
-    }
-
-    public void setFederatedID(String federatedId) {
-        this.federatedId = federatedId;
     }
 
     public String getRecoveryMail() {

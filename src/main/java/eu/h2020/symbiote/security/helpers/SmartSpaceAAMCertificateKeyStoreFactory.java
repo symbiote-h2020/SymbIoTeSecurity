@@ -4,7 +4,6 @@ import eu.h2020.symbiote.security.commons.exceptions.SecurityException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStoreException;
@@ -35,21 +34,7 @@ public class SmartSpaceAAMCertificateKeyStoreFactory extends AbstractAAMCertific
      */
     public static void main(String[] args) {
         Properties props = new Properties();
-        if (args.length == 1) {
-            try {
-                props.load(new FileReader(args[0]));
-            } catch (IOException e) {
-                System.err.println("Can not load properties file '" + args[0] + "'. Reason: " + e);
-                System.exit(1);
-            }
-        } else {
-            try {
-                props.load(new FileReader("cert.properties"));
-            } catch (IOException e) {
-                System.err.println("Can not load properties file 'cert.properties'. Reason: " + e);
-                System.exit(2);
-            }
-        }
+        argumentsCheck(args, props);
 
         // given to you for integration, in the end should be available in public
         // from spring bootstrap file: symbIoTe.core.interface.url
@@ -79,7 +64,7 @@ public class SmartSpaceAAMCertificateKeyStoreFactory extends AbstractAAMCertific
         String rootCACertificateAlias = props.getProperty("rootCACertificateAlias", "caam");
 
         try {
-            PlatformAAMCertificateKeyStoreFactory.getServiceAAMKeystore(
+            getServiceAAMKeystore(
                     coreAAMAddress,
                     smartSpaceOwnerUsername,
                     smartSpaceOwnerPassword,

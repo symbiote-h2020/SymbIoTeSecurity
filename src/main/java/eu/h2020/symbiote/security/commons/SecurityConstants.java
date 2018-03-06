@@ -18,6 +18,8 @@ public class SecurityConstants {
     // AAM GLOBAL
     public static final String CORE_AAM_FRIENDLY_NAME = "SymbIoTe Core AAM";
     public static final String CORE_AAM_INSTANCE_ID = "SymbIoTe_Core_AAM";
+    public static final String PLATFORM_AGENT_IDENTIFIER_PREFIX = "PA_";
+    public static final String SMART_SPACE_IDENTIFIER_PREFIX = "SSP_";
 
     // component certificates resolver constants
     public static final String AAM_COMPONENT_NAME = "aam";
@@ -43,8 +45,6 @@ public class SecurityConstants {
     public static final int JWT_PARTS_COUNT = 3; //Header, body and signature
     public static final String CLAIM_NAME_TOKEN_TYPE = "ttyp";
     public static final String SYMBIOTE_ATTRIBUTES_PREFIX = "SYMBIOTE_";
-    public static final String SMART_SPACE_IDENTIFIER_PREFIX = "SSP_";
-    public static final String PLATFORM_AGENT_IDENTIFIER_PREFIX = "PA_";
     public static final String FEDERATION_CLAIM_KEY_PREFIX = "federation_";
     public static final String GUEST_NAME = "guest";
 

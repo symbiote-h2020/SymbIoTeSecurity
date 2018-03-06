@@ -12,9 +12,11 @@ import org.apache.commons.logging.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.util.Properties;
 
 abstract class AbstractAAMCertificateKeyStoreFactory {
 
@@ -68,7 +70,7 @@ abstract class AbstractAAMCertificateKeyStoreFactory {
         ks.setCertificateEntry(rootCACertificateAlias, rootAAMCertificate.getX509());
 
         /*
-        // TODO fix in R4
+        // TODO fix in R5
         KeyStore.ProtectionParameter protParam =
                 new KeyStore.PasswordProtection(privateKeyPassword.toCharArray());
 
@@ -122,5 +124,23 @@ abstract class AbstractAAMCertificateKeyStoreFactory {
         System.err.println(msg);
         System.exit(3);
         return null;
+    }
+
+    protected static void argumentsCheck(String[] args, Properties props) {
+        if (args.length == 1) {
+            try {
+                props.load(new FileReader(args[0]));
+            } catch (IOException e) {
+                System.err.println("Can not load properties file '" + args[0] + "'. Reason: " + e);
+                System.exit(1);
+            }
+        } else {
+            try {
+                props.load(new FileReader("cert.properties"));
+            } catch (IOException e) {
+                System.err.println("Can not load properties file 'cert.properties'. Reason: " + e);
+                System.exit(2);
+            }
+        }
     }
 }
