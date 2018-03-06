@@ -28,7 +28,6 @@ apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-version = 'SNAPSHOT'
 
 // dependencies section
 repositories {
