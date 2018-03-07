@@ -80,13 +80,14 @@ AAM coreAAM = clientSH.getCoreAAMInstance();
 AAM platform1 = clientSH.getAvailableAAMs().get(platformId);
 
 // Acquiring GUEST token from platform1
-Token token = clientSH.loginAsGuest(platform1);
+Token guestToken = clientSH.loginAsGuest(platform1);
 
-// preparing the security request using the credentials the actor has from platform 1
-Set<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<>();
-// please note that from now on we don't need the password and only the the client certificate and matching private key.
-authorizationCredentialsSet.add(new AuthorizationCredentials(token, platform1, clientSH.getAcquiredCredentials().get(platform1.getAamInstanceId()).homeCredentials));
-SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
+// creating securityRequest using guest Token
+SecurityRequest securityRequest = new SecurityRequest(guestToken);
+
+// converting the prepared request into communication ready HTTP headers.
+Map<String, String> securityHeaders = new HashMap<>();
+securityHeaders = securityRequest.getSecurityRequestHeaderParams();
 ```
 
 2. Then, after receiving the response from a SymbIoTe component, you should check if it came from component you are interested. To do that you can use the following snippet
