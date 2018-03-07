@@ -28,8 +28,6 @@ public class ComponentSecurityHandlerTest {
                 "irrelevant",
                 badComponentId + "@" + goodPlatformId,
                 "irrelevant",
-                false,
-                "irrelevant",
                 "irrelevant"
         );
     }
@@ -41,10 +39,8 @@ public class ComponentSecurityHandlerTest {
         ComponentSecurityHandlerFactory.getComponentSecurityHandler(
                 "irrelevant",
                 "irrelevant",
-                "irrelevant",
                 goodComponentId + "@" + badPlatformId,
                 "irrelevant",
-                false,
                 "irrelevant",
                 "irrelevant"
         );
@@ -56,10 +52,8 @@ public class ComponentSecurityHandlerTest {
         ComponentSecurityHandlerFactory.getComponentSecurityHandler(
                 "irrelevant",
                 "irrelevant",
-                "irrelevant",
                 goodComponentId,
                 "irrelevant",
-                false,
                 "irrelevant",
                 "irrelevant"
         );
@@ -71,10 +65,8 @@ public class ComponentSecurityHandlerTest {
         ComponentSecurityHandlerFactory.getComponentSecurityHandler(
                 "irrelevant",
                 "irrelevant",
-                "irrelevant",
                 goodComponentId + "@" + goodPlatformId + "@" + goodPlatformId,
                 "irrelevant",
-                false,
                 "irrelevant",
                 "irrelevant"
         );

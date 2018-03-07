@@ -39,7 +39,6 @@ public class ComponentSecurityHandlerFactory {
      * @param componentOwnerPassword         local AAM Admin credentials
      * @return the component security handler ready to talk with Symbiote components
      * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
-     *
      * @deprecated use {@link #getComponentSecurityHandler(String, String, String, String, String, String)}
      */
     @Deprecated
@@ -52,15 +51,14 @@ public class ComponentSecurityHandlerFactory {
                                                                         String componentOwnerUsername,
                                                                         String componentOwnerPassword) throws
             SecurityHandlerException {
-        if (clientId.split("@").length != 2) {
-            throw new SecurityHandlerException("Component Id has bad form, must be componentId@platformId");
-        }
-        return new ComponentSecurityHandler(
-                new SecurityHandler(keystorePath, keystorePassword, localAAMAddress, clientId.split("@")[1]),
+        return getComponentSecurityHandler(
+                keystorePath,
+                keystorePassword,
+                clientId,
                 localAAMAddress,
                 componentOwnerUsername,
-                componentOwnerPassword,
-                clientId);
+                componentOwnerPassword
+        );
     }
 
     /**
