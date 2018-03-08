@@ -19,6 +19,9 @@ public class AAMException extends SecurityException {
     public static final String SELECTED_CERTIFICATE_NOT_FOUND = "Selected certificate could not be found/retrieved";
     private static final String errorMessage = "AAM_SERVER_ERROR";
     private static final HttpStatus statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+    public static final String CORE_AAM_IS_NOT_TRUSTED = "Error occurred - Core AAM is not trusted. Received Core certificate mismatch with this in our keystore.";
+    public static final String REMOTE_AAM_CERTIFICATE_IS_NOT_TRUSTED = "Error occurred - remote AAM certificate is not trusted";
+    public static final String REMOTE_AAMS_COMPONENT_CERTIFICATE_IS_NOT_TRUSTED = "Error occurred - remote AAMs component certificate is not trusted";
 
     public AAMException() {
         super(errorMessage);
