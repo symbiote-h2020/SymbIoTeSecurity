@@ -29,7 +29,7 @@ public class ValidationException extends SecurityException {
     //todo review if status codes and change of parent are valid
     private static final String errorMessage = "VALIDATION_ERROR";
     private static final HttpStatus statusCode = HttpStatus.UNAUTHORIZED;
-    public static final String USER_CAN_T_GET_COMPONENT_CERTIFICATE = "This user can't get component certificate.";
+    public static final String USER_MUST_NOT_GET_COMPONENT_CERTIFICATE = "End user must not get component certificate.";
     public static final String INVALID_COMPONENT_NAME_NO_PA_PREFIX = "Invalid component name. Platform Agents' components' ids must have 'PA_' prefix.";
     public static final String NO_RIGHTS_FOR_COMPONENT_CERTIFICATE = "You don't have rights to ask for component certificate!";
 
