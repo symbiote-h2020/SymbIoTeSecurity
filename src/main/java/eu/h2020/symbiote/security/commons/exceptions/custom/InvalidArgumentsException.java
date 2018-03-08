@@ -28,7 +28,7 @@ public class InvalidArgumentsException extends SecurityException {
     private static final HttpStatus statusCode = HttpStatus.BAD_REQUEST;
     public static final String MISSING_SITE_LOCAL_ADDRESS = "Exposed site-local address must be provided";
     public static final String NO_SSP_PREFIX = "Smart space identifier must start with 'SSP_' prefix.";
-    public static final String GATEWAY_ADDRESS_MUST_START_WITH_HTTPS = "Gateway Address must start with https.";
+    public static final String EXTERNAL_ADDRESS_MUST_START_WITH_HTTPS = "External Address must start with https.";
 
     public InvalidArgumentsException() {
         super(errorMessage);

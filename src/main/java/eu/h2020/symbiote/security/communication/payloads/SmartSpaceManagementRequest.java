@@ -6,7 +6,7 @@ import eu.h2020.symbiote.security.commons.enums.OperationType;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 
 /**
- * Describes smart space registration in AAM payload.
+ * Describes smart space registration and management in AAM payload.
  *
  * @author Mikołaj Dobski (PSNC)
  * @author Jakub Toczek (PSNC)
@@ -19,7 +19,7 @@ public class SmartSpaceManagementRequest {
     private final String instanceFriendlyName;
     private final OperationType operationType;
     private final boolean exposingSiteLocalAddress;
-    private final String gatewayAddress;
+    private final String externalAddress;
     private final String siteLocalAddress;
     private final String instanceId;
 
@@ -29,7 +29,7 @@ public class SmartSpaceManagementRequest {
      *
      * @param aamOwnerCredentials        used to authorize this request
      * @param serviceOwnerCredentials    used to register the smartSpaceOwner in the database
-     * @param gatewayAddress             used to point symbiote users to possible entry points available from Internet
+     * @param externalAddress            used to point symbiote users to possible entry points available from the Internet
      * @param siteLocalAddress           used to point symbiote users to possible entry points available from within the smart space local network
      * @param instanceFriendlyName       a label for the end user to be able to identify the login entry point
      * @param operationType              operation, that smart space owner wants to perform (CREATE, UPDATE, DELETE)
@@ -39,7 +39,7 @@ public class SmartSpaceManagementRequest {
     @JsonCreator
     public SmartSpaceManagementRequest(@JsonProperty("aamOwnerCredentials") Credentials aamOwnerCredentials,
                                        @JsonProperty("serviceOwnerCredentials") Credentials serviceOwnerCredentials,
-                                       @JsonProperty("gatewayAddress") String gatewayAddress,
+                                       @JsonProperty("externalAddress") String externalAddress,
                                        @JsonProperty("siteLocalAddress") String siteLocalAddress,
                                        @JsonProperty("instanceFriendlyName") String instanceFriendlyName,
                                        @JsonProperty("operationType") OperationType operationType,
@@ -49,9 +49,9 @@ public class SmartSpaceManagementRequest {
         this.aamOwnerCredentials = aamOwnerCredentials;
         this.serviceOwnerCredentials = serviceOwnerCredentials;
 
-        if (!gatewayAddress.isEmpty() && !gatewayAddress.startsWith("https://"))
-            throw new InvalidArgumentsException(InvalidArgumentsException.GATEWAY_ADDRESS_MUST_START_WITH_HTTPS);
-        this.gatewayAddress = gatewayAddress;
+        if (!externalAddress.isEmpty() && !externalAddress.startsWith("https://"))
+            throw new InvalidArgumentsException(InvalidArgumentsException.EXTERNAL_ADDRESS_MUST_START_WITH_HTTPS);
+        this.externalAddress = externalAddress;
 
         this.instanceFriendlyName = instanceFriendlyName;
         this.operationType = operationType;
@@ -74,8 +74,8 @@ public class SmartSpaceManagementRequest {
         return serviceOwnerCredentials;
     }
 
-    public String getGatewayAddress() {
-        return gatewayAddress;
+    public String getExternalAddress() {
+        return externalAddress;
     }
 
     public String getSiteLocalAddress() {
