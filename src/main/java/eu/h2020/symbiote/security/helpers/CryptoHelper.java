@@ -239,10 +239,10 @@ public class CryptoHelper {
         TrustAnchor trustAnchor = new TrustAnchor(coreAAMCertificate, null);
         trustAnchors.add(trustAnchor);
 
-        // List of intermediate certificates
-        List<X509Certificate> intermediateCertificates = new ArrayList<>();
-        intermediateCertificates.add(signingAAMCertificate);
-        intermediateCertificates.add(clientCertificate);
+        // List of certificates to build the path from
+        List<X509Certificate> certsOnPath = new ArrayList<>();
+        certsOnPath.add(signingAAMCertificate);
+        certsOnPath.add(clientCertificate);
 
         /*
          * If build() returns successfully, the certificate is valid. More details
@@ -255,10 +255,10 @@ public class CryptoHelper {
             // Disable CRL checks (this is done manually as additional step)
             params.setRevocationEnabled(false);
 
-            // Specify a list of intermediate certificates
-            CertStore intermediateCertStore = CertStore.getInstance("Collection",
-                    new CollectionCertStoreParameters(intermediateCertificates), "BC");
-            params.addCertStore(intermediateCertStore);
+            // Specify a list of certificates on path
+            CertStore validatedPathCertsStore = CertStore.getInstance("Collection",
+                    new CollectionCertStoreParameters(certsOnPath), "BC");
+            params.addCertStore(validatedPathCertsStore);
 
             // Build and verify the certification chain
             CertPathBuilder builder = CertPathBuilder.getInstance("PKIX", "BC");
