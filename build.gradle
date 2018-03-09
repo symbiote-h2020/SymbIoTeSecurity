@@ -68,6 +68,16 @@ task generateJavaDocs(type: Javadoc) {
 task javadocJar(type: Jar, dependsOn: generateJavaDocs) {
     classifier = 'javadoc'
     from javadoc.destinationDir
+
+}
+
+// hack to make the @apiNote not break the build...
+if (JavaVersion.current().isJava8Compatible()) {
+    allprojects {
+        tasks.withType(Javadoc) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+        }
+    }
 }
 
 task buildRunnableServiceKeystoreFactoryJAR(type: Jar) {
