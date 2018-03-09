@@ -2,6 +2,7 @@ package eu.h2020.symbiote.security.helpers;
 
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
+import eu.h2020.symbiote.security.commons.exceptions.SecurityException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.AAMException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.NotExistingUserException;
@@ -9,6 +10,7 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.communication.AAMClient;
 import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -18,7 +20,80 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Properties;
 
-abstract class AbstractAAMCertificateKeyStoreFactory {
+/**
+ * Builds a key store with service certificate and it's issuer
+ *
+ * @author Jakub Toczek (PSNC)
+ */
+public class ServiceAAMCertificateKeyStoreFactory {
+
+    private static Log log = LogFactory.getLog(ServiceAAMCertificateKeyStoreFactory.class);
+
+    /**
+     * Generates a service AAM keystore.
+     * <p>
+     * Fill properly all the fields in as in the template 'cert.properties' to get the service AAM keystore.
+     * You can send as first argument the name of the file if it is nod default name. If you do not provide default
+     * filename the it uses 'cert.properties'.
+     * <p>
+     * You need to build all jar with gradle task: buildRunnablePAAMKeystoreFactoryJAR
+     * <p>
+     * After that you can start it e.g., java -jar build/libs/SymbIoTeSecurity-all-23.0.2.jar
+     */
+    public static void main(String[] args) {
+        Properties props = new Properties();
+        argumentsCheck(args, props);
+
+        // given to you for integration, in the end should be available in public
+        // from spring bootstrap file: symbIoTe.core.interface.url
+        String coreAAMAddress = (String) props.computeIfAbsent("coreAAMAddress",
+                (p) -> exit("Property 'coreAAMAddress' can not be absent."));
+        // of the user registered through administration in the symbIoTe Core
+        String serviceOwnerUsername = (String) props.computeIfAbsent("serviceOwnerUsername",
+                (p) -> exit("Property 'serviceOwnerUsername' can not be absent."));
+        String serviceOwnerPassword = (String) props.computeIfAbsent("serviceOwnerPassword",
+                (p) -> exit("Property 'serviceOwnerPassword' can not be absent."));
+        // of the service registered to the given service Owner
+        String serviceId = (String) props.computeIfAbsent("serviceId",
+                (p) -> exit("Property 'serviceId' can not be absent."));
+
+        // how the generated keystore should be named
+        String keyStoreFileName = (String) props.computeIfAbsent("keyStoreFileName",
+                (p) -> exit("Property keyStoreFileName anc not be absent."));
+        // used to access the keystore. MUST NOT be longer than 7 chars
+        // from spring bootstrap file: aam.security.KEY_STORE_PASSWORD
+        // R3 dirty fix MUST BE THE SAME as spring bootstrap file: aam.security.PV_KEY_PASSWORD
+        String keyStorePassword = props.getProperty("keyStorePassword", "pass");
+        // service AAM key/certificate alias... case INSENSITIVE (all lowercase)
+        // from spring bootstrap file: aam.security.CERTIFICATE_ALIAS
+        String aamCertificateAlias = props.getProperty("aamCertificateAlias", "service_aam");
+        // root CA certificate alias... case INSENSITIVE (all lowercase)
+        // from spring bootstrap file:  aam.security.ROOT_CA_CERTIFICATE_ALIAS
+        String rootCACertificateAlias = props.getProperty("rootCACertificateAlias", "caam");
+
+        try {
+            getServiceAAMKeystore(
+                    coreAAMAddress,
+                    serviceOwnerUsername,
+                    serviceOwnerPassword,
+                    serviceId,
+                    keyStoreFileName,
+                    keyStorePassword,
+                    rootCACertificateAlias,
+                    aamCertificateAlias,
+                    log
+            );
+            log.info("OK");
+        } catch (SecurityException
+                | IOException
+                | CertificateException
+                | InvalidAlgorithmParameterException
+                | NoSuchAlgorithmException
+                | KeyStoreException
+                | NoSuchProviderException e) {
+            log.error(e);
+        }
+    }
 
     public static void getServiceAAMKeystore(String coreAAMAddress,
                                              String serviceOwnerUsername,
@@ -120,13 +195,13 @@ abstract class AbstractAAMCertificateKeyStoreFactory {
         return trustStore;
     }
 
-    static String exit(String msg) {
+    private static String exit(String msg) {
         System.err.println(msg);
         System.exit(3);
         return null;
     }
 
-    protected static void argumentsCheck(String[] args, Properties props) {
+    private static void argumentsCheck(String[] args, Properties props) {
         if (args.length == 1) {
             try {
                 props.load(new FileReader(args[0]));
@@ -143,4 +218,6 @@ abstract class AbstractAAMCertificateKeyStoreFactory {
             }
         }
     }
+
+
 }
