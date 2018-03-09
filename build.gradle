@@ -70,11 +70,11 @@ task javadocJar(type: Jar, dependsOn: generateJavaDocs) {
     from javadoc.destinationDir
 }
 
-task buildRunnablePAAMKeystoreFactoryJAR(type: Jar) {
+task buildRunnableServiceKeystoreFactoryJAR(type: Jar) {
     manifest {
-        attributes 'Implementation-Title': 'Build Runnable PAAM Keystore Factory JAR',
+        attributes 'Implementation-Title': 'Build Runnable Service Keystore Factory JAR',
             'Implementation-Version': version,
-            'Main-Class': 'eu.h2020.symbiote.security.helpers.PlatformAAMCertificateKeyStoreFactory'
+            'Main-Class': 'eu.h2020.symbiote.security.helpers.ServiceAAMCertificateKeyStoreFactory'
     }
     baseName = project.name + '-helper'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
@@ -85,7 +85,7 @@ task buildRunnablePAAMKeystoreFactoryJAR(type: Jar) {
 artifacts {
     archives sourceJar
     archives javadocJar
-    archives buildRunnablePAAMKeystoreFactoryJAR
+    archives buildRunnableServiceKeystoreFactoryJAR
 }
 
 publishing {
@@ -99,7 +99,7 @@ publishing {
                 classifier "sources"
             }
             artifact javadocJar
-            artifact buildRunnablePAAMKeystoreFactoryJAR {
+            artifact buildRunnableServiceKeystoreFactoryJAR {
                 classifier "helper"
             }
         }
