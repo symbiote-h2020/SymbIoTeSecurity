@@ -70,9 +70,22 @@ task javadocJar(type: Jar, dependsOn: generateJavaDocs) {
     from javadoc.destinationDir
 }
 
+task buildRunnablePAAMKeystoreFactoryJAR(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Build Runnable PAAM Keystore Factory JAR',
+            'Implementation-Version': version,
+            'Main-Class': 'eu.h2020.symbiote.security.helpers.PlatformAAMCertificateKeyStoreFactory'
+    }
+    baseName = project.name + '-helper'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA' 
+    with jar
+}
+
 artifacts {
     archives sourceJar
     archives javadocJar
+    archives buildRunnablePAAMKeystoreFactoryJAR
 }
 
 publishing {
@@ -86,6 +99,9 @@ publishing {
                 classifier "sources"
             }
             artifact javadocJar
+            artifact buildRunnablePAAMKeystoreFactoryJAR {
+                classifier "helper"
+            }
         }
     }
 }
@@ -118,15 +134,3 @@ dependencyCheck {
 
 // including code quality extensions into the build
 check.dependsOn(jacocoTestReport, 'dependencyCheckAnalyze')
-
-task buildRunnablePAAMKeystoreFactoryJAR(type: Jar) {
-    manifest {
-        attributes 'Implementation-Title': 'Build Runnable PAAM Keystore Factory JAR',
-            'Implementation-Version': version,
-            'Main-Class': 'eu.h2020.symbiote.security.helpers.PlatformAAMCertificateKeyStoreFactory'
-    }
-    baseName = project.name + '-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA' 
-    with jar
-}

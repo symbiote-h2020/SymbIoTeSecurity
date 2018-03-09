@@ -1,7 +1,14 @@
 [![Build Status](https://api.travis-ci.org/symbiote-h2020/SymbIoTeSecurity.svg?branch=staging)](https://api.travis-ci.org/symbiote-h2020/SymbIoTeSecurity)
 [![](https://jitpack.io/v/symbiote-h2020/SymbIoTeSecurity.svg)](https://jitpack.io/#symbiote-h2020/SymbIoTeSecurity)
 [![codecov.io](https://codecov.io/github/symbiote-h2020/SymbIoTeSecurity/branch/staging/graph/badge.svg)](https://codecov.io/github/symbiote-h2020/SymbIoTeSecurity)
-# SymbIoTe Security
+### Table of Contents
+* [SymbIoTe Security Overview](#symbiote-security-overview) 
+* [Access to public resources](#access-to-public-resources) 
+* [Access resources with restricted access](#access-resources-with-restricted-access) 
+* [Offering resources with restricted access](#offering-resources-with-restricted-access) 
+* [Credentials revocation ](#credentials-revocation) 
+
+# SymbIoTe Security Overview
 This repository contains SymbIoTe security layer interfaces, payloads, helper methods and a thin client named the SecurityHandler used throughout different components and different layers. It contains methods that allow the clients to acquire authorization credentials, service to evaluate the received credentials in terms of both authorizing operations and authenticating the clients and finally the clients to verify the authenticity of service they interact with.
 
 For such we define 2 most important security payloads
@@ -46,7 +53,7 @@ We briefly show how the clients can acquire GUEST credentials required to access
 ```java
 // creating REST client communicating with SymbIoTe Authorization Services 
 // AAMServerAddress can be acquired from SymbIoTe web page
-IAAMClient restClient = new AAMClient(AAMServerAddress);
+IAAMClient restClient = ClientFactory.getAAMClient(AAMServerAddress);
 
 // acquiring Guest Token
 String guestToken = restClient.getGuestToken();
@@ -59,6 +66,29 @@ Map<String, String> securityHeaders = new HashMap<>();
 securityHeaders = securityRequest.getSecurityRequestHeaderParams();
 ```
 With these headers containing your GUEST token you can use SymbIoTe APIs to access public resources.
+It can be also acquired in the following way, using end user Java client described [here](#end-user-security-handler):
+```java
+// Initializing application security handler
+ISecurityHandler clientSH = ClientSecurityHandlerFactory.getSecurityHandler(
+         coreAAMServerAddress,
+         KEY_STORE_PATH,
+         KEY_STORE_PASSWORD,
+         clientId
+);
+// examples how to retrieve AAM instances
+AAM coreAAM = clientSH.getCoreAAMInstance();
+AAM platform1 = clientSH.getAvailableAAMs().get(platformId);
+
+// Acquiring GUEST token from platform1
+Token guestToken = clientSH.loginAsGuest(platform1);
+
+// creating securityRequest using guest Token
+SecurityRequest securityRequest = new SecurityRequest(guestToken);
+
+// converting the prepared request into communication ready HTTP headers.
+Map<String, String> securityHeaders = new HashMap<>();
+securityHeaders = securityRequest.getSecurityRequestHeaderParams();
+```
 
 2. Then, after receiving the response from a SymbIoTe component, you should check if it came from component you are interested. To do that you can use the following snippet
 ```java 
@@ -114,11 +144,20 @@ To make use of your GUEST token you need to wrap it into our SecurityRequest. Fo
 
 4. After receiving a business response from a symbiote component, you should check if it came from component you are interested in. To do so, please see [Service Response payload](#service_response)
 
-# Access and offering resources with restricted access 
-The sections below demonstrate the SymbioteSecurity in depth for parties interested in accessing and offering resources with limited access.
+# Access resources with restricted access 
+The sections below demonstrate the SymbioteSecurity in depth for parties interested in accessing resources with limited access.
+In general, to access a resource with restricted access, SecurityRequest payload with homeToken issued for the users client needs to be sent. 
+The whole path looks as follows:
+1. user creates an account in the platform, in which he wants to access resources
+2. <a name="access_priv_resources_2"></a> user, using credentials from the registration process, acquire a certificate(PKI) for his client
+3. client acquire homeToken from it's home AAM
+4. <a name="access_priv_resources_4"></a> client generates Security Request to authorize himself in the system
+5. client gets access to the restricted resource (if he has rights to use it) using Security Request
 
-## Instructions for Java developers
+Note that users credentials (username and password) are used in this process only during registration and acquisition of the certificates. They should not be saved on the clients device!  
+## Java developers
 This section provides the information about usage of SymbIoTe Security library in the java code. 
+It requires from user its prior registration in the platform, in which he wants to access resources.
 
 #### End-user Security Handler
 Security handler class is a thin Java client providing methods allowing clients to acquire authorization and authentication credentials required to gain access to symbIoTe resource:
@@ -159,7 +198,7 @@ SecurityHandler securityHandler = ClientSecurityHandlerFactory.getSecurityHandle
         coreAAMAddress, keystorePath, keystorePassword, userId);
 ```
 
-To acquire access to any of the resources the following instructions have to be done:
+To acquire access to any of the resources, steps from [2](#access_priv_resources_2) to [4](#access_priv_resources_4) can be achieved easily using SecurityHandler. The following instructions have to be done:
 ```java
 // Initializing application security handler
 ISecurityHandler clientSH = ClientSecurityHandlerFactory.getSecurityHandler(
@@ -177,7 +216,7 @@ Certificate clientCertificate = clientSH.getCertificate(platform1, username, pas
 
 // Acquiring HOME token from platform1 AAM
 Token token = clientSH.login(platform1);
- 
+
 // preparing the security request using the credentials the actor has from platform 1
 Set<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<>();
 // please note that from now on we don't need the password and only the the client certificate and matching private key.
@@ -203,65 +242,6 @@ In order to identify the certificate of the component you communicate with, plea
 | CoreResourceAccessMonitor | cram |
 | other might appear | ... |
 
-#### Component Security Handler
-If you want to manage components, create ComponentSecurityHandler object with  [ComponentSecurityHandlerFactory](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/ComponentSecurityHandler.java) class.
-```java
-/**
-     * Creates an end-user component security handler
-     *
-     * @param coreAAMAddress                 Symbiote Core AAM address which is available 
-     *                                       on the symbiote security webpage
-     * @param keystorePath                   where the keystore will be stored
-     * @param keystorePassword               needed to access security credentials
-     * @param clientId                       name of the component in the form of "componentId@platformId"
-     * @param localAAMAddress                when using only local AAM for SecurityRequest validation
-     * @param alwaysUseLocalAAMForValidation when wanting to use local AAM for SecurityRequest validation
-     * @param componentOwnerUsername         AAMAdmin credentials 
-     * @param componentOwnerPassword         AAMAdmin credentials
-     * @return the component security handler ready to talk with Symbiote components
-     * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
-     */
-ComponentSecurityHandler componentSecurityHandler = 
-    ComponentSecurityHandlerFactory.getComponentSecurityHandler(
-            coreAAMAddress, keystorePath, keystorePassword, clientId, localAAMAddress, 
-            alwaysUseLocalAAMForValidation, componentOwnerUsername, componentOwnerPassword);
-```
-
-Component Security Handler provides following methods:
- - `Set<String> getSatisfiedPoliciesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
-                                                    SecurityRequest securityRequest)` - returns a set of identifiers of policies (e.g. resources identifiers) which are satisfied with the given SecurityRequest
- - `boolean isReceivedServiceResponseVerified(String serviceResponse,                                                  
-                                                  String componentIdentifier,
-                                                  String platformIdentifier)` - is used by a component to verify that the other components response was legitimate... e.g. to handle the service response encapsulated in a JWS. Returns true if the service is genuine.
- - `SecurityRequest generateSecurityRequestUsingLocalCredentials()` - is used by a component to generate the SecurityRequest needed to authorize operations in the Symbiote Environment to be attached to the business query
-             so that the service can confirm that the client should posses provided tokens. Returns the required payload for client's authentication and authorization.
- - `String generateServiceResponse()` - returns the required payload that should be attached next to the components API business response so that the client can verify that the service is legitimate.  
- - `ISecurityHandler getSecurityHandler()` - returns Security Handler if the component owner wants to use it directly
-
-To set up component SH, following instructions have to be done. Example for a platform registrationHandler
-```java
-IComponentSecurityHandler registrationHandlerCSH = ComponentSecurityHandlerFactory.getComponentSecurityHandler(
-                coreAAMAddress,
-                KEY_STORE_PATH,
-                KEY_STORE_PASSWORD,
-                "reghandler" + "@platfom1",
-                localAAMAddress,
-                false,
-                componentOwnerUsername,
-                componentOwnerPassword);
-
-// building a service response that needs to be attached to each of your business responses
-String regHandlerServiceResponse = rhCSH.generateServiceResponse();
-
-// building a security request to authorize operation from the registration handler in other platforms' components (e.g. Core Registry)
-SecurityRequest rhSecurityRequest = rhCSH.generateSecurityRequestUsingLocalCredentials();
-```
-
-To check validity of a response, if it came from component we are interested in (e.g. from the Core Registry), following operation have to be done: 
-```java  
-// trying to validate the service response
-registrationHandlerCSH.isReceivedServiceResponseVerified(serviceResponse, "registry", "SymbIoTe_Core_AAM); 
-```
 
 #### SecurityRequest and API
 The SecurityRequest (available here [SecurityRequest.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/payloads/SecurityRequest.java)) 
@@ -289,123 +269,7 @@ public SecurityRequest(String guestToken) {
     securityCredentials.add(new SecurityCredentials(guestToken));
 }
 ```
-
-#### Proxy client for access to AAM Services
-In addition to the [IComponentSecurityHandler](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/IComponentSecurityHandler.java) that was released, there's an utility class for REST clients using Feign. In case you are using it, it is created a client that will manage automatically the authentication headers and validate the server response (with respect to security). This class is [SymbioteAuthorizationClient](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/SymbioteAuthorizationClient.java).
-
-So let's say that you have a Feign client named MyServiceFeignClient. Normally you would instantiate it like:
-
-```java
-Feign.builder().decoder(new JacksonDecoder())
-                 .encoder(new JacksonEncoder())
-                 .target(MyServiceFeignClient.class, url);
-```
-
-So now, if you want it to manage the security headers automatically, all you have to do is:
-
-
- 1. Get an instance of the IComponentSecurityHandler:
-   ```java
-
-IComponentSecurityHandler secHandler = ComponentSecurityHandlerFactory
-                                           .getComponentSecurityHandler(
-                                               coreAAMAddress, keystorePath, keystorePassword,
-                                               clientId, localAAMAddress, false,
-                                               username, password );
-```
-2. Create an instance of the [SymbioteAuthorizationClient](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/SymbioteAuthorizationClient.java) 
-passing the Security Handler instance and the target service (serviceComponentIdentifier of the service this client is used to communicate with and servicePlatformIdentifier to which the service belongs ([CORE_AAM_INSTANCE_ID](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/commons/SecurityConstants.java#L20)) for Symbiote core components). So for example, the Registration Handler wanting to communicate with the Registry will pass `registry` in the first parameter and [CORE_AAM_INSTANCE_ID](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/commons/SecurityConstants.java#L20) for the latter. This will allow the Security Handler to get the correct certificate to validate responses.
-```java
-Client client = new SymbioteAuthorizationClient(
-    secHandler, serviceComponentIdentifier,servicePlatformIdentifier, new Client.Default(null, null));
-```
-
-And now you can pass it on your Feign client creation:
-```java
-MyServiceFeignClient jsonclient = Feign.builder()
-                 .decoder(new JacksonDecoder())
-                 .encoder(new JacksonEncoder())
-                 .client(client)
-                 .target(MyServiceFeignClient.class, url);
-```
-From now on, all methods call to jsonclient will generate REST requests with valid authentication headers and the responses will be validated as well for integrity, so in case of a challenge-response failure it will return a 400 error message.
-
-### Attribute Based Access Control
-The owner of a resource can establish a policy that describe using attributes, by whom and what operations can be performed on this object. 
-If a subject has the attributes that satisfies the access control policy established by the resource owner, then the subject is authorized to perform the desidered operation on that object.
-All attributes are stored in authorization tokens.
-Authorization tokens are issued only by AAMs.
-
-For the simplest IBAC (Identity-Based Access Control) implementation, the policies should look something like:
-```json
-AND:
-    ISS: <PlatformInstanceIdentifier>
-    SUB: <UserAuthorizedForThatResource1>
-```
-Access to the resource will be granted only to particular actor <UserAuthorizedForThatResource1>, who has token issued by specified platform <PlatformInstanceIdentifier>.
-Another good example of the ABAC is an access policy for federated resource:
-```json
-AND:
-    ISS: <PlatformInstanceIdentifier>
-    ttyp: "FOREIGN"
-    "SYMBIOTE_federation_{ordinal_number}" : "federationId"
-```
-Access to the resource will be granted to the actor, who has FOREIGN token issued by specified platform and contain attribute defining affiliation to the appropriate federation.
-
-The package [eu/h2020/symbiote/security/accesspolicies](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies) 
-offers a set of premade access policies that you can use out of the box (or always implement your own):
-* [SingleLocalHomeTokenIdentityBasedTokenAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/SingleLocalHomeTokenIdentityBasedTokenAccessPolicy.java)
- – offers basically IdentityBasedAC - useful when you only want a particular user in your platform to access a resource
-* [SingleLocalHomeTokenAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/SingleLocalHomeTokenAccessPolicy.java)
- – will offer access to the resource by any user that has an account in your platform.
-* [ComponentHomeTokenAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/ComponentHomeTokenAccessPolicy.java)
- – will offer access to the resource by particular component from specified platform. Additional required claims can be specified.
-* [SingleTokenAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/SingleTokenAccessPolicy.java) – most generic and simple implentation. You are free to set your required map of attributes that the user must possess. 
-* [SingleFederatedTokenAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/SingleFederatedTokenAccessPolicy.java) - offer access to:
-    * one of the federation members if his FOREIGN token contains the federation identifier claim
-    * user which HOME token was issued by the home platform
-
-To make it easier, above policies can be generated using special factory: [SingleTokenAccessPolicyFactory.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/SingleTokenAccessPolicyFactory.java).
-To work, factory as a parameter needs object of [SingleTokenAccessPolicySpecifier.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/SingleTokenAccessPolicySpecifier.java) class. 
-It checks if the requirements for each ABAC was met and build proper policy (e.g. if issuer is defined in attributes map for SingleLocalHomeTokenAccessPolicy).
-
-It's important to know, that creating your own AccessPolicy, it has to implement [IAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/IAccessPolicy.java). 
-
-#### ABAC example
-To generate SingleLocalHomeTokenAccessPolicy, issuer claim has to be provided. 
-```java
-//generate required attributes map
-Map<String, String> accessPolicyClaimsMap = new HashMap<>();
-//only tokens with proper values of attributes 'name', 'age' and right issuer of the token can pass access policy
-accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + "name", "John");
-accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + "age", "18");
-accessPolicyClaimsMap.put(Claims.ISSUER, deploymentId);
-
-//generate SingleTokenAccessPolicySpecifier 
-SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(
-        SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.SLHTAP,
-        accessPolicyClaimsMap
-        );
-//create map of active policies
-Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-resourceAccessPolicyMap.put("resourceId", SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));
-```
-Received Security Request must be checked against policies:
-```java
-Set<String> resp = componentSecurityHandler.getSatisfiedPoliciesIdentifiers(resourceAccessPolicyMap, securityRequest);
-//returns set of identifiers of policies (e.g. resources identifiers) whose access policies are satisfied
-```
-Note, that all custom dynamic attributes (for ABAC only) in authorization tokens are prefixed according to SecurityConstants.java
-```java
-public static final String SYMBIOTE_ATTRIBUTES_PREFIX = "SYMBIOTE_";
-```
-For PUBLIC access to a resource, just use:
-```java
-new SingleTokenAccessPolicy(null);
-```
-This will be satisfied by any valid symbiote token.
-
-## Instructions for non java developers
+## Non java developers
 ### <a name="client_certificate"></a>Acquiring client certificates needed to get authorization credentials
 The following image depicts in general how to get a symbIoTe authentication certificate:
 ![Certificate acquisition procedure](media/acquire_user_cert.png)
@@ -790,118 +654,246 @@ PAYLOAD:
 4. With such prepared headers you can access SymbIoTe resources offered privately, e.g. execute search queries.
 5. After receiving a business response from a symbiote component, you should check if it came from component you are interested in. To do so, please see [Service Response payload](#service_response)
 
+
+# Offering resources with restricted access 
+The sections below demonstrate the SymbioteSecurity in depth for parties interested in offering resources with limited access.
+
+## Java developers
+This section provides the information about usage of SymbIoTe Security library in the java code. 
+
+#### Component Security Handler
+If you want to manage components, create ComponentSecurityHandler object with  [ComponentSecurityHandlerFactory](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/ComponentSecurityHandler.java) class.
+```java
+/**
+     * Creates an end-user component security handler
+     *
+     * @param coreAAMAddress                 Symbiote Core AAM address which is available 
+     *                                       on the symbiote security webpage
+     * @param keystorePath                   where the keystore will be stored
+     * @param keystorePassword               needed to access security credentials
+     * @param clientId                       name of the component in the form of "componentId@platformId"
+     * @param localAAMAddress                when using only local AAM for SecurityRequest validation
+     * @param alwaysUseLocalAAMForValidation when wanting to use local AAM for SecurityRequest validation
+     * @param componentOwnerUsername         AAMAdmin credentials 
+     * @param componentOwnerPassword         AAMAdmin credentials
+     * @return the component security handler ready to talk with Symbiote components
+     * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
+     */
+ComponentSecurityHandler componentSecurityHandler = 
+    ComponentSecurityHandlerFactory.getComponentSecurityHandler(
+            coreAAMAddress, keystorePath, keystorePassword, clientId, localAAMAddress, 
+            alwaysUseLocalAAMForValidation, componentOwnerUsername, componentOwnerPassword);
+```
+
+Component Security Handler provides following methods:
+ - `Set<String> getSatisfiedPoliciesIdentifiers(Map<String, IAccessPolicy> accessPolicies,
+                                                    SecurityRequest securityRequest)` - returns a set of identifiers of policies (e.g. resources identifiers) which are satisfied with the given SecurityRequest
+ - `boolean isReceivedServiceResponseVerified(String serviceResponse,                                                  
+                                                  String componentIdentifier,
+                                                  String platformIdentifier)` - is used by a component to verify that the other components response was legitimate... e.g. to handle the service response encapsulated in a JWS. Returns true if the service is genuine.
+ - `SecurityRequest generateSecurityRequestUsingLocalCredentials()` - is used by a component to generate the SecurityRequest needed to authorize operations in the Symbiote Environment to be attached to the business query
+             so that the service can confirm that the client should posses provided tokens. Returns the required payload for client's authentication and authorization.
+ - `String generateServiceResponse()` - returns the required payload that should be attached next to the components API business response so that the client can verify that the service is legitimate.  
+ - `ISecurityHandler getSecurityHandler()` - returns Security Handler if the component owner wants to use it directly
+
+To set up component SH, following instructions have to be done. Example for a platform registrationHandler
+```java
+IComponentSecurityHandler registrationHandlerCSH = ComponentSecurityHandlerFactory.getComponentSecurityHandler(
+                coreAAMAddress,
+                KEY_STORE_PATH,
+                KEY_STORE_PASSWORD,
+                "reghandler" + "@platfom1",
+                localAAMAddress,
+                false,
+                componentOwnerUsername,
+                componentOwnerPassword);
+
+// building a service response that needs to be attached to each of your business responses
+String regHandlerServiceResponse = rhCSH.generateServiceResponse();
+
+// building a security request to authorize operation from the registration handler in other platforms' components (e.g. Core Registry)
+SecurityRequest rhSecurityRequest = rhCSH.generateSecurityRequestUsingLocalCredentials();
+```
+
+To check validity of a response, if it came from component we are interested in (e.g. from the Core Registry), following operation have to be done: 
+```java  
+// trying to validate the service response
+registrationHandlerCSH.isReceivedServiceResponseVerified(serviceResponse, "registry", "SymbIoTe_Core_AAM); 
+```
+
+#### Proxy client for access to AAM Services
+In addition to the [IComponentSecurityHandler](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/IComponentSecurityHandler.java) that was released, there's an utility class for REST clients using Feign. In case you are using it, it is created a client that will manage automatically the authentication headers and validate the server response (with respect to security). This class is [SymbioteAuthorizationClient](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/SymbioteAuthorizationClient.java).
+
+So let's say that you have a Feign client named MyServiceFeignClient. Normally you would instantiate it like:
+
+```java
+Feign.builder().decoder(new JacksonDecoder())
+                 .encoder(new JacksonEncoder())
+                 .target(MyServiceFeignClient.class, url);
+```
+
+So now, if you want it to manage the security headers automatically, all you have to do is:
+
+
+ 1. Get an instance of the IComponentSecurityHandler:
+   ```java
+
+IComponentSecurityHandler secHandler = ComponentSecurityHandlerFactory
+                                           .getComponentSecurityHandler(
+                                               coreAAMAddress, keystorePath, keystorePassword,
+                                               clientId, localAAMAddress, false,
+                                               username, password );
+```
+2. Create an instance of the [SymbioteAuthorizationClient](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/SymbioteAuthorizationClient.java) 
+passing the Security Handler instance and the target service (serviceComponentIdentifier of the service this client is used to communicate with and servicePlatformIdentifier to which the service belongs ([CORE_AAM_INSTANCE_ID](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/commons/SecurityConstants.java#L20)) for Symbiote core components). So for example, the Registration Handler wanting to communicate with the Registry will pass `registry` in the first parameter and [CORE_AAM_INSTANCE_ID](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/commons/SecurityConstants.java#L20) for the latter. This will allow the Security Handler to get the correct certificate to validate responses.
+```java
+Client client = new SymbioteAuthorizationClient(
+    secHandler, serviceComponentIdentifier,servicePlatformIdentifier, new Client.Default(null, null));
+```
+
+And now you can pass it on your Feign client creation:
+```java
+MyServiceFeignClient jsonclient = Feign.builder()
+                 .decoder(new JacksonDecoder())
+                 .encoder(new JacksonEncoder())
+                 .client(client)
+                 .target(MyServiceFeignClient.class, url);
+```
+From now on, all methods call to jsonclient will generate REST requests with valid authentication headers and the responses will be validated as well for integrity, so in case of a challenge-response failure it will return a 400 error message.
+
+### Attribute Based Access Control
+The owner of a resource can establish a policy that describe using attributes, by whom and what operations can be performed on this object. 
+If a subject has the attributes that satisfies the access control policy established by the resource owner, then the subject is authorized to perform the desidered operation on that object.
+All attributes are stored in authorization tokens.
+Authorization tokens are issued only by AAMs.
+
+For the simplest IBAC (Identity-Based Access Control) implementation, the policies should look something like:
+```json
+AND:
+    ISS: <PlatformInstanceIdentifier>
+    SUB: <UserAuthorizedForThatResource1>
+```
+Access to the resource will be granted only to particular actor <UserAuthorizedForThatResource1>, who has token issued by specified platform <PlatformInstanceIdentifier>.
+Another good example of the ABAC is an access policy for federated resource:
+```json
+AND:
+    ISS: <PlatformInstanceIdentifier>
+    ttyp: "FOREIGN"
+    "SYMBIOTE_federation_{ordinal_number}" : "federationId"
+```
+Access to the resource will be granted to the actor, who has FOREIGN token issued by specified platform and contain attribute defining affiliation to the appropriate federation.
+
+The package [eu/h2020/symbiote/security/accesspolicies](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies) 
+offers a set of premade access policies that you can use out of the box (or always implement your own):
+* [SingleLocalHomeTokenIdentityBasedTokenAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/SingleLocalHomeTokenIdentityBasedTokenAccessPolicy.java)
+ – offers basically IdentityBasedAC - useful when you only want a particular user in your platform to access a resource
+* [SingleLocalHomeTokenAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/SingleLocalHomeTokenAccessPolicy.java)
+ – will offer access to the resource by any user that has an account in your platform.
+* [ComponentHomeTokenAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/ComponentHomeTokenAccessPolicy.java)
+ – will offer access to the resource by particular component from specified platform. Additional required claims can be specified.
+* [SingleTokenAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/SingleTokenAccessPolicy.java) – most generic and simple implentation. You are free to set your required map of attributes that the user must possess. 
+* [SingleFederatedTokenAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/SingleFederatedTokenAccessPolicy.java) - offer access to:
+    * one of the federation members if his FOREIGN token contains the federation identifier claim
+    * user which HOME token was issued by the home platform
+
+To make it easier, above policies can be generated using special factory: [SingleTokenAccessPolicyFactory.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/SingleTokenAccessPolicyFactory.java).
+To work, factory as a parameter needs object of [SingleTokenAccessPolicySpecifier.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/common/singletoken/SingleTokenAccessPolicySpecifier.java) class. 
+It checks if the requirements for each ABAC was met and build proper policy (e.g. if issuer is defined in attributes map for SingleLocalHomeTokenAccessPolicy).
+
+It's important to know, that creating your own AccessPolicy, it has to implement [IAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/IAccessPolicy.java). 
+
+#### ABAC example
+To generate SingleLocalHomeTokenAccessPolicy, issuer claim has to be provided. 
+```java
+//generate required attributes map
+Map<String, String> accessPolicyClaimsMap = new HashMap<>();
+//only tokens with proper values of attributes 'name', 'age' and right issuer of the token can pass access policy
+accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + "name", "John");
+accessPolicyClaimsMap.put(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + "age", "18");
+accessPolicyClaimsMap.put(Claims.ISSUER, deploymentId);
+
+//generate SingleTokenAccessPolicySpecifier 
+SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(
+        SingleTokenAccessPolicySpecifier.SingleTokenAccessPolicyType.SLHTAP,
+        accessPolicyClaimsMap
+        );
+//create map of active policies
+Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+resourceAccessPolicyMap.put("resourceId", SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));
+```
+Received Security Request must be checked against policies:
+```java
+Set<String> resp = componentSecurityHandler.getSatisfiedPoliciesIdentifiers(resourceAccessPolicyMap, securityRequest);
+//returns set of identifiers of policies (e.g. resources identifiers) whose access policies are satisfied
+```
+Note, that all custom dynamic attributes (for ABAC only) in authorization tokens are prefixed according to SecurityConstants.java
+```java
+public static final String SYMBIOTE_ATTRIBUTES_PREFIX = "SYMBIOTE_";
+```
+For PUBLIC access to a resource, just use:
+```java
+new SingleTokenAccessPolicy(null);
+```
+This will be satisfied by any valid symbiote token.
+
 # Credentials revocation 
+
+
+In case of security breach, there may be need to revoke credentials such as certificates or tokens. 
+
 ## Java developers:
-To revoke credentials, proper Revocation Request should be sent using AAMClient.
-
+To revoke credentials, proper Revocation Request should be sent to the issuer AAM using AAMClient.
+Revocation Request has following structure:
+```java
+private Credentials credentials = new Credentials();
+private String homeTokenString = "";
+private String foreignTokenString = "";
+private String certificatePEMString = "";
+private String certificateCommonName = "";
+private CredentialType credentialType = CredentialType.NULL;
+```
+Appropriate fields have to be set using setters, depending on the kind of credentials we want to revoke.
+To send the payload, AAMClient should be used:
+```java
+// payload should be sent to the issuer of the token/certificate
+IAAMClient restClient = new AAMClient(issuerAAMOfCredentialsAddress);
+// as response, boolean is received
+boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
+``` 
+As the response, boolean value is received. 'true' stands for success, 'false' for failure of the revocation.
 ### Revocation of home token
-In case of our security breach of our home token, it can be revoked in the issuing platform by sending Revocation Request with following payload:
+To revoke home token and prevent any user from using it, following fields have to be set:
 ```java
 RevocationRequest revocationRequest = new RevocationRequest();
-        revocationRequest.setCredentialType(RevocationRequest.CredentialType.USER);
-        revocationRequest.setHomeTokenString(homeToken.toString());             // homeToken for the revocation
-        revocationRequest.setCredentials(new Credentials(username, password));  // credentials of the token Owner
-// payload should be sent to the issuer of the homeToken
-IAAMClient restClient = new AAMClient(issuerAAMOfHomeTokenAddress);
-// as response, boolean is received (true if revocation was successful)
-boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
+revocationRequest.setCredentialType(RevocationRequest.CredentialType.USER);
+revocationRequest.setHomeTokenString(homeToken.toString());                 // homeToken for the revocation
+revocationRequest.setCredentials(new Credentials(username, password));      // credentials of the token Owner
 ```
-#### Example
-Full payload sent:
-```java
-{
-  "credentials" : {
-    "username" : "testApplicationUsername",
-    "password" : "testApplicationPassword"
-  },
-  "homeTokenString" : "eyJhbGciOiJFUzI1NiJ9.eyJTWU1CSU9URV9Sb2xlIjoiVVNFUiIsInR0eXAiOiJIT01FIiwic3ViIjoidGVzdEFwcGxpY2F0aW9uVXNlcm5hbWVAY2xpZW50SWQiLCJpcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVQYWVEQzRJZ091SE5QZlgrVERuWnV2bkx3VGxzMDBEUG9veGlWQkxPM2tyNDdDd01xWEpuMjd5aXRXWVJEUSswZlhudjMxSGxiS25MUlpLakpheVN6dz09IiwiaXNzIjoiU3ltYklvVGVfQ29yZV9BQU0iLCJleHAiOjE1MTk3NDIwOTcsImlhdCI6MTUxOTc0MjA5NSwianRpIjoiMjA5NTg2NDcxOCIsInNwayI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRUlhY1JZbGVNOUYyWmNQV09UYW00L3J4eFBoeW5yOXllVDV0SVpLTU4vSDhQQzJ4cVFZVUJvVWFLQjliV1BFZlBGdThTT2IvVTBmQWRvWVBqSXFSdU93PT0ifQ.7LtJREqMYX_281zhWOuut0DZ5WLpuHF06lX1gx_KTJEg9BiHbp8jmzSr8Se1gISQD5Kxyh711a-cYZAS5y55cg",
-  "foreignTokenString" : "",
-  "certificatePEMString" : "",
-  "certificateCommonName" : "",
-  "credentialType" : "USER"
-}
-```
-### Revocation of foreign token
-In case of our security breach of our foreign token, it can be revoked in the issuing platform by sending Revocation Request with following payload:
-```java
-RevocationRequest revocationRequest = new RevocationRequest();
-        revocationRequest.setHomeTokenString(token.toString());
-        revocationRequest.setForeignTokenString(foreignToken.toString());
-IAAMClient restClient = new AAMClient(issuerAAMOfHomeTokenAddress);
-// as response, boolean is received (true if revocation was successful)
-boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
-```
-#### Example
-Full payload sent:
-{
-  "credentials" : {
-    "username" : "",
-    "password" : ""
-  },
-  "homeTokenString" : "eyJhbGciOiJFUzI1NiJ9.eyJ0dHlwIjoiSE9NRSIsInN1YiI6InRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkIiwiaXBrIjoiTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFN2VTYUlicWNRSnNpUWRmRXpPWkZuZlVQZWpTSkpDb1R4SSt2YWZiS1dyclZSUVNkS3cwdlYvUmRkZ3U1SXhWTnFkV0tsa3dpcldsTVpYTFJHcWZ3aHc9PSIsIlNZTUJJT1RFX25hbWUiOiJ0ZXN0MiIsImlzcyI6InBsYXRmb3JtLTEiLCJleHAiOjMwMzk0ODUxNzcsImlhdCI6MTUxOTc0MjU1OCwianRpIjoiNTY5MjYxMzExIiwic3BrIjoiTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFVWg5eTBLcHRmU0RveUhXU2F5WFRUT3lGZlZiV3RWQWYycm9tU25CQlE0NE5FaWFrU3ZGSTliL1FhK0Iwd2g3WkZVT29xeXl4MFdGOEZoQ3dyODJQMkE9PSJ9.fT1AiZudp2W7RcntF13rvP1O_n0gknuSC_UHuvuZYHFLNmdsHT3sbZMgttLSlOO-RM9EEz_CR_K0n20_MWGR3A",
-  "foreignTokenString" : "eyJhbGciOiJFUzI1NiJ9.eyJTWU1CSU9URV9mZWRlcmF0aW9uXzEiOiJmZWRlcmF0aW9uSWQiLCJ0dHlwIjoiRk9SRUlHTiIsInN1YiI6InRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkQHBsYXRmb3JtLTFANTY5MjYxMzExIiwiaXBrIjoiTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFUGFlREM0SWdPdUhOUGZYK1REblp1dm5Md1RsczAwRFBvb3hpVkJMTzNrcjQ3Q3dNcVhKbjI3eWl0V1lSRFErMGZYbnYzMUhsYktuTFJaS2pKYXlTenc9PSIsImlzcyI6IlN5bWJJb1RlX0NvcmVfQUFNIiwiZXhwIjoxNTE5NzQyNTYyLCJpYXQiOjE1MTk3NDI1NjAsImp0aSI6IjIxMDUzMjk3MDIiLCJzcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVVaDl5MEtwdGZTRG95SFdTYXlYVFRPeUZmVmJXdFZBZjJyb21TbkJCUTQ0TkVpYWtTdkZJOWIvUWErQjB3aDdaRlVPb3F5eXgwV0Y4RmhDd3I4MlAyQT09In0.VbsuXGjfExPxUrhRHTLp8qtmsoej9I8C3GS1R3SMb7KQ7UUyaFrUmkWoC0fFRceKZwifW1MX5szdeypiKoxFIQ",
-  "certificatePEMString" : "",
-  "certificateCommonName" : "",
-  "credentialType" : "NULL"
-}
+Payload should be sent to the issuer of this token.
 
-### Revocation of client certificate
-In case of our security breach of our client's certificate, it can be revoked in the issuing platform by sending Revocation Request with following payload:
+### Revocation of foreign token
+To revoke home token and prevent any user from using it, following fields have to be set:
 ```java
 RevocationRequest revocationRequest = new RevocationRequest();
-        revocationRequest.setCredentials(new Credentials(username, password));
-        revocationRequest.setCredentialType(RevocationRequest.CredentialType.USER);
-        revocationRequest.setCertificatePEMString(clientCertificate);
-        // or it can be revoked using its commonName
-        // String commonName = username + illegalSign + clientId;
-        // revocationRequest.setCertificateCommonName(commonName);
-// as response, boolean is received (true if revocation was successful)
-boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
+revocationRequest.setHomeTokenString(token.toString());           //homeToken based on which foreign token was issued
+revocationRequest.setForeignTokenString(foreignToken.toString()); //foreign token to revoke
 ```
-#### Example
-Full payload sent:
-```java
-{
-  "credentials" : {
-    "username" : "testApplicationUsername",
-    "password" : "testApplicationPassword"
-  },
-  "homeTokenString" : "",
-  "foreignTokenString" : "",
-  "certificatePEMString" : "-----BEGIN CERTIFICATE-----\r\nMIIBgTCCASigAwIBAgIBATAKBggqhkjOPQQDAjBJMQ0wCwYDVQQHEwR0ZXN0MQ0w\r\nCwYDVQQKEwR0ZXN0MQ0wCwYDVQQLEwR0ZXN0MRowGAYDVQQDDBFTeW1iSW9UZV9D\r\nb3JlX0FBTTAeFw0xODAyMjcxNDQ3MTNaFw0xOTAyMjcxNDQ3MTNaMD0xOzA5BgNV\r\nBAMMMnRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkQFN5bWJJb1RlX0Nv\r\ncmVfQUFNMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEs8QnAVC9r4j11mik9dl9\r\nU5g1WbId/bZOSvyMMcskH+Gz/3McMEg0/yY6YkV/Zmr46oQ6xnHEHXipE3Rywigu\r\n2qMNMAswCQYDVR0TBAIwADAKBggqhkjOPQQDAgNHADBEAiBWNmuWEUgLHRZ6YpHn\r\n5UlbPvWVn0y9k4RlKNFTDPpSKAIgWfJL34k28sG5+RKEZEXn8xsrMcS9LQYVLzVD\r\nHBdYUz8=\r\n-----END CERTIFICATE-----\r\n",
-  "certificateCommonName" : "",
-  "credentialType" : "USER"
-}
-```
-### Revocation of platform certificate
-Platform owners can also revoke their platforms certificate using Revocation Request with following payload:
+Payload should be sent to the issuer of the foreign token.
+
+### Revocation of certificate
+In case of security breach of our private key, certificate associated with it can be revoked to prevent impersonation. This applies to platforms and clients. It is possible to revoke certificate using its PEM or common name. Following fields have to be set: 
 ```java
 RevocationRequest revocationRequest = new RevocationRequest();
-        revocationRequest.setCredentials(new Credentials(platformOwnerUsername, platformOwnerPassword));
-        revocationRequest.setCredentialType(RevocationRequest.CredentialType.USER);
-        revocationRequest.setCertificatePEMString(platformCertificate);
-        // or it can be revoked using its commonName
-        // String commonName = platformId;
-        // revocationRequest.setCertificateCommonName(commonName);
-// as response, boolean is received (true if revocation was successful)
-boolean isRevoked = Boolean.parseBoolean(restClient.revokeCredentials(revocationRequest));
+revocationRequest.setCredentials(new Credentials(username, password)); //user or platformOwner credentials
+revocationRequest.setCredentialType(RevocationRequest.CredentialType.USER);
+revocationRequest.setCertificatePEMString(clientCertificate); //in case of revocation using PEM
+// common name for client certs: username@clientId
+// common name for platform certs: platformId
+// revocationRequest.setCertificateCommonName(commonName); //in case of revocation using common Name
 ```
-#### Example
-```java 
-{
-  "credentials" : {
-    "username" : "testApplicationPOUsername",
-    "password" : "testApplicationPOPassword"
-  },
-  "homeTokenString" : "",
-  "foreignTokenString" : "",
-  "certificatePEMString" : "-----BEGIN CERTIFICATE-----\r\nMIIBZTCCAQqgAwIBAgIBATAKBggqhkjOPQQDAjBJMQ0wCwYDVQQHEwR0ZXN0MQ0w\r\nCwYDVQQKEwR0ZXN0MQ0wCwYDVQQLEwR0ZXN0MRowGAYDVQQDDBFTeW1iSW9UZV9D\r\nb3JlX0FBTTAeFw0xODAyMjcxNDUzNTdaFw0xOTAyMjcxNDUzNTdaMBkxFzAVBgNV\r\nBAMTDnRlc3RQbGF0Zm9ybUlkMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEKWmQ\r\nUU7YDa08g8xP8YdLBYdkjuNG6QD06gW6EATbM37x8UQr+xWbJ0jqi5S/mwYo8j1s\r\nI6R4zRBBqUEUTFnDyaMTMBEwDwYDVR0TBAgwBgEB/wIBADAKBggqhkjOPQQDAgNJ\r\nADBGAiEAxcxy3aB3Q7FLHIZ/kM+1azkDZnUgF9RNt9PEnwiwHhYCIQDR2DHxmJgE\r\nZyWWMICJJKx22IxdXM0cfAdtu9xX/Gbcmw==\r\n-----END CERTIFICATE-----\r\n",
-  "certificateCommonName" : "",
-  "credentialType" : "USER"
-}
-```
-## Non Java developers:
-To revoke credentials, proper Revocation Request should be sent on following urls:
+Payload should be sent to the issuer of the certificate (CoreAAM in case of platform certificate, proper platform in case of client one).
+## Non java developers:
+To revoke credentials, proper payload, Revocation Request, should be sent on following urls:
 ```
 https://<coreInterfaceAdress>/revoke_credentials 
 ```
@@ -909,9 +901,80 @@ or
 ```
 https://<platformInterworkingInterface>/paam/revoke_credentials
 ```
-depending on the issuer of that credential (token/certificate).
+depending on the issuer of that credentials.
 ### Revocation Request
-TODO
+Revocation Request is a json payload carrying information needed to revoke compromised credentials. It contains fields such as:
+```java
+{
+  "credentials" : {
+    "username" : "",
+    "password" : ""
+  },
+  "homeTokenString" : "",
+  "foreignTokenString" : "",
+  "certificatePEMString" : "",
+  "certificateCommonName" : "",
+  "credentialType" : "NULL"
+}
+```
+Depending on the kind of credentials we want to revoke, proper fields should be filled.
 
+### Revocation of home token
+To revoke home token and prevent any user from using it, following fields have to be set:
+```java
+{
+  "credentials" : {
+    "username" : "tokenOwnerUsername", 
+    "password" : "tokenOwnerPassword"
+  },
+  "homeTokenString" : "homeTokenString",        //home token to revoke
+  "foreignTokenString" : "",
+  "certificatePEMString" : "",
+  "certificateCommonName" : "",
+  "credentialType" : "USER"                     //DO NOT CHANGE THAT VALUE
+}
+```
+Payload should be sent to the issuer of this token.
 
+### Revocation of foreign token
+To revoke home token and prevent any user from using it, following fields have to be set:
+```java 
+{
+  "credentials" : {
+    "username" : "tokenOwnerUsername",
+    "password" : "tokenOwnerPassword"
+  },
+  "homeTokenString" : "homeTokenString",        //homeToken based on which foreign token was issued
+  "foreignTokenString" : "foreignTokenString",  //foreign token for revocation
+  "certificatePEMString" : "",
+  "certificateCommonName" : "",
+  "credentialType" : "NULL"                     //DO NOT CHANGE THAT VALUE
+}
+```
+Payload should be sent to the issuer of the foreign token.
 
+### Revocation of certificate
+In case of security breach of our private key, certificate associated with it can be revoked to prevent impersonation. This applies to platforms and clients. It is possible to revoke certificate using its PEM or common name. Following fields have to be set: 
+```java
+{
+  "credentials" : {
+    "username" : "username",                    //user or platformOwner credentials
+    "password" : "password"
+  },
+  "homeTokenString" : "",
+  "foreignTokenString" : "",
+  //certificate PEM strink to revoke
+  "certificatePEMString" : "-----BEGIN CERTIFICATE-----\r\nMIIBgTCCASigAwIBAgIBATAKBggqhkjOPQQDAjBJMQ0wCwYDVQQHEwR0ZXN0MQ0w\r\nCwYDVQQKEwR0ZXN0MQ0wCwYDVQQLEwR0ZXN0MRowGAYDVQQDDBFTeW1iSW9UZV9D\r\nb3JlX0FBTTAeFw0xODAyMjcxNDQ3MTNaFw0xOTAyMjcxNDQ3MTNaMD0xOzA5BgNV\r\nBAMMMnRlc3RBcHBsaWNhdGlvblVzZXJuYW1lQGNsaWVudElkQFN5bWJJb1RlX0Nv\r\ncmVfQUFNMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEs8QnAVC9r4j11mik9dl9\r\nU5g1WbId/bZOSvyMMcskH+Gz/3McMEg0/yY6YkV/Zmr46oQ6xnHEHXipE3Rywigu\r\n2qMNMAswCQYDVR0TBAIwADAKBggqhkjOPQQDAgNHADBEAiBWNmuWEUgLHRZ6YpHn\r\n5UlbPvWVn0y9k4RlKNFTDPpSKAIgWfJL34k28sG5+RKEZEXn8xsrMcS9LQYVLzVD\r\nHBdYUz8=\r\n-----END CERTIFICATE-----\r\n",
+  //certificate common name to revoke (instead of PEM)
+  "certificateCommonName" : "",
+  "credentialType" : "USER"                     //DO NOT CHANGE THAT VALUE
+}
+```
+Common name structure:
+```java
+username@clientId - for client certificates to revoke
+platformId - for platform certificate
+```
+Sending payload with certificate commonName AND PEM will result in taking into consideration only commonName.
+  
+Payload should be sent to the issuer of the certificate (CoreAAM in case of platform certificate, proper platform in case of client one).
