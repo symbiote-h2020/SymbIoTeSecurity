@@ -12,10 +12,11 @@ import org.springframework.http.HttpStatus;
 public class SecurityMisconfigurationException extends SecurityException {
 
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
+    public static final String GENERIC_README_NOTICE = "Please check relevant for your deployment Symbiote Core/Cloud/Enabler/SmartSpace and/or AAM repository readme for instructions on how to configure your AAM.";
     public static final String AAM_OWNER_USER_ALREADY_REGISTERED = "AAM owner user already registered in database... Either delete that user or choose a different administrator username";
-    public static final String AAM_HAS_NO_FOREIGN_RULES_DEFINED = "AAM has no foreign rules defined";
-    public static final String AAM_PRIVATE_KEY_NOT_FOUND_IN_GIVEN_CONFIGURATION = "Can't find AAM private key using the given configuration. Please check SymbioteCloud readme on PAAM certificate.";
-    public static final String CONFIGURATION_POINTS_TO_WRONG_CERTIFICATE = "Configuration points to a certificate that doesn't match the symbiote requirements. Please check SymbioteCloud readme on PAAM certificate.";
+    public static final String AAM_HAS_NO_FEDERATIONS_DEFINED = "AAM has no foreign rules defined";
+    public static final String AAM_PRIVATE_KEY_NOT_FOUND_IN_GIVEN_CONFIGURATION = "Can't find AAM private key using the given configuration.";
+    public static final String CONFIGURATION_POINTS_TO_WRONG_CERTIFICATE = "Configuration points to a certificate that doesn't match the symbiote requirements.";
     private static final String errorMessage = "AAM_MISCONFIGURED";
     private static final HttpStatus statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
 
