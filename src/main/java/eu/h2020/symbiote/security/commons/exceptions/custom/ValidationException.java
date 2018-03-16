@@ -17,6 +17,7 @@ public class ValidationException extends SecurityException {
 
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
 
+    public static final String CLIENT_ID_MISMATCH = "Client Id from certificate request must be the same as in CSR.";
     public static final String VALIDATION_ERROR_OCCURRED = "Validation error occurred";
     public static final String USING_REVOKED_KEY = "Using revoked key";
     public static final String WRONG_DEPLOYMENT_ID = "Deployment id's mismatch";
