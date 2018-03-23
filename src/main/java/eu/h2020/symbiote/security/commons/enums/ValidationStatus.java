@@ -61,6 +61,11 @@ public enum ValidationStatus {
     UNKNOWN,
 
     /**
+     * when issuer of the token under validation is unreachable
+     */
+    ISSUING_AAM_UNREACHABLE,
+
+    /**
      * uninitialized value of this enum
      */
     NULL
