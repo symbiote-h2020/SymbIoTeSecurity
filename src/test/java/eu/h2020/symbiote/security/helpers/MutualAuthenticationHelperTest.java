@@ -168,6 +168,48 @@ public class MutualAuthenticationHelperTest {
         assertTrue(MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, new Certificate(CryptoHelper.convertX509ToPEM(serviceCertificate))));
     }
 
+    @Test
+    public void isServiceResponseVerifiedFailDueToBadHash() throws
+            NoSuchProviderException,
+            KeyStoreException,
+            IOException,
+            CertificateException,
+            NoSuchAlgorithmException,
+            UnrecoverableKeyException {
+
+        KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
+        ks.load(new FileInputStream(SERVICE_CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
+        PrivateKey servicePrivateKey = (PrivateKey) ks.getKey(SERVICE_CERTIFICATE_ALIAS, CERTIFICATE_PASSWORD.toCharArray());
+
+        // prepare a malicious hash
+        String hashedTimestamp = hashSHA256(Long.toString(new Date().getTime()));
+        JwtBuilder jwtBuilder = Jwts.builder();
+        jwtBuilder.claim("hash", hashedTimestamp);
+        jwtBuilder.claim("timestamp", Long.toString(new Date().getTime()));
+        jwtBuilder.signWith(SignatureAlgorithm.ES256, servicePrivateKey);
+        X509Certificate serviceCertificate = (X509Certificate) ks.getCertificate(SERVICE_CERTIFICATE_ALIAS);
+        assertFalse(MutualAuthenticationHelper.isServiceResponseVerified(jwtBuilder.compact(), new Certificate(CryptoHelper.convertX509ToPEM(serviceCertificate))));
+    }
+
+    @Test
+    public void isServiceResponseVerifiedFailDueToExpiration() throws
+            NoSuchProviderException,
+            KeyStoreException,
+            IOException,
+            CertificateException,
+            NoSuchAlgorithmException,
+            UnrecoverableKeyException {
+
+        KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
+        ks.load(new FileInputStream(SERVICE_CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
+        X509Certificate serviceCertificate = (X509Certificate) ks.getCertificate(SERVICE_CERTIFICATE_ALIAS);
+        PrivateKey servicePrivateKey = (PrivateKey) ks.getKey(SERVICE_CERTIFICATE_ALIAS, CERTIFICATE_PASSWORD.toCharArray());
+        SecurityRequest securityRequestCertsAttached = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, true);
+        String serviceResponse = MutualAuthenticationHelper.getServiceResponse(servicePrivateKey, securityRequestCertsAttached.getTimestamp() - 2000);
+        MutualAuthenticationHelper.SERVICE_RESPONSE_EXPIRATION_TIME = 1;
+        assertFalse(MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, new Certificate(CryptoHelper.convertX509ToPEM(serviceCertificate))));
+    }
+
     @Test(expected = ValidationException.class)
     public void isSecurityRequestVerifiedFailsWrongAuthenticationChallenge() throws
             NoSuchAlgorithmException,

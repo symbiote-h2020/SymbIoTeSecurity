@@ -42,8 +42,8 @@ dependencies {
     compile('io.github.openfeign:feign-jackson:[9.5.1, 9.999]')
     compile('commons-logging:commons-logging:[1.2, 1.999]')
 
-    // JDK 9 runtime fixes
-    if(JavaVersion.current() == JavaVersion.VERSION_1_9){
+    // JDK 9+ runtime fixes
+    if(JavaVersion.current() > JavaVersion.VERSION_1_8){
         runtime('javax.xml.bind:jaxb-api:[2.3.0, 2.3.999]')
     }
 

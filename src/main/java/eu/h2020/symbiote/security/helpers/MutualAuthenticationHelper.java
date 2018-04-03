@@ -13,6 +13,8 @@ import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.nio.charset.StandardCharsets;
@@ -32,10 +34,14 @@ import java.util.*;
  */
 public class MutualAuthenticationHelper {
 
-    // TODO @Daniele by Mikołaj -> I think it should be param of the validator as SS doesn't have support for properties. It should be integrated as the exp claim timestamp which by RFC self-invalidates the challenge
-    // in seconds
-    private static final long THRESHOLD_SECONDS = 60;
+    /**
+     * Defines for how long a security response from a remote service should be deemed as valid.
+     * MUST not be enlarged without serious consideration.
+     * Default value of 60 seconds is reasonable to count for Internet delays.
+     */
+    public static long SERVICE_RESPONSE_EXPIRATION_TIME = 60;
     private static SecureRandom random = new SecureRandom();
+    private static Log log = LogFactory.getLog(MutualAuthenticationHelper.class);
 
     /**
      * Utility class to hash a string with SHA-256
@@ -70,7 +76,7 @@ public class MutualAuthenticationHelper {
         Date timestampDate = new Date();
         // JWT rounds to seconds
         long timestampMilliseconds = timestampDate.getTime() - timestampDate.getTime() % 1000;
-        Date expiryDate = new Date(timestampMilliseconds + THRESHOLD_SECONDS * 1000);
+        Date expiryDate = new Date(timestampMilliseconds + SERVICE_RESPONSE_EXPIRATION_TIME * 1000);
 
         Iterator<AuthorizationCredentials> iteratorAC = authorizationCredentials.iterator();
         Set<SecurityCredentials> securityCredentialsSet = new HashSet<>();
@@ -169,7 +175,7 @@ public class MutualAuthenticationHelper {
             String challengeHash = Jwts.parser().setSigningKey(applicationPublicKey).parseClaimsJws(challengeJWS).getBody().get("hash").toString();
             String calculatedHash = hashSHA256(securityCredentialsSetElement.getToken() + timestamp1.toString());
             Long deltaT = timestamp2 - timestamp1;
-            Long thresholdMilis = THRESHOLD_SECONDS * 1000;
+            Long thresholdMilis = SERVICE_RESPONSE_EXPIRATION_TIME * 1000;
 
             // check that challengeJWS matches the authorization token
 
@@ -239,24 +245,36 @@ public class MutualAuthenticationHelper {
             NoSuchAlgorithmException,
             CertificateException {
 
-        Long timestamp3 = new Date().getTime();
+        Long currentLocalTimestamp = new Date().getTime();
         // JWT rounds to seconds
-        timestamp3 = timestamp3 - timestamp3 % 1000;
+        currentLocalTimestamp = currentLocalTimestamp - currentLocalTimestamp % 1000;
         PublicKey servicePublicKey = serviceCertificate.getX509().getPublicKey();
 
-        Long timestamp2;
-        String hashedTimestamp2;
+        Long remoteServiceTimestamp;
+        String remoteServiceTimestampHash;
         try {
-            timestamp2 = Long.valueOf(Jwts.parser().setSigningKey(servicePublicKey).parseClaimsJws(serviceResponse).getBody().get("timestamp").toString());
-            hashedTimestamp2 = Jwts.parser().setSigningKey(servicePublicKey).parseClaimsJws(serviceResponse).getBody().get("hash").toString();
+            remoteServiceTimestamp = Long.valueOf(Jwts.parser().setSigningKey(servicePublicKey).parseClaimsJws(serviceResponse).getBody().get("timestamp").toString());
+            remoteServiceTimestampHash = Jwts.parser().setSigningKey(servicePublicKey).parseClaimsJws(serviceResponse).getBody().get("hash").toString();
         } catch (io.jsonwebtoken.SignatureException e) {
+            log.error("The signature of the service response doesn't match the provided component certificate.");
             throw new CertificateException(e.getMessage());
         }
 
-        String calculatedHash = hashSHA256(timestamp2.toString());
-        Long deltaT = timestamp3 - timestamp2;
+        String calculatedHash = hashSHA256(remoteServiceTimestamp.toString());
+        Long deltaT = Math.abs(currentLocalTimestamp - remoteServiceTimestamp);
 
-        return Objects.equals(calculatedHash, hashedTimestamp2) && deltaT < THRESHOLD_SECONDS * 1000;
+        if (!calculatedHash.equals(remoteServiceTimestampHash)) {
+            log.error("Service response JWS hash claim doesn't match symbIoTe mutual authentication algorithm");
+            return false;
+        }
+
+        if (deltaT > SERVICE_RESPONSE_EXPIRATION_TIME * 1000) {
+            log.error("Disparity between received timestamp: " + new Date(remoteServiceTimestamp)
+                    + " and our local timestamp: " + new Date(currentLocalTimestamp)
+                    + " is " + deltaT / 1000 + "seconds, which is over the " + SERVICE_RESPONSE_EXPIRATION_TIME + " seconds allowed validity threshold.");
+            return false;
+        }
+        return true;
     }
 
 }
