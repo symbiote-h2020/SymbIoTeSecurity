@@ -109,10 +109,10 @@ public class CryptoHelperTest {
         KeyPair keyPair = CryptoHelper.createKeyPair();
         HomeCredentials homeCredentials = new HomeCredentials(null, username, clientId, null, keyPair.getPrivate());
         String loginRequest = CryptoHelper.buildHomeTokenAcquisitionRequest(homeCredentials);
-        JWTClaims claims = JWTEngine.getClaimsFromToken(loginRequest);
+        JWTClaims claims = JWTEngine.getClaimsFromJWT(loginRequest);
         assertEquals(homeCredentials.username, claims.getIss());
         assertEquals(homeCredentials.clientIdentifier, claims.getSub());
-        assertEquals(ValidationStatus.VALID, JWTEngine.validateTokenString(loginRequest, keyPair.getPublic()));
+        assertEquals(ValidationStatus.VALID, JWTEngine.validateJWTString(loginRequest, keyPair.getPublic()));
     }
 
     @Test

@@ -21,11 +21,12 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Set of functions for generating JWT tokens.
+ * Set of functions for generating JSON Web Tokens (JWT).
  *
  * @author Daniele Caldarola (CNIT)
  * @author Nemanja Ignjatov (UNIVIE)
  * @author Mikołaj Dobski (PSNC)
+ * @author Jakub Toczek (PSNC)
  */
 public class JWTEngine {
 
@@ -33,82 +34,82 @@ public class JWTEngine {
     }
 
     /**
-     * Retrieves claims from given token String
+     * Retrieves claims from given jwt String
      *
-     * @param tokenString to get claims from
-     * @return claims deserialized from the token
+     * @param jwtString to get claims from
+     * @return claims deserialized from the jwt
      * @throws ValidationException on parse exception.
      */
-    public static Claims getClaims(String tokenString) throws ValidationException {
+    public static Claims getClaims(String jwtString) throws ValidationException {
         try {
             ECDSAHelper.enableECDSAProvider();
-            JWTClaims claims = getClaimsFromToken(tokenString);
+            JWTClaims claims = getClaimsFromJWT(jwtString);
             //Convert IPK claim to publicKey for validation
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(claims.getIpk()));
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
             PublicKey publicKey = keyFactory.generatePublic(keySpec);
 
             // retrieve the claims
-            return Jwts.parser().setSigningKey(publicKey).parseClaimsJws(tokenString).getBody();
-            // validate the token using the claims parser
+            return Jwts.parser().setSigningKey(publicKey).parseClaimsJws(jwtString).getBody();
+            // validate the jwt using the claims parser
         } catch (InvalidKeySpecException | MalformedJWTException | NoSuchAlgorithmException e) {
-            throw new ValidationException("Token could not be validated", e);
+            //TODO @JT create static String message from that
+            throw new ValidationException("JSON Web Token could not be validated", e);
         }
     }
 
     /**
-     * Validates the token string using a given public key
+     * Validates the jwt string using a given public key
      *
-     * @param tokenString Token to be validated and initialized
+     * @param jwtString JSON Web Token to be validated and initialized
      * @param publicKey   issuer's public key
      * @return validation status
      * @throws ValidationException on other errors
      */
-    public static ValidationStatus validateTokenString(String tokenString, PublicKey publicKey) throws
+    public static ValidationStatus validateJWTString(String jwtString, PublicKey publicKey) throws
             ValidationException {
         try {
             ECDSAHelper.enableECDSAProvider();
 
             Jwts.parser()
                     .setSigningKey(publicKey)
-                    .parseClaimsJws(tokenString);
+                    .parseClaimsJws(jwtString);
             return ValidationStatus.VALID;
         } catch (ExpiredJwtException e) {
             return ValidationStatus.EXPIRED_TOKEN;
         } catch (SignatureException e) {
             return ValidationStatus.INVALID_TRUST_CHAIN;
         } catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
-            throw new ValidationException("Token could not be validated", e);
+            throw new ValidationException("JSON Web Token could not be validated", e);
         }
     }
 
     /**
-     * Validates the given token string
+     * Validates the given jwt string
      *
-     * @param tokenString JWT to be validated
+     * @param jwtString JWT to be validated
      * @return validation status
      * @throws ValidationException on validation error
      */
-    public static ValidationStatus validateTokenString(String tokenString) throws ValidationException {
+    public static ValidationStatus validateJWTString(String jwtString) throws ValidationException {
         try {
             ECDSAHelper.enableECDSAProvider();
-            JWTClaims claims = getClaimsFromToken(tokenString);
+            JWTClaims claims = getClaimsFromJWT(jwtString);
             //Convert IPK claim to publicKey for validation
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(claims.getIpk()));
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
             PublicKey publicKey = keyFactory.generatePublic(keySpec);
 
-            // validate the token using the claims parser
-            return validateTokenString(tokenString, publicKey);
-            // validate the token using the claims parser
+            // validate the jwt using the claims parser
+            return validateJWTString(jwtString, publicKey);
         } catch (InvalidKeySpecException | MalformedJWTException | NoSuchAlgorithmException e) {
-            throw new ValidationException("Token could not be validated", e);
+            throw new ValidationException("JSON Web Token could not be validated", e);
         }
     }
 
-    public static JWTClaims getClaimsFromToken(String jwtToken) throws MalformedJWTException {
+    public static JWTClaims getClaimsFromJWT(String jwtString) throws MalformedJWTException {
         HashMap<String, Object> retMap = new HashMap<>();
-        String[] jwtParts = jwtToken.split("\\.");
+        String[] jwtParts = jwtString.split("\\.");
         if (jwtParts.length < SecurityConstants.JWT_PARTS_COUNT) {
             throw new MalformedJWTException();
         }
@@ -137,10 +138,7 @@ public class JWTEngine {
             }
 
             //Extracting claims from JWT claims map
-            return new JWTClaims(retMap.get("jti"), retMap.get("alg"), retMap.get("iss"), retMap.get
-                    ("sub"), retMap
-                    .get("iat"), retMap.get("exp"), retMap.get("ipk"), retMap.get("spk"), retMap.get("ttyp"),
-                    attributes);
+            return new JWTClaims(retMap, attributes);
         } catch (IOException | NumberFormatException e) {
             throw new MalformedJWTException(e);
         }

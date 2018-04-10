@@ -1,6 +1,8 @@
 package eu.h2020.symbiote.security.commons;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
@@ -8,51 +10,51 @@ import io.jsonwebtoken.Claims;
 import org.springframework.data.annotation.Transient;
 
 /**
- * Class that defines the SymbIoTe JWS token
+ * Class that defines the SymbIoTe JWS Coupon String
  * <p>
  *
- * @author Daniele Caldarola (CNIT)
  * @author Mikołaj Dobski (PSNC)
- * @author Elena Garrido (ATOS)
- * @author Nemanja Ignjatov (UNIVIE)
+ * @author Jakub Toczek (PSNC)
  * @see eu.h2020.symbiote.security.commons.jwt.JWTClaims
  */
-public class Token {
+public class Coupon {
 
     private String id = "";
-    private String token = "";
+    private String couponString = "";
     private Type type = Type.NULL;
 
     @Transient
     private Claims claims;
 
-    public Token() {
+    public Coupon() {
         // used by JPA
     }
 
     /**
-     * The token is validated using the issuer public key found in the string.
+     * The coupon is validated using the issuer public key found in the string.
      *
-     * @param token compacted signed token string
+     * @param couponString compacted signed couponString string
      */
-    public Token(String token) throws ValidationException {
-        this.setToken(token);
+
+    @JsonCreator
+    public Coupon(@JsonProperty("couponString") String couponString) throws ValidationException {
+        this.setCoupon(couponString);
     }
 
-    public String getToken() {
-        return token;
+    public String getCoupon() {
+        return couponString;
     }
 
     /**
-     * @param token compacted signed token string
+     * @param coupon compacted signed couponString string
      */
-    public void setToken(String token) throws ValidationException {
-        ValidationStatus validationStatus = JWTEngine.validateJWTString(token);
+    private void setCoupon(String coupon) throws ValidationException {
+        ValidationStatus validationStatus = JWTEngine.validateJWTString(coupon);
         if (validationStatus != ValidationStatus.VALID) {
-            throw new ValidationException("Provided token string is not valid: " + validationStatus);
+            throw new ValidationException("Provided coupon string is not valid: " + validationStatus);
         }
-        this.token = token;
-        this.setClaims(JWTEngine.getClaims(token));
+        this.couponString = coupon;
+        this.setClaims(JWTEngine.getClaims(coupon));
     }
 
     @JsonIgnore
@@ -69,7 +71,7 @@ public class Token {
     /**
      * stored in JWT_CLAIMS_TTYPE attribute
      *
-     * @return the type of this token stating if it was issued by Core or a Platform
+     * @return the type of this couponString stating if it was issued by Core or a Platform
      */
     public Type getType() {
         return type;
@@ -81,13 +83,12 @@ public class Token {
 
     @Override
     public String toString() {
-        return token;
+        return couponString;
     }
 
     public enum Type {
-        HOME,
-        FOREIGN,
-        GUEST,
+        DISCRETE,
+        PERIODIC,
         NULL
     }
 }

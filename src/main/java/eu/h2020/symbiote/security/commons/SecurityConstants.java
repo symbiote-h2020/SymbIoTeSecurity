@@ -40,8 +40,9 @@ public class SecurityConstants {
     public static final String AAM_VALIDATE_FOREIGN_TOKEN_ORIGIN_CREDENTIALS = "/validate_foreign_token_origin_credentials";
 
 
-    // tokens
+    // jwt
     public static final String TOKEN_HEADER_NAME = "x-auth-token";
+    public static final String COUPON_HEADER_NAME = "x-auth-coupon";
     public static final int JWT_PARTS_COUNT = 3; //Header, body and signature
     public static final String CLAIM_NAME_TOKEN_TYPE = "ttyp";
     public static final String SYMBIOTE_ATTRIBUTES_PREFIX = "SYMBIOTE_";
@@ -76,6 +77,13 @@ public class SecurityConstants {
     public static final String ACCESS_POLICY_JSON_FIELD_COMPOSITE_AP = "compositeAccessPolicySpecifiers";
 
     public static final String ERROR_DESC_UNSUPPORTED_ACCESS_POLICY_TYPE = "Access policy type not suppoted!";
+
+    //Bartening and Traiding Module REST paths
+    public static final String BTM_GET_DISCRETE_COUPON = "/get_discrete_coupon";
+    public static final String BTM_VALIDATE_COUPON = "/validate_coupon";
+    public static final String BTM_REVOKE_COUPON = "/revoke_coupon";
+    public static final String BTM_CONSUME_COUPON = "/consume_coupon";
+
     private SecurityConstants() {
     }
 }
