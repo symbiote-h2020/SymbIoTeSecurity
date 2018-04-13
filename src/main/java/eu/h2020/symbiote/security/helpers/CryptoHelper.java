@@ -51,11 +51,11 @@ public class CryptoHelper {
     }
 
     /**
-     * @param homeCredentials users credentials
+     * @param homeCredentials users/component credentials
      * @return String loginRequest
      * @throws SecurityException error during creation of loginRequest
      */
-    public static String buildHomeTokenAcquisitionRequest(HomeCredentials homeCredentials) {
+    public static String buildJWTAcquisitionRequest(HomeCredentials homeCredentials) {
         ECDSAHelper.enableECDSAProvider();
 
         try {

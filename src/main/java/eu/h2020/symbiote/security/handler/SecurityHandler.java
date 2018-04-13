@@ -188,7 +188,7 @@ public class SecurityHandler implements ISecurityHandler {
                 credentials.homeCredentials.privateKey != null) {
             try {
                 String homeToken = ClientFactory.getAAMClient(homeAAMId.getAamAddress()).getHomeToken(
-                        CryptoHelper.buildHomeTokenAcquisitionRequest(credentials.homeCredentials));
+                        CryptoHelper.buildJWTAcquisitionRequest(credentials.homeCredentials));
                 credentials.homeCredentials.homeToken = new Token(homeToken);
                 tokenCredentials.put(homeToken, credentials);
                 return credentials.homeCredentials.homeToken;

@@ -2,7 +2,7 @@ package eu.h2020.symbiote.security.communication;
 
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
-import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
+import eu.h2020.symbiote.security.commons.enums.CouponValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.*;
 import eu.h2020.symbiote.security.communication.interfaces.IFeignBTMClient;
 import eu.h2020.symbiote.security.communication.payloads.RevocationRequest;
@@ -92,10 +92,33 @@ public class BTMClient implements IBTMClient {
 
     }
 
+    @Override
+    public boolean consumeCoupon(String coupon) throws AAMException, MalformedJWTException, WrongCredentialsException, JWTCreationException {
+        Response response;
+        try {
+            response = feignClient.consumeCoupon(coupon);
+        } catch (FeignException fe) {
+            //TODO @JT change error msg
+            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
+        }
+        switch (response.status()) {
+            case 400:
+                throw new MalformedJWTException("Unable to read malformed coupon");
+            case 401:
+                throw new WrongCredentialsException("Could not validate coupon with incorrect credentials");
+            case 500:
+                throw new JWTCreationException("Server failed use coupon");
+            case 200:
+                return true;
+            default:
+                throw new AAMException("Error occured. Error code: " + response.status() + ". Message: " + response.body().toString());
+        }
+    }
+
     /**
      * TODO @JT change documentation
      *
-     * @param loginRequest JWS build in accordance to @{@link eu.h2020.symbiote.security.helpers.CryptoHelper#buildHomeTokenAcquisitionRequest(HomeCredentials)}
+     * @param loginRequest JWS build in accordance to @{@link eu.h2020.symbiote.security.helpers.CryptoHelper#buildJWTAcquisitionRequest(HomeCredentials)}
      *                     and http://www.smarteremc2.eu/colab/display/SYM/Home+Authorization+Token+acquisition+%28home+login%29+request
      * @return HOME token used to access restricted resources offered in SymbIoTe
      */
@@ -114,12 +137,13 @@ public class BTMClient implements IBTMClient {
         }
         switch (response.status()) {
             case 400:
-                throw new MalformedJWTException("Unable to read malformed token");
+                throw new MalformedJWTException("Unable to read malformed request");
             case 401:
-                throw new WrongCredentialsException("Could not validate token with incorrect credentials");
+                throw new WrongCredentialsException("Could not validate request with incorrect credentials");
             case 500:
-                throw new JWTCreationException("Server failed to create a home token");
+                throw new JWTCreationException("Server failed to create a coupon");
             case 200:
+                //TODO change this
                 Collection headers = response.headers().get(SecurityConstants.COUPON_HEADER_NAME);
                 if (headers == null ||
                         headers.toArray().length == 0) {
@@ -137,7 +161,7 @@ public class BTMClient implements IBTMClient {
      * @return validation status
      */
     @Override
-    public ValidationStatus validateCoupon(String coupon) throws
+    public CouponValidationStatus validateCoupon(String coupon) throws
             AAMException {
         try {
             return feignClient.validateCoupon(coupon);
