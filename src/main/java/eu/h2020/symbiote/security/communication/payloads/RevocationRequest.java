@@ -9,6 +9,7 @@ package eu.h2020.symbiote.security.communication.payloads;
 public class RevocationRequest {
 
     private Credentials credentials = new Credentials();
+    private String couponString = "";
     private String homeTokenString = "";
     private String foreignTokenString = "";
     private String certificatePEMString = "";
@@ -65,6 +66,14 @@ public class RevocationRequest {
 
     public void setCertificatePEMString(String certificatePEMString) {
         this.certificatePEMString = certificatePEMString;
+    }
+
+    public String getCouponString() {
+        return couponString;
+    }
+
+    public void setCouponString(String couponString) {
+        this.couponString = couponString;
     }
 
     public enum CredentialType {

@@ -14,6 +14,10 @@ public enum CouponValidationStatus {
      */
     REVOKED_COUPON,
     /**
+     * coupon issued by us is not in database
+     */
+    COUPON_NOT_IN_DB,
+    /**
      * unknown status of the coupon
      */
     UNKNOWN,
