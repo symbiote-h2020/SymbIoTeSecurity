@@ -14,40 +14,40 @@ import eu.h2020.symbiote.security.communication.payloads.RevocationRequest;
 public interface IBTMClient {
 
     /**
-     * Allows the user to revoke coupons
+     * Allows the user to revoke their coupons
      *
-     * @param revocationRequest required to revoke coupon.
-     * @return the revocation status
+     * @param revocationRequest required to revoke a coupon.
+     * @return revocation status
      */
     String revokeCoupon(RevocationRequest revocationRequest) throws
             InvalidArgumentsException,
             WrongCredentialsException,
-            AAMException;
+            BTMException;
 
     /**
-     * Allows the user to use the coupon
-     *
-     * @param coupon - coupon to be consumed
-     * @return TODO
+     * Allows the user to use the coupon to get access to another federated platform’s data under a bartering scenario
+     * @param coupon - valid coupon to consume
+     * @return true if consumed properly
      */
-    boolean consumeCoupon(String coupon) throws AAMException, MalformedJWTException, WrongCredentialsException, JWTCreationException;
+    boolean consumeCoupon(String coupon) throws MalformedJWTException, WrongCredentialsException, JWTCreationException, BTMException;
 
     /**
      * TODO @JT change documentation
      *
-     * @param loginRequest JWS build in accordance to @{@link eu.h2020.symbiote.security.helpers.CryptoHelper#buildJWTAcquisitionRequest(HomeCredentials)}
-     *                     and TODO
-     * @return coupon
+     * @param couponRequest JWS build in accordance to @{@link eu.h2020.symbiote.security.helpers.CryptoHelper#buildJWTAcquisitionRequest(HomeCredentials)}
+     *                     and http://www.smarteremc2.eu/colab/display/SYM/Home+Authorization+Token+acquisition+%28home+login%29+request
+     * @return coupon to access another federated platform’s data under a bartering scenario
      */
-    String getDiscreteCoupon(String loginRequest) throws
+    String getDiscreteCoupon(String couponRequest) throws
             WrongCredentialsException,
             JWTCreationException,
             MalformedJWTException,
-            AAMException;
+            BTMException;
 
     /**
-     * @param coupon that is to be validated
+     * Allows the user to validate coupon
+     * @param coupon for validation
      * @return validation status
      */
-    CouponValidationStatus validateCoupon(String coupon) throws AAMException;
+    CouponValidationStatus validateCoupon(String coupon) throws BTMException;
 }

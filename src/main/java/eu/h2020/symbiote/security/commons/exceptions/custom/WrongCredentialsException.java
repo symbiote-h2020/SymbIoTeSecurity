@@ -24,6 +24,7 @@ public class WrongCredentialsException extends SecurityException {
     public static final String USER_NOT_ACTIVE = "User account is not in active. It could've have been blocked or still needs to be activated.";
     private static final String errorMessage = "ERR_WRONG_CREDENTIALS";
     private HttpStatus statusCode = HttpStatus.UNAUTHORIZED;
+    public static final String COUPON_WITH_INCORRECT_CREDENTIALS = "Could not validate coupon with incorrect credentials";
 
     public WrongCredentialsException() {
         super(errorMessage);

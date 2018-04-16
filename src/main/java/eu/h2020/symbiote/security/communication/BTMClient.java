@@ -26,19 +26,21 @@ import java.util.Collection;
 public class BTMClient implements IBTMClient {
     private static final Log logger = LogFactory.getLog(BTMClient.class);
 
-    private static final String AAM_COMMS_ERROR_MESSAGE = "Failed to communicate with the AAM: ";
+    private static final String BTM_COMMS_ERROR_MESSAGE = "Failed to communicate with the BTM: ";
+    private static final String ERROR_OCCURED_ERROR_CODE = "Error occured. Error code: ";
+    private static final String MESSAGE = ". Message: ";
     private String serverAddress;
     private IFeignBTMClient feignClient;
 
     /**
-     * @param serverAddress of the AAM server the client wants to interact with.
+     * @param serverAddress of the BTM server the client wants to interact with.
      */
     public BTMClient(String serverAddress) {
         this(serverAddress, new ApacheCommonsLogger4Feign(logger));
     }
 
     /**
-     * @param serverAddress of the AAM server the client wants to interact with.
+     * @param serverAddress of the BTM server the client wants to interact with.
      * @param logger        feign logger
      */
     public BTMClient(String serverAddress, Logger logger) {
@@ -68,13 +70,12 @@ public class BTMClient implements IBTMClient {
     public String revokeCoupon(RevocationRequest revocationRequest) throws
             InvalidArgumentsException,
             WrongCredentialsException,
-            AAMException {
+            BTMException {
         Response response;
         try {
             response = feignClient.revokeCoupon(revocationRequest);
         } catch (FeignException fe) {
-            //TODO @JT change error messages
-            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
+            throw new BTMException(BTM_COMMS_ERROR_MESSAGE + fe.getMessage());
         }
         switch (response.status()) {
             case 400:
@@ -83,91 +84,97 @@ public class BTMClient implements IBTMClient {
                 throw new WrongCredentialsException();
             case 200:
                 if (response.body().toString().isEmpty()) {
-                    throw new AAMException("Error occured. Response is empty!");
+                    throw new BTMException(BTMException.RESPONSE_IS_EMPTY);
                 }
                 return response.body().toString();
             default:
-                throw new AAMException("Error occured. Error code: " + response.status() + ". Message: " + response.body().toString());
+                throw new BTMException(ERROR_OCCURED_ERROR_CODE + response.status() + MESSAGE + response.body().toString());
         }
 
     }
 
+    /**
+     * Allows the user to use the coupon to get access to another federated platform’s data under a bartering scenario
+     *
+     * @param coupon - valid coupon to consume
+     * @return true if consumed properly
+     */
     @Override
-    public boolean consumeCoupon(String coupon) throws AAMException, MalformedJWTException, WrongCredentialsException, JWTCreationException {
+    public boolean consumeCoupon(String coupon) throws
+            MalformedJWTException,
+            WrongCredentialsException,
+            JWTCreationException,
+            BTMException {
         Response response;
         try {
             response = feignClient.consumeCoupon(coupon);
         } catch (FeignException fe) {
-            //TODO @JT change error msg
-            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
+            throw new BTMException(BTM_COMMS_ERROR_MESSAGE + fe.getMessage());
         }
         switch (response.status()) {
             case 400:
-                throw new MalformedJWTException("Unable to read malformed coupon");
+                throw new MalformedJWTException(MalformedJWTException.UNABLE_TO_READ_MALFORMED_COUPON);
             case 401:
-                throw new WrongCredentialsException("Could not validate coupon with incorrect credentials");
+                throw new WrongCredentialsException(WrongCredentialsException.COUPON_WITH_INCORRECT_CREDENTIALS);
             case 500:
-                throw new JWTCreationException("Server failed use coupon");
+                throw new JWTCreationException(JWTCreationException.SERVER_FAILED_USE_COUPON);
             case 200:
                 return true;
             default:
-                throw new AAMException("Error occured. Error code: " + response.status() + ". Message: " + response.body().toString());
+                throw new BTMException(ERROR_OCCURED_ERROR_CODE + response.status() + MESSAGE + response.body().toString());
         }
     }
 
     /**
      * TODO @JT change documentation
      *
-     * @param loginRequest JWS build in accordance to @{@link eu.h2020.symbiote.security.helpers.CryptoHelper#buildJWTAcquisitionRequest(HomeCredentials)}
+     * @param couponRequest JWS build in accordance to @{@link eu.h2020.symbiote.security.helpers.CryptoHelper#buildJWTAcquisitionRequest(HomeCredentials)}
      *                     and http://www.smarteremc2.eu/colab/display/SYM/Home+Authorization+Token+acquisition+%28home+login%29+request
-     * @return HOME token used to access restricted resources offered in SymbIoTe
+     * @return coupon to access another federated platform’s data under a bartering scenario
      */
     @Override
-    public String getDiscreteCoupon(String loginRequest) throws
+    public String getDiscreteCoupon(String couponRequest) throws
             WrongCredentialsException,
             JWTCreationException,
             MalformedJWTException,
-            AAMException {
+            BTMException {
         Response response;
         try {
-            response = feignClient.getDiscreteCoupon(loginRequest);
+            response = feignClient.getDiscreteCoupon(couponRequest);
         } catch (FeignException fe) {
-            //TODO @JT change error msg
-            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
+            throw new BTMException(BTM_COMMS_ERROR_MESSAGE + fe.getMessage());
         }
         switch (response.status()) {
             case 400:
-                throw new MalformedJWTException("Unable to read malformed request");
+                throw new MalformedJWTException(MalformedJWTException.UNABLE_TO_READ_MALFORMED_COUPON);
             case 401:
-                throw new WrongCredentialsException("Could not validate request with incorrect credentials");
+                throw new WrongCredentialsException(WrongCredentialsException.COUPON_WITH_INCORRECT_CREDENTIALS);
             case 500:
-                throw new JWTCreationException("Server failed to create a coupon");
+                throw new JWTCreationException(JWTCreationException.SERVER_FAILED_USE_COUPON);
             case 200:
-                //TODO change this
                 Collection headers = response.headers().get(SecurityConstants.COUPON_HEADER_NAME);
                 if (headers == null ||
                         headers.toArray().length == 0) {
-                    //TODO @JT change error msg
-                    throw new AAMException(AAMException.NO_TOKEN_IN_RESPONSE);
+                    throw new BTMException(BTMException.NO_COUPON_IN_RESPONSE);
                 }
                 return headers.toArray()[0].toString();
             default:
-                throw new AAMException("Error occured. Error code: " + response.status() + ". Message: " + response.body().toString());
+                throw new BTMException(ERROR_OCCURED_ERROR_CODE + response.status() + MESSAGE + response.body().toString());
         }
     }
 
     /**
-     * @param coupon that is to be validated
+     * Allows the user to validate coupon
+     * @param coupon for validation
      * @return validation status
      */
     @Override
     public CouponValidationStatus validateCoupon(String coupon) throws
-            AAMException {
+            BTMException {
         try {
             return feignClient.validateCoupon(coupon);
         } catch (FeignException fe) {
-            //TODO @JT change error msg
-            throw new AAMException(AAM_COMMS_ERROR_MESSAGE + fe.getMessage());
+            throw new BTMException(BTM_COMMS_ERROR_MESSAGE + fe.getMessage());
         }
     }
 }
