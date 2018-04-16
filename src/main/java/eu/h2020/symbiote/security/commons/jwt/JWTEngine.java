@@ -53,8 +53,7 @@ public class JWTEngine {
             return Jwts.parser().setSigningKey(publicKey).parseClaimsJws(jwtString).getBody();
             // validate the jwt using the claims parser
         } catch (InvalidKeySpecException | MalformedJWTException | NoSuchAlgorithmException e) {
-            //TODO @JT create static String message from that
-            throw new ValidationException("JSON Web Token could not be validated", e);
+            throw new ValidationException(ValidationException.JSON_WEB_TOKEN_COULD_NOT_BE_VALIDATED + e.getMessage(), e);
         }
     }
 
@@ -80,7 +79,7 @@ public class JWTEngine {
         } catch (SignatureException e) {
             return ValidationStatus.INVALID_TRUST_CHAIN;
         } catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
-            throw new ValidationException("JSON Web Token could not be validated", e);
+            throw new ValidationException(ValidationException.JSON_WEB_TOKEN_COULD_NOT_BE_VALIDATED + e.getMessage(), e);
         }
     }
 
@@ -103,7 +102,7 @@ public class JWTEngine {
             // validate the jwt using the claims parser
             return validateJWTString(jwtString, publicKey);
         } catch (InvalidKeySpecException | MalformedJWTException | NoSuchAlgorithmException e) {
-            throw new ValidationException("JSON Web Token could not be validated", e);
+            throw new ValidationException(ValidationException.JSON_WEB_TOKEN_COULD_NOT_BE_VALIDATED + e.getMessage(), e);
         }
     }
 

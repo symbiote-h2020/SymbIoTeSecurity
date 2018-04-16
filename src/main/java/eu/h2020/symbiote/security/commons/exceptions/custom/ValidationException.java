@@ -33,6 +33,7 @@ public class ValidationException extends SecurityException {
     public static final String USER_MUST_NOT_GET_COMPONENT_CERTIFICATE = "End user must not get component certificate.";
     public static final String INVALID_COMPONENT_NAME_NO_PA_PREFIX = "Invalid component name. Platform Agents' components' ids must have 'PA_' prefix.";
     public static final String NO_RIGHTS_FOR_COMPONENT_CERTIFICATE = "You don't have rights to ask for component certificate!";
+    public static final String JSON_WEB_TOKEN_COULD_NOT_BE_VALIDATED = "JSON Web Token could not be validated. Message: ";
 
     public ValidationException(String validationStatus) {
         super(validationStatus);
