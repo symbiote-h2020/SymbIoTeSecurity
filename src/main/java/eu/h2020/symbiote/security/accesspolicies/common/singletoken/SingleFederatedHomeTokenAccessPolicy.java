@@ -15,7 +15,7 @@ import java.util.Set;
  * @author Mikołaj Dobski (PSNC)
  * @author Jakub Toczek (PSNC)
  */
-public class FederatedResourceAccessPolicyUsingSingleHomeToken implements IAccessPolicy {
+public class SingleFederatedHomeTokenAccessPolicy implements IAccessPolicy {
     private final Set<String> federationMembers;
     private final String federationIdentifier;
 
@@ -25,7 +25,7 @@ public class FederatedResourceAccessPolicyUsingSingleHomeToken implements IAcces
      * @param federationIdentifier identifier of the federation
      * @param federationMembers    set containing federation members identifiers
      */
-    public FederatedResourceAccessPolicyUsingSingleHomeToken(Set<String> federationMembers, String federationIdentifier) throws
+    public SingleFederatedHomeTokenAccessPolicy(Set<String> federationMembers, String federationIdentifier) throws
             InvalidArgumentsException {
         if (federationMembers == null
                 || federationMembers.isEmpty()

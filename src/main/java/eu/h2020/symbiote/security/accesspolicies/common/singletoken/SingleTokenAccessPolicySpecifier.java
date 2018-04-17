@@ -56,7 +56,7 @@ public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier 
                     throw new InvalidArgumentsException("Missing ISS claim required to build this policy type");
                 this.requiredClaims = requiredClaims;
                 break;
-            case FRAPUSFOLHT:
+            case SFTAP:
                 // initial check of needed fields
                 if (requiredClaims == null
                         || !requiredClaims.containsKey(FEDERATION_HOME_PLATFORM_ID)
@@ -71,7 +71,7 @@ public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier 
                 }
                 this.requiredClaims = requiredClaims;
                 break;
-            case FRAPUSHT:
+            case SFHTAP:
                 // initial check of needed fields
                 if (requiredClaims == null
                         || !requiredClaims.containsKey(FEDERATION_IDENTIFIER_KEY)
@@ -128,7 +128,7 @@ public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier 
                 || !federationMembers.contains(homePlatformIdentifier))
             throw new InvalidArgumentsException("Missing federation definition contents required to build this policy type");
 
-        policyType = AccessPolicyType.FRAPUSFOLHT;
+        policyType = AccessPolicyType.SFTAP;
         // building the map
         requiredClaims = new HashMap<>(federationMembers.size() + 2);
         requiredClaims.put(FEDERATION_IDENTIFIER_KEY, federationIdentifier);
@@ -157,7 +157,7 @@ public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier 
                 || federationIdentifier.isEmpty())
             throw new InvalidArgumentsException("Missing federation definition contents required to build this policy type");
 
-        policyType = AccessPolicyType.FRAPUSHT;
+        policyType = AccessPolicyType.SFHTAP;
         // building the map
         requiredClaims = new HashMap<>(federationMembers.size() + 1);
         requiredClaims.put(FEDERATION_IDENTIFIER_KEY, federationIdentifier);

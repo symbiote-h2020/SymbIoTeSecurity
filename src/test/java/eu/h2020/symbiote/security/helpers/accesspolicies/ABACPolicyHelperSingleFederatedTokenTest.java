@@ -117,7 +117,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         federationMembers.add(federatedPlatformId);
         federationMembers.add(deploymentId);
 
-        //FRAPUSFOLHT
+        //SFTAP
         SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, deploymentId, federationId);
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
@@ -144,7 +144,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         Set<String> federationMembers = new HashSet<>();
         federationMembers.add(deploymentId);
 
-        //FRAPUSFOLHT
+        //SFTAP
         SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, deploymentId, federationId2);
 
         //check security request with foreign token without proper federation attribute
@@ -166,7 +166,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         federationMembers.add(federatedPlatformId);
         federationMembers.add(deploymentId);
 
-        //FRAPUSHT
+        //SFHTAP
         SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, federationId);
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
@@ -187,7 +187,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         Set<String> federationMembers = new HashSet<>();
         federationMembers.add(deploymentId);
 
-        //FRAPUSHT
+        //SFHTAP
         SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, federationId2);
 
         //check security request with HOME token without proper federation attribute
@@ -209,7 +209,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         federationMembers.add(federatedPlatformId);
         federationMembers.add(deploymentId);
 
-        //FRAPUSHT
+        //SFHTAP
         SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, federationId);
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();

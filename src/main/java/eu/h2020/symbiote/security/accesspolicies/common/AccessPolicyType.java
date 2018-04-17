@@ -16,13 +16,13 @@ public enum AccessPolicyType {
      */
     SLHTAP,
     /**
-     * FederatedResourceAccessPolicyUsingSingleForeignOrLocalHomeToken
+     * SingleFederatedTokenAccessPolicy
      */
-    FRAPUSFOLHT,
+    SFTAP,
     /**
-     * FederatedResourceAccessPolicyUsingSingleHomeToken
+     * SingleFederatedHomeTokenAccessPolicy
      */
-    FRAPUSHT,
+    SFHTAP,
     /**
      * SingleTokenAccessPolicy
      */

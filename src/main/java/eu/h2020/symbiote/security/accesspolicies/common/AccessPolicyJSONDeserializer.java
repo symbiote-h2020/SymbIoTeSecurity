@@ -39,8 +39,8 @@ public class AccessPolicyJSONDeserializer extends JsonDeserializer<IAccessPolicy
                     return deserializeCompositeAccessPolicyJSON(mapper, node);
                 case SLHTIBAP:
                 case SLHTAP:
-                case FRAPUSFOLHT:
-                case FRAPUSHT:
+                case SFTAP:
+                case SFHTAP:
                 case STAP:
                 case CHTAP:
                 case PUBLIC:

@@ -40,7 +40,7 @@ public class SingleTokenAccessPolicyFactory {
             case STAP: {
                 return new SingleTokenAccessPolicy(specifier.getRequiredClaims());
             }
-            case FRAPUSFOLHT: {
+            case SFTAP: {
                 String homePlatformIdentifier = specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_HOME_PLATFORM_ID);
                 String federationIdentifier = specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_IDENTIFIER_KEY);
                 Set<String> federationMembers = new HashSet<>(Integer.parseInt(specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_SIZE)));
@@ -48,16 +48,16 @@ public class SingleTokenAccessPolicyFactory {
                     if (claimKey.startsWith(SingleTokenAccessPolicySpecifier.FEDERATION_MEMBER_KEY_PREFIX))
                         federationMembers.add(specifier.getRequiredClaims().get(claimKey));
                 }
-                return new FederatedResourceAccessPolicyUsingSingleForeignOrLocalHomeToken(federationMembers, homePlatformIdentifier, federationIdentifier);
+                return new SingleFederatedTokenAccessPolicy(federationMembers, homePlatformIdentifier, federationIdentifier);
             }
-            case FRAPUSHT: {
+            case SFHTAP: {
                 String federationIdentifier = specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_IDENTIFIER_KEY);
                 Set<String> federationMembers = new HashSet<>(Integer.parseInt(specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_SIZE)));
                 for (String claimKey : specifier.getRequiredClaims().keySet()) {
                     if (claimKey.startsWith(SingleTokenAccessPolicySpecifier.FEDERATION_MEMBER_KEY_PREFIX))
                         federationMembers.add(specifier.getRequiredClaims().get(claimKey));
                 }
-                return new FederatedResourceAccessPolicyUsingSingleHomeToken(federationMembers, federationIdentifier);
+                return new SingleFederatedHomeTokenAccessPolicy(federationMembers, federationIdentifier);
             }
             case SLHTAP: {
                 String platformIdentifier = specifier.getRequiredClaims().get(Claims.ISSUER);
