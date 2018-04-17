@@ -13,9 +13,6 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
-import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -32,7 +29,6 @@ import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -146,11 +142,7 @@ public class ABACPolicyHelperAccessPoliciesTest {
     @Test
     public void compositeSpecifierBasedAccessPolicyCheckSuccess() throws
             NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException {
+            InvalidArgumentsException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -191,11 +183,7 @@ public class ABACPolicyHelperAccessPoliciesTest {
     @Test
     public void compositeSpecifierBasedAccessPolicyCheckFailure() throws
             NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException {
+            InvalidArgumentsException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -236,11 +224,7 @@ public class ABACPolicyHelperAccessPoliciesTest {
     @Test
     public void singleTokenSpecifierBasedAccessPolicyCheckSuccess() throws
             NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException {
+            InvalidArgumentsException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -265,11 +249,7 @@ public class ABACPolicyHelperAccessPoliciesTest {
     @Test
     public void singleTokenSpecifierBasedAccessPolicyCheckFailure() throws
             NoSuchAlgorithmException,
-            MalformedJWTException,
-            SecurityHandlerException,
-            InvalidArgumentsException,
-            CertificateException,
-            WrongCredentialsException {
+            InvalidArgumentsException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());

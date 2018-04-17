@@ -180,14 +180,16 @@ public class MutualAuthenticationHelperTest {
         KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
         ks.load(new FileInputStream(SERVICE_CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
         PrivateKey servicePrivateKey = (PrivateKey) ks.getKey(SERVICE_CERTIFICATE_ALIAS, CERTIFICATE_PASSWORD.toCharArray());
+        X509Certificate serviceCertificate = (X509Certificate) ks.getCertificate(SERVICE_CERTIFICATE_ALIAS);
 
         // prepare a malicious hash
-        String hashedTimestamp = hashSHA256(Long.toString(new Date().getTime()));
+        long timestamp = new Date().getTime();
+
+        String hashedTimestamp = hashSHA256(Long.toString(timestamp));
         JwtBuilder jwtBuilder = Jwts.builder();
         jwtBuilder.claim("hash", hashedTimestamp);
-        jwtBuilder.claim("timestamp", Long.toString(new Date().getTime()));
+        jwtBuilder.claim("timestamp", Long.toString(timestamp + 1));
         jwtBuilder.signWith(SignatureAlgorithm.ES256, servicePrivateKey);
-        X509Certificate serviceCertificate = (X509Certificate) ks.getCertificate(SERVICE_CERTIFICATE_ALIAS);
         assertFalse(MutualAuthenticationHelper.isServiceResponseVerified(jwtBuilder.compact(), new Certificate(CryptoHelper.convertX509ToPEM(serviceCertificate))));
     }
 

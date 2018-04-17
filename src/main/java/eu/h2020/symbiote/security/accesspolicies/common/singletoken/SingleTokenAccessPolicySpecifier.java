@@ -71,6 +71,20 @@ public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier 
                 }
                 this.requiredClaims = requiredClaims;
                 break;
+            case FRAPUSHT:
+                // initial check of needed fields
+                if (requiredClaims == null
+                        || !requiredClaims.containsKey(FEDERATION_IDENTIFIER_KEY)
+                        || !requiredClaims.containsKey(FEDERATION_SIZE))
+                    throw new InvalidArgumentsException("Missing federation definition contents required to build this policy type");
+                // checking if all members are there
+                federationSize = Long.parseLong(requiredClaims.get(FEDERATION_SIZE));
+                for (long i = 1; i <= federationSize; i++) {
+                    if (!requiredClaims.containsKey(FEDERATION_MEMBER_KEY_PREFIX + i))
+                        throw new InvalidArgumentsException("Missing federation member required to build this policy type");
+                }
+                this.requiredClaims = requiredClaims;
+                break;
             case STAP:
                 if (requiredClaims == null || requiredClaims.isEmpty())
                     throw new InvalidArgumentsException("Empty claims define a public access policy!");
@@ -119,6 +133,34 @@ public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier 
         requiredClaims = new HashMap<>(federationMembers.size() + 2);
         requiredClaims.put(FEDERATION_IDENTIFIER_KEY, federationIdentifier);
         requiredClaims.put(FEDERATION_HOME_PLATFORM_ID, homePlatformIdentifier);
+        requiredClaims.put(FEDERATION_SIZE, String.valueOf(federationMembers.size()));
+        int memberNumber = 1;
+        for (String member : federationMembers) {
+            requiredClaims.put(FEDERATION_MEMBER_KEY_PREFIX + memberNumber, member);
+            memberNumber++;
+        }
+    }
+
+    /**
+     * Used to create the specifier for resources offered in federations, where access is granted using Home Token from one of the federated platforms
+     *
+     * @param federationMembers    identifiers of platforms participating in the federation (including home platform Id)
+     * @param federationIdentifier which identifies the authorization granting access claim
+     * @throws InvalidArgumentsException
+     */
+    public SingleTokenAccessPolicySpecifier(Set<String> federationMembers, String federationIdentifier) throws
+            InvalidArgumentsException {
+        // required contents check
+        if (federationMembers == null
+                || federationMembers.isEmpty()
+                || federationIdentifier == null
+                || federationIdentifier.isEmpty())
+            throw new InvalidArgumentsException("Missing federation definition contents required to build this policy type");
+
+        policyType = AccessPolicyType.FRAPUSHT;
+        // building the map
+        requiredClaims = new HashMap<>(federationMembers.size() + 1);
+        requiredClaims.put(FEDERATION_IDENTIFIER_KEY, federationIdentifier);
         requiredClaims.put(FEDERATION_SIZE, String.valueOf(federationMembers.size()));
         int memberNumber = 1;
         for (String member : federationMembers) {

@@ -109,7 +109,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
     }
 
     @Test
-    public void singleResourceSingleTokenCheckSuccess() throws
+    public void federatedResourceSingleTokenCheckSuccess() throws
             NoSuchAlgorithmException,
             InvalidArgumentsException {
 
@@ -117,6 +117,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         federationMembers.add(federatedPlatformId);
         federationMembers.add(deploymentId);
 
+        //FRAPUSFOLHT
         SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, deploymentId, federationId);
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
@@ -136,13 +137,14 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
     }
 
     @Test
-    public void singleResourceSingleTokenCheckFailWrongFederationId() throws
+    public void federatedResourceSingleTokenCheckFailWrongFederationId() throws
             NoSuchAlgorithmException,
             InvalidArgumentsException {
 
         Set<String> federationMembers = new HashSet<>();
         federationMembers.add(deploymentId);
 
+        //FRAPUSFOLHT
         SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, deploymentId, federationId2);
 
         //check security request with foreign token without proper federation attribute
@@ -151,6 +153,71 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
         resourceAccessPolicyMap.put(goodResourceID, SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void federatedResourceSingleHomeTokenCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        Set<String> federationMembers = new HashSet<>();
+        federationMembers.add(federatedPlatformId);
+        federationMembers.add(deploymentId);
+
+        //FRAPUSHT
+        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, federationId);
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        resourceAccessPolicyMap.put(goodResourceID, SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));
+
+        //check security request with proper HOME token
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsHomeTokenSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void federatedResourceSingleHomeTokenCheckFailWrongFederationId() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        Set<String> federationMembers = new HashSet<>();
+        federationMembers.add(deploymentId);
+
+        //FRAPUSHT
+        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, federationId2);
+
+        //check security request with HOME token without proper federation attribute
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsHomeTokenSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        resourceAccessPolicyMap.put(goodResourceID, SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void federatedResourceSingleHomeTokenCheckFailFederatedToken() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        Set<String> federationMembers = new HashSet<>();
+        federationMembers.add(federatedPlatformId);
+        federationMembers.add(deploymentId);
+
+        //FRAPUSHT
+        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, federationId);
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        resourceAccessPolicyMap.put(goodResourceID, SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));
+
+        //check security request with proper HOME token
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsForeignTokenSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
         assertFalse(resp.keySet().contains(goodResourceID));
     }

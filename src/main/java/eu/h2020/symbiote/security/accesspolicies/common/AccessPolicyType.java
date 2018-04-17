@@ -20,6 +20,10 @@ public enum AccessPolicyType {
      */
     FRAPUSFOLHT,
     /**
+     * FederatedResourceAccessPolicyUsingSingleHomeToken
+     */
+    FRAPUSHT,
+    /**
      * SingleTokenAccessPolicy
      */
     STAP,

@@ -40,6 +40,7 @@ public class AccessPolicyJSONDeserializer extends JsonDeserializer<IAccessPolicy
                 case SLHTIBAP:
                 case SLHTAP:
                 case FRAPUSFOLHT:
+                case FRAPUSHT:
                 case STAP:
                 case CHTAP:
                 case PUBLIC:

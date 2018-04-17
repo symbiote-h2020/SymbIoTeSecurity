@@ -50,6 +50,15 @@ public class SingleTokenAccessPolicyFactory {
                 }
                 return new FederatedResourceAccessPolicyUsingSingleForeignOrLocalHomeToken(federationMembers, homePlatformIdentifier, federationIdentifier);
             }
+            case FRAPUSHT: {
+                String federationIdentifier = specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_IDENTIFIER_KEY);
+                Set<String> federationMembers = new HashSet<>(Integer.parseInt(specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_SIZE)));
+                for (String claimKey : specifier.getRequiredClaims().keySet()) {
+                    if (claimKey.startsWith(SingleTokenAccessPolicySpecifier.FEDERATION_MEMBER_KEY_PREFIX))
+                        federationMembers.add(specifier.getRequiredClaims().get(claimKey));
+                }
+                return new FederatedResourceAccessPolicyUsingSingleHomeToken(federationMembers, federationIdentifier);
+            }
             case SLHTAP: {
                 String platformIdentifier = specifier.getRequiredClaims().get(Claims.ISSUER);
                 Map<String, String> filteredClaims = new HashMap<>(specifier.getRequiredClaims());

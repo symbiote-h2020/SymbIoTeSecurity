@@ -55,7 +55,7 @@ public class ABACPolicyHelperJSONDeserializerTest {
     private AccessPolicyJSONDeserializer jsonDeserializer;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         jsonFactory = new JsonFactory();
         objMapper = new ObjectMapper();
 
@@ -66,7 +66,8 @@ public class ABACPolicyHelperJSONDeserializerTest {
 
     @Test
     public void singleTokensPublicAPDeserialization() throws
-            IOException, InvalidArgumentsException {
+            IOException,
+            InvalidArgumentsException {
 
         AccessPolicyType refAPType = AccessPolicyType.PUBLIC;
         Map<String, String> refAPClaimsMapFirst = new HashMap<>();
@@ -87,7 +88,8 @@ public class ABACPolicyHelperJSONDeserializerTest {
 
     @Test
     public void simpleCompositeAccessPolicyAPDeserialization() throws
-            IOException, InvalidArgumentsException {
+            IOException,
+            InvalidArgumentsException {
 
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
@@ -129,7 +131,8 @@ public class ABACPolicyHelperJSONDeserializerTest {
 
     @Test
     public void nestedCompositeAccessPolicyAPDeserialization() throws
-            IOException, InvalidArgumentsException {
+            IOException,
+            InvalidArgumentsException {
 
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
@@ -217,7 +220,8 @@ public class ABACPolicyHelperJSONDeserializerTest {
 
     @Test
     public void tripleNestedCompositeAccessPolicyAPDeserialization() throws
-            IOException, InvalidArgumentsException {
+            IOException,
+            InvalidArgumentsException {
 
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
