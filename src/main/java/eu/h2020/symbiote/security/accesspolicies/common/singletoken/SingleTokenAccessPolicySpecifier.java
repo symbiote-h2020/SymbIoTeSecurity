@@ -56,7 +56,7 @@ public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier 
                     throw new InvalidArgumentsException("Missing ISS claim required to build this policy type");
                 this.requiredClaims = requiredClaims;
                 break;
-            case SFTAP:
+            case FRAPUSFOLHT:
                 // initial check of needed fields
                 if (requiredClaims == null
                         || !requiredClaims.containsKey(FEDERATION_HOME_PLATFORM_ID)
@@ -114,7 +114,7 @@ public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier 
                 || !federationMembers.contains(homePlatformIdentifier))
             throw new InvalidArgumentsException("Missing federation definition contents required to build this policy type");
 
-        policyType = AccessPolicyType.SFTAP;
+        policyType = AccessPolicyType.FRAPUSFOLHT;
         // building the map
         requiredClaims = new HashMap<>(federationMembers.size() + 2);
         requiredClaims.put(FEDERATION_IDENTIFIER_KEY, federationIdentifier);

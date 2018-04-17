@@ -39,7 +39,7 @@ public class AccessPolicyJSONDeserializer extends JsonDeserializer<IAccessPolicy
                     return deserializeCompositeAccessPolicyJSON(mapper, node);
                 case SLHTIBAP:
                 case SLHTAP:
-                case SFTAP:
+                case FRAPUSFOLHT:
                 case STAP:
                 case CHTAP:
                 case PUBLIC:
@@ -53,14 +53,14 @@ public class AccessPolicyJSONDeserializer extends JsonDeserializer<IAccessPolicy
         }
     }
 
-    private CompositeAccessPolicySpecifier deserializeCompositeAccessPolicyJSON(ObjectMapper mapper, JsonNode node) throws InvalidArgumentsException, IOException {
+    private CompositeAccessPolicySpecifier deserializeCompositeAccessPolicyJSON(ObjectMapper mapper, JsonNode node) throws InvalidArgumentsException {
 
         CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator operators = mapper.convertValue(node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_OPERATOR), CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.class);
 
         Set<SingleTokenAccessPolicySpecifier> staps = null;
         JsonNode stapsJsonNode = node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_SINGLE_TOKEN_AP);
         if ((stapsJsonNode != null) && !stapsJsonNode.isNull()) {
-            staps = new HashSet<SingleTokenAccessPolicySpecifier>();
+            staps = new HashSet<>();
             for (final JsonNode stapNode : stapsJsonNode) {
                 staps.add(deserializeSingleTokenAccessPolicyJSON(mapper, stapNode));
             }
@@ -69,7 +69,7 @@ public class AccessPolicyJSONDeserializer extends JsonDeserializer<IAccessPolicy
         Set<CompositeAccessPolicySpecifier> caps = null;
         JsonNode capsJsonNode = node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_COMPOSITE_AP);
         if ((capsJsonNode != null) && !capsJsonNode.isNull()) {
-            caps = new HashSet<CompositeAccessPolicySpecifier>();
+            caps = new HashSet<>();
             for (final JsonNode capNode : capsJsonNode) {
                 caps.add(deserializeCompositeAccessPolicyJSON(mapper, capNode));
             }

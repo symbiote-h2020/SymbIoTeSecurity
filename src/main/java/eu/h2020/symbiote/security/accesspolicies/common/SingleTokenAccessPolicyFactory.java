@@ -40,7 +40,7 @@ public class SingleTokenAccessPolicyFactory {
             case STAP: {
                 return new SingleTokenAccessPolicy(specifier.getRequiredClaims());
             }
-            case SFTAP: {
+            case FRAPUSFOLHT: {
                 String homePlatformIdentifier = specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_HOME_PLATFORM_ID);
                 String federationIdentifier = specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_IDENTIFIER_KEY);
                 Set<String> federationMembers = new HashSet<>(Integer.parseInt(specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_SIZE)));
@@ -48,7 +48,7 @@ public class SingleTokenAccessPolicyFactory {
                     if (claimKey.startsWith(SingleTokenAccessPolicySpecifier.FEDERATION_MEMBER_KEY_PREFIX))
                         federationMembers.add(specifier.getRequiredClaims().get(claimKey));
                 }
-                return new SingleFederatedTokenAccessPolicy(federationMembers, homePlatformIdentifier, federationIdentifier);
+                return new FederatedResourceAccessPolicyUsingSingleForeignOrLocalHomeToken(federationMembers, homePlatformIdentifier, federationIdentifier);
             }
             case SLHTAP: {
                 String platformIdentifier = specifier.getRequiredClaims().get(Claims.ISSUER);

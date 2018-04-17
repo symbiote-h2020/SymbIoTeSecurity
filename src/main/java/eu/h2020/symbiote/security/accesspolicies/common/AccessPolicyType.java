@@ -16,9 +16,9 @@ public enum AccessPolicyType {
      */
     SLHTAP,
     /**
-     * SingleFederatedTokenAccessPolicy
+     * FederatedResourceAccessPolicyUsingSingleForeignOrLocalHomeToken
      */
-    SFTAP,
+    FRAPUSFOLHT,
     /**
      * SingleTokenAccessPolicy
      */

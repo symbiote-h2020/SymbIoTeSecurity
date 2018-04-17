@@ -16,7 +16,7 @@ import java.util.Set;
  * @author Mikołaj Dobski (PSNC)
  * @author Jakub Toczek (PSNC)
  */
-public class SingleFederatedTokenAccessPolicy implements IAccessPolicy {
+public class FederatedResourceAccessPolicyUsingSingleForeignOrLocalHomeToken implements IAccessPolicy {
     private final String homePlatformIdentifier;
     private final Set<String> federationMembers;
     private final String federationIdentifier;
@@ -25,10 +25,10 @@ public class SingleFederatedTokenAccessPolicy implements IAccessPolicy {
      * Creates a new access policy object
      *
      * @param homePlatformIdentifier so that HOME tokens are properly identified
-     * @param federationIdentifier
-     * @param federationMembers
+     * @param federationIdentifier identifier of the federation
+     * @param federationMembers    set containing federation members identifiers
      */
-    public SingleFederatedTokenAccessPolicy(Set<String> federationMembers, String homePlatformIdentifier, String federationIdentifier) throws
+    public FederatedResourceAccessPolicyUsingSingleForeignOrLocalHomeToken(Set<String> federationMembers, String homePlatformIdentifier, String federationIdentifier) throws
             InvalidArgumentsException {
         if (federationMembers == null
                 || federationMembers.isEmpty()
