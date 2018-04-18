@@ -4,14 +4,16 @@ import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
+import eu.h2020.symbiote.security.helpers.CryptoHelper;
 
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * SymbIoTe Access Policy that needs to be satisfied by a single Token:
- * - issued one of the federation members and containing the federation identifier claim OR
- * - a HOME token issued by the home platform
+ * SymbIoTe Access Policy that needs to be satisfied by a single Token issued by the local platform:
+ * - a HOME one for local users/apps that have claims required to access the resource OR
+ * - a FOREIGN one issued in exchange for a HOME token from the federation members and containing the federation identifier claim
+ * basically the same as @{@link SingleFederatedHomeTokenAccessPolicy} but requiring federation members to acquire local domain credentials
  *
  * @author Mikołaj Dobski (PSNC)
  * @author Jakub Toczek (PSNC)
@@ -25,8 +27,10 @@ public class SingleFederatedTokenAccessPolicy implements IAccessPolicy {
      * Creates a new access policy object
      *
      * @param homePlatformIdentifier so that HOME tokens are properly identified
-     * @param federationIdentifier identifier of the federation
-     * @param federationMembers    set containing federation members identifiers
+     *                               TODO add param required claims for home users
+     * @param federationIdentifier   identifier of the federation
+     * @param federationMembers      set containing federation members identifiers
+     *
      */
     public SingleFederatedTokenAccessPolicy(Set<String> federationMembers, String homePlatformIdentifier, String federationIdentifier) throws
             InvalidArgumentsException {
@@ -51,25 +55,26 @@ public class SingleFederatedTokenAccessPolicy implements IAccessPolicy {
         // trying to find token satisfying this policy
         for (Token token : authorizationTokens) {
             //verify if token is HOME ttyp and if token is issued by this platform
-            if (token.getType().equals(Token.Type.HOME) && token.getClaims().getIssuer().equals(homePlatformIdentifier)) {
+            if (token.getType().equals(Token.Type.HOME) // a local token
+                    && token.getClaims().getIssuer().equals(homePlatformIdentifier)) { // issued by us
+                // todo check required claims
                 validTokens.add(token);
                 return validTokens;
             }
             // a foreign token issued by member with the proper key should be processed for searching the federation id
-            if (token.getType().equals(Token.Type.FOREIGN) && federationMembers.contains(token.getClaims().getIssuer())) {
-                Set<String> federationIdentifierClaims = new HashSet<>();
+            if (token.getType().equals(Token.Type.FOREIGN) // an exchanged token
+                    && token.getClaims().getIssuer().equals(homePlatformIdentifier) // issued by the local service
+                    && federationMembers.contains(token.getClaims().getSubject().split(CryptoHelper.FIELDS_DELIMITER)[1])) { // the federation still harbour the platform the client comes from
                 for (String claimKey : token.getClaims().keySet()) {
                     if (claimKey.startsWith(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + SecurityConstants.FEDERATION_CLAIM_KEY_PREFIX))
-                        federationIdentifierClaims.add(token.getClaims().get(claimKey).toString());
-                }
-                // checking if federation claims have our needed id
-                if (federationIdentifierClaims.contains(federationIdentifier)) {
-                    validTokens.add(token);
-                    return validTokens;
+                        // checking if federation claims have our needed id
+                        if (token.getClaims().get(claimKey).toString().equals(federationIdentifier)) {
+                            validTokens.add(token);
+                            return validTokens;
+                        }
                 }
             }
         }
-
         return validTokens;
     }
 }

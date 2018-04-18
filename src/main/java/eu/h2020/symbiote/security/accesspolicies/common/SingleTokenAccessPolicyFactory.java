@@ -48,7 +48,7 @@ public class SingleTokenAccessPolicyFactory {
                     if (claimKey.startsWith(SingleTokenAccessPolicySpecifier.FEDERATION_MEMBER_KEY_PREFIX))
                         federationMembers.add(specifier.getRequiredClaims().get(claimKey));
                 }
-                return new SingleFederatedTokenAccessPolicy(federationMembers, homePlatformIdentifier, federationIdentifier);
+                return new SingleFederatedTokenAccessPolicy(federationMembers, homePlatformIdentifier, federationIdentifier); // todo add other claims map param
             }
             case SFHTAP: {
                 String federationIdentifier = specifier.getRequiredClaims().get(SingleTokenAccessPolicySpecifier.FEDERATION_IDENTIFIER_KEY);
@@ -57,7 +57,7 @@ public class SingleTokenAccessPolicyFactory {
                     if (claimKey.startsWith(SingleTokenAccessPolicySpecifier.FEDERATION_MEMBER_KEY_PREFIX))
                         federationMembers.add(specifier.getRequiredClaims().get(claimKey));
                 }
-                return new SingleFederatedHomeTokenAccessPolicy(federationMembers, federationIdentifier);
+                return new SingleFederatedHomeTokenAccessPolicy(federationMembers, federationIdentifier); // todo add other claims map param and local platform identifier
             }
             case SLHTAP: {
                 String platformIdentifier = specifier.getRequiredClaims().get(Claims.ISSUER);
