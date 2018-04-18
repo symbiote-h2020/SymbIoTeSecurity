@@ -7,6 +7,7 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsExce
 import eu.h2020.symbiote.security.helpers.CryptoHelper;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -22,29 +23,31 @@ public class SingleFederatedTokenAccessPolicy implements IAccessPolicy {
     private final String homePlatformIdentifier;
     private final Set<String> federationMembers;
     private final String federationIdentifier;
+    private final Map<String, String> requiredClaims;
 
     /**
      * Creates a new access policy object
      *
-     * @param homePlatformIdentifier so that HOME tokens are properly identified
-     *                               TODO add param required claims for home users
-     * @param federationIdentifier   identifier of the federation
      * @param federationMembers      set containing federation members identifiers
+     * @param localPlatformIdentifier so that HOME tokens are properly identified
+     * @param federationIdentifier   identifier of the federation
+     * @param requiredClaims         map of claims that should appear in local Home Token to pass the policy
      *
      */
-    public SingleFederatedTokenAccessPolicy(Set<String> federationMembers, String homePlatformIdentifier, String federationIdentifier) throws
+    public SingleFederatedTokenAccessPolicy(Set<String> federationMembers, String localPlatformIdentifier, String federationIdentifier, Map<String, String> requiredClaims) throws
             InvalidArgumentsException {
         if (federationMembers == null
                 || federationMembers.isEmpty()
-                || homePlatformIdentifier == null
-                || homePlatformIdentifier.isEmpty()
+                || localPlatformIdentifier == null
+                || localPlatformIdentifier.isEmpty()
                 || federationIdentifier == null
                 || federationIdentifier.isEmpty()
-                || !federationMembers.contains(homePlatformIdentifier))
+                || !federationMembers.contains(localPlatformIdentifier))
             throw new InvalidArgumentsException("Missing federation definition contents required to build this policy type");
-        this.homePlatformIdentifier = homePlatformIdentifier;
+        this.homePlatformIdentifier = localPlatformIdentifier;
         this.federationMembers = federationMembers;
         this.federationIdentifier = federationIdentifier;
+        this.requiredClaims = requiredClaims;
     }
 
 
@@ -56,8 +59,8 @@ public class SingleFederatedTokenAccessPolicy implements IAccessPolicy {
         for (Token token : authorizationTokens) {
             //verify if token is HOME ttyp and if token is issued by this platform
             if (token.getType().equals(Token.Type.HOME) // a local token
-                    && token.getClaims().getIssuer().equals(homePlatformIdentifier)) { // issued by us
-                // todo check required claims
+                    && token.getClaims().getIssuer().equals(homePlatformIdentifier)
+                    && isSatisfiedWith(token)) { // issued by us
                 validTokens.add(token);
                 return validTokens;
             }
@@ -76,5 +79,25 @@ public class SingleFederatedTokenAccessPolicy implements IAccessPolicy {
             }
         }
         return validTokens;
+    }
+
+    private boolean isSatisfiedWith(Token token) {
+        // empty access policy is satisfied by any token
+        if (requiredClaims.isEmpty())
+            return true;
+
+        // need to verify that all the required claims are in the token
+        for (Map.Entry<String, String> requiredClaim : requiredClaims.entrySet()) {
+            // try to find requiredClaim in token attributes
+            String claimValue = (String) token.getClaims().get(requiredClaim.getKey());
+            // missing claim causes failed authorization
+            if (claimValue == null)
+                return false;
+            // wrong value of the claim also causes failed authorization
+            if (!requiredClaim.getValue().equals(claimValue))
+                return false;
+        }
+        // token passes the satisfaction procedure
+        return true;
     }
 }

@@ -74,6 +74,7 @@ public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier 
             case SFHTAP:
                 // initial check of needed fields
                 if (requiredClaims == null
+                        || !requiredClaims.containsKey(FEDERATION_HOME_PLATFORM_ID)
                         || !requiredClaims.containsKey(FEDERATION_IDENTIFIER_KEY)
                         || !requiredClaims.containsKey(FEDERATION_SIZE))
                     throw new InvalidArgumentsException("Missing federation definition contents required to build this policy type");
@@ -115,10 +116,11 @@ public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier 
      * @param federationMembers      identifiers of platforms participating in the federation (including home platform Id)
      * @param localPlatformIdentifier used to authorize our local users
      * @param federationIdentifier   which identifies the authorization granting access claim
-     *                               todo add local users claims map
+     * @param requiredClaimsByLocalUsers used to authorize only our local users
+     *
      * @throws InvalidArgumentsException
      */
-    public SingleTokenAccessPolicySpecifier(Set<String> federationMembers, String localPlatformIdentifier, String federationIdentifier) throws
+    public SingleTokenAccessPolicySpecifier(Set<String> federationMembers, String localPlatformIdentifier, Map<String, String> requiredClaimsByLocalUsers, String federationIdentifier) throws
             InvalidArgumentsException {
         // required contents check
         if (federationMembers == null
@@ -127,6 +129,7 @@ public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier 
                 || localPlatformIdentifier.isEmpty()
                 || federationIdentifier == null
                 || federationIdentifier.isEmpty()
+                || requiredClaimsByLocalUsers == null
                 || !federationMembers.contains(localPlatformIdentifier))
             throw new InvalidArgumentsException("Missing federation definition contents required to build this policy type");
 
@@ -141,22 +144,28 @@ public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier 
             requiredClaims.put(FEDERATION_MEMBER_KEY_PREFIX + memberNumber, member);
             memberNumber++;
         }
+        requiredClaims.putAll(requiredClaimsByLocalUsers);
     }
 
     /**
      * Used to create the specifier for resources offered in federation according to @{@link SingleFederatedHomeTokenAccessPolicy}
      * where access is granted using Home Token from one of the federated platforms
      *
+     * @param localPlatformIdentifier used to authorize our local users
+     * @param requiredClaimsByLocalUsers used to authorize only our local users
      * @param federationMembers    identifiers of platforms participating in the federation (including home platform Id)
      * @param federationIdentifier which identifies the authorization granting access claim
      *
      * @throws InvalidArgumentsException
      */
-    public SingleTokenAccessPolicySpecifier(Set<String> federationMembers, String federationIdentifier) throws
+    public SingleTokenAccessPolicySpecifier(String localPlatformIdentifier, Map<String, String> requiredClaimsByLocalUsers, Set<String> federationMembers, String federationIdentifier) throws
             InvalidArgumentsException {
         // required contents check
         if (federationMembers == null
                 || federationMembers.isEmpty()
+                || localPlatformIdentifier == null
+                || localPlatformIdentifier.isEmpty()
+                || !federationMembers.contains(localPlatformIdentifier)
                 || federationIdentifier == null
                 || federationIdentifier.isEmpty())
             throw new InvalidArgumentsException("Missing federation definition contents required to build this policy type");
@@ -165,12 +174,14 @@ public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier 
         // building the map
         requiredClaims = new HashMap<>(federationMembers.size() + 1);
         requiredClaims.put(FEDERATION_IDENTIFIER_KEY, federationIdentifier);
+        requiredClaims.put(FEDERATION_HOME_PLATFORM_ID, localPlatformIdentifier);
         requiredClaims.put(FEDERATION_SIZE, String.valueOf(federationMembers.size()));
         int memberNumber = 1;
         for (String member : federationMembers) {
             requiredClaims.put(FEDERATION_MEMBER_KEY_PREFIX + memberNumber, member);
             memberNumber++;
         }
+        requiredClaims.putAll(requiredClaimsByLocalUsers);
     }
 
     /**

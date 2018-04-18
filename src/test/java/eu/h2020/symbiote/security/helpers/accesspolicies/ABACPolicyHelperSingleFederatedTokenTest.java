@@ -57,6 +57,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
 
     private HashSet<AuthorizationCredentials> authorizationCredentialsForeignTokenSet = new HashSet<>();
     private HashSet<AuthorizationCredentials> authorizationCredentialsHomeTokenSet = new HashSet<>();
+    private HashSet<AuthorizationCredentials> authorizationCredentialsPlatformHomeTokenSet = new HashSet<>();
 
     @Before
     public void setUp() throws Exception {
@@ -84,12 +85,12 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         Map<String, String> attributesSecond = new HashMap<>();
         attributesSecond.put("federation_1", federationId);
 
-        String authorizationTokenOne = DummyTokenIssuer.buildAuthorizationToken(clientId,
+        String authorizationTokenOne = DummyTokenIssuer.buildAuthorizationToken(clientId + "@" + federatedPlatformId,
                 attributesFirst,
                 clientPublicKey.getEncoded(),
                 Token.Type.FOREIGN,
                 (long) (36000000),
-                federatedPlatformId,
+                deploymentId,
                 issuingAAMPublicKey,
                 issuingAAMPrivateKey);
 
@@ -102,10 +103,21 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
                 issuingAAMPublicKey,
                 issuingAAMPrivateKey);
 
+        String authorizationTokenThree = DummyTokenIssuer.buildAuthorizationToken(clientId,
+                attributesSecond,
+                clientPublicKey.getEncoded(),
+                Token.Type.HOME,
+                (long) (36000000),
+                federatedPlatformId,
+                issuingAAMPublicKey,
+                issuingAAMPrivateKey);
+
         AuthorizationCredentials authorizationCredentialsFirst = new AuthorizationCredentials(new Token(authorizationTokenOne), homeCredentials.homeAAM, homeCredentials);
         AuthorizationCredentials authorizationCredentialsSecond = new AuthorizationCredentials(new Token(authorizationTokenTwo), homeCredentials.homeAAM, homeCredentials);
+        AuthorizationCredentials authorizationCredentialsThird = new AuthorizationCredentials(new Token(authorizationTokenThree), homeCredentials.homeAAM, homeCredentials);
         this.authorizationCredentialsForeignTokenSet.add(authorizationCredentialsFirst);
         this.authorizationCredentialsHomeTokenSet.add(authorizationCredentialsSecond);
+        this.authorizationCredentialsPlatformHomeTokenSet.add(authorizationCredentialsThird);
     }
 
     @Test
@@ -118,7 +130,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         federationMembers.add(deploymentId);
 
         //SFTAP
-        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, deploymentId, federationId);
+        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, deploymentId, new HashMap<>(), federationId);
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
         resourceAccessPolicyMap.put(goodResourceID, SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));
@@ -145,7 +157,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         federationMembers.add(deploymentId);
 
         //SFTAP
-        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, deploymentId, federationId2);
+        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, deploymentId, new HashMap<>(), federationId2);
 
         //check security request with foreign token without proper federation attribute
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsForeignTokenSet, false);
@@ -167,7 +179,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         federationMembers.add(deploymentId);
 
         //SFHTAP
-        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, federationId);
+        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(deploymentId, new HashMap<>(), federationMembers, federationId);
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
         resourceAccessPolicyMap.put(goodResourceID, SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));
@@ -188,10 +200,10 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         federationMembers.add(deploymentId);
 
         //SFHTAP
-        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, federationId2);
+        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(deploymentId, new HashMap<>(), federationMembers, federationId2);
 
         //check security request with HOME token without proper federation attribute
-        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsHomeTokenSet, false);
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsPlatformHomeTokenSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
@@ -210,7 +222,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         federationMembers.add(deploymentId);
 
         //SFHTAP
-        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, federationId);
+        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(deploymentId, new HashMap<>(), federationMembers, federationId);
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
         resourceAccessPolicyMap.put(goodResourceID, SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));
