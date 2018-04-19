@@ -65,7 +65,7 @@ public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier 
                         || !requiredClaims.containsKey(FEDERATION_IDENTIFIER_KEY)
                         || !requiredClaims.containsKey(FEDERATION_SIZE)
                         || !requiredClaims.containsKey(DOES_REQUIRE_ALL_LOCAL_TOKENS))
-                    throw new InvalidArgumentsException("Missing federation definition contents required to build this policy type");
+                    throw new InvalidArgumentsException("Missing required federation policy fields required to build this policy type");
                 // checking if all members are there
                 long federationSize = Long.parseLong(requiredClaims.get(FEDERATION_SIZE));
                 for (long i = 1; i <= federationSize; i++) {
@@ -107,7 +107,11 @@ public class SingleTokenAccessPolicySpecifier implements IAccessPolicySpecifier 
      * @param requireAllLocalTokens         requires exchange of platform Home Tokens to FOREIGN Token issued by local AAM with proper claims to pass the policy
      * @throws InvalidArgumentsException
      */
-    public SingleTokenAccessPolicySpecifier(String federationIdentifier, Set<String> federationMembers, String localPlatformIdentifier, Map<String, String> requiredClaimsByLocalUsers, boolean requireAllLocalTokens) throws
+    public SingleTokenAccessPolicySpecifier(String federationIdentifier,
+                                            Set<String> federationMembers,
+                                            String localPlatformIdentifier,
+                                            Map<String, String> requiredClaimsByLocalUsers,
+                                            boolean requireAllLocalTokens) throws
             InvalidArgumentsException {
         // required contents check
         if (federationMembers == null

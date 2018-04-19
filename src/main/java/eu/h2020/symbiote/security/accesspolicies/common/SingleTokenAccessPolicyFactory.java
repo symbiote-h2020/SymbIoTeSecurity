@@ -57,7 +57,12 @@ public class SingleTokenAccessPolicyFactory {
                         filteredClaims.remove(claimKey);
                     }
                 }
-                return new SingleFederatedTokenAccessPolicy(federationIdentifier, federationMembers, localPlatformIdentifier, filteredClaims, doesRequireAllLocalTokens);
+                return new SingleFederatedTokenAccessPolicy(
+                        federationIdentifier,
+                        federationMembers,
+                        localPlatformIdentifier,
+                        filteredClaims,
+                        doesRequireAllLocalTokens);
             }
             case SLHTAP: {
                 String platformIdentifier = specifier.getRequiredClaims().get(Claims.ISSUER);

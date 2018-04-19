@@ -12,9 +12,9 @@ import java.util.Set;
 
 /**
  * SymbIoTe Access Policy that needs to be satisfied by a single Token:
- * - a HOME one issued by local AAM for local users/apps that have claims required to access the resource OR
+ * - a HOME one issued by the local AAM for local users/apps that have claims required to access the resource OR
  * - (if requireAllLocalTokens== false) a HOME one issued by one of the federation members and containing the federation identifier claim OR
- * - (if requireAllLocalTokens== true) a FOREIGN one issued by local AAM in exchange for a HOME token from the federation members and containing the federation identifier claim
+ * - (if requireAllLocalTokens== true) a FOREIGN one issued by the local AAM in exchange for a HOME token from the federation members and containing the federation identifier claim
  *
  * @author Mikołaj Dobski (PSNC)
  * @author Jakub Toczek (PSNC)
@@ -35,7 +35,8 @@ public class SingleFederatedTokenAccessPolicy implements IAccessPolicy {
      * @param doesRequireAllLocalTokens requires exchange of platform Home Tokens to FOREIGN Token issued by local AAM with proper claims to pass the policy
      *
      */
-    public SingleFederatedTokenAccessPolicy(String federationIdentifier, Set<String> federationMembers, String localPlatformIdentifier, Map<String, String> requiredClaims, boolean doesRequireAllLocalTokens) throws
+    public SingleFederatedTokenAccessPolicy(String federationIdentifier,
+                                            Set<String> federationMembers, String localPlatformIdentifier, Map<String, String> requiredClaims, boolean doesRequireAllLocalTokens) throws
             InvalidArgumentsException {
         if (federationMembers == null
                 || federationMembers.isEmpty()
@@ -69,7 +70,7 @@ public class SingleFederatedTokenAccessPolicy implements IAccessPolicy {
             // if locality of Tokens is not required, Home Tokens from services belonging to federation should be processed
             if (!requireAllLocalTokens
                     && token.getType().equals(Token.Type.HOME)
-                    && !token.getClaims().getIssuer().equals(localPlatformIdentifier)
+                    && !token.getClaims().getIssuer().equals(localPlatformIdentifier) // a HOME token which is not ours
                     && federationMembers.contains(token.getClaims().getIssuer())) {
                 if (checkFederationClaims(token)) {
                     validTokens.add(token);
