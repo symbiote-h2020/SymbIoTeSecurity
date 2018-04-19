@@ -130,7 +130,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         federationMembers.add(deploymentId);
 
         //SFTAP
-        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, deploymentId, new HashMap<>(), federationId);
+        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationId, federationMembers, deploymentId, new HashMap<>(), true);
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
         resourceAccessPolicyMap.put(goodResourceID, SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));
@@ -157,7 +157,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         federationMembers.add(deploymentId);
 
         //SFTAP
-        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationMembers, deploymentId, new HashMap<>(), federationId2);
+        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationId2, federationMembers, deploymentId, new HashMap<>(), true);
 
         //check security request with foreign token without proper federation attribute
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsForeignTokenSet, false);
@@ -178,8 +178,8 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         federationMembers.add(federatedPlatformId);
         federationMembers.add(deploymentId);
 
-        //SFHTAP
-        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(deploymentId, new HashMap<>(), federationMembers, federationId);
+        //SFTAP without Foreign Tokens
+        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationId, federationMembers, deploymentId, new HashMap<>(), false);
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
         resourceAccessPolicyMap.put(goodResourceID, SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));
@@ -199,8 +199,8 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         Set<String> federationMembers = new HashSet<>();
         federationMembers.add(deploymentId);
 
-        //SFHTAP
-        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(deploymentId, new HashMap<>(), federationMembers, federationId2);
+        //SFTAP without Foreign Tokens
+        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationId2, federationMembers, deploymentId, new HashMap<>(), false);
 
         //check security request with HOME token without proper federation attribute
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsPlatformHomeTokenSet, false);
@@ -221,8 +221,8 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
         federationMembers.add(federatedPlatformId);
         federationMembers.add(deploymentId);
 
-        //SFHTAP
-        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(deploymentId, new HashMap<>(), federationMembers, federationId);
+        //SFTAP
+        SingleTokenAccessPolicySpecifier testPolicySpecifier = new SingleTokenAccessPolicySpecifier(federationId, federationMembers, deploymentId, new HashMap<>(), false);
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
         resourceAccessPolicyMap.put(goodResourceID, SingleTokenAccessPolicyFactory.getSingleTokenAccessPolicy(testPolicySpecifier));

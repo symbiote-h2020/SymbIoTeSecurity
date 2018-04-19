@@ -20,10 +20,6 @@ public enum AccessPolicyType {
      */
     SFTAP,
     /**
-     * SingleFederatedHomeTokenAccessPolicy
-     */
-    SFHTAP,
-    /**
      * SingleTokenAccessPolicy
      */
     STAP,

@@ -11,30 +11,31 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * SymbIoTe Access Policy that needs to be satisfied by a single Token issued by the local platform:
- * - a HOME one for local users/apps that have claims required to access the resource OR
- * - a FOREIGN one issued in exchange for a HOME token from the federation members and containing the federation identifier claim
- * basically the same as @{@link SingleFederatedHomeTokenAccessPolicy} but requiring federation members to acquire local domain credentials
+ * SymbIoTe Access Policy that needs to be satisfied by a single Token:
+ * - a HOME one issued by local AAM for local users/apps that have claims required to access the resource OR
+ * - (if requireAllLocalTokens== false) a HOME one issued by one of the federation members and containing the federation identifier claim OR
+ * - (if requireAllLocalTokens== true) a FOREIGN one issued by local AAM in exchange for a HOME token from the federation members and containing the federation identifier claim
  *
  * @author Mikołaj Dobski (PSNC)
  * @author Jakub Toczek (PSNC)
  */
 public class SingleFederatedTokenAccessPolicy implements IAccessPolicy {
-    private final String homePlatformIdentifier;
+    private final String localPlatformIdentifier;
     private final Set<String> federationMembers;
     private final String federationIdentifier;
     private final Map<String, String> requiredClaims;
+    private final boolean requireAllLocalTokens;
 
     /**
      * Creates a new access policy object
-     *
-     * @param federationMembers      set containing federation members identifiers
-     * @param localPlatformIdentifier so that HOME tokens are properly identified
-     * @param federationIdentifier   identifier of the federation
-     * @param requiredClaims         map of claims that should appear in local Home Token to pass the policy
+     * @param federationIdentifier      identifier of the federation
+     * @param federationMembers         set containing federation members identifiers
+     * @param localPlatformIdentifier   so that local HOME Tokens are properly identified
+     * @param requiredClaims            map of claims that should appear in local Home Token to pass the policy
+     * @param doesRequireAllLocalTokens requires exchange of platform Home Tokens to FOREIGN Token issued by local AAM with proper claims to pass the policy
      *
      */
-    public SingleFederatedTokenAccessPolicy(Set<String> federationMembers, String localPlatformIdentifier, String federationIdentifier, Map<String, String> requiredClaims) throws
+    public SingleFederatedTokenAccessPolicy(String federationIdentifier, Set<String> federationMembers, String localPlatformIdentifier, Map<String, String> requiredClaims, boolean doesRequireAllLocalTokens) throws
             InvalidArgumentsException {
         if (federationMembers == null
                 || federationMembers.isEmpty()
@@ -44,10 +45,11 @@ public class SingleFederatedTokenAccessPolicy implements IAccessPolicy {
                 || federationIdentifier.isEmpty()
                 || !federationMembers.contains(localPlatformIdentifier))
             throw new InvalidArgumentsException("Missing federation definition contents required to build this policy type");
-        this.homePlatformIdentifier = localPlatformIdentifier;
+        this.localPlatformIdentifier = localPlatformIdentifier;
         this.federationMembers = federationMembers;
         this.federationIdentifier = federationIdentifier;
         this.requiredClaims = requiredClaims;
+        this.requireAllLocalTokens = doesRequireAllLocalTokens;
     }
 
 
@@ -58,27 +60,45 @@ public class SingleFederatedTokenAccessPolicy implements IAccessPolicy {
         // trying to find token satisfying this policy
         for (Token token : authorizationTokens) {
             //verify if token is HOME ttyp and if token is issued by this platform
-            if (token.getType().equals(Token.Type.HOME) // a local token
-                    && token.getClaims().getIssuer().equals(homePlatformIdentifier)
-                    && isSatisfiedWith(token)) { // issued by us
+            if (token.getType().equals(Token.Type.HOME) // a Home Token
+                    && token.getClaims().getIssuer().equals(localPlatformIdentifier) // issued by us
+                    && isSatisfiedWith(token)) { // containing proper Claims
                 validTokens.add(token);
                 return validTokens;
             }
-            // a foreign token issued by member with the proper key should be processed for searching the federation id
-            if (token.getType().equals(Token.Type.FOREIGN) // an exchanged token
-                    && token.getClaims().getIssuer().equals(homePlatformIdentifier) // issued by the local service
+            // if locality of Tokens is not required, Home Tokens from services belonging to federation should be processed
+            if (!requireAllLocalTokens
+                    && token.getType().equals(Token.Type.HOME)
+                    && !token.getClaims().getIssuer().equals(localPlatformIdentifier)
+                    && federationMembers.contains(token.getClaims().getIssuer())) {
+                if (checkFederationClaims(token)) {
+                    validTokens.add(token);
+                    return validTokens;
+                }
+            }
+            // if locality of Tokens is required, a foreign token issued by member with the proper key should be processed for searching the federation id
+            if (requireAllLocalTokens
+                    && token.getType().equals(Token.Type.FOREIGN) // an exchanged token
+                    && token.getClaims().getIssuer().equals(localPlatformIdentifier) // issued by the local service
                     && federationMembers.contains(token.getClaims().getSubject().split(CryptoHelper.FIELDS_DELIMITER)[1])) { // the federation still harbour the platform the client comes from
-                for (String claimKey : token.getClaims().keySet()) {
-                    if (claimKey.startsWith(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + SecurityConstants.FEDERATION_CLAIM_KEY_PREFIX))
-                        // checking if federation claims have our needed id
-                        if (token.getClaims().get(claimKey).toString().equals(federationIdentifier)) {
-                            validTokens.add(token);
-                            return validTokens;
-                        }
+                if (checkFederationClaims(token)) {
+                    validTokens.add(token);
+                    return validTokens;
                 }
             }
         }
         return validTokens;
+    }
+
+    private boolean checkFederationClaims(Token token) {
+        for (String claimKey : token.getClaims().keySet()) {
+            if (claimKey.startsWith(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + SecurityConstants.FEDERATION_CLAIM_KEY_PREFIX))
+                // checking if federation claims have our needed id
+                if (token.getClaims().get(claimKey).toString().equals(federationIdentifier)) {
+                    return true;
+                }
+        }
+        return false;
     }
 
     private boolean isSatisfiedWith(Token token) {
