@@ -35,6 +35,13 @@ repositories {
     jcenter()
 }
 
+configurations {
+    keystoreJar {
+        extendsFrom(compile)
+        exclude(module:'bcprov-jdk15on')
+    }
+}
+
 dependencies {
     compile('io.jsonwebtoken:jjwt:[0.9, 0.9.999]')
     compile('org.bouncycastle:bcprov-jdk15on:[1.59, 1.999]')
@@ -87,8 +94,8 @@ task buildRunnableServiceKeystoreFactoryJAR(type: Jar) {
             'Main-Class': 'eu.h2020.symbiote.security.helpers.ServiceAAMCertificateKeyStoreFactory'
     }
     baseName = project.name + '-helper'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA' 
+    from { configurations.keystoreJar.collect { it.isDirectory() ? it : zipTree(it) } }
+	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
     with jar
 }
 
