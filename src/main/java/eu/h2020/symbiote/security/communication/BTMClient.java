@@ -115,7 +115,7 @@ public class BTMClient implements IBTMClient {
             case 400:
                 throw new MalformedJWTException(MalformedJWTException.UNABLE_TO_READ_MALFORMED_COUPON);
             case 401:
-                throw new WrongCredentialsException(WrongCredentialsException.COUPON_WITH_INCORRECT_CREDENTIALS);
+                throw new WrongCredentialsException(WrongCredentialsException.INVALID_REQUEST);
             case 500:
                 throw new JWTCreationException(JWTCreationException.SERVER_FAILED_USE_COUPON);
             case 200:
@@ -135,7 +135,6 @@ public class BTMClient implements IBTMClient {
     @Override
     public String getDiscreteCoupon(String couponRequest) throws
             WrongCredentialsException,
-            JWTCreationException,
             MalformedJWTException,
             BTMException {
         Response response;
@@ -148,9 +147,9 @@ public class BTMClient implements IBTMClient {
             case 400:
                 throw new MalformedJWTException(MalformedJWTException.UNABLE_TO_READ_MALFORMED_COUPON);
             case 401:
-                throw new WrongCredentialsException(WrongCredentialsException.COUPON_WITH_INCORRECT_CREDENTIALS);
+                throw new WrongCredentialsException(WrongCredentialsException.INVALID_REQUEST);
             case 500:
-                throw new JWTCreationException(JWTCreationException.SERVER_FAILED_USE_COUPON);
+                throw new BTMException("Internal server error occurred");
             case 200:
                 Collection headers = response.headers().get(SecurityConstants.COUPON_HEADER_NAME);
                 if (headers == null ||

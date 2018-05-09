@@ -110,6 +110,9 @@ public class SecurityHandler implements ISecurityHandler {
         KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 
         File ksFile = new File(path);
+        File dir = new File("keystores");
+
+
 
         if (!ksFile.exists()) {
             trustStore.load(null, pw);

@@ -72,6 +72,28 @@ public class CryptoHelper {
         }
     }
 
+    /**
+     * @param homeCredentials users/component credentials
+     * @return String loginRequest
+     * @throws SecurityException error during creation of loginRequest
+     */
+    public static String buildCouponAcquisitionRequest(HomeCredentials homeCredentials, String platformId) {
+        ECDSAHelper.enableECDSAProvider();
+
+        try {
+            JwtBuilder jwtBuilder = Jwts.builder();
+            jwtBuilder.setIssuer(homeCredentials.username + CryptoHelper.FIELDS_DELIMITER + homeCredentials.clientIdentifier);
+            jwtBuilder.setSubject(platformId);
+            jwtBuilder.setIssuedAt(new Date());
+            jwtBuilder.setExpiration(new Date(System.currentTimeMillis() + 60000));
+            jwtBuilder.signWith(SignatureAlgorithm.ES256, homeCredentials.privateKey);
+
+            return jwtBuilder.compact();
+        } catch (Exception e) {
+            throw new SecurityException(e.getMessage(), e.getCause());
+        }
+    }
+
     public static String convertX509ToPEM(X509Certificate signedCertificate) throws IOException {
         StringWriter signedCertificatePEMDataStringWriter = new StringWriter();
         JcaPEMWriter pemWriter = new JcaPEMWriter(signedCertificatePEMDataStringWriter);
