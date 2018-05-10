@@ -18,6 +18,10 @@ public enum CouponValidationStatus {
      */
     COUPON_NOT_IN_DB,
     /**
+     *
+     */
+    DB_MISMATCH,
+    /**
      * unknown status of the coupon
      */
     UNKNOWN,
