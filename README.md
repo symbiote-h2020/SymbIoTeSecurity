@@ -472,20 +472,20 @@ The SecurityRequest is split into the following HTTP security headers for commun
  ```
 The SECURITY_CREDENTIALS_HEADER_PREFIX of each token is created according the value of last header, which specifies the number of provided tokens.
 Prefix contains JSON structure that consists of following [SecurityCredentials](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/documentation/src/main/java/eu/h2020/symbiote/security/communication/payloads/SecurityCredentials.java):
- - `String token` - type of token: only home or foreign;
+ - `String token` - a HOME or FOREIGN token string;
  - `String authenticationChallenge` - generated using MutualAuthenticationHelper;
  - `String clientCertificate` - (optional for offline validation) matching token SPK claim
  - `String clientCertificateSigningAAMCertificate` - (optional for offline validation) matching clientCertificate signature
  - `String foreignTokenIssuingAAMCertificate` - (optional for offline validation) matching @{@link Type#FOREIGN} ISS and IPK claims 
 
 **Example:**
- - x-auth-timestamp: 1519652051000
+ - x-auth-timestamp: 1519723453000
  - x-auth-size: 1
  - x-auth-1:
 ```java
 {
-   "token":"eyJhbGciOiJFUzI1NiJ9.eyJ0dHlwIjoiR1VFU1QiLCJzdWIiOiJndWVzdCIsImlwayI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRVBhZURDNElnT3VITlBmWCtURG5adXZuTHdUbHMwMERQb294aVZCTE8za3I0N0N3TXFYSm4yN3lpdFdZUkRRKzBmWG52MzFIbGJLbkxSWktqSmF5U3p3PT0iLCJpc3MiOiJTeW1iSW9UZV9Db3JlX0FBTSIsImV4cCI6MTUxMDU2Nzg2NywiaWF0IjoxNTEwNTY3MjY3LCJqdGkiOiI2MzI4NDUxMzAiLCJzcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVsdlNwYVhDa2RFZ3lYM2xJeWQ1VCs2VFgyQ0hXMDluekNjL05aY2krcGEvdmtQSG5DeFZESkpLTkZwL1hQc0g2T1hvSTkxQXJFcUJ1SlJtd3k2dWZSdz09In0.zn7xjwUq89YSNptLTFCZSpb8n65n4o24HPOw2WPTJSglfaO8paW1O5vC3n9072ktm327kj44Kgs5qqMhRy22cA",
-   "authenticationChallenge":"",
+	"token":"eyJhbGciOiJFUzI1NiJ9.eyJ0dHlwIjoiSE9NRSIsInN1YiI6InJoIiwiaXBrIjoiTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFN2VTYUlicWNRSnNpUWRmRXpPWkZuZlVQZWpTSkpDb1R4SSt2YWZiS1dyclZSUVNkS3cwdlYvUmRkZ3U1SXhWTnFkV0tsa3dpcldsTVpYTFJHcWZ3aHc9PSIsImlzcyI6InBsYXRmb3JtLTEiLCJleHAiOjE1MTk3MjM0NTUsImlhdCI6MTUxOTcyMzQ1MywianRpIjoiMTY0ODE2NzgxNiIsInNwayI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRWVwK1VPTHFVbGRuamJwL0V4UGNpNHV3ZDk0bzRpczM0SXFCYmlhS2VmMXlPd2hUQ2wzcEw2Y1ErNXhRMFN5ajd2NEtscngvamRVUEhGN2dpQktUVnVBPT0ifQ.82rEpMSdLs3VFfsrKkS17wjtnP5A2dZm8J70CG-YNrp-GwvDeRSj1DJiR0qKYfu5oOm5-cTsqJm7UGVjZaorCQ",
+	"authenticationChallenge":"eyJhbGciOiJFUzI1NiJ9.eyJqdGkiOiIzNzk3OTg3MjAiLCJzdWIiOiIxNjQ4MTY3ODE2IiwiaXNzIjoicmgiLCJpcGsiOiJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVlcCtVT0xxVWxkbmpicC9FeFBjaTR1d2Q5NG80aXMzNElxQmJpYUtlZjF5T3doVENsM3BMNmNRKzV4UTBTeWo3djRLbHJ4L2pkVVBIRjdnaUJLVFZ1QT09IiwiaGFzaCI6IjNmNjkyMmQwMGQzMWY2NmFlOWE3ODQ1ZWIzNjRhZjVlN2UzODNmZDA2ODQxYTMzZGFlZTZmZTVlNDg5ZTI1MjMiLCJpYXQiOjE1MTk3MjM0NTMsImV4cCI6MTUxOTcyMzUxM30.PJpwjkL672KGYzipFqzNJeBzxRDL51p8zo0y70tM5wJWsluYVpjkQ6yQtt4jAiWJhSrtYmyHybE1MXbAdxkyBw",
    "clientCertificate":"",
    "clientCertificateSigningAAMCertificate":"",
    "foreignTokenIssuingAAMCertificate":""
