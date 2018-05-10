@@ -836,6 +836,89 @@ new SingleTokenAccessPolicy(null);
 ```
 This will be satisfied by any valid symbiote token.
 
+### Composite Access Policies
+In order to explain usage of Composite Access Policies and how they can be defined, we foresaw scenario with SmartHome platform – *OpenHAB*, three users in system – father, mother, child and three sensors - **S1**,**S2** and **S3**.
+
+All sensors are searchable from symbIoTe core by the people that use the same SmartHome platform. Due to that, access policy specifying searching policy would be of type **SLHTAP** (SingleHomeTokenAccessPolicy). 
+
+JSON specification of that policy is:
+```json
+{
+   "policyType":"SLHTAP",
+   "requiredClaims":{
+      "iss":"OpenHAB"
+   }
+}
+```
+
+As for access rights in the SmartHome, we defined 2 scenarios:
+*	**S1** can be accessed by all family members
+*	**S2** and **S3** can be accessed ONLY by father and mother
+
+For definition of access policy which is based on proving someone’s identity, we are using **SLHTIBAP** (SingleHomeTokenIdentityBasedAccessPolicy). 
+
+However, since multiple identities can satisfy single access policy, we are using **CAP**(CompositeAccessPolicy) as wrapper around access policies specifying access grant for single identity. 
+
+Examples of access policy JSON definitions are:
+
+**S1**:
+```json
+{
+   "relationOperator":"OR",
+   "compositeAccessPolicySpecifiers":null,
+   "policyType":"CAP",
+   "singleTokenAccessPolicySpecifiers":[
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"fatherUID"
+         }
+      },
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"motherUID"
+         }
+      },
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"childUID"
+         }
+      }
+   ]
+}
+```
+
+**S2** and **S3**:
+```json
+{
+   "relationOperator":"OR",
+   "compositeAccessPolicySpecifiers":null,
+   "policyType":"CAP",
+   "singleTokenAccessPolicySpecifiers":[
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"fatherUID"
+         }
+      },
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"motherUID"
+         }
+      }
+   ]
+}
+```
+
+
 # Credentials revocation 
 
 
