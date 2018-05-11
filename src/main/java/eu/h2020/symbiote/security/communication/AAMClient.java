@@ -4,9 +4,21 @@ import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ManagementStatus;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
-import eu.h2020.symbiote.security.commons.exceptions.custom.*;
+import eu.h2020.symbiote.security.commons.exceptions.custom.AAMException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.JWTCreationException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.NotExistingUserException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.UserManagementException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
 import eu.h2020.symbiote.security.communication.interfaces.IFeignAAMClient;
-import eu.h2020.symbiote.security.communication.payloads.*;
+import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
+import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
+import eu.h2020.symbiote.security.communication.payloads.Credentials;
+import eu.h2020.symbiote.security.communication.payloads.RevocationRequest;
+import eu.h2020.symbiote.security.communication.payloads.UserDetails;
+import eu.h2020.symbiote.security.communication.payloads.UserManagementRequest;
 import feign.Feign;
 import feign.FeignException;
 import feign.Logger;
@@ -14,11 +26,13 @@ import feign.Logger.Level;
 import feign.Response;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Optional;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Crude RMI-like client's implementation to the AAM module that communicates with it over REST.
@@ -85,7 +99,13 @@ public class AAMClient implements IAAMClient {
                 if (response.body().toString().isEmpty()) {
                     throw new AAMException(AAMException.RESPONSE_IS_EMPTY);
                 }
-                return response.body().toString();
+                try {
+                    String toString =
+                        IOUtils.toString(response.body().asInputStream(), Charset.forName("UTF-8"));
+                    return toString;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             default:
                 throw new AAMException("Error occured. Error code: " + response.status() + ". Message: " + response.body().toString());
         }
@@ -121,7 +141,13 @@ public class AAMClient implements IAAMClient {
                 if (response.body().toString().isEmpty()) {
                     throw new AAMException("Error occured. Response is empty!");
                 }
-                return response.body().toString();
+                try {
+                    String toString =
+                        IOUtils.toString(response.body().asInputStream(), Charset.forName("UTF-8"));
+                    return toString;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             default:
                 throw new AAMException("Error occured. Error code: " + response.status() + ". Message: " + response.body().toString());
         }
