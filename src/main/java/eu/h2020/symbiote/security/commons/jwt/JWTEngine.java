@@ -1,5 +1,6 @@
 package eu.h2020.symbiote.security.commons.jwt;
 
+import android.util.Base64;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
@@ -7,15 +8,18 @@ import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
-import io.jsonwebtoken.*;
-
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +48,7 @@ public class JWTEngine {
             ECDSAHelper.enableECDSAProvider();
             JWTClaims claims = getClaimsFromToken(tokenString);
             //Convert IPK claim to publicKey for validation
-            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(claims.getIpk()));
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.decode(claims.getIpk(), Base64.DEFAULT));
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
             PublicKey publicKey = keyFactory.generatePublic(keySpec);
 
@@ -94,7 +98,7 @@ public class JWTEngine {
             ECDSAHelper.enableECDSAProvider();
             JWTClaims claims = getClaimsFromToken(tokenString);
             //Convert IPK claim to publicKey for validation
-            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(claims.getIpk()));
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.decode(claims.getIpk(), Base64.DEFAULT));
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
             PublicKey publicKey = keyFactory.generatePublic(keySpec);
 
@@ -115,7 +119,7 @@ public class JWTEngine {
         //Get second part of the JWT
         String jwtBody = jwtParts[1];
 
-        String claimsString = new String(Base64.getDecoder().decode(jwtBody));
+        String claimsString = new String(Base64.decode(jwtBody, Base64.DEFAULT));
 
         ObjectMapper mapper = new ObjectMapper();
 
