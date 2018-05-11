@@ -85,6 +85,7 @@ public class SecurityConstants {
     public static final String BTM_CONSUME_COUPON = "/consume_coupon";
     public static final String BTM_NOTIFICATION = "/notification";
     public static final String BTM_EXCHANGE_COUPONS = "/exchange_coupons";
+    public static final String BTM_IS_NOTIFIED = "/is_notified";
 
     private SecurityConstants() {
     }
