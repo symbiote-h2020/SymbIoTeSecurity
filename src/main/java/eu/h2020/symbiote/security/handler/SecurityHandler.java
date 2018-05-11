@@ -15,10 +15,10 @@ import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.asn1.x500.RDN;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x500.style.BCStyle;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.spongycastle.asn1.x500.RDN;
+import org.spongycastle.asn1.x500.X500Name;
+import org.spongycastle.asn1.x500.style.BCStyle;
+import org.spongycastle.cert.jcajce.JcaX509CertificateHolder;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -478,9 +478,9 @@ public class SecurityHandler implements ISecurityHandler {
         KeyStore trustStore = getKeystore();
 
         String aliastag = credentials.homeAAM.getAamInstanceId();
-
+        X509Certificate cert = credentials.certificate.getX509();
         trustStore.setKeyEntry(aliastag, credentials.privateKey, keystorePassword.toCharArray(),
-                new java.security.cert.Certificate[]{credentials.certificate.getX509()});
+            new java.security.cert.Certificate[] { credentials.certificate.getX509() });
 
         FileOutputStream fOut = new FileOutputStream(keystorePath);
         trustStore.store(fOut, keystorePassword.toCharArray());

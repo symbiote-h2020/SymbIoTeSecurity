@@ -13,6 +13,6 @@ public class ECDSAHelper {
      * Certificates
      */
     public static void enableECDSAProvider() {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
     }
 }
