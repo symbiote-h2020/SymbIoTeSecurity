@@ -79,13 +79,12 @@ public class SecurityConstants {
     public static final String ERROR_DESC_UNSUPPORTED_ACCESS_POLICY_TYPE = "Access policy type not suppoted!";
 
     //Bartening and Traiding Module REST paths
-    public static final String BTM_GET_DISCRETE_COUPON = "/get_discrete_coupon";
-    public static final String BTM_VALIDATE_COUPON = "/validate_coupon";
-    public static final String BTM_REVOKE_COUPON = "/revoke_coupon";
+    public static final String BTM_GET_COUPON = "/get_coupon";
+    public static final String BTM_AUTHORIZE_BARTERAL_ACCESS = "/authorize_barteral_access";
+    public static final String BTM_REGISTER_COUPON = "/register_coupon";
+    public static final String BTM_IS_COUPON_VALID = "/is_coupon_valid";
     public static final String BTM_CONSUME_COUPON = "/consume_coupon";
-    public static final String BTM_NOTIFICATION = "/notification";
-    public static final String BTM_EXCHANGE_COUPONS = "/exchange_coupons";
-    public static final String BTM_IS_NOTIFIED = "/is_notified";
+    public static final String BTM_REVOKE_COUPON = "/revoke_coupon";
 
     private SecurityConstants() {
     }
