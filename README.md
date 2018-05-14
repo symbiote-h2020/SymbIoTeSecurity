@@ -802,6 +802,80 @@ It checks if the requirements for each ABAC was met and build proper policy (e.g
 
 It's important to know, that creating your own AccessPolicy, it has to implement [IAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/IAccessPolicy.java). 
 
+JSON structures for the above listed Access Policies:
+
+
+**SLHTAP** - SingleLocalHomeTokenAccessPolicy
+
+Example: Only users from OpenHAB platform can access particular service
+```json
+{
+   "policyType":"SLHTAP",
+   "requiredClaims":{
+      "iss":"OpenHAB"
+   }
+}
+```
+
+
+**SHTIBAP** - SingleLocalHomeTokenIdentityBasedAccessPolicy
+
+Example: Only user from OpenHAB having UID from particular user can access service
+```json
+{
+    "policyType":"SHTIBAP",
+    "requiredClaims":{
+      "iss":"OpenHAB",
+      "sub":"userUID"
+    }
+}
+```
+
+
+**STAP** - SingleTokenAccessPolicy - specifying value for particular attribute which has to be provided during authorization
+
+Example: Only user named "John" can access service
+```json
+{
+   "policyType":"STAP",
+   "requiredClaims":{
+      "SYMBIOTE_name":"John"
+   }
+}
+```  
+
+
+**CHTAP** - ComponentHomeTokenAccessPolicy - specifying list of attributes values that need to be provided to allow 
+access to the component resource of the particular platform. 
+
+Example: Identity Based authorization for OpenHAB platform for particular user
+
+```json
+{
+    "policyType":"CHTAP",
+    "requiredClaims":{
+      "iss":"OpenHAB",
+      "sub":"userUID"
+    }
+}
+```  
+
+
+**SFTAP** - SingleFederatedTokenAccessPolicy - Grants access for users of the platform involved in federation
+
+Example: 
+
+Allow access to the users from OpenHAB for the resources involved through platforms involved in federationID
+```json
+{
+    "policyType":"SFTAP",
+    "requiredClaims":{
+      "fed_id":"federationID",
+      "fed_h":"OpenHAB"
+    }
+}
+``` 
+            
 #### ABAC example
 To generate SingleLocalHomeTokenAccessPolicy, issuer claim has to be provided. 
 ```java
@@ -839,7 +913,8 @@ This will be satisfied by any valid symbiote token.
 ### Composite Access Policies
 In order to explain usage of Composite Access Policies and how they can be defined, we foresaw scenario with SmartHome platform – *OpenHAB*, three users in system – father, mother, child and three sensors - **S1**,**S2** and **S3**.
 
-All sensors are searchable from symbIoTe core by the people that use the same SmartHome platform. Due to that, access policy specifying searching policy would be of type **SLHTAP** (SingleHomeTokenAccessPolicy). 
+All sensors are searchable from symbIoTe core by the people that use the same SmartHome platform. 
+Due to that, filtering policy that is  specifying who can search for such resources would be of type **SLHTAP** (SingleHomeTokenAccessPolicy). 
 
 JSON specification of that policy is:
 ```json
@@ -918,6 +993,56 @@ Examples of access policy JSON definitions are:
 }
 ```
 
+Please notice that Composite Access Policies can be used to define access policies consisting of:
+* SingleToken Access Policies
+* Other Composite Access Policies
+
+These Access Policies, both SingleToken or Composite are to be provided in **singleTokenAccessPolicySpecifiers** and **compositeAccessPolicySpecifiers** fields of Composite Access Policy Object, respectively.
+While defining Composite Access Policy, developer should provide either **null** value or array containing access policies in these two fields.
+ 
+Example for this nested Composite Access Policies: in the same SmartHome environment described previously, 
+sensor S1 can be accessed by persons which:
+* Can be identified as father in the SmartHome **OR**
+    * Are named John **AND**
+    * Are 20 years old.
+    
+JSON structure for the given example:
+```json
+{
+   "relationOperator":"OR",
+   "policyType":"CAP",
+   "singleTokenAccessPolicySpecifiers":[
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"fatherUID"
+         }
+      }
+   ],
+   "compositeAccessPolicySpecifiers":[
+      {
+         "relationOperator":"AND",
+         "policyType":"CAP",         
+         "singleTokenAccessPolicySpecifiers":[
+            {
+               "policyType":"STAP",
+               "requiredClaims":{
+                  "SYMBIOTE_name":"John"
+               }
+            },
+            {
+               "policyType":"STAP",
+               "requiredClaims":{
+                  "SYMBIOTE_age":""
+               }
+            }
+         ],
+         "compositeAccessPolicySpecifiers":null
+      }
+   ]
+}
+```
 
 # Credentials revocation 
 
