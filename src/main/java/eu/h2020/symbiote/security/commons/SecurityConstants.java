@@ -84,6 +84,7 @@ public class SecurityConstants {
     public static final String BTM_REGISTER_COUPON = "/register_coupon";
     public static final String BTM_IS_COUPON_VALID = "/is_coupon_valid";
     public static final String BTM_CONSUME_COUPON = "/consume_coupon";
+    public static final String BTM_CLEANUP_COUPONS = "/cleanup_coupons";
     public static final String BTM_REVOKE_COUPON = "/revoke_coupon";
 
     private SecurityConstants() {
