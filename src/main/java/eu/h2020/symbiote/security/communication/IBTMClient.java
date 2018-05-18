@@ -1,8 +1,12 @@
 package eu.h2020.symbiote.security.communication;
 
-import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
-import eu.h2020.symbiote.security.commons.enums.CouponValidationStatus;
-import eu.h2020.symbiote.security.commons.exceptions.custom.*;
+import eu.h2020.symbiote.security.commons.exceptions.custom.BTMException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
+import eu.h2020.symbiote.security.communication.payloads.BarteralAccessRequest;
+import eu.h2020.symbiote.security.communication.payloads.CouponRequest;
+import eu.h2020.symbiote.security.communication.payloads.CouponValidity;
 import eu.h2020.symbiote.security.communication.payloads.RevocationRequest;
 
 /**
@@ -25,29 +29,43 @@ public interface IBTMClient {
             BTMException;
 
     /**
-     * Allows the user to use the coupon to get access to another federated platform’s data under a bartering scenario
-     * @param coupon - valid coupon to consume
-     * @return true if consumed properly
+     * Allows registering coupon in the Core BTM."
+     *@param couponString to register
+     *@return status of the operation (true - success)
      */
-    boolean consumeCoupon(String coupon) throws MalformedJWTException, WrongCredentialsException, JWTCreationException, BTMException;
+    boolean registerCoupon(String couponString) throws BTMException;
 
     /**
-     * TODO @JT change documentation
+     * Coupon validation in Core BTM
      *
-     * @param couponRequest JWS build in accordance to @{@link eu.h2020.symbiote.security.helpers.CryptoHelper#buildJWTAcquisitionRequest(HomeCredentials)}
-     *                     and http://www.smarteremc2.eu/colab/display/SYM/Home+Authorization+Token+acquisition+%28home+login%29+request
-     * @return coupon to access another federated platform’s data under a bartering scenario
+     * @param couponString for validation
+     * @return couponValidity containing information about remaining usages/time and validation status
      */
-    String getDiscreteCoupon(String couponRequest) throws
-            WrongCredentialsException,
-            JWTCreationException,
-            MalformedJWTException,
-            BTMException;
+    CouponValidity isCouponValid(String couponString) throws BTMException;
 
     /**
-     * Allows the user to validate coupon
-     * @param coupon for validation
-     * @return validation status
+     * Coupon consumption in the Core BTM
+     *
+     * @param couponString for consumption
+     * @return consumption status (true - success)
      */
-    CouponValidationStatus validateCoupon(String coupon) throws BTMException;
+    boolean consumeCoupon(String couponString) throws BTMException;
+
+
+    /**
+     * Ask for authorization of the barteral access
+     * @param barteralAccessRequest request containing information about client's platform, resource Id and type of access
+     * @return information if access is granted
+     */
+    boolean authorizeBarteralAccess(BarteralAccessRequest barteralAccessRequest) throws BTMException;
+
+    /**
+     * asks BTM for coupon to access the resource
+     *
+     * @param couponRequest request containing information about platform, type of access
+     * @return coupon string
+     */
+    String getCoupon(CouponRequest couponRequest) throws BTMException, ValidationException;
+
+
 }

@@ -6,21 +6,21 @@ import eu.h2020.symbiote.security.commons.Coupon;
 
 public class BarteralAccessRequest {
 
-    private final String clientId;
+    private final String clientPlatform;
     private final String resourceId;
     private final Coupon.Type couponType;
 
     @JsonCreator
-    public BarteralAccessRequest(@JsonProperty("clientId") String clientId,
+    public BarteralAccessRequest(@JsonProperty("clientPlatform") String clientPlatform,
                                  @JsonProperty("resourceId") String resourceId,
                                  @JsonProperty("couponType") Coupon.Type couponType) {
-        this.clientId = clientId;
+        this.clientPlatform = clientPlatform;
         this.resourceId = resourceId;
         this.couponType = couponType;
     }
 
-    public String getClientId() {
-        return clientId;
+    public String getClientPlatform() {
+        return clientPlatform;
     }
 
     public String getResourceId() {

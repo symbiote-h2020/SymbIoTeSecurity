@@ -1,10 +1,12 @@
 package eu.h2020.symbiote.security.communication;
 
-import eu.h2020.symbiote.security.commons.SecurityConstants;
-import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
-import eu.h2020.symbiote.security.commons.enums.CouponValidationStatus;
-import eu.h2020.symbiote.security.commons.exceptions.custom.*;
+import eu.h2020.symbiote.security.commons.exceptions.custom.BTMException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
 import eu.h2020.symbiote.security.communication.interfaces.IFeignBTMClient;
+import eu.h2020.symbiote.security.communication.payloads.BarteralAccessRequest;
+import eu.h2020.symbiote.security.communication.payloads.CouponRequest;
+import eu.h2020.symbiote.security.communication.payloads.CouponValidity;
 import eu.h2020.symbiote.security.communication.payloads.RevocationRequest;
 import feign.Feign;
 import feign.FeignException;
@@ -15,8 +17,6 @@ import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.util.Collection;
 
 /**
  * Crude RMI-like client's implementation to the Bartening and Trading  module that communicates with it over REST.
@@ -94,30 +94,20 @@ public class BTMClient implements IBTMClient {
     }
 
     /**
-     * Allows the user to use the coupon to get access to another federated platform’s data under a bartering scenario
-     *
-     * @param coupon - valid coupon to consume
-     * @return true if consumed properly
+     * Allows registering coupon in the Core BTM."
+     *@param couponString to register
+     *@return status of the operation (true - success)
      */
     @Override
-    public boolean consumeCoupon(String coupon) throws
-            MalformedJWTException,
-            WrongCredentialsException,
-            JWTCreationException,
-            BTMException {
+    public boolean registerCoupon(String couponString) throws BTMException {
         Response response;
         try {
-            response = feignClient.consumeCoupon(coupon);
+            response = feignClient.registerCoupon(couponString);
         } catch (FeignException fe) {
             throw new BTMException(BTM_COMMS_ERROR_MESSAGE + fe.getMessage());
         }
         switch (response.status()) {
-            case 400:
-                throw new MalformedJWTException(MalformedJWTException.UNABLE_TO_READ_MALFORMED_COUPON);
-            case 401:
-                throw new WrongCredentialsException(WrongCredentialsException.INVALID_REQUEST);
-            case 500:
-                throw new JWTCreationException(JWTCreationException.SERVER_FAILED_USE_COUPON);
+            //TODO other cases
             case 200:
                 return true;
             default:
@@ -126,54 +116,83 @@ public class BTMClient implements IBTMClient {
     }
 
     /**
-     * TODO @JT change documentation
+     * Coupon validation in Core BTM
      *
-     * @param couponRequest JWS build in accordance to @{@link eu.h2020.symbiote.security.helpers.CryptoHelper#buildJWTAcquisitionRequest(HomeCredentials)}
-     *                     and http://www.smarteremc2.eu/colab/display/SYM/Home+Authorization+Token+acquisition+%28home+login%29+request
-     * @return coupon to access another federated platform’s data under a bartering scenario
+     * @param couponString for validation
+     * @return couponValidity containing information about remaining usages/time and validation status
      */
     @Override
-    public String getDiscreteCoupon(String couponRequest) throws
-            WrongCredentialsException,
-            MalformedJWTException,
-            BTMException {
+    public CouponValidity isCouponValid(String couponString) throws BTMException {
+        CouponValidity couponValidity;
+        try {
+            couponValidity = feignClient.isCouponValid(couponString);
+        } catch (FeignException fe) {
+            throw new BTMException(BTM_COMMS_ERROR_MESSAGE + fe.getMessage());
+        }
+        return couponValidity;
+    }
+
+    /**
+     * Coupon consumption in the Core BTM
+     *
+     * @param couponString for consumption
+     * @return consumption status (true - success)
+     */
+    @Override
+    public boolean consumeCoupon(String couponString) throws BTMException {
         Response response;
         try {
-            response = feignClient.getDiscreteCoupon(couponRequest);
+            response = feignClient.consumeCoupon(couponString);
         } catch (FeignException fe) {
             throw new BTMException(BTM_COMMS_ERROR_MESSAGE + fe.getMessage());
         }
         switch (response.status()) {
-            case 400:
-                throw new MalformedJWTException(MalformedJWTException.UNABLE_TO_READ_MALFORMED_COUPON);
-            case 401:
-                throw new WrongCredentialsException(WrongCredentialsException.INVALID_REQUEST);
-            case 500:
-                throw new BTMException("Internal server error occurred");
+            //TODO other cases
             case 200:
-                Collection headers = response.headers().get(SecurityConstants.COUPON_HEADER_NAME);
-                if (headers == null ||
-                        headers.toArray().length == 0) {
-                    throw new BTMException(BTMException.NO_COUPON_IN_RESPONSE);
-                }
-                return headers.toArray()[0].toString();
+                return true;
             default:
                 throw new BTMException(ERROR_OCCURED_ERROR_CODE + response.status() + MESSAGE + response.body().toString());
         }
     }
 
     /**
-     * Allows the user to validate coupon
-     * @param coupon for validation
-     * @return validation status
+     * Ask for authorization of the barteral access
+     * @param barteralAccessRequest request containing information about client's platform, resource Id and type of access
+     * @return information if access is granted
      */
     @Override
-    public CouponValidationStatus validateCoupon(String coupon) throws
-            BTMException {
+    public boolean authorizeBarteralAccess(BarteralAccessRequest barteralAccessRequest) throws BTMException {
+        Response response;
         try {
-            return feignClient.validateCoupon(coupon);
+            response = feignClient.authorizeBarteralAccess(barteralAccessRequest);
         } catch (FeignException fe) {
             throw new BTMException(BTM_COMMS_ERROR_MESSAGE + fe.getMessage());
         }
+        switch (response.status()) {
+            //TODO other cases
+            case 200:
+                return true;
+            default:
+                throw new BTMException(ERROR_OCCURED_ERROR_CODE + response.status() + MESSAGE + response.body().toString());
+        }
     }
+
+    /**
+     * asks BTM for coupon to access the resource
+     *
+     * @param couponRequest request containing information about platform, type of access
+     * @return Coupon coupon
+     */
+    @Override
+    public String getCoupon(CouponRequest couponRequest) throws BTMException {
+        String couponString;
+        try {
+            couponString = feignClient.getCoupon(couponRequest);
+        } catch (FeignException fe) {
+            throw new BTMException(BTM_COMMS_ERROR_MESSAGE + fe.getMessage());
+        }
+        return couponString;
+    }
+
+
 }
