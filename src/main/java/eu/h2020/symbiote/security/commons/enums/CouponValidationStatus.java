@@ -14,11 +14,11 @@ public enum CouponValidationStatus {
      */
     REVOKED_COUPON,
     /**
-     * coupon issued by us is not in database
+     * coupon is not in Core database
      */
-    COUPON_NOT_IN_DB,
+    COUPON_NOT_REGISTERED,
     /**
-     *
+     * coupon is different, than this saved in repository
      */
     DB_MISMATCH,
     /**

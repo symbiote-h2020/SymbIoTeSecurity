@@ -3,6 +3,7 @@ package eu.h2020.symbiote.security.communication.payloads;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.h2020.symbiote.security.commons.Coupon;
+import eu.h2020.symbiote.security.commons.enums.CouponValidationStatus;
 
 /**
  * SymbIoTe BTM's coupon validation details.
@@ -12,13 +13,13 @@ import eu.h2020.symbiote.security.commons.Coupon;
  */
 public class CouponValidity {
 
-    private final Status status;
+    private final CouponValidationStatus status;
     private final Coupon.Type type;
     private final long remainingUsages;
     private final long remainingTime;
 
     @JsonCreator
-    public CouponValidity(@JsonProperty("status") Status status,
+    public CouponValidity(@JsonProperty("status") CouponValidationStatus status,
                           @JsonProperty("type") Coupon.Type type,
                           @JsonProperty("remainingUsages") long remainingUsages,
                           @JsonProperty("remainingTime") long remainingTime) {
@@ -28,7 +29,7 @@ public class CouponValidity {
         this.remainingTime = remainingTime;
     }
 
-    public Status getStatus() {
+    public CouponValidationStatus getStatus() {
         return status;
     }
 
@@ -42,10 +43,5 @@ public class CouponValidity {
 
     public long getRemainingTime() {
         return remainingTime;
-    }
-
-    public enum Status {
-        VALID,
-        INVALID
     }
 }
