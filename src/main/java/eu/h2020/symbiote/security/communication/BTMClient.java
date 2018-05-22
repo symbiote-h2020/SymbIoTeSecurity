@@ -111,7 +111,7 @@ public class BTMClient implements IBTMClient {
             case 200:
                 return true;
             default:
-                throw new BTMException(ERROR_OCCURED_ERROR_CODE + response.status() + MESSAGE + response.body().toString());
+                return false;
         }
     }
 
