@@ -802,6 +802,108 @@ It checks if the requirements for each ABAC was met and build proper policy (e.g
 
 It's important to know, that creating your own AccessPolicy, it has to implement [IAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/IAccessPolicy.java). 
 
+JSON structures for the above listed Access Policies:
+
+
+**SLHTAP** - SingleLocalHomeTokenAccessPolicy
+
+Example: Only users from OpenHAB platform can access particular service
+```json
+{
+   "policyType":"SLHTAP",
+   "requiredClaims":{
+      "iss":"OpenHAB"
+   }
+}
+```
+
+
+**SHTIBAP** - SingleLocalHomeTokenIdentityBasedAccessPolicy
+
+Example: Only user from OpenHAB having UID from particular user can access service
+```json
+{
+    "policyType":"SHTIBAP",
+    "requiredClaims":{
+      "iss":"OpenHAB",
+      "sub":"userUID"
+    }
+}
+```
+
+
+**STAP** - SingleTokenAccessPolicy - specifying value for particular attribute which has to be provided during authorization
+
+Example: Only user named "John" can access service
+```json
+{
+   "policyType":"STAP",
+   "requiredClaims":{
+      "SYMBIOTE_name":"John"
+   }
+}
+```  
+
+
+**CHTAP** - ComponentHomeTokenAccessPolicy - specifying list of attributes values that need to be provided to allow symbiote componentes access to services in other platforms, e.g. registrationHandler -> CoreRegistry 
+Note: not for end users as tokens satisfying such policy can only be issued to components knowing the AAM master credentials (in Core, Platform, Enablers) and the specialized platform owner accounts in a SmartSpace AAM.
+
+Example: Identity Based authorization for OpenHAB component to access CoreRegistry
+```json
+{
+    "policyType":"CHTAP",
+    "requiredClaims":{
+      "iss":"OpenHAB",
+      "sub":"reghandler"
+    }
+}
+```  
+
+
+**SFTAP** - SingleFederatedTokenAccessPolicy - Grants access for users of the platform involved in federation
+**SFTAP** can be satisfied in one of the following ways:
+* Using a **HOME** token, which is issued by the local AAM for local users/apps that have claims required to access the resource
+* Using a **HOME** token issued by one of the federation members and containing the federation identifier claim (in case **requireAllLocalTokens** is set to false)
+* Using a **FOREIGN** token issued by the local AAM in exchange for a HOME token from the federation members and containing the federation identifier claim
+
+Example: 
+
+Allow access to the federated resources in OpenHAB instance by user from platforms involved in the fedaration identified by the federationID.
+Note: In this example users with valid HOME token from any federation member (OpenHAB, SomeCustomPlatform1 and SomeOtherPlatform2) can access the resources offered by OpenHAB based on the federationID rules.
+```json
+{
+    "policyType":"SFTAP",
+    "requiredClaims":{
+      "fed_id":"federationID",
+      "fed_h":"OpenHAB",
+      "fed_s" : "3",
+      "req_loc" : "false",
+      "fed_m_1" : "OpenHAB", 
+      "fed_m_2" : "SomeCustomPlatform1"
+	  "fed_m_3" : "SomeCustomPlatform2"
+    }
+}
+``` 
+
+A more strict federated access policy comes below. It once again shows access to the federated resources in OpenHAB instance by users from platforms involved in the fedaration identified by the federationID.
+Note:
+This example however requires the foreign/remote platforms' users to exchange their token first in the OpenHAB AAM.
+This is an extension to support situations where the attribute mapping takes place.
+```json
+{
+    "policyType":"SFTAP",
+    "requiredClaims":{
+      "fed_id":"federationID",
+      "fed_h":"OpenHAB",
+      "fed_s" : "2",
+      "req_loc" : "true",
+      "fed_m_1" : "OpenHAB", 
+      "fed_m_2" : "FederatedPlatform"
+    }
+}
+``` 
+Last but not least, the resources shared according to federation should have persisted only the federationID they are offered within and the federation members should be fetched in the symbIoTe RAP component and hence build the access policy per request (possible reasonable caching).
+            
 #### ABAC example
 To generate SingleLocalHomeTokenAccessPolicy, issuer claim has to be provided. 
 ```java
@@ -836,9 +938,146 @@ new SingleTokenAccessPolicy(null);
 ```
 This will be satisfied by any valid symbiote token.
 
+### Composite Access Policies
+In order to explain usage of Composite Access Policies and how they can be defined, we foresaw scenario with SmartHome platform – *OpenHAB*, three users in system – father, mother, child and three sensors - **S1**,**S2** and **S3**.
+
+All sensors are searchable from symbIoTe core by the people that use the same SmartHome platform. 
+Due to that, filtering policy that is  specifying who can search for such resources would be of type **SLHTAP** (SingleHomeTokenAccessPolicy). 
+
+JSON specification of that policy is:
+```json
+{
+   "policyType":"SLHTAP",
+   "requiredClaims":{
+      "iss":"OpenHAB"
+   }
+}
+```
+
+As for access rights in the SmartHome, we defined 2 scenarios:
+*	**S1** can be accessed by all family members
+*	**S2** and **S3** can be accessed ONLY by father and mother
+
+For definition of access policy which is based on proving someone’s identity, we are using **SLHTIBAP** (SingleHomeTokenIdentityBasedAccessPolicy). 
+
+However, since multiple identities can satisfy single access policy, we are using **CAP**(CompositeAccessPolicy) as wrapper around access policies specifying access grant for single identity. 
+
+Examples of access policy JSON definitions are:
+
+**S1**:
+```json
+{
+   "relationOperator":"OR",
+   "compositeAccessPolicySpecifiers":null,
+   "policyType":"CAP",
+   "singleTokenAccessPolicySpecifiers":[
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"fatherUID"
+         }
+      },
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"motherUID"
+         }
+      },
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"childUID"
+         }
+      }
+   ]
+}
+```
+
+**S2** and **S3**:
+```json
+{
+   "relationOperator":"OR",
+   "compositeAccessPolicySpecifiers":null,
+   "policyType":"CAP",
+   "singleTokenAccessPolicySpecifiers":[
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"fatherUID"
+         }
+      },
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"motherUID"
+         }
+      }
+   ]
+}
+```
+
+It is worth noting that each user can have **multiple clients** (e.g. devices) belonging to her/him (e.g. phone, tablet, computer) and in some scenarios (e.g. S1) it is enough to have just a single account in a particular platform (e.g. OpenHAB) and letting the user to manage access to his resources by setting-up his clients.
+For example the resource owner (end-user) father, can enable sharing of his resources with mom and kid just by configuring their devices for them. He only know the username and password required to configure the clients/devices and can revoke them at any time. 
+In such case the resource admin (on platform side) needs to put a single **SLHTIBAP** (SingleHomeTokenIdentityBasedAccessPolicy) with the father's userIdentifier which would end up satisfied by all 3 devices/clients the user has set up for his account.
+
+
+Please notice that Composite Access Policies can be used to define access policies consisting of:
+* SingleToken Access Policies
+* Other Composite Access Policies
+
+These Access Policies, both SingleToken or Composite are to be provided in **singleTokenAccessPolicySpecifiers** and **compositeAccessPolicySpecifiers** fields of Composite Access Policy Object, respectively.
+While defining Composite Access Policy, developer should provide either **null** value or array containing access policies in these two fields.
+ 
+Example for this nested Composite Access Policies: in the same SmartHome environment described previously, 
+sensor S1 can be accessed by persons which:
+* Can be identified as father in the SmartHome **OR**
+    * Are named John **AND**
+    * Are 20 years old.
+    
+JSON structure for the given example:
+```json
+{
+   "relationOperator":"OR",
+   "policyType":"CAP",
+   "singleTokenAccessPolicySpecifiers":[
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"fatherUID"
+         }
+      }
+   ],
+   "compositeAccessPolicySpecifiers":[
+      {
+         "relationOperator":"AND",
+         "policyType":"CAP",         
+         "singleTokenAccessPolicySpecifiers":[
+            {
+               "policyType":"STAP",
+               "requiredClaims":{
+                  "SYMBIOTE_name":"John"
+               }
+            },
+            {
+               "policyType":"STAP",
+               "requiredClaims":{
+                  "SYMBIOTE_age":""
+               }
+            }
+         ],
+         "compositeAccessPolicySpecifiers":null
+      }
+   ]
+}
+```
+
 # Credentials revocation 
-
-
 In case of security breach, there may be need to revoke credentials such as certificates or tokens. 
 
 ## Java developers:
