@@ -846,22 +846,25 @@ Example: Only user named "John" can access service
 
 
 **CHTAP** - ComponentHomeTokenAccessPolicy - specifying list of attributes values that need to be provided to allow 
-access to the component resource of the particular platform. 
+access to the services in other platforms, e.g. registrationHandler -> CoreRegistry 
 
-Example: Identity Based authorization for OpenHAB platform for particular user
-
+Example: Identity Based authorization for OpenHAB component to access CoreRegistry
 ```json
 {
     "policyType":"CHTAP",
     "requiredClaims":{
       "iss":"OpenHAB",
-      "sub":"userUID"
+      "sub":"reghandler"
     }
 }
 ```  
 
 
 **SFTAP** - SingleFederatedTokenAccessPolicy - Grants access for users of the platform involved in federation
+**SFTAP** can be satisfied in one of the following ways:
+* Using a **HOME** token, which is issued by the local AAM for local users/apps that have claims required to access the resource
+* Using a **HOME** token issued by one of the federation members and containing the federation identifier claim (in case **requireAllLocalTokens** is set to false)
+* Using a **FOREIGN** token issued by the local AAM in exchange for a HOME token from the federation members and containing the federation identifier claim
 
 Example: 
 
@@ -871,7 +874,11 @@ Allow access to the users from OpenHAB for the resources involved through platfo
     "policyType":"SFTAP",
     "requiredClaims":{
       "fed_id":"federationID",
-      "fed_h":"OpenHAB"
+      "fed_h":"OpenHAB",
+      "fed_s" : "2",
+      "req_loc" : "true",
+      "fed_m_1" : "OpenHAB", 
+      "fed_m_2" : "FederatedPlatform"
     }
 }
 ``` 
@@ -1043,6 +1050,15 @@ JSON structure for the given example:
    ]
 }
 ```
+
+## General remarks on symbIoTe access control
+It is worth noting that each of the users can have multiple client devices 
+belonging to her/him (e.g. phone, tablet, computer) and in some scenarios 
+it is enough to have a single account in platform (e.g. OpenHAB) 
+for the account owner to set-up his clients. For example, e.g. admin, father, 
+can enable sharing his resources with mom and kid just by configuring
+their devices for them. In that case a single **SLHTIBAP** 
+(SingleHomeTokenIdentityBasedAccessPolicy) with his UID is enough and is satisfied by all 3 devices/clients he can manage.
 
 # Credentials revocation 
 
