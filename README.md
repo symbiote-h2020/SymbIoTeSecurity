@@ -6,6 +6,7 @@
 * [Access to public resources](#access-to-public-resources) 
 * [Access resources with restricted access](#access-resources-with-restricted-access) 
 * [Offering resources with restricted access](#offering-resources-with-restricted-access) 
+* [Access Policies Examples](#attribute-based-access-control) 
 * [Credentials revocation ](#credentials-revocation) 
 
 # SymbIoTe Security Overview
@@ -879,8 +880,8 @@ Note: In this example users with valid HOME token from any federation member (Op
       "fed_s" : "3",
       "req_loc" : "false",
       "fed_m_1" : "OpenHAB", 
-      "fed_m_2" : "SomeCustomPlatform1"
-	  "fed_m_3" : "SomeCustomPlatform2"
+      "fed_m_2" : "SomeCustomPlatform1",
+      "fed_m_3" : "SomeCustomPlatform2"
     }
 }
 ``` 
