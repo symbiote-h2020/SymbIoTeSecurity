@@ -27,7 +27,7 @@ public interface IFeignBTMClient {
 
     @RequestLine("POST " + SecurityConstants.BTM_GET_COUPON)
     @Headers("Content-Type: application/json")
-    String getCoupon(CouponRequest couponRequest);
+    Response getCoupon(CouponRequest couponRequest);
 
     @RequestLine("POST " + SecurityConstants.BTM_IS_COUPON_VALID)
     @Headers("Content-Type: application/json")

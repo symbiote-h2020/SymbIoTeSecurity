@@ -151,7 +151,7 @@ public class BTMClient implements IBTMClient {
             case 200:
                 return true;
             default:
-                throw new BTMException(ERROR_OCCURED_ERROR_CODE + response.status() + MESSAGE + response.body().toString());
+                return false;
         }
     }
 
@@ -187,7 +187,7 @@ public class BTMClient implements IBTMClient {
     public String getCoupon(CouponRequest couponRequest) throws BTMException {
         String couponString;
         try {
-            couponString = feignClient.getCoupon(couponRequest);
+            couponString = feignClient.getCoupon(couponRequest).body().toString();
         } catch (FeignException fe) {
             throw new BTMException(BTM_COMMS_ERROR_MESSAGE + fe.getMessage());
         }
