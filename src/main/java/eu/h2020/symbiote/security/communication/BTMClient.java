@@ -107,7 +107,6 @@ public class BTMClient implements IBTMClient {
             throw new BTMException(BTM_COMMS_ERROR_MESSAGE + fe.getMessage());
         }
         switch (response.status()) {
-            //TODO other cases
             case 200:
                 return true;
             default:
@@ -147,7 +146,6 @@ public class BTMClient implements IBTMClient {
             throw new BTMException(BTM_COMMS_ERROR_MESSAGE + fe.getMessage());
         }
         switch (response.status()) {
-            //TODO other cases
             case 200:
                 return true;
             default:
@@ -169,7 +167,6 @@ public class BTMClient implements IBTMClient {
             throw new BTMException(BTM_COMMS_ERROR_MESSAGE + fe.getMessage());
         }
         switch (response.status()) {
-            //TODO other cases
             case 200:
                 return true;
             default:
