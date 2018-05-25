@@ -1,6 +1,7 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
 import eu.h2020.symbiote.security.commons.Certificate;
+import eu.h2020.symbiote.security.commons.enums.AccountStatus;
 import eu.h2020.symbiote.security.commons.enums.UserRole;
 
 import java.util.HashMap;
@@ -17,6 +18,7 @@ public class UserDetails {
     private Credentials userCredentials = new Credentials();
     private String recoveryMail = "";
     private UserRole role = UserRole.NULL;
+    private AccountStatus status = AccountStatus.NEW;
     private Map<String, String> attributes = new HashMap<>();
     private Map<String, Certificate> clients = new HashMap<>();
 
@@ -26,21 +28,23 @@ public class UserDetails {
 
     /**
      * UserDetails constructor
-     *
      * @param userCredentials Credentials identifying user
      * @param recoveryMail    Recovery mail of the user
      * @param role            Role of the user (USER, SERVICE_OWNER, NULL)
+     * @param status          Current status of this account
      * @param attributes      This user attributes. NOTE: during update, in case of empty map, attributes also will be updated (removed)
      * @param clients         user's clients
      */
     public UserDetails(Credentials userCredentials,
                        String recoveryMail,
                        UserRole role,
+                       AccountStatus status,
                        Map<String, String> attributes,
                        Map<String, Certificate> clients) {
         this.userCredentials = userCredentials;
         this.recoveryMail = recoveryMail;
         this.role = role;
+        this.status = status;
         this.attributes = attributes;
         this.clients = clients;
     }
@@ -79,5 +83,9 @@ public class UserDetails {
 
     public Map<String, Certificate> getClients() {
         return clients;
+    }
+
+    public AccountStatus getStatus() {
+        return status;
     }
 }

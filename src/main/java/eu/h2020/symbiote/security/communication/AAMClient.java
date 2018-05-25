@@ -118,6 +118,8 @@ public class AAMClient implements IAAMClient {
             case 401:
                 //TODO: Find a way to differentiate ValidationException from WrongCredentialsException since response's body is empty on error
                 throw new ValidationException("Could not validate - Invalid certificate / credentials");
+            case 403:
+                throw new ValidationException("User account is not yet activated or blocked due to suspicious actions.");
             case 200:
                 if (response.body().toString().isEmpty()) {
                     throw new AAMException("Error occured. Response is empty!");
@@ -151,6 +153,8 @@ public class AAMClient implements IAAMClient {
                 throw new InvalidArgumentsException(response.body().toString());
             case 401:
                 throw new WrongCredentialsException();
+            case 403:
+                throw new WrongCredentialsException("User account is not yet activated or blocked due to suspicious actions.");
             case 200:
                 if (response.body().toString().isEmpty()) {
                     throw new AAMException("Error occured. Response is empty!");
@@ -212,6 +216,8 @@ public class AAMClient implements IAAMClient {
                 throw new MalformedJWTException("Unable to read malformed token");
             case 401:
                 throw new WrongCredentialsException("Could not validate token with incorrect credentials");
+            case 403:
+                throw new WrongCredentialsException("User account is not yet activated or blocked due to suspicious actions.");
             case 500:
                 throw new JWTCreationException("Server failed to create a home token");
             case 200:
@@ -251,6 +257,8 @@ public class AAMClient implements IAAMClient {
         switch (response.status()) {
             case 401:
                 throw new ValidationException("Failed to validate homeToken");
+            case 403:
+                throw new ValidationException("User account is not yet activated or blocked due to suspicious actions.");
             case 500:
                 throw new JWTCreationException("Server failed to create a foreign token");
             case 200:
