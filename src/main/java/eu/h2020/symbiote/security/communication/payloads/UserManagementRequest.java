@@ -1,5 +1,7 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.h2020.symbiote.security.commons.enums.OperationType;
 
 /**
@@ -14,7 +16,7 @@ public class UserManagementRequest {
 
     private Credentials administratorCredentials = new Credentials();
     private Credentials userCredentials = new Credentials();
-    private UserDetails userDetails = new UserDetails();
+    private UserDetails userDetails;
     private OperationType operationType;
 
     /**
@@ -23,8 +25,12 @@ public class UserManagementRequest {
     public UserManagementRequest() { // used by JSON serializer
     }
 
-    public UserManagementRequest(Credentials administratorCredentials, Credentials userCredentials,
-                                 UserDetails userDetails, OperationType operationType) {
+    @JsonCreator
+    public UserManagementRequest(
+            @JsonProperty("administratorCredentials") Credentials administratorCredentials,
+            @JsonProperty("userCredentials") Credentials userCredentials,
+            @JsonProperty("userDetails") UserDetails userDetails,
+            @JsonProperty("operationType") OperationType operationType) {
         this.administratorCredentials = administratorCredentials;
         this.userCredentials = userCredentials;
         this.userDetails = userDetails;

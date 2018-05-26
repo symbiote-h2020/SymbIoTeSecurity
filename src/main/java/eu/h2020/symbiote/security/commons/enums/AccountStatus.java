@@ -15,5 +15,9 @@ public enum AccountStatus {
     /**
      * account which was blocked due to suspicious activity
      */
-    BLOCKED
+    ACTIVITY_BLOCKED,
+    /**
+     * missing consent, user needs to either accept the terms of agreement or delete his acount
+     */
+    CONSENT_BLOCKED
 }
