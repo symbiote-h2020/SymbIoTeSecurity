@@ -231,7 +231,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
      * @return required for authorizing operations in the local AAM
      * @throws SecurityHandlerException on error
      */
-    private BoundCredentials getLocalAAMCredentials() throws
+    public BoundCredentials getLocalAAMCredentials() throws
             SecurityHandlerException {
         BoundCredentials localAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(localAAM.getAamInstanceId());
         if (localAAMBoundCredentials == null) {

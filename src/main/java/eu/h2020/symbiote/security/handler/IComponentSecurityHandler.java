@@ -2,6 +2,7 @@ package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
+import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
@@ -78,4 +79,13 @@ public interface IComponentSecurityHandler {
      * @return if the component owner wants to use the SH directly
      */
     ISecurityHandler getSecurityHandler();
+
+    /**
+     * gets the credentials from the wallet, if missing then issues them and adds to the wallet
+     *
+     * @return required for authorizing operations in the local AAM
+     * @throws SecurityHandlerException on error
+     */
+    BoundCredentials getLocalAAMCredentials() throws
+            SecurityHandlerException;
 }
