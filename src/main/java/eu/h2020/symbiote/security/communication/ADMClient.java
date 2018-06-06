@@ -2,7 +2,7 @@ package eu.h2020.symbiote.security.communication;
 
 import eu.h2020.symbiote.security.commons.exceptions.custom.ADMException;
 import eu.h2020.symbiote.security.communication.interfaces.IFeignADMClient;
-import eu.h2020.symbiote.security.communication.payloads.FailFederationAuthorizationReport;
+import eu.h2020.symbiote.security.communication.payloads.FailedFederationAuthorizationReport;
 import feign.Feign;
 import feign.FeignException;
 import feign.Logger;
@@ -60,7 +60,7 @@ public class ADMClient implements IADMClient {
      * @return true if anomaly saved
      */
     @Override
-    public boolean reportFailedFederatedAuthorization(FailFederationAuthorizationReport report) throws
+    public boolean reportFailedFederatedAuthorization(FailedFederationAuthorizationReport report) throws
             ADMException {
         Response response;
         try {

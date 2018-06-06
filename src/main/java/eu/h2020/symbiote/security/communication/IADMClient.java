@@ -1,7 +1,7 @@
 package eu.h2020.symbiote.security.communication;
 
 import eu.h2020.symbiote.security.commons.exceptions.custom.ADMException;
-import eu.h2020.symbiote.security.communication.payloads.FailFederationAuthorizationReport;
+import eu.h2020.symbiote.security.communication.payloads.FailedFederationAuthorizationReport;
 
 /**
  * Crude RMI-like client's interface to the AAM module.
@@ -15,5 +15,5 @@ public interface IADMClient {
      * @param report report to be sent
      * @return true if anomaly saved
      */
-    boolean reportFailedFederatedAuthorization(FailFederationAuthorizationReport report) throws ADMException;
+    boolean reportFailedFederatedAuthorization(FailedFederationAuthorizationReport report) throws ADMException;
 }
