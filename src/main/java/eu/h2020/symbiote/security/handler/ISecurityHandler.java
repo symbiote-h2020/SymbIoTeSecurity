@@ -127,15 +127,17 @@ public interface ISecurityHandler {
     /**
      * Function used to notify Core ADM about failed federated authorization during getting access to the federated resource
      *
-     * @param securityRequest used during authorization
-     * @param federationId    based on which actor wants to get access to the resource
-     * @param platformId      owner of the resource
-     * @param resourceId      to which actor wants to get access
+     * @param securityRequest       used during authorization
+     * @param federationId          based on which actor wants to get access to the resource
+     * @param federatedPlatformId   owner of the resource
+     * @param resourceId            to which actor wants to get access
+     * @param localPlatformId       actor's local platform Id
      * @return true if user/component should have access to the resource and anomaly was saved
      */
     boolean reportFailedFederatedAuthorization(SecurityRequest securityRequest,
                                                String federationId,
-                                               String platformId,
-                                               String resourceId) throws
+                                               String federatedPlatformId,
+                                               String resourceId,
+                                               String localPlatformId) throws
             ADMException;
 }
