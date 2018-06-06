@@ -127,17 +127,23 @@ public interface ISecurityHandler {
     /**
      * Function used to notify Core ADM about failed federated authorization during getting access to the federated resource
      *
-     * @param securityRequest       used during authorization
-     * @param federationId          based on which actor wants to get access to the resource
-     * @param federatedPlatformId   owner of the resource
-     * @param resourceId            to which actor wants to get access
-     * @param localPlatformId       actor's local platform Id
+     * @param securityRequest        used during failed authorization
+     * @param federationId           according to which resource access should be provided
+     * @param resourcePlatformId     resource's platform
+     * @param resourceId             to which access was not granted
+     * @param searchOriginPlatformId platform from which actor gained information about resource availability
+     *
+     *
+     *      * @param federationId           according to which resource access should be provided
+     *      * @param resourcePlatformId     resource's platform
+     *      * @param searchOriginPlatformId platform from which actor gained information about resource availability
+     *      * @param resourceId             to which access was not granted
      * @return true if user/component should have access to the resource and anomaly was saved
      */
-    boolean reportFailedFederatedAuthorization(SecurityRequest securityRequest,
-                                               String federationId,
-                                               String federatedPlatformId,
-                                               String resourceId,
-                                               String localPlatformId) throws
+    boolean reportFailedFederationAuthorization(SecurityRequest securityRequest,
+                                                String federationId,
+                                                String resourcePlatformId,
+                                                String resourceId,
+                                                String searchOriginPlatformId) throws
             ADMException;
 }

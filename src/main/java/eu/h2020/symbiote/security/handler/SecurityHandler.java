@@ -303,16 +303,16 @@ public class SecurityHandler implements ISecurityHandler {
     }
 
     @Override
-    public boolean reportFailedFederatedAuthorization(SecurityRequest securityRequest,
-                                                      String federationId,
-                                                      String federatedPlatformId,
-                                                      String resourceId,
-                                                      String localPlatformId) throws
+    public boolean reportFailedFederationAuthorization(SecurityRequest securityRequest,
+                                                       String federationId,
+                                                       String resourcePlatformId,
+                                                       String resourceId,
+                                                       String searchOriginPlatformId) throws
             ADMException {
         FailedFederationAuthorizationReport failedFederationAuthorizationReport = new FailedFederationAuthorizationReport(securityRequest,
                 federationId,
-                federatedPlatformId,
-                localPlatformId,
+                resourcePlatformId,
+                searchOriginPlatformId,
                 resourceId);
         ADMClient admClient = new ADMClient(coreAAM.getAamAddress() + "/adm");
         return admClient.reportFailedFederatedAuthorization(failedFederationAuthorizationReport);
