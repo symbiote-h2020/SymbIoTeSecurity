@@ -14,7 +14,7 @@ import feign.Response;
  */
 public interface IFeignADMClient {
 
-    @RequestLine("POST " + SecurityConstants.LOG_FAIL_FEDERATION_AUTHORIZATION)
+    @RequestLine("POST " + SecurityConstants.ADM_LOG_FAILED_FEDERATION_AUTHORIZATION)
     @Headers("Content-Type: application/json")
     Response reportFailedFederatedAuthorization(FailedFederationAuthorizationReport report);
 

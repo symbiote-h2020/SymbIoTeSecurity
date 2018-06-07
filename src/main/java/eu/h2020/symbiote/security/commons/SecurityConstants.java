@@ -59,7 +59,8 @@ public class SecurityConstants {
     public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "x-auth-";
     public static final String SECURITY_RESPONSE_HEADER = "x-auth-response";
 
-    public static final String LOG_FAIL_FEDERATION_AUTHORIZATION = "/log_fail_federation_authorization";
+    public static final String ADM_LOG_FAILED_FEDERATION_AUTHORIZATION = "/log_failed_federation_authorization";
+    public static final String ADM_GET_FEDERATED_MISDEEDS = "/federated_misdeeds";
 
     //Access Policy JSON fields
     //Single Token

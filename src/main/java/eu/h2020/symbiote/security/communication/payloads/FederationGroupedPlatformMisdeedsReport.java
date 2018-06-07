@@ -1,5 +1,8 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Map;
 
 /**
@@ -11,8 +14,9 @@ import java.util.Map;
 public class FederationGroupedPlatformMisdeedsReport extends PlatformMisdeedsReport {
     private final Map<String, Map<String, Integer>> detailsByFederation;
 
-    public FederationGroupedPlatformMisdeedsReport(int totalMisdeeds,
-                                                   Map<String, Map<String, Integer>> detailsByFederation) {
+    @JsonCreator
+    public FederationGroupedPlatformMisdeedsReport(@JsonProperty("totalMisdeeds") int totalMisdeeds,
+                                                   @JsonProperty("detailsByFederation") Map<String, Map<String, Integer>> detailsByFederation) {
         super(totalMisdeeds);
         this.detailsByFederation = detailsByFederation;
     }

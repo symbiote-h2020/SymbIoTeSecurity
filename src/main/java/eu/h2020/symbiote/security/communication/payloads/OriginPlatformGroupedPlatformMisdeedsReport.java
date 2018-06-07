@@ -1,5 +1,8 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Map;
 
 /**
@@ -11,8 +14,9 @@ import java.util.Map;
 public class OriginPlatformGroupedPlatformMisdeedsReport extends PlatformMisdeedsReport {
     private final Map<String, Map<String, Integer>> detailsBySearchOriginPlatform;
 
-    public OriginPlatformGroupedPlatformMisdeedsReport(int totalMisdeeds,
-                                                       Map<String, Map<String, Integer>> detailsBySearchOriginPlatform) {
+    @JsonCreator
+    public OriginPlatformGroupedPlatformMisdeedsReport(@JsonProperty("totalMisdeeds") int totalMisdeeds,
+                                                       @JsonProperty("detailsBySearchOriginPlatform") Map<String, Map<String, Integer>> detailsBySearchOriginPlatform) {
         super(totalMisdeeds);
         this.detailsBySearchOriginPlatform = detailsBySearchOriginPlatform;
     }
