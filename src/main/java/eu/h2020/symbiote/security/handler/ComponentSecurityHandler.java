@@ -1,5 +1,6 @@
 package eu.h2020.symbiote.security.handler;
 
+import eu.h2020.symbiote.client.SymbioteComponentClientFactory;
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
@@ -12,9 +13,8 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTExceptio
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
-import eu.h2020.symbiote.security.communication.payloads.AAM;
-import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
-import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
+import eu.h2020.symbiote.security.communication.interfaces.IFeignADMComponentClient;
+import eu.h2020.symbiote.security.communication.payloads.*;
 import eu.h2020.symbiote.security.helpers.ABACPolicyHelper;
 import eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper;
 import org.apache.commons.logging.Log;
@@ -293,5 +293,44 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
 
         }
         return localAAMBoundCredentials;
+    }
+
+    @Override
+    public Map<String, OriginPlatformGroupedPlatformMisdeedsReport> getOriginPlatformGroupedPlatformMisdeedsReports(String resourcePlatformFilter, String searchOriginPlatformFilter) throws
+            SecurityHandlerException {
+
+        String coreAAMAddress = this.getSecurityHandler().getCoreAAMInstance().getAamAddress();
+
+        IFeignADMComponentClient admComponentClient = SymbioteComponentClientFactory.createClient(
+                coreAAMAddress + "/adm",
+                IFeignADMComponentClient.class,
+                "adm",
+                SecurityConstants.CORE_AAM_INSTANCE_ID,
+                this);
+        Map<String, String> params = new HashMap<>();
+        if (resourcePlatformFilter != null || !resourcePlatformFilter.isEmpty())
+            params.put("platformId", resourcePlatformFilter);
+        if (searchOriginPlatformFilter != null || !searchOriginPlatformFilter.isEmpty())
+            params.put("searchOriginPlatformId", searchOriginPlatformFilter);
+        return admComponentClient.getMisdeedsGroupedByPlatform(params);
+    }
+
+    @Override
+    public Map<String, FederationGroupedPlatformMisdeedsReport> getFederationGroupedPlatformMisdeedsReports(String resourcePlatformFilter, String federationId) throws
+            SecurityHandlerException {
+        String coreAAMAddress = this.getSecurityHandler().getCoreAAMInstance().getAamAddress();
+
+        IFeignADMComponentClient admComponentClient = SymbioteComponentClientFactory.createClient(
+                coreAAMAddress + "/adm",
+                IFeignADMComponentClient.class,
+                "adm",
+                SecurityConstants.CORE_AAM_INSTANCE_ID,
+                this);
+        Map<String, String> params = new HashMap<>();
+        if (resourcePlatformFilter != null || !resourcePlatformFilter.isEmpty())
+            params.put("platformId", resourcePlatformFilter);
+        if (federationId != null || !federationId.isEmpty())
+            params.put("federationId", federationId);
+        return admComponentClient.getMisdeedsGroupedByFederations(params);
     }
 }

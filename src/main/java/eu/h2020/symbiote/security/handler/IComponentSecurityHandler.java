@@ -5,6 +5,8 @@ import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
+import eu.h2020.symbiote.security.communication.payloads.FederationGroupedPlatformMisdeedsReport;
+import eu.h2020.symbiote.security.communication.payloads.OriginPlatformGroupedPlatformMisdeedsReport;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 
@@ -88,4 +90,22 @@ public interface IComponentSecurityHandler {
      */
     BoundCredentials getLocalAAMCredentials() throws
             SecurityHandlerException;
+
+    /**
+     * gets the map containing information about platform misdeeds within federations grouped by searchOriginPlatform
+     *
+     * @param resourcePlatformFilter     limits report to only one provided resource platform
+     * @param searchOriginPlatformFilter limits report to only one searchOriginPlatform
+     * @return map containing reports about requested resource platforms
+     */
+    Map<String, OriginPlatformGroupedPlatformMisdeedsReport> getOriginPlatformGroupedPlatformMisdeedsReports(String resourcePlatformFilter, String searchOriginPlatformFilter) throws SecurityHandlerException;
+
+    /**
+     * gets the map containing information about platform misdeeds within federations grouped by searchOriginPlatform
+     *
+     * @param resourcePlatformFilter limits report to only one provided resource platform
+     * @param federationId           limits report to contain information about misdeeds in one federation
+     * @return map containing reports about requested resource platforms
+     */
+    Map<String, FederationGroupedPlatformMisdeedsReport> getFederationGroupedPlatformMisdeedsReports(String resourcePlatformFilter, String federationId) throws SecurityHandlerException;
 }
