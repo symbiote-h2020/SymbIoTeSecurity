@@ -92,7 +92,7 @@ public interface IComponentSecurityHandler {
             SecurityHandlerException;
 
     /**
-     * gets the map containing information about platform misdeeds within federations grouped by searchOriginPlatform
+     * gets the map containing information about platform misdeeds within federations grouped by searchOriginPlatforms
      *
      * @param resourcePlatformFilter     limits report to only one provided resource platform
      * @param searchOriginPlatformFilter limits report to only one searchOriginPlatform
@@ -101,7 +101,7 @@ public interface IComponentSecurityHandler {
     Map<String, OriginPlatformGroupedPlatformMisdeedsReport> getOriginPlatformGroupedPlatformMisdeedsReports(String resourcePlatformFilter, String searchOriginPlatformFilter) throws SecurityHandlerException;
 
     /**
-     * gets the map containing information about platform misdeeds within federations grouped by searchOriginPlatform
+     * gets the map containing information about platform misdeeds within federations grouped by federations
      *
      * @param resourcePlatformFilter limits report to only one provided resource platform
      * @param federationId           limits report to contain information about misdeeds in one federation

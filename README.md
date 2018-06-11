@@ -180,6 +180,11 @@ Security handler class is a thin Java client providing methods allowing clients 
 - `getAcquiredCredentials()` - returns all saved credentials bound with a particular AAM.
 - `AAM getCoreAAMInstance()` - returns the Core AAM instance.
 - `void clearCachedTokens()` - clears all acquired tokens from memory (credentialsWallet).
+- `boolean reportFailedFederationAuthorization(SecurityRequest securityRequest,
+                                                   String federationId,
+                                                   String resourcePlatformId,
+                                                   String resourceId,
+                                                   String searchOriginPlatformId)` - method used to notify Anomaly Detection Module about failed federated authorization during getting access to the federated resource
 
 See [SecurityHandler.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/SecurityHandler.java) 
 
@@ -243,6 +248,11 @@ In order to identify the certificate of the component you communicate with, plea
 | CoreResourceAccessMonitor | cram |
 | other might appear | ... |
 
+In case of failing authorization to the federated resource that should be accessable, such event should be reported to the Anomaly Detection Module in the following way:
+```java
+// Client security handler
+clientSH.reportFailedFederationAuthorization(securityRequest, federationId, resourcePlatformId, resourceId, searchOriginPlatformId);
+```
 
 #### SecurityRequest and API
 The SecurityRequest (available here [SecurityRequest.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/payloads/SecurityRequest.java)) 
@@ -654,6 +664,11 @@ PAYLOAD:
    
 4. With such prepared headers you can access SymbIoTe resources offered privately, e.g. execute search queries.
 5. After receiving a business response from a symbiote component, you should check if it came from component you are interested in. To do so, please see [Service Response payload](#service_response)
+6. In case of failing authorization to the federated resource that should be accessable, such event should be reported to the Anomaly Detection Module using HTTP POST,
+```
+https://<coreInterfaceAdress>/adm/log_failed_federation_authorization
+```
+containing following information:
 
 
 # Offering resources with restricted access 
@@ -696,6 +711,8 @@ Component Security Handler provides following methods:
              so that the service can confirm that the client should posses provided tokens. Returns the required payload for client's authentication and authorization.
  - `String generateServiceResponse()` - returns the required payload that should be attached next to the components API business response so that the client can verify that the service is legitimate.  
  - `ISecurityHandler getSecurityHandler()` - returns Security Handler if the component owner wants to use it directly
+ - `Map<String, OriginPlatformGroupedPlatformMisdeedsReport> getOriginPlatformGroupedPlatformMisdeedsReports(String resourcePlatformFilter, String searchOriginPlatformFilter)` -  - available for Trust Manager, returns the map containing information about platform misdeeds (reported to Anomaly Detection Module) within federations grouped by federations searchOriginPlatforms
+ - `Map<String, FederationGroupedPlatformMisdeedsReport> getFederationGroupedPlatformMisdeedsReports(String resourcePlatformFilter, String federationId)` - available for Trust Manager, returns the map containing information about platform misdeeds (reported to Anomaly Detection Module) within federations grouped by federation ids
 
 To set up component SH, following instructions have to be done. Example for a platform registrationHandler
 ```java

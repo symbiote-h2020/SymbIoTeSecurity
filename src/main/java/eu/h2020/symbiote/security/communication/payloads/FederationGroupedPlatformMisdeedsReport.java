@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
 
 /**
- * Describes platform misdeeds stored by ADM, grouped by federations
+ * Describes platform misdeeds stored by Anomaly Detection Module, grouped by federations
  *
  * @author Mikołaj Dobski (PSNC)
  * @author Jakub Toczek (PSNC)

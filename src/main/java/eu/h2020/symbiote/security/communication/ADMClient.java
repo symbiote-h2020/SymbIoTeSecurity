@@ -16,26 +16,26 @@ import org.apache.commons.logging.LogFactory;
 import static eu.h2020.symbiote.security.commons.exceptions.custom.ADMException.ADM_NOT_AVAILABLE;
 
 /**
- * Crude RMI-like client's implementation to the ADM module that communicates with it over REST.
+ * Crude RMI-like client's implementation to the Anomaly Detection Module module that communicates with it over REST.
  *
  * @author Jakub Toczek (PSNC)
  */
 public class ADMClient implements IADMClient {
     private static final Log logger = LogFactory.getLog(ADMClient.class);
 
-    private static final String ADM_COMMS_ERROR_MESSAGE = "Failed to communicate with the ADM: ";
+    private static final String ADM_COMMS_ERROR_MESSAGE = "Failed to communicate with the Anomaly Detection Module: ";
     private String serverAddress;
     private IFeignADMClient feignClient;
 
     /**
-     * @param serverAddress of the ADM server the client wants to interact with.
+     * @param serverAddress of the Anomaly Detection Module server the client wants to interact with.
      */
     public ADMClient(String serverAddress) {
         this(serverAddress, new ApacheCommonsLogger4Feign(logger));
     }
 
     /**
-     * @param serverAddress of the ADM server the client wants to interact with.
+     * @param serverAddress of the Anomaly Detection Module server the client wants to interact with.
      * @param logger        feign logger
      */
     public ADMClient(String serverAddress, Logger logger) {

@@ -125,19 +125,13 @@ public interface ISecurityHandler {
     AAM getCoreAAMInstance();
 
     /**
-     * Function used to notify Core ADM about failed federated authorization during getting access to the federated resource
+     * Function used to notify Anomaly Detection Module about failed federated authorization during getting access to the federated resource
      *
      * @param securityRequest        used during failed authorization
      * @param federationId           according to which resource access should be provided
      * @param resourcePlatformId     resource's platform
      * @param resourceId             to which access was not granted
      * @param searchOriginPlatformId platform from which actor gained information about resource availability
-     *
-     *
-     *      * @param federationId           according to which resource access should be provided
-     *      * @param resourcePlatformId     resource's platform
-     *      * @param searchOriginPlatformId platform from which actor gained information about resource availability
-     *      * @param resourceId             to which access was not granted
      * @return true if user/component should have access to the resource and anomaly was saved
      */
     boolean reportFailedFederationAuthorization(SecurityRequest securityRequest,

@@ -7,7 +7,7 @@ import feign.RequestLine;
 import feign.Response;
 
 /**
- * Access to services provided by ADMs
+ * Access to client services provided by Anomaly Detection Module
  *
  * @author Jakub Toczek (PSNC)
  * @author Mikołaj Dobski (PSNC)

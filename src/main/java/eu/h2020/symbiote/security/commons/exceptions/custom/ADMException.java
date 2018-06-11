@@ -5,14 +5,14 @@ import eu.h2020.symbiote.security.commons.exceptions.SecurityException;
 import org.springframework.http.HttpStatus;
 
 /**
- * Custom exception thrown when ADM fails to do some operation
+ * Custom exception thrown when Anomaly Detection Module fails to do some operation
  *
  * @author Mikolaj Dobski (PSNC)
  * @author Jakub Toczek (PSNC)
  */
 public class ADMException extends SecurityException {
 
-    public static final String ADM_NOT_AVAILABLE = "Error occured. ADM is not available";
+    public static final String ADM_NOT_AVAILABLE = "Error occured. Anomaly Detection Module is not available";
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
     private static final String errorMessage = "ADM_SERVER_ERROR";
     private static final HttpStatus statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
