@@ -1,7 +1,6 @@
 package eu.h2020.symbiote.security.helpers.accesspolicies;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyFactory;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.AttributeOrientedAccessPolicySpecifier;
@@ -28,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -69,6 +67,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     private final String missingAttr = "youAreGonnaMissMe";
 
     private final String fromEUAttrOKValue = "false";
+    private final String fromEUAttrBadValue = "true";
     private final String nameAttrOKValue = "John";
     private final String nameAttrBadValue = "Mike";
     private final Integer ageAttrOKValue = 20;
@@ -147,7 +146,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singleNumberAccessRuleCheckSuccess() throws
+    public void singleNumberAccessRuleEqualsCheckSuccess() throws
             NoSuchAlgorithmException,
             InvalidArgumentsException {
 
@@ -165,8 +164,10 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         assertTrue(resp.keySet().contains(goodResourceID));
     }
 
+    //TODO Kaspar - add tests(positive and negative) for other numeric operators : NOT_EQUALS, GREATER_THAN, LESS_THAN, GREATER_OR_EQUAL_THAN, LESS_OR_EQUALS_THAN
+
     @Test
-    public void singleBooleanAccessRuleCheckSuccess() throws
+    public void singleBooleanAccessRuleFalseValueCheckSuccess() throws
             NoSuchAlgorithmException,
             InvalidArgumentsException {
 
@@ -183,6 +184,26 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
 
         assertTrue(resp.keySet().contains(goodResourceID));
     }
+
+    @Test
+    public void singleBooleanAccessRuleFalseValueCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        BooleanAccessRule booleanAccessRule = new BooleanAccessRule(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + fromEUAttr, BooleanAccessRule.BooleanRelationalOperator.IS_TRUE);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(booleanAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(!resp.keySet().contains(goodResourceID));
+    }
+
 
     @Test
     public void singleStringAccessRuleCheckSuccess() throws
@@ -203,12 +224,12 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         assertTrue(resp.keySet().contains(goodResourceID));
     }
 
+    //TODO Kaspar - add tests(positive and negative) for other String operators : EQUALS_IGNORE_CASE, CONTAINS, CONTAINS_IGNORE_CASE, NOT_CONTAINS, NOT_CONTAINS_IGNORE_CASE, STARTS_WITH, STARTS_WITH_IGNORE_CASE, ENDS_WITH, ENDS_WITH_IGNORE_CASE, REGEXP
+
     @Test
     public void compositeAccessRuleCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException,
-            JsonProcessingException,
-            IOException {
+            InvalidArgumentsException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
