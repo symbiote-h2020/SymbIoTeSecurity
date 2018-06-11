@@ -302,7 +302,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         String coreAAMAddress = this.getSecurityHandler().getCoreAAMInstance().getAamAddress();
 
         IFeignADMComponentClient admComponentClient = SymbioteComponentClientFactory.createClient(
-                coreAAMAddress + "/adm",
+                coreAAMAddress + SecurityConstants.ADM_PREFIX,
                 IFeignADMComponentClient.class,
                 "adm",
                 SecurityConstants.CORE_AAM_INSTANCE_ID,

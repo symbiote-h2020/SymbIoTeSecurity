@@ -61,6 +61,7 @@ public class SecurityConstants {
 
     public static final String ADM_LOG_FAILED_FEDERATION_AUTHORIZATION = "/log_failed_federation_authorization";
     public static final String ADM_GET_FEDERATED_MISDEEDS = "/federated_misdeeds";
+    public static final String ADM_PREFIX = "/adm";
 
     //Access Policy JSON fields
     //Single Token

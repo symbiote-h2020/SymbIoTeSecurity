@@ -314,7 +314,7 @@ public class SecurityHandler implements ISecurityHandler {
                 resourcePlatformId,
                 searchOriginPlatformId,
                 resourceId);
-        ADMClient admClient = new ADMClient(coreAAM.getAamAddress() + "/adm");
+        ADMClient admClient = new ADMClient(getCoreAAMInstance().getAamAddress() + SecurityConstants.ADM_PREFIX);
         return admClient.reportFailedFederatedAuthorization(failedFederationAuthorizationReport);
     }
 

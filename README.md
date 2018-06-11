@@ -252,7 +252,9 @@ In case of failing authorization to the federated resource that should be access
 ```java
 // Client security handler
 clientSH.reportFailedFederationAuthorization(securityRequest, federationId, resourcePlatformId, resourceId, searchOriginPlatformId);
+//returned true if anomaly was saved and stored
 ```
+
 
 #### SecurityRequest and API
 The SecurityRequest (available here [SecurityRequest.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/payloads/SecurityRequest.java)) 
@@ -668,8 +670,16 @@ PAYLOAD:
 ```
 https://<coreInterfaceAdress>/adm/log_failed_federation_authorization
 ```
-containing following information:
-
+containing following json (with properly filled fields):
+```
+{"securityRequest":
+    {"securityCredentials":["some credentials"],"timestamp":100},
+    "federationId":"testFederationId",
+    "resourcePlatformId":"testPlatformId",
+    "searchOriginPlatformId":"testLocalPlatformId",
+    "resourceId":"testResourceId"}
+```
+As the response, Anomaly Detection Module will return HttpStatus.OK in case of acceptance and saving the anomaly.
 
 # Offering resources with restricted access 
 The sections below demonstrate the SymbioteSecurity in depth for parties interested in offering resources with limited access.
