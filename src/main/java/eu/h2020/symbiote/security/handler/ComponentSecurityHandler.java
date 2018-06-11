@@ -1,7 +1,7 @@
 package eu.h2020.symbiote.security.handler;
 
-import eu.h2020.symbiote.client.SymbioteComponentClientFactory;
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
+import eu.h2020.symbiote.security.clients.SymbioteComponentClientFactory;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
