@@ -164,7 +164,167 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         assertTrue(resp.keySet().contains(goodResourceID));
     }
 
-    //TODO Kaspar - add tests(positive and negative) for other numeric operators : NOT_EQUALS, GREATER_THAN, LESS_THAN, GREATER_OR_EQUAL_THAN, LESS_OR_EQUALS_THAN
+    //TODO Done - Kaspar - add tests(positive and negative) for other numeric operators : NOT_EQUALS, GREATER_THAN, LESS_THAN, GREATER_OR_EQUAL_THAN, LESS_OR_EQUALS_THAN
+    @Test
+    public void singleNumberAccessRuleNotEqualsCheckSuccess() throws NoSuchAlgorithmException, InvalidArgumentsException{
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrBadValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.NOT_EQUALS);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleNumberAccessRuleNotEqualsCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException{
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.NOT_EQUALS);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleNumberAccessRuleGreaterThanCheckSuccess() throws NoSuchAlgorithmException, InvalidArgumentsException{
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue+1, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.GREATER_THAN);
+        //FIXME @Nemanja Direction of Relationship?
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleNumberAccessRuleGreaterThanCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException{
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        //FIXME @Nemanja Direction of Relationship?
+        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.GREATER_THAN);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleNumberAccessRuleLessThanCheckSuccess() throws NoSuchAlgorithmException, InvalidArgumentsException{
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        //FIXME @Nemanja Direction of Relationship?
+        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue-1, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.LESS_THAN);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleNumberAccessRuleLessThanCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException{
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+        //FIXME @Nemanja Direction of Relationship?
+        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrBadValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.LESS_THAN);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleNumberAccessRuleGreaterOrEqualsCheckSuccess() throws NoSuchAlgorithmException, InvalidArgumentsException{
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.GREATER_OR_EQUAL_THAN);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleNumberAccessRuleGreaterOrEqualsCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException{
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue-1, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.GREATER_OR_EQUAL_THAN);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleNumberAccessRuleLessOrEqualsCheckSuccess() throws NoSuchAlgorithmException, InvalidArgumentsException{
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.LESS_OR_EQUALS_THAN);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleNumberAccessRuleLessOrEqualsCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException{
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue+1, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.LESS_OR_EQUALS_THAN);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+
 
     @Test
     public void singleBooleanAccessRuleFalseValueCheckSuccess() throws
