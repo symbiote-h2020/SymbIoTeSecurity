@@ -4,13 +4,13 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.BTMException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
-import eu.h2020.symbiote.security.communication.payloads.BarteralAccessRequest;
+import eu.h2020.symbiote.security.communication.payloads.BarteredAccessRequest;
 import eu.h2020.symbiote.security.communication.payloads.CouponRequest;
 import eu.h2020.symbiote.security.communication.payloads.CouponValidity;
 import eu.h2020.symbiote.security.communication.payloads.RevocationRequest;
 
 /**
- * Crude RMI-like client's interface to the Bartening and Trading module.
+ * Crude RMI-like client's interface to the Bartering and Trading module.
  *
  * @author Jakub Toczek (PSNC)
  * @author Mikolaj Dobski (PSNC)
@@ -33,7 +33,7 @@ public interface IBTMClient {
      *@param couponString to register
      *@return status of the operation (true - success)
      */
-    boolean registerCoupon(String couponString) throws BTMException;
+    boolean registerIssuedCoupon(String couponString) throws BTMException;
 
     /**
      * Coupon validation in Core BTM
@@ -54,10 +54,10 @@ public interface IBTMClient {
 
     /**
      * Ask for authorization of the barteral access
-     * @param barteralAccessRequest request containing information about client's platform, resource Id and type of access
+     * @param barteredAccessRequest request containing information about client's platform, resource Id and type of access
      * @return information if access is granted
      */
-    boolean authorizeBarteralAccess(BarteralAccessRequest barteralAccessRequest) throws BTMException;
+    boolean authorizeBarteredAccess(BarteredAccessRequest barteredAccessRequest) throws BTMException;
 
     /**
      * asks BTM for coupon to access the resource

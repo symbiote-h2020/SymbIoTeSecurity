@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.h2020.symbiote.security.commons.Coupon;
 
-public class BarteralAccessRequest {
+public class BarteredAccessRequest {
 
     private final String clientPlatform;
     private final String federationId;
@@ -12,7 +12,7 @@ public class BarteralAccessRequest {
     private final Coupon.Type couponType;
 
     @JsonCreator
-    public BarteralAccessRequest(@JsonProperty("clientPlatform") String clientPlatform,
+    public BarteredAccessRequest(@JsonProperty("clientPlatform") String clientPlatform,
                                  @JsonProperty("federationId") String federationId,
                                  @JsonProperty("resourceId") String resourceId,
                                  @JsonProperty("couponType") Coupon.Type couponType) {

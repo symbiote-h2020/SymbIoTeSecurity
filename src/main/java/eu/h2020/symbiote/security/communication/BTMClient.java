@@ -4,7 +4,7 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.BTMException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.WrongCredentialsException;
 import eu.h2020.symbiote.security.communication.interfaces.IFeignBTMClient;
-import eu.h2020.symbiote.security.communication.payloads.BarteralAccessRequest;
+import eu.h2020.symbiote.security.communication.payloads.BarteredAccessRequest;
 import eu.h2020.symbiote.security.communication.payloads.CouponRequest;
 import eu.h2020.symbiote.security.communication.payloads.CouponValidity;
 import eu.h2020.symbiote.security.communication.payloads.RevocationRequest;
@@ -19,7 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Crude RMI-like client's implementation to the Bartening and Trading  module that communicates with it over REST.
+ * Crude RMI-like client's implementation to the Bartering and Trading  module that communicates with it over REST.
  *
  * @author Jakub Toczek (PSNC)
  */
@@ -99,7 +99,7 @@ public class BTMClient implements IBTMClient {
      *@return status of the operation (true - success)
      */
     @Override
-    public boolean registerCoupon(String couponString) throws BTMException {
+    public boolean registerIssuedCoupon(String couponString) throws BTMException {
         Response response;
         try {
             response = feignClient.registerCoupon(couponString);
@@ -154,15 +154,15 @@ public class BTMClient implements IBTMClient {
     }
 
     /**
-     * Ask for authorization of the barteral access
-     * @param barteralAccessRequest request containing information about client's platform, resource Id and type of access
+     * Ask for authorization of the bartered access
+     * @param barteredAccessRequest request containing information about client's platform, resource Id and type of access
      * @return information if access is granted
      */
     @Override
-    public boolean authorizeBarteralAccess(BarteralAccessRequest barteralAccessRequest) throws BTMException {
+    public boolean authorizeBarteredAccess(BarteredAccessRequest barteredAccessRequest) throws BTMException {
         Response response;
         try {
-            response = feignClient.authorizeBarteralAccess(barteralAccessRequest);
+            response = feignClient.authorizeBarteredAccess(barteredAccessRequest);
         } catch (FeignException fe) {
             throw new BTMException(BTM_COMMS_ERROR_MESSAGE + fe.getMessage());
         }
