@@ -164,7 +164,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         assertTrue(resp.keySet().contains(goodResourceID));
     }
 
-    //TODO Done - Kaspar - add tests(positive and negative) for other numeric operators : NOT_EQUALS, GREATER_THAN, LESS_THAN, GREATER_OR_EQUAL_THAN, LESS_OR_EQUALS_THAN
+    //TODO - Kaspar - add tests(positive and negative) for other numeric operators : NOT_EQUALS, GREATER_THAN, LESS_THAN, GREATER_OR_EQUAL_THAN, LESS_OR_EQUALS_THAN
     @Test
     public void singleNumberAccessRuleNotEqualsCheckSuccess() throws NoSuchAlgorithmException, InvalidArgumentsException{
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
@@ -204,8 +204,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
 
-        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue+1, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.GREATER_THAN);
-        //FIXME @Nemanja Direction of Relationship?
+        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue-1, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.GREATER_THAN);
+
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
 
         Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
@@ -217,9 +217,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     public void singleNumberAccessRuleGreaterThanCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException{
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-
+        //FIXME @Nemanja evaluates to true, when equal
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        //FIXME @Nemanja Direction of Relationship?
         NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.GREATER_THAN);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
@@ -235,8 +234,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        //FIXME @Nemanja Direction of Relationship?
-        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue-1, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.LESS_THAN);
+
+        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue+1, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.LESS_THAN);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
 
@@ -251,8 +250,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        //FIXME @Nemanja Direction of Relationship?
-        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrBadValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.LESS_THAN);
+        //FIXME @Nemanja less than evalates to true when equal
+        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.LESS_THAN);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
 
@@ -267,7 +266,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-
+        //FIXME @Nemanja evaluates to false, when equal.
         NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.GREATER_OR_EQUAL_THAN);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
@@ -284,7 +283,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
 
-        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue-1, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.GREATER_OR_EQUAL_THAN);
+        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue+1, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.GREATER_OR_EQUAL_THAN);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
 
@@ -299,7 +298,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-
+        //FIXME @Nemanja evaluates to false when equal
         NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.LESS_OR_EQUALS_THAN);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
@@ -316,7 +315,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
 
-        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue+1, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.LESS_OR_EQUALS_THAN);
+        NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue-1, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.LESS_OR_EQUALS_THAN);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
 
@@ -384,6 +383,349 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         assertTrue(resp.keySet().contains(goodResourceID));
     }
 
+    @Test
+    public void singleStringAccessRuleEqualsIgnoreCaseCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule(nameAttrOKValue.toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.EQUALS_IGNORE_CASE);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleStringAccessRuleEqualsIgnoreCaseCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule(nameAttrBadValue.toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.EQUALS_IGNORE_CASE);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleStringAccessRuleContainsCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule(nameAttrOKValue+" Meyer", SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.CONTAINS);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleStringAccessRuleContainsCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule(nameAttrBadValue+" Doe", SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.CONTAINS);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleStringAccessRuleContainsIgnoreCaseCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrOKValue+" Doe").toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.CONTAINS_IGNORE_CASE);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleStringAccessRuleContainsIgnoreCaseCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrBadValue+" Doe").toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.CONTAINS_IGNORE_CASE);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+
+
+    @Test
+    public void singleStringAccessRuleNotContainsCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule(nameAttrBadValue+" Doe", SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.NOT_CONTAINS);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleStringAccessRuleNotContainsCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule(nameAttrOKValue+" Doe", SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.NOT_CONTAINS);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleStringAccessRuleNotContainsIgnoreCaseCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrBadValue+" Doe").toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.NOT_CONTAINS);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleStringAccessRuleNotContainsIgnoreCaseCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrOKValue+" Doe").toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.NOT_CONTAINS);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleStringAccessRuleStartsWithCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrOKValue.substring(0,1)), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.STARTS_WITH);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleStringAccessRuleStartsWithCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrBadValue.substring(0,1)), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.STARTS_WITH);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+
+
+    @Test
+    public void singleStringAccessRuleStartsWithIgnoreCaseCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrOKValue.substring(0,2)).toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.STARTS_WITH_IGNORE_CASE);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleStringAccessRuleStartsWithIgnoreCaseCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrBadValue.substring(0,2)).toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.STARTS_WITH_IGNORE_CASE);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleStringAccessRuleEndsWithCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrOKValue.substring(nameAttrOKValue.length()-2,nameAttrOKValue.length()-1)), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.ENDS_WITH);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+    @Test
+    public void singleStringAccessRuleEndsWithCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrBadValue.substring(nameAttrOKValue.length()-2,nameAttrOKValue.length()-1)), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.ENDS_WITH);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+
+
+    @Test
+    public void singleStringAccessRuleEndsWithIgnoreCaseCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrOKValue.substring(nameAttrOKValue.length()-2,nameAttrOKValue.length()-1)).toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.ENDS_WITH_IGNORE_CASE);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertTrue(resp.keySet().contains(goodResourceID));
+    }
+
+
+    @Test
+    public void singleStringAccessRuleEndsWithIgnoreCaseCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException {
+
+        SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
+        assertFalse(securityRequest.getSecurityCredentials().isEmpty());
+
+        Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
+
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrBadValue.substring(nameAttrOKValue.length()-2,nameAttrOKValue.length()-1)).toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.ENDS_WITH_IGNORE_CASE);
+
+        resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
+
+        Map<String, Set<SecurityCredentials>> resp = ABACPolicyHelper.checkRequestedOperationAccess(resourceAccessPolicyMap, securityRequest);
+
+        assertFalse(resp.keySet().contains(goodResourceID));
+    }
+    //TODO implement REGEXP
     //TODO Kaspar - add tests(positive and negative) for other String operators : EQUALS_IGNORE_CASE, CONTAINS, CONTAINS_IGNORE_CASE, NOT_CONTAINS, NOT_CONTAINS_IGNORE_CASE, STARTS_WITH, STARTS_WITH_IGNORE_CASE, ENDS_WITH, ENDS_WITH_IGNORE_CASE, REGEXP
 
     @Test
