@@ -63,6 +63,9 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         if (this.localAAM == null) {
             throw new SecurityHandlerException("You are not connected to your local aam");
         }
+
+        // checks if the provided AAM credentials are valid
+        generateServiceResponse();
     }
 
 
