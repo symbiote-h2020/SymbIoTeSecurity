@@ -307,7 +307,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
             SecurityHandlerException {
         Map<String, String> params = new HashMap<>();
         resourcePlatformFilter.ifPresent(value -> params.put("platformId", value));
-        searchOriginPlatformFilter.ifPresent(val -> params.put("getSecurityEnabledADMClient", val));
+        searchOriginPlatformFilter.ifPresent(val -> params.put("searchOriginPlatformId", val));
         try {
             return this.getSecurityEnabledADMClient().getMisdeedsGroupedByPlatform(params);
         } catch (FeignException fe) {
