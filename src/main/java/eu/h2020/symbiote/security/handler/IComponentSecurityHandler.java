@@ -11,6 +11,7 @@ import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -98,7 +99,9 @@ public interface IComponentSecurityHandler {
      * @param searchOriginPlatformFilter limits report to only one searchOriginPlatform
      * @return map containing reports about requested resource platforms
      */
-    Map<String, OriginPlatformGroupedPlatformMisdeedsReport> getOriginPlatformGroupedPlatformMisdeedsReports(String resourcePlatformFilter, String searchOriginPlatformFilter) throws SecurityHandlerException;
+    Map<String, OriginPlatformGroupedPlatformMisdeedsReport> getOriginPlatformGroupedPlatformMisdeedsReports(Optional<String> resourcePlatformFilter,
+                                                                                                             Optional<String> searchOriginPlatformFilter) throws
+            SecurityHandlerException;
 
     /**
      * gets the map containing information about platform misdeeds within federations grouped by federations
@@ -107,5 +110,7 @@ public interface IComponentSecurityHandler {
      * @param federationId           limits report to contain information about misdeeds in one federation
      * @return map containing reports about requested resource platforms
      */
-    Map<String, FederationGroupedPlatformMisdeedsReport> getFederationGroupedPlatformMisdeedsReports(String resourcePlatformFilter, String federationId) throws SecurityHandlerException;
+    Map<String, FederationGroupedPlatformMisdeedsReport> getFederationGroupedPlatformMisdeedsReports(Optional<String> resourcePlatformFilter,
+                                                                                                     Optional<String> federationId) throws
+            SecurityHandlerException;
 }

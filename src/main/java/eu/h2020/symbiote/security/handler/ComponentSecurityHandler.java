@@ -17,6 +17,7 @@ import eu.h2020.symbiote.security.communication.interfaces.IFeignADMComponentCli
 import eu.h2020.symbiote.security.communication.payloads.*;
 import eu.h2020.symbiote.security.helpers.ABACPolicyHelper;
 import eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper;
+import feign.FeignException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
     private final String componentOwnerUsername;
     private final String componentOwnerPassword;
     private final String combinedClientIdentifier;
+    private IFeignADMComponentClient admComponentClient;
 
     public ComponentSecurityHandler(ISecurityHandler securityHandler,
                                     String localAAMAddress,
@@ -234,6 +236,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
      * @return required for authorizing operations in the local AAM
      * @throws SecurityHandlerException on error
      */
+    @Override
     public BoundCredentials getLocalAAMCredentials() throws
             SecurityHandlerException {
         BoundCredentials localAAMBoundCredentials = securityHandler.getAcquiredCredentials().get(localAAM.getAamInstanceId());
@@ -299,41 +302,59 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
     }
 
     @Override
-    public Map<String, OriginPlatformGroupedPlatformMisdeedsReport> getOriginPlatformGroupedPlatformMisdeedsReports(String resourcePlatformFilter, String searchOriginPlatformFilter) throws
+    public Map<String, OriginPlatformGroupedPlatformMisdeedsReport> getOriginPlatformGroupedPlatformMisdeedsReports(Optional<String> resourcePlatformFilter,
+                                                                                                                    Optional<String> searchOriginPlatformFilter) throws
             SecurityHandlerException {
-
-        String coreAAMAddress = this.getSecurityHandler().getCoreAAMInstance().getAamAddress();
-
-        IFeignADMComponentClient admComponentClient = SymbioteComponentClientFactory.createClient(
-                coreAAMAddress + SecurityConstants.ADM_PREFIX,
-                IFeignADMComponentClient.class,
-                "adm",
-                SecurityConstants.CORE_AAM_INSTANCE_ID,
-                this);
         Map<String, String> params = new HashMap<>();
-        if (resourcePlatformFilter != null || !resourcePlatformFilter.isEmpty())
-            params.put("platformId", resourcePlatformFilter);
-        if (searchOriginPlatformFilter != null || !searchOriginPlatformFilter.isEmpty())
-            params.put("searchOriginPlatformId", searchOriginPlatformFilter);
-        return admComponentClient.getMisdeedsGroupedByPlatform(params);
+        resourcePlatformFilter.ifPresent(value -> params.put("platformId", value));
+        searchOriginPlatformFilter.ifPresent(val -> params.put("getSecurityEnabledADMClient", val));
+        try {
+            return this.getSecurityEnabledADMClient().getMisdeedsGroupedByPlatform(params);
+        } catch (FeignException fe) {
+            throw handleFeignExceptions(fe);
+        }
     }
 
     @Override
-    public Map<String, FederationGroupedPlatformMisdeedsReport> getFederationGroupedPlatformMisdeedsReports(String resourcePlatformFilter, String federationId) throws
+    public Map<String, FederationGroupedPlatformMisdeedsReport> getFederationGroupedPlatformMisdeedsReports(Optional<String> resourcePlatformFilter,
+                                                                                                            Optional<String> federationId) throws
             SecurityHandlerException {
-        String coreAAMAddress = this.getSecurityHandler().getCoreAAMInstance().getAamAddress();
-
-        IFeignADMComponentClient admComponentClient = SymbioteComponentClientFactory.createClient(
-                coreAAMAddress + "/adm",
-                IFeignADMComponentClient.class,
-                "adm",
-                SecurityConstants.CORE_AAM_INSTANCE_ID,
-                this);
         Map<String, String> params = new HashMap<>();
-        if (resourcePlatformFilter != null || !resourcePlatformFilter.isEmpty())
-            params.put("platformId", resourcePlatformFilter);
-        if (federationId != null || !federationId.isEmpty())
-            params.put("federationId", federationId);
-        return admComponentClient.getMisdeedsGroupedByFederations(params);
+        resourcePlatformFilter.ifPresent(value -> params.put("platformId", value));
+        federationId.ifPresent(v -> params.put("federationId", v));
+        try {
+            return this.getSecurityEnabledADMClient().getMisdeedsGroupedByFederations(params);
+        } catch (FeignException fe) {
+            throw handleFeignExceptions(fe);
+        }
+    }
+
+    private SecurityHandlerException handleFeignExceptions(FeignException fe) throws
+            SecurityHandlerException {
+        switch (fe.status()) {
+            case 400:
+                log.error("Bad request");
+                throw new SecurityHandlerException("Bad/malformed request was sent to the ADM", fe);
+            case 401:
+                log.error("Failed to authorize the request in the core");
+                throw new SecurityHandlerException("Failed to authorize the request", fe);
+            case 500:
+                log.error("Service Error");
+                throw new SecurityHandlerException("ADM Service error", fe);
+            default:
+                throw new SecurityHandlerException("Unexpected happened", fe);
+        }
+    }
+
+    private synchronized IFeignADMComponentClient getSecurityEnabledADMClient() throws
+            SecurityHandlerException {
+        if (admComponentClient == null)
+            admComponentClient = SymbioteComponentClientFactory.createClient(
+                    this.getSecurityHandler().getCoreAAMInstance().getAamAddress() + SecurityConstants.ADM_PREFIX,
+                    IFeignADMComponentClient.class,
+                    "adm",
+                    SecurityConstants.CORE_AAM_INSTANCE_ID,
+                    this);
+        return admComponentClient;
     }
 }
