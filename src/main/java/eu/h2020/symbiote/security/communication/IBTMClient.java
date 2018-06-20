@@ -18,48 +18,16 @@ import eu.h2020.symbiote.security.communication.payloads.RevocationRequest;
 public interface IBTMClient {
 
     /**
-     * Allows the user to revoke their coupons
-     *
-     * @param revocationRequest required to revoke a coupon.
-     * @return revocation status
-     */
-    String revokeCoupon(RevocationRequest revocationRequest) throws
-            InvalidArgumentsException,
-            WrongCredentialsException,
-            BTMException;
-
-    /**
-     * Allows registering coupon in the Core BTM."
-     *@param couponString to register
-     *@return status of the operation (true - success)
-     */
-    boolean registerIssuedCoupon(String couponString) throws BTMException;
-
-    /**
-     * Coupon validation in Core BTM
-     *
-     * @param couponString for validation
-     * @return couponValidity containing information about remaining usages/time and validation status
-     */
-    CouponValidity isCouponValid(String couponString) throws BTMException;
-
-    /**
-     * Coupon consumption in the Core BTM
-     *
-     * @param couponString for consumption
-     * @return consumption status (true - success)
-     */
-    boolean consumeCoupon(String couponString) throws BTMException;
-
-
-    /**
+     * //TODO consumption of the coupon is nor transactional or reversible, it can consume coupon no matter the result of this method,
      * Ask for authorization of the barteral access
      * @param barteredAccessRequest request containing information about client's platform, resource Id and type of access
      * @return information if access is granted
      */
+    //TODO change the return to HttpStatus or validity.
     boolean authorizeBarteredAccess(BarteredAccessRequest barteredAccessRequest) throws BTMException;
 
     /**
+     * //TODO move this class to other class
      * asks BTM for coupon to access the resource
      *
      * @param couponRequest request containing information about platform, type of access
