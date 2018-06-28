@@ -1,14 +1,14 @@
 package eu.h2020.symbiote.security.handler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.h2020.symbiote.security.clients.ClientFactory;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.communication.AAMClient;
-import eu.h2020.symbiote.security.communication.payloads.AAM;
-import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
-import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
+import eu.h2020.symbiote.security.communication.payloads.*;
 import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.utils.DummyTokenIssuer;
 import org.apache.commons.logging.Log;
@@ -27,14 +27,15 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.io.IOException;
+import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ClientFactory.class)
@@ -374,5 +375,47 @@ public class SecurityHandlerTest {
             cal.add(Calendar.DATE, days); //minus number would decrement the days
             return cal.getTime();
         }
+    }
+
+    @Test
+    public void serializeIt() throws IOException {
+        SecurityRequest securityRequest = new SecurityRequest(new HashSet<>(), 123, "bla");
+        ObjectMapper om = new ObjectMapper();
+        assertTrue(om.canSerialize(SecurityRequest.class));
+        String string = (om.writerWithDefaultPrettyPrinter().writeValueAsString(securityRequest));
+        System.out.println(string);
+        SecurityRequest securityRequest1 = om.readValue(string, SecurityRequest.class);
+        assertEquals(securityRequest, securityRequest1);
+
+        string = "{\n" +
+                "  \"securityCredentials\" : [ ],\n" +
+                "  \"timestamp\" : 123,\n" +
+                "  \"hash\" : \"\",\n" +
+                "  \"extravalue\" : \"extravalue\"\n" +
+                "}";
+        System.out.println("before: "+string);
+        securityRequest1 = om.readValue(string, SecurityRequest.class);
+        string = (om.writerWithDefaultPrettyPrinter().writeValueAsString(securityRequest1));
+        System.out.println("after: "+string);
+
+        securityRequest = new SecurityRequest(new HashSet<>(), 123);
+        om = new ObjectMapper();
+        assertTrue(om.canSerialize(SecurityRequest.class));
+        string = (om.writerWithDefaultPrettyPrinter().writeValueAsString(securityRequest));
+        System.out.println(string);
+        securityRequest1 = om.readValue(string, SecurityRequest.class);
+        assertEquals(securityRequest, securityRequest1);
+
+        string = "{\n" +
+                "  \"securityCredentials\" : [ ],\n" +
+                "  \"timestamp\" : 123\n" +
+                "}";
+        System.out.println("before:"+ string);
+        securityRequest1 = om.readValue(string, SecurityRequest.class);
+        string = (om.writerWithDefaultPrettyPrinter().writeValueAsString(securityRequest1));
+        System.out.println("after: "+ string);
+
+
+
     }
 }

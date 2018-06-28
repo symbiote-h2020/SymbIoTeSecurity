@@ -126,6 +126,8 @@ To make use of your GUEST token you need to wrap it into our SecurityRequest. Fo
     * "clientCertificate":"",
     * "clientCertificateSigningAAMCertificate":"",
     * "foreignTokenIssuingAAMCertificate":""
+* optional security hash (only L3/L4)
+  * x-auth-hash
 
 **Example:**
  - x-auth-timestamp: 1519652051000
@@ -140,6 +142,7 @@ To make use of your GUEST token you need to wrap it into our SecurityRequest. Fo
        "foreignTokenIssuingAAMCertificate":""
      } 
      ```
+ - x-auth-hash: "secretHash"
 
 3. With such prepared headers you can access SymbIoTe resources offered publicly, e.g. execute search queries or send request to Resource Access Proxy.
 
@@ -266,6 +269,8 @@ public static final String SECURITY_CREDENTIALS_TIMESTAMP_HEADER = "x-auth-times
 public static final String SECURITY_CREDENTIALS_SIZE_HEADER = "x-auth-size";
 // each SecurityCredentials entry header prefix, they are number 1..size
 public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "x-auth-";
+// L3/L4 only, containing secret hash needed to access the resource (it's optional)
+public static final String SECURITY_HASH = "x-auth-hash"
 ```
 whereas the ServiceResponseJWS is in contrast just a String and should be transport in the following header:
 ```java

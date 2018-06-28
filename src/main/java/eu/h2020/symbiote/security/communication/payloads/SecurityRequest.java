@@ -1,8 +1,6 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
@@ -18,18 +16,40 @@ import java.util.*;
  * @author Daniele Caldarola (CNIT)
  * @author Mikołaj Dobski (PSNC)
  */
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SecurityRequest {
 
     private static final ObjectMapper om = new ObjectMapper();
     private final Set<SecurityCredentials> securityCredentials;
     private final long timestamp;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private final Optional<String> hash;
 
+
+    public SecurityRequest(
+            Set<SecurityCredentials> securityCredentials,
+            long timestamp) {
+        this.securityCredentials = securityCredentials;
+        this.timestamp = timestamp;
+        this.hash = Optional.empty();
+    }
+
+    /**
+     * Used to generate the security request for L3/L4 containing secret hash for resource access
+     *
+     * @param securityCredentials
+     * @param timestamp
+     * @param hash
+     */
     @JsonCreator
     public SecurityRequest(
             @JsonProperty("securityCredentials") Set<SecurityCredentials> securityCredentials,
-            @JsonProperty("timestamp") long timestamp) {
+            @JsonProperty("timestamp") long timestamp,
+            @JsonProperty("hash") String hash) {
         this.securityCredentials = securityCredentials;
         this.timestamp = timestamp;
+        this.hash = Optional.ofNullable(hash);
     }
 
     /**
@@ -43,6 +63,7 @@ public class SecurityRequest {
         this.timestamp = now - now % 1000;
         this.securityCredentials = new HashSet<>();
         securityCredentials.add(new SecurityCredentials(guestToken));
+        this.hash = Optional.empty();
     }
 
     /**
@@ -58,9 +79,9 @@ public class SecurityRequest {
 
         // SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER
         String timestampString = securityRequestHeaderParams.get(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER);
-        if (timestampString == null )
+        if (timestampString == null)
             throw new InvalidArgumentsException("Missing required header: " + SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER);
-        if(timestampString.isEmpty())
+        if (timestampString.isEmpty())
             throw new InvalidArgumentsException("Header '" + SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER + "' can not be empty.");
         try {
             this.timestamp = Long.parseLong(timestampString);
@@ -72,7 +93,7 @@ public class SecurityRequest {
         String credentialsSetSizeString = securityRequestHeaderParams.get(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER);
         if (credentialsSetSizeString == null)
             throw new InvalidArgumentsException("Missing required header: " + SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER);
-        if(credentialsSetSizeString.isEmpty())
+        if (credentialsSetSizeString.isEmpty())
             throw new InvalidArgumentsException("Header  '" + SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER + "' can not be empty.");
         int credentialsSetSize;
         try {
@@ -80,6 +101,8 @@ public class SecurityRequest {
         } catch (NumberFormatException e) {
             throw new InvalidArgumentsException("Malformed required header: " + SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER);
         }
+        //SecurityConstrants.SECURITY_HASH parsing
+        this.hash = Optional.of(securityRequestHeaderParams.getOrDefault(SecurityConstants.SECURITY_HASH, ""));
 
         // deserializing SecurityCredentials Set
         this.securityCredentials = new HashSet<>();
@@ -87,7 +110,7 @@ public class SecurityRequest {
             String securityCredentialsString = securityRequestHeaderParams.get(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + i);
             if (securityCredentialsString == null)
                 throw new InvalidArgumentsException("Missing/malformed required header: " + SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + i);
-            if(securityCredentialsString.isEmpty())
+            if (securityCredentialsString.isEmpty())
                 throw new InvalidArgumentsException("Header '" + SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + i + "' can not be empty.");
             try {
                 this.securityCredentials.add(om.readValue(securityCredentialsString, SecurityCredentials.class));
@@ -95,6 +118,10 @@ public class SecurityRequest {
                 throw new InvalidArgumentsException("Missing/malformed required header: " + SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + i + " " + e.getMessage());
             }
         }
+    }
+
+    public String getHash() {
+        return hash.orElse("");
     }
 
     public Set<SecurityCredentials> getSecurityCredentials() {
@@ -119,6 +146,9 @@ public class SecurityRequest {
             securityHeaderParams.put(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + headerNumber, om.writeValueAsString(securityCredential));
             headerNumber++;
         }
+        if (!hash.orElse("").isEmpty())
+            securityHeaderParams.put(SecurityConstants.SECURITY_HASH, hash.get());
+
         return securityHeaderParams;
     }
 
