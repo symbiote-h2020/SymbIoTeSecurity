@@ -1,6 +1,7 @@
 package eu.h2020.symbiote.security;
 
 import eu.h2020.symbiote.security.commons.Certificate;
+import eu.h2020.symbiote.security.commons.ComponentIdsConstants;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
@@ -32,7 +33,7 @@ public class ComponentSecurityHandlerFactory {
      * @param coreAAMAddress                 address to Core AAM (no longer used, add proper address in localAAMAddress parameter)
      * @param keystorePath                   where the keystore will be stored
      * @param keystorePassword               needed to access security credentials
-     * @param clientId                       name of the component in the form of "componentId@platformId"
+     * @param clientId                       name of the component in the form of "componentId@platformId", componentId should be consistent with {@link ComponentIdsConstants}
      * @param localAAMAddress                needed to acquire the component's authorization credentials
      * @param alwaysUseLocalAAMForValidation forced true due to usage of caching tools
      * @param componentOwnerUsername         local AAM Admin credentials
@@ -66,7 +67,7 @@ public class ComponentSecurityHandlerFactory {
      *
      * @param keystorePath           where the keystore will be stored
      * @param keystorePassword       needed to access security credentials
-     * @param clientId               name of the component in the form of "componentId@platformId"
+     * @param clientId               name of the component in the form of "componentId@platformId", componentId should be consistent with {@link ComponentIdsConstants}
      * @param localAAMAddress        needed to acquire the component's authorization credentials
      * @param componentOwnerUsername local AAM Admin credentials
      * @param componentOwnerPassword local AAM Admin credentials

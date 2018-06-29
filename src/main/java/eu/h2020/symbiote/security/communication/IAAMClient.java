@@ -18,7 +18,7 @@ import java.util.Optional;
 public interface IAAMClient {
 
     /**
-     * @param componentIdentifier component identifier or {@link SecurityConstants#AAM_COMPONENT_NAME} for AAM CA certificate
+     * @param componentIdentifier component identifier {@link eu.h2020.symbiote.security.commons.ComponentIdsConstants} or {@link SecurityConstants#AAM_COMPONENT_NAME} for AAM CA certificate
      * @param platformIdentifier  for a platform component or {@link SecurityConstants#CORE_AAM_INSTANCE_ID} for Symbiote core components
      * @return symbiote component Certificate of the component in PEM format
      */
