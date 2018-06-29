@@ -292,7 +292,7 @@ MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, clientSH.g
 ```
 <a name="component_table"></a>
 All the names of the components, required to properly identify the certificates can be found in 
-[ComponentIdsConstants.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/commons/ComponentIdsConstants.java))
+[ComponentIdentifiers.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/commons/ComponentIdentifiers.java))
 
 In case of failing authorization to the federated resource that should be accessable, such event should be reported to the Anomaly Detection Module in the following way:
 ```java
@@ -743,7 +743,7 @@ If you want to manage components, create ComponentSecurityHandler object with  [
      *
      * @param keystorePath           where the keystore will be stored
      * @param keystorePassword       needed to access security credentials
-     * @param clientId               name of the component in the form of "componentId@platformId", componentId should be consistent with {@link ComponentIdsConstants}
+     * @param clientId               name of the component in the form of "componentId@platformId", componentId should be consistent with {@link ComponentIdentifiers}
      * @param localAAMAddress        needed to acquire the component's authorization credentials
      * @param componentOwnerUsername local AAM Admin credentials
      * @param componentOwnerPassword local AAM Admin credentials
@@ -776,7 +776,7 @@ To set up component SH, following instructions have to be done. Example for a pl
 IComponentSecurityHandler registrationHandlerCSH = ComponentSecurityHandlerFactory.getComponentSecurityHandler(
                 KEY_STORE_PATH,
                 KEY_STORE_PASSWORD,
-                ComponentIdsConstants.REGISTRATION_HANDLER + "@platfom1",
+                ComponentIdentifiers.REGISTRATION_HANDLER + "@platfom1",
                 localAAMAddress,
                 componentOwnerUsername,
                 componentOwnerPassword);
@@ -791,7 +791,7 @@ SecurityRequest rhSecurityRequest = rhCSH.generateSecurityRequestUsingLocalCrede
 To check validity of a response, if it came from component we are interested in (e.g. from the Core Registry), following operation have to be done: 
 ```java  
 // trying to validate the service response
-registrationHandlerCSH.isReceivedServiceResponseVerified(serviceResponse, ComponentIdsConstants.CORE_REGISTRY, "SymbIoTe_Core_AAM"); 
+registrationHandlerCSH.isReceivedServiceResponseVerified(serviceResponse, ComponentIdentifiers.CORE_REGISTRY, "SymbIoTe_Core_AAM"); 
 ```
 
 #### Proxy client for access to AAM Services
