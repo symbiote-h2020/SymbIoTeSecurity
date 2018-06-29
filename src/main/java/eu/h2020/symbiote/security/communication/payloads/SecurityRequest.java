@@ -110,7 +110,7 @@ public class SecurityRequest {
         }
 
         //SecurityConstrants.PROPRIETARY_SECURITY_PAYLOAD parsing
-        this.proprietarySecurityPayload = securityRequestHeaderParams.get(SecurityConstants.PROPRIETARY_SECURITY_PAYLOAD);
+        this.proprietarySecurityPayload = securityRequestHeaderParams.getOrDefault(SecurityConstants.PROPRIETARY_SECURITY_PAYLOAD,"");
 
         // deserializing SecurityCredentials Set
         this.securityCredentials = new HashSet<>();

@@ -1,6 +1,5 @@
 package eu.h2020.symbiote.security.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.h2020.symbiote.security.clients.ClientFactory;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
@@ -10,7 +9,6 @@ import eu.h2020.symbiote.security.communication.AAMClient;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
 import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
-import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.utils.DummyTokenIssuer;
 import org.apache.commons.logging.Log;
@@ -29,7 +27,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -39,8 +36,6 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ClientFactory.class)
@@ -75,22 +70,22 @@ public class SecurityHandlerTest {
         //aamClient.signCertificateRequest
         Mockito.when(aamClient.signCertificateRequest(Mockito.any(CertificateRequest.class))).thenReturn(serverCertString);
 
-        Mockito.when(ClientFactory.getAAMClient(Matchers.anyString())).thenReturn(aamClient);
+        Mockito.when(ClientFactory.getAAMClient(Mockito.anyString())).thenReturn(aamClient);
 
         //aamClient.getAvailableAAMs
         Mockito.when(aamClient.getAvailableAAMs()).thenReturn(new AvailableAAMsCollection(getAMMMap()));
 
         //aamClient.getHomeToken
-        Mockito.when(aamClient.getHomeToken(Matchers.anyString())).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
+        Mockito.when(aamClient.getHomeToken(Mockito.anyString())).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
 
         //aamClient.getForeignToken
-        Mockito.when(aamClient.getForeignToken(Matchers.anyString(), Matchers.any(), Matchers.any())).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
+        Mockito.when(aamClient.getForeignToken(Mockito.anyString(), Mockito.any(), Mockito.any())).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
 
         //aamClient.getGuestToken
         Mockito.when(aamClient.getGuestToken()).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
 
         //aamClient.getGuestToken
-        Mockito.when(aamClient.validateCredentials(Matchers.anyString(), Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(ValidationStatus.VALID);
+        Mockito.when(aamClient.validateCredentials(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(ValidationStatus.VALID);
 
 
         createEmptyKeystore();
@@ -154,9 +149,7 @@ public class SecurityHandlerTest {
 
         if (result.size() != ammList.size()) return false;
 
-        Iterator<Entry<String, AAM>> entries = result.entrySet().iterator();
-        while (entries.hasNext()) {
-            Entry<String, AAM> entry = entries.next();
+        for (Entry<String, AAM> entry : result.entrySet()) {
             String key = entry.getKey();
 
             if (ammList.get(key) == null)
@@ -214,7 +207,7 @@ public class SecurityHandlerTest {
         Token tk = testclient.login(homeAAM);
         String validToken = tk.getToken();
         //String validToken = getTokenString(serverkeystorePath, serverkeystorePassword, serveralias);
-        List<AAM> ammlist = testclient.getAvailableAAMs(homeAAM).values().stream().collect(Collectors.toList());
+        List<AAM> ammlist = new ArrayList<>(testclient.getAvailableAAMs(homeAAM).values());
 
         Map<AAM, Token> maptk = testclient.login(ammlist, validToken);
 
@@ -266,7 +259,7 @@ public class SecurityHandlerTest {
 //		java.security.cert.Certificate cert = keystore.getCertificate(serveralias);
 //
 
-        ValidationStatus val = testclient.validate(getHomeAMM(homeAAMId), validToken, null, null, null);
+        ValidationStatus val = testclient.validate(getHomeAMM(homeAAMId), validToken, Optional.empty(), Optional.empty(), Optional.empty());
 
         logger.info("TEST RESULT --> ValidationStatus from AMM and Token: " + val);
         assert val != null;
@@ -274,9 +267,8 @@ public class SecurityHandlerTest {
     }
 
     private AAM getAMMfromList(List<AAM> ammlist, String testaamInstanceId2) {
-        for (int x = 0; x < ammlist.size(); x++) {
+        for (AAM a : ammlist) {
 
-            AAM a = ammlist.get(x);
             if (a.getAamInstanceId().equals(testaamInstanceId2))
                 return a;
         }
@@ -365,47 +357,6 @@ public class SecurityHandlerTest {
 
 
         return result;
-    }
-
-    @Test
-    public void serializeIt() throws IOException {
-        SecurityRequest securityRequest = new SecurityRequest(new HashSet<>(), 123, "bla");
-        ObjectMapper om = new ObjectMapper();
-        assertTrue(om.canSerialize(SecurityRequest.class));
-        String string = (om.writerWithDefaultPrettyPrinter().writeValueAsString(securityRequest));
-        System.out.println(string);
-        SecurityRequest securityRequest1 = om.readValue(string, SecurityRequest.class);
-        assertEquals(securityRequest, securityRequest1);
-
-        string = "{\n" +
-                "  \"securityCredentials\" : [ ],\n" +
-                "  \"timestamp\" : 123,\n" +
-                "  \"proprietarySecurityPayload\" : \"\",\n" +
-                "  \"extravalue\" : \"extravalue\"\n" +
-                "}";
-        System.out.println("before: " + string);
-        securityRequest1 = om.readValue(string, SecurityRequest.class);
-        string = (om.writerWithDefaultPrettyPrinter().writeValueAsString(securityRequest1));
-        System.out.println("after: " + string);
-
-        securityRequest = new SecurityRequest(new HashSet<>(), 123);
-        om = new ObjectMapper();
-        assertTrue(om.canSerialize(SecurityRequest.class));
-        string = (om.writerWithDefaultPrettyPrinter().writeValueAsString(securityRequest));
-        System.out.println(string);
-        securityRequest1 = om.readValue(string, SecurityRequest.class);
-        assertEquals(securityRequest, securityRequest1);
-
-        string = "{\n" +
-                "  \"securityCredentials\" : [ ],\n" +
-                "  \"timestamp\" : 123\n" +
-                "}";
-        System.out.println("before:" + string);
-        securityRequest1 = om.readValue(string, SecurityRequest.class);
-        string = (om.writerWithDefaultPrettyPrinter().writeValueAsString(securityRequest1));
-        System.out.println("after: " + string);
-
-
     }
 
     static public class DateUtil {

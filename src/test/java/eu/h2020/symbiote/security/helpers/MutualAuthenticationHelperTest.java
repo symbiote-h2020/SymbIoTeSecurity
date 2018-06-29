@@ -1,6 +1,7 @@
 package eu.h2020.symbiote.security.helpers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
@@ -354,6 +355,47 @@ public class MutualAuthenticationHelperTest {
         // deserialize
         SecurityRequest deserializedSecurityRequest = new SecurityRequest(securityRequestHeaderParams);
         assertEquals(securityRequest, deserializedSecurityRequest);
+    }
+
+    @Test
+    public void securityRequestSerializationTest() throws IOException {
+        ObjectMapper om = new ObjectMapper();
+        SecurityRequest securityRequest = new SecurityRequest(new HashSet<>(), 123, "hash");
+        String serializedSecurityRequest = om.writerWithDefaultPrettyPrinter().writeValueAsString(securityRequest);
+        SecurityRequest deserializedSecurityRequest = om.readValue(serializedSecurityRequest, SecurityRequest.class);
+        assertEquals(securityRequest, deserializedSecurityRequest);
+
+        String extraValue = "extravalue";
+        String serializedSecurityRequestExtraField = "{\n" +
+                "  \"securityCredentials\" : [ ],\n" +
+                "  \"timestamp\" : 123,\n" +
+                "  \"proprietarySecurityPayload\" : \"hash\",\n" +
+                "  \""+extraValue+"\" : \""+extraValue+"\"\n" +
+                "}";
+
+        deserializedSecurityRequest = om.readValue(serializedSecurityRequestExtraField, SecurityRequest.class);
+        assertNotNull(deserializedSecurityRequest.getSecurityCredentials());
+        assertEquals(123, deserializedSecurityRequest.getTimestamp().longValue());
+        assertEquals("hash", deserializedSecurityRequest.getProprietarySecurityPayload());
+        serializedSecurityRequest = om.writerWithDefaultPrettyPrinter().writeValueAsString(deserializedSecurityRequest);
+        assertFalse(serializedSecurityRequest.contains(extraValue));
+        assertTrue(serializedSecurityRequest.contains("proprietarySecurityPayload"));
+
+        securityRequest = new SecurityRequest(new HashSet<>(), 123);
+        serializedSecurityRequest = om.writerWithDefaultPrettyPrinter().writeValueAsString(securityRequest);
+        deserializedSecurityRequest = om.readValue(serializedSecurityRequest, SecurityRequest.class);
+        assertEquals(securityRequest, deserializedSecurityRequest);
+
+        String serializedSecurityRequestWithoutField = "{\n" +
+                "  \"securityCredentials\" : [ ],\n" +
+                "  \"timestamp\" : 123\n" +
+                "}";
+        deserializedSecurityRequest = om.readValue(serializedSecurityRequestWithoutField, SecurityRequest.class);
+        assertNotNull(deserializedSecurityRequest.getSecurityCredentials());
+        assertEquals(123, deserializedSecurityRequest.getTimestamp().longValue());
+        assertTrue(deserializedSecurityRequest.getProprietarySecurityPayload().isEmpty());
+        serializedSecurityRequest = om.writerWithDefaultPrettyPrinter().writeValueAsString(deserializedSecurityRequest);
+        assertFalse(serializedSecurityRequest.contains("proprietarySecurityPayload"));
     }
 
     @Test
