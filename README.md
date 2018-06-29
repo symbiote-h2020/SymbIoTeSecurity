@@ -291,17 +291,8 @@ Then after received a business response from a symbiote component we can check i
 MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, clientSH.getComponentCertificate(componentIdentifier, platformIdentifier));
 ```
 <a name="component_table"></a>
-In order to identify the certificate of the component you communicate with, please use the following table:
-
-| Component name | Component certificate key in the AAM collection |
-| ------ | ------ |
-| Core search | search |
-| Core registry | registry |
-| Registration handler | reghandler |
-| ResourceAccessProxy | rap |
-| CoreResourceMonitor | crm |
-| CoreResourceAccessMonitor | cram |
-| other might appear | ... |
+All the names of the components, required to properly identify the certificates can be found in 
+[ComponentIdsConstants.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/commons/ComponentIdsConstants.java))
 
 In case of failing authorization to the federated resource that should be accessable, such event should be reported to the Anomaly Detection Module in the following way:
 ```java
@@ -748,24 +739,23 @@ This section provides the information about usage of SymbIoTe Security library i
 If you want to manage components, create ComponentSecurityHandler object with  [ComponentSecurityHandlerFactory](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/ComponentSecurityHandler.java) class.
 ```java
 /**
-     * Creates an end-user component security handler
+     * Creates a component security handler
      *
-     * @param coreAAMAddress                 Symbiote Core AAM address which is available 
-     *                                       on the symbiote security webpage
-     * @param keystorePath                   where the keystore will be stored
-     * @param keystorePassword               needed to access security credentials
-     * @param clientId                       name of the component in the form of "componentId@platformId"
-     * @param localAAMAddress                when using only local AAM for SecurityRequest validation
-     * @param alwaysUseLocalAAMForValidation when wanting to use local AAM for SecurityRequest validation
-     * @param componentOwnerUsername         AAMAdmin credentials 
-     * @param componentOwnerPassword         AAMAdmin credentials
+     * @param keystorePath           where the keystore will be stored
+     * @param keystorePassword       needed to access security credentials
+     * @param clientId               name of the component in the form of "componentId@platformId", componentId should be consistent with {@link ComponentIdsConstants}
+     * @param localAAMAddress        needed to acquire the component's authorization credentials
+     * @param componentOwnerUsername local AAM Admin credentials
+     * @param componentOwnerPassword local AAM Admin credentials
      * @return the component security handler ready to talk with Symbiote components
      * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
      */
-ComponentSecurityHandler componentSecurityHandler = 
-    ComponentSecurityHandlerFactory.getComponentSecurityHandler(
-            coreAAMAddress, keystorePath, keystorePassword, clientId, localAAMAddress, 
-            alwaysUseLocalAAMForValidation, componentOwnerUsername, componentOwnerPassword);
+ComponentSecurityHandler componentSecurityHandler = ComponentSecurityHandlerFactory.getComponentSecurityHandler(keystorePath,
+                                                                        keystorePassword,
+                                                                        clientId,
+                                                                        localAAMAddress,
+                                                                        componentOwnerUsername,
+                                                                        componentOwnerPassword)
 ```
 
 Component Security Handler provides following methods:
@@ -784,12 +774,10 @@ Component Security Handler provides following methods:
 To set up component SH, following instructions have to be done. Example for a platform registrationHandler
 ```java
 IComponentSecurityHandler registrationHandlerCSH = ComponentSecurityHandlerFactory.getComponentSecurityHandler(
-                coreAAMAddress,
                 KEY_STORE_PATH,
                 KEY_STORE_PASSWORD,
-                "reghandler" + "@platfom1",
+                ComponentIdsConstants.REGISTRATION_HANDLER + "@platfom1",
                 localAAMAddress,
-                false,
                 componentOwnerUsername,
                 componentOwnerPassword);
 
@@ -803,7 +791,7 @@ SecurityRequest rhSecurityRequest = rhCSH.generateSecurityRequestUsingLocalCrede
 To check validity of a response, if it came from component we are interested in (e.g. from the Core Registry), following operation have to be done: 
 ```java  
 // trying to validate the service response
-registrationHandlerCSH.isReceivedServiceResponseVerified(serviceResponse, "registry", "SymbIoTe_Core_AAM); 
+registrationHandlerCSH.isReceivedServiceResponseVerified(serviceResponse, ComponentIdsConstants.CORE_REGISTRY, "SymbIoTe_Core_AAM"); 
 ```
 
 #### Proxy client for access to AAM Services
@@ -825,8 +813,8 @@ So now, if you want it to manage the security headers automatically, all you hav
 
 IComponentSecurityHandler secHandler = ComponentSecurityHandlerFactory
                                            .getComponentSecurityHandler(
-                                               coreAAMAddress, keystorePath, keystorePassword,
-                                               clientId, localAAMAddress, false,
+                                               keystorePath, keystorePassword,
+                                               clientId, localAAMAddress,
                                                username, password );
 ```
 2. Create an instance of the [SymbioteAuthorizationClient](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/SymbioteAuthorizationClient.java) 
