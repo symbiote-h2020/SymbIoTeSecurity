@@ -159,6 +159,58 @@ The whole path looks as follows:
 5. client gets access to the restricted resource (if he has rights to use it) using Security Request
 
 Note that users credentials (username and password) are used in this process only during registration and acquisition of the certificates. They should not be saved on the clients device!  
+
+### Authorization token structure
+Without loss of generality, a token is a digital object used as a container for security-related information in SymbIoTe. It serves for authentication and/or authorization purposes and generally appears as a list of elements. Each element contains an assertion that further specifies properties assigned to the owner of the token.
+
+The structure and the content of a token in symbIoTe:
+![Authorization token](media/JWT_symbiote.png)
+
+#### JTI
+JTI is an unique identifier for the JWT.
+#### Structure of *iss* and *sub* claim
+The identifier of the token issuer, that is the reference AAM, is inserted in the token within the (“iss”) field.
+
+The identifier of the application (user) for which the token has been issued is inserted within the “sub” field, in the following scheme:
+
+##### GUEST Token
+```
+guest
+```
+##### HOME Token
+* user token
+
+```
+username@clientIdentifier
+```
+* component token
+```
+componentIdentifier
+```
+
+##### FOREIGN Token
+```
+username@clientIdentifier@homeAAMInstanceIdentifier@OriginHomeTokenJTI
+```
+
+#### Time relevant claims IAT, EXP
+
+Issue (“iat”) and expiration date (“exp”) limit the validity of the token.
+
+
+#### Public Keys: IPK & SPK
+Two private claims are introduced to carry information about the public keys of both the issuer and the subject within the token. The “ipk” field (“issuer public key”) carries the public key of the token issuer (that is the reference AAM), while the “spk” field (“subject public key”) includes the information about the public key of the subject.
+The public key of the subject, specifically, can be used to verify that an entity using this token is effectively the entity for which the token has been generated, by performing a challenge-response protocol.
+
+#### Custom Attributes
+Furthermore, we assume that each token embeds multiple attributes.
+
+#### Token type
+Token Type ("ttyp") is used to specify the type of token (Home, Foreign, Guest). If this field is null, the token is invalid. Home means that it was issued for a user that has an account in that issuer (AAM); Foreign means that it was issued using another token, and Guest means that it was issued for a guest user (without credentials).
+
+#### Sign
+Sign certifies token authenticity and integrity. For the sign generation, we use of ECDSA algorithm, by leveraging elliptic curve public keys 256-bits long.
+
 ## Java developers
 This section provides the information about usage of SymbIoTe Security library in the java code. 
 It requires from user its prior registration in the platform, in which he wants to access resources.
