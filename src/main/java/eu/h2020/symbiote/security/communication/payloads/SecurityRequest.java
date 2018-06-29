@@ -16,40 +16,47 @@ import java.util.*;
  * @author Daniele Caldarola (CNIT)
  * @author Mikołaj Dobski (PSNC)
  */
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SecurityRequest {
 
     private static final ObjectMapper om = new ObjectMapper();
     private final Set<SecurityCredentials> securityCredentials;
     private final long timestamp;
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private final Optional<String> hash;
+    private final String proprietarySecurityPayload;
 
-
-    public SecurityRequest(
-            Set<SecurityCredentials> securityCredentials,
-            long timestamp) {
-        this.securityCredentials = securityCredentials;
-        this.timestamp = timestamp;
-        this.hash = Optional.empty();
-    }
 
     /**
-     * Used to generate the security request for L3/L4 containing secret hash for resource access
+     * Used to generate the security request
      *
-     * @param securityCredentials
-     * @param timestamp
-     * @param hash
+     * @param securityCredentials        mandatory for all Symbiote Levels (1 through 4)
+     * @param timestamp                  mandatory for all Symbiote Levels (1 through 4)
+     * @param proprietarySecurityPayload (optional) designed for L3/L4 (or any other) resources that need a proprietary security payload that can be checked in RAP plugin.
      */
     @JsonCreator
     public SecurityRequest(
-            @JsonProperty("securityCredentials") Set<SecurityCredentials> securityCredentials,
-            @JsonProperty("timestamp") long timestamp,
-            @JsonProperty("hash") String hash) {
+            @JsonProperty(value = "securityCredentials", required = true) Set<SecurityCredentials> securityCredentials,
+            @JsonProperty(value = "timestamp", required = true) long timestamp,
+            @JsonProperty(value = "proprietarySecurityPayload") String proprietarySecurityPayload) {
         this.securityCredentials = securityCredentials;
         this.timestamp = timestamp;
-        this.hash = Optional.ofNullable(hash);
+        if (proprietarySecurityPayload != null)
+            this.proprietarySecurityPayload = proprietarySecurityPayload;
+        else
+            this.proprietarySecurityPayload = "";
+    }
+
+    /**
+     * Used to generate the security request for L1/L2 resources access without support for the proprietary security schema.
+     *
+     * @param securityCredentials
+     * @param timestamp
+     */
+    public SecurityRequest(
+            Set<SecurityCredentials> securityCredentials,
+            long timestamp) {
+        this(securityCredentials,
+                timestamp,
+                "");
     }
 
     /**
@@ -63,7 +70,7 @@ public class SecurityRequest {
         this.timestamp = now - now % 1000;
         this.securityCredentials = new HashSet<>();
         securityCredentials.add(new SecurityCredentials(guestToken));
-        this.hash = Optional.empty();
+        this.proprietarySecurityPayload = "";
     }
 
     /**
@@ -101,8 +108,9 @@ public class SecurityRequest {
         } catch (NumberFormatException e) {
             throw new InvalidArgumentsException("Malformed required header: " + SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER);
         }
-        //SecurityConstrants.SECURITY_HASH parsing
-        this.hash = Optional.of(securityRequestHeaderParams.getOrDefault(SecurityConstants.SECURITY_HASH, ""));
+
+        //SecurityConstrants.PROPRIETARY_SECURITY_PAYLOAD parsing
+        this.proprietarySecurityPayload = securityRequestHeaderParams.get(SecurityConstants.PROPRIETARY_SECURITY_PAYLOAD);
 
         // deserializing SecurityCredentials Set
         this.securityCredentials = new HashSet<>();
@@ -120,16 +128,17 @@ public class SecurityRequest {
         }
     }
 
-    public String getHash() {
-        return hash.orElse("");
-    }
-
     public Set<SecurityCredentials> getSecurityCredentials() {
         return securityCredentials;
     }
 
     public Long getTimestamp() {
         return timestamp;
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public String getProprietarySecurityPayload() {
+        return proprietarySecurityPayload;
     }
 
     /**
@@ -146,8 +155,8 @@ public class SecurityRequest {
             securityHeaderParams.put(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + headerNumber, om.writeValueAsString(securityCredential));
             headerNumber++;
         }
-        if (!hash.orElse("").isEmpty())
-            securityHeaderParams.put(SecurityConstants.SECURITY_HASH, hash.get());
+        if (!proprietarySecurityPayload.isEmpty())
+            securityHeaderParams.put(SecurityConstants.PROPRIETARY_SECURITY_PAYLOAD, proprietarySecurityPayload);
 
         return securityHeaderParams;
     }
@@ -156,17 +165,16 @@ public class SecurityRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         SecurityRequest that = (SecurityRequest) o;
-
-        if (timestamp != that.timestamp) return false;
-        return securityCredentials.equals(that.securityCredentials);
+        return timestamp == that.timestamp &&
+                Objects.equals(securityCredentials, that.securityCredentials) &&
+                Objects.equals(proprietarySecurityPayload, that.proprietarySecurityPayload);
     }
 
     @Override
     public int hashCode() {
-        int result = securityCredentials.hashCode();
-        result = 31 * result + (int) (timestamp ^ (timestamp >>> 32));
-        return result;
+
+        return Objects.hash(securityCredentials, timestamp, proprietarySecurityPayload);
     }
+
 }

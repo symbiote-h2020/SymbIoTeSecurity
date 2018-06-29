@@ -1,6 +1,5 @@
 package eu.h2020.symbiote.security.handler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.h2020.symbiote.security.clients.ClientFactory;
 import eu.h2020.symbiote.security.commons.Certificate;
@@ -8,7 +7,10 @@ import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.communication.AAMClient;
-import eu.h2020.symbiote.security.communication.payloads.*;
+import eu.h2020.symbiote.security.communication.payloads.AAM;
+import eu.h2020.symbiote.security.communication.payloads.AvailableAAMsCollection;
+import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
+import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.utils.DummyTokenIssuer;
 import org.apache.commons.logging.Log;
@@ -28,7 +30,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.*;
+import java.security.Key;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.Map.Entry;
@@ -43,22 +48,18 @@ import static org.junit.Assert.assertTrue;
 public class SecurityHandlerTest {
 
 
-    private AAMClient aamClient = Mockito.mock(AAMClient.class);
-
     private static Log logger = LogFactory.getLog(SecurityHandlerTest.class);
     SecurityHandler testclient = null;
-
     String localPath = ".";
     String keystorePath = localPath + "/src/test/resources/keystore.jks";
     String keystorePassword = "123456";
-
     String serverkeystorePath = localPath + "/src/test/resources/core.p12";
     String serverkeystorePassword = "1234567";
     String serveralias = "client-core-1";
     String homeAAMId = SecurityConstants.CORE_AAM_INSTANCE_ID;
-    
     String serverCertString = null;
     AAM homeAAM = null;
+    private AAMClient aamClient = Mockito.mock(AAMClient.class);
 
     @Before
     public void prepare() throws
@@ -66,11 +67,11 @@ public class SecurityHandlerTest {
 
 
         PowerMockito.mockStatic(ClientFactory.class);
-        
+
         serverCertString = getCertString(serverkeystorePath, serverkeystorePassword, serveralias);
-    
+
         homeAAM = getHomeAMM(homeAAMId);
-    
+
         //aamClient.signCertificateRequest
         Mockito.when(aamClient.signCertificateRequest(Mockito.any(CertificateRequest.class))).thenReturn(serverCertString);
 
@@ -90,21 +91,20 @@ public class SecurityHandlerTest {
 
         //aamClient.getGuestToken
         Mockito.when(aamClient.validateCredentials(Matchers.anyString(), Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(ValidationStatus.VALID);
-    
-    
-        
+
+
         createEmptyKeystore();
         testclient = new SecurityHandler(keystorePath, keystorePassword, "http://test");
-    
-    
+
+
     }
-    
+
     @After
     public void clean() {
         deleteKeystore();
     }
-    
-    private void deleteKeystore(){
+
+    private void deleteKeystore() {
         File file = new File(keystorePath);
         file.delete();
     }
@@ -112,9 +112,9 @@ public class SecurityHandlerTest {
     private void createEmptyKeystore() throws
             Exception {
         deleteKeystore();
-    
+
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-    
+
         char[] password = keystorePassword.toCharArray();
         ks.load(null, password);
 
@@ -137,12 +137,12 @@ public class SecurityHandlerTest {
         assert result != null;
 
         assert equalsId(result, getAMMMap());
-    
+
         result = testclient.getAvailableAAMs();
-    
+
         logger.info("TEST RESULT --> Map<String, AAM>: " + result);
         assert result != null;
-    
+
         assert equalsId(result, getAMMMap());
 
 
@@ -180,7 +180,6 @@ public class SecurityHandlerTest {
         assert cer != null;
         assert (cer.getCertificateString()).equals(serverCertString);
     }
-    
 
 
     @Test
@@ -188,9 +187,9 @@ public class SecurityHandlerTest {
             Throwable {
         logger.info("----------------------------");
         logger.info("testLoginHomeCredentials starts");
-    
+
         testclient.getCertificate(homeAAM, "usu1", "pass1", "clientID");
-    
+
         Token tk = testclient.login(homeAAM);
         String validToken = getTokenString(serverkeystorePath, serverkeystorePassword, serveralias);
 
@@ -209,14 +208,14 @@ public class SecurityHandlerTest {
             Throwable {
         logger.info("----------------------------");
         logger.info("testLoginListOfAAMHomeCredentials starts");
-    
+
         testclient.getCertificate(homeAAM, "usu1", "pass1", "clientID");
-        
+
         Token tk = testclient.login(homeAAM);
         String validToken = tk.getToken();
         //String validToken = getTokenString(serverkeystorePath, serverkeystorePassword, serveralias);
         List<AAM> ammlist = testclient.getAvailableAAMs(homeAAM).values().stream().collect(Collectors.toList());
-        
+
         Map<AAM, Token> maptk = testclient.login(ammlist, validToken);
 
         logger.info("TEST RESULT --> Map Token from AMM: " + maptk);
@@ -296,9 +295,9 @@ public class SecurityHandlerTest {
 
     public java.security.cert.Certificate getCertificate(String keystoreFilename, String spassword, String alias) throws
             Throwable {
-        
+
         KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-    
+
         //Leer
         keystore.load(new FileInputStream(keystoreFilename), spassword.toCharArray());
         return keystore.getCertificate(alias);
@@ -312,9 +311,9 @@ public class SecurityHandlerTest {
     public Map<String, AAM> getAMMMap() throws
             Throwable {
         Map<String, AAM> aamMap = new HashMap<>();
-        
+
         aamMap.put(homeAAMId, homeAAM);
-        
+
         Certificate certificate = new Certificate(getCertString(serverkeystorePath, serverkeystorePassword, serveralias));
 
         for (int i = 0; i < 3; i++) {
@@ -368,15 +367,6 @@ public class SecurityHandlerTest {
         return result;
     }
 
-    static public class DateUtil {
-        public static Date addDays(Date date, int days) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(date);
-            cal.add(Calendar.DATE, days); //minus number would decrement the days
-            return cal.getTime();
-        }
-    }
-
     @Test
     public void serializeIt() throws IOException {
         SecurityRequest securityRequest = new SecurityRequest(new HashSet<>(), 123, "bla");
@@ -390,13 +380,13 @@ public class SecurityHandlerTest {
         string = "{\n" +
                 "  \"securityCredentials\" : [ ],\n" +
                 "  \"timestamp\" : 123,\n" +
-                "  \"hash\" : \"\",\n" +
+                "  \"proprietarySecurityPayload\" : \"\",\n" +
                 "  \"extravalue\" : \"extravalue\"\n" +
                 "}";
-        System.out.println("before: "+string);
+        System.out.println("before: " + string);
         securityRequest1 = om.readValue(string, SecurityRequest.class);
         string = (om.writerWithDefaultPrettyPrinter().writeValueAsString(securityRequest1));
-        System.out.println("after: "+string);
+        System.out.println("after: " + string);
 
         securityRequest = new SecurityRequest(new HashSet<>(), 123);
         om = new ObjectMapper();
@@ -410,12 +400,20 @@ public class SecurityHandlerTest {
                 "  \"securityCredentials\" : [ ],\n" +
                 "  \"timestamp\" : 123\n" +
                 "}";
-        System.out.println("before:"+ string);
+        System.out.println("before:" + string);
         securityRequest1 = om.readValue(string, SecurityRequest.class);
         string = (om.writerWithDefaultPrettyPrinter().writeValueAsString(securityRequest1));
-        System.out.println("after: "+ string);
+        System.out.println("after: " + string);
 
 
+    }
 
+    static public class DateUtil {
+        public static Date addDays(Date date, int days) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.add(Calendar.DATE, days); //minus number would decrement the days
+            return cal.getTime();
+        }
     }
 }
