@@ -32,9 +32,9 @@ public class UserDetails {
     private boolean serviceConsent = false;
 
     /**
-     * defines if the user personal data (username, e-mail) and actions can be used for marketing purposes.
+     * defines if the user personal data (username, e-mail, clients and public keys) and actions can be used for analytics and research purposes
      */
-    private boolean marketingConsent = false;
+    private boolean analyticsAndResearchConsent = false;
 
     public UserDetails() {
         // used in serialization and in UserManagementRequest
@@ -43,14 +43,14 @@ public class UserDetails {
     /**
      * UserDetails constructor
      *
-     * @param userCredentials  Credentials identifying user
-     * @param recoveryMail     Recovery mail of the user
-     * @param role             Role of the user (USER, SERVICE_OWNER, NULL)
-     * @param status           Current status of this account
-     * @param attributes       This user attributes. NOTE: during update, in case of empty map, attributes also will be updated (removed)
-     * @param clients          user's clients
-     * @param serviceConsent   service terms consent is mandatory to provide the service (including suspicious actions identification and blocking)
-     * @param marketingConsent defines if the user personal data (username, e-mail) and actions can be used for marketing purposes.
+     * @param userCredentials             Credentials identifying user
+     * @param recoveryMail                Recovery mail of the user
+     * @param role                        Role of the user (USER, SERVICE_OWNER, NULL)
+     * @param status                      Current status of this account
+     * @param attributes                  This user attributes. NOTE: during update, in case of empty map, attributes also will be updated (removed)
+     * @param clients                     user's clients
+     * @param serviceConsent              service terms consent is mandatory to provide the service (including suspicious actions identification and blocking)
+     * @param analyticsAndResearchConsent defines if the user personal data (username, e-mail, clients and public keys) and actions can be used for analytics and research purposes
      */
     @JsonCreator
     public UserDetails(@JsonProperty("userCredentials") Credentials userCredentials,
@@ -60,7 +60,7 @@ public class UserDetails {
                        @JsonProperty("attributes") Map<String, String> attributes,
                        @JsonProperty("clients") Map<String, Certificate> clients,
                        @JsonProperty("serviceConsent") boolean serviceConsent,
-                       @JsonProperty("marketingConsent") boolean marketingConsent) {
+                       @JsonProperty("analyticsAndResearchConsent") boolean analyticsAndResearchConsent) {
         this.userCredentials = userCredentials;
         this.recoveryMail = recoveryMail;
         this.role = role;
@@ -68,7 +68,7 @@ public class UserDetails {
         this.attributes = attributes;
         this.clients = clients;
         this.serviceConsent = serviceConsent;
-        this.marketingConsent = marketingConsent;
+        this.analyticsAndResearchConsent = analyticsAndResearchConsent;
     }
 
     public Map<String, String> getAttributes() {
@@ -124,12 +124,12 @@ public class UserDetails {
         this.serviceConsent = serviceConsent;
     }
 
-    @JsonGetter("marketingConsent")
-    public boolean hasGrantedMarketingConsent() {
-        return marketingConsent;
+    @JsonGetter("analyticsAndResearchConsent")
+    public boolean hasGrantedAnalyticsAndResearchConsent() {
+        return analyticsAndResearchConsent;
     }
 
-    public void setMarketingConsent(boolean marketingConsent) {
-        this.marketingConsent = marketingConsent;
+    public void setAnalyticsAndResearchConsent(boolean analyticsAndResearchConsent) {
+        this.analyticsAndResearchConsent = analyticsAndResearchConsent;
     }
 }
