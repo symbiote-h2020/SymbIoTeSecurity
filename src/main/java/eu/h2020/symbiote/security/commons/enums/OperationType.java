@@ -22,7 +22,11 @@ public enum OperationType {
      */
     FORCE_UPDATE,
     /**
-     * reading actor's details
+     * reading actor's details (by user)
      */
-    READ
+    READ,
+    /**
+     * reading actor's details by the administrator (not checking his credentials), only needs the username
+     */
+    FORCE_READ
 }
