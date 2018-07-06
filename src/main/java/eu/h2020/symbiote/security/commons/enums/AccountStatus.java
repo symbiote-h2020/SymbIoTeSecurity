@@ -17,7 +17,7 @@ public enum AccountStatus {
      */
     ACTIVITY_BLOCKED,
     /**
-     * missing consent, user needs to either accept the terms of agreement or delete his acount
+     * missing consent, user needs to either accept the terms of agreement or delete his account
      */
     CONSENT_BLOCKED
 }
