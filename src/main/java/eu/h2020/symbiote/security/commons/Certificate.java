@@ -65,7 +65,8 @@ public class Certificate {
     public void setCertificateString(String certificateString) throws CertificateException {
         if (certificateString == null) // || certificateString.isEmpty()) // todo R4 enforce this check
             throw new CertificateException("trying to pass empty value");
-        this.certificateString = certificateString;
+        // removing carriage return to make the string platform independent
+        this.certificateString = certificateString.replace("\r", "");
     }
 
     @Override

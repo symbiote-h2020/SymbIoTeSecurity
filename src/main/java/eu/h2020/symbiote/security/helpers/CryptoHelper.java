@@ -77,7 +77,7 @@ public class CryptoHelper {
         JcaPEMWriter pemWriter = new JcaPEMWriter(signedCertificatePEMDataStringWriter);
         pemWriter.writeObject(signedCertificate);
         pemWriter.close();
-        return signedCertificatePEMDataStringWriter.toString();
+        return signedCertificatePEMDataStringWriter.toString().replace("\r", "");
     }
 
     public static String convertKeyToPEM(Key key) throws IOException {
