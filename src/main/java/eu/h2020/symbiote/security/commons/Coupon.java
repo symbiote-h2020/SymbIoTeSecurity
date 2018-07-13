@@ -34,7 +34,7 @@ public class Coupon {
 
     @JsonCreator
     public Coupon(@JsonProperty("couponString") String couponString) throws ValidationException {
-        ValidationStatus validationStatus = JWTEngine.validateJWTString(couponString);
+        ValidationStatus validationStatus = JWTEngine.validateTokenString(couponString);
         if (validationStatus != ValidationStatus.VALID) {
             throw new ValidationException("Provided coupon string is not valid: " + validationStatus);
         }

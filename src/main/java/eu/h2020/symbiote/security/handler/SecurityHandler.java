@@ -110,9 +110,6 @@ public class SecurityHandler implements ISecurityHandler {
         KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 
         File ksFile = new File(path);
-        File dir = new File("keystores");
-
-
 
         if (!ksFile.exists()) {
             trustStore.load(null, pw);
@@ -191,7 +188,7 @@ public class SecurityHandler implements ISecurityHandler {
                 credentials.homeCredentials.privateKey != null) {
             try {
                 String homeToken = ClientFactory.getAAMClient(homeAAMId.getAamAddress()).getHomeToken(
-                        CryptoHelper.buildJWTAcquisitionRequest(credentials.homeCredentials));
+                        CryptoHelper.buildHomeTokenAcquisitionRequest(credentials.homeCredentials));
                 credentials.homeCredentials.homeToken = new Token(homeToken);
                 tokenCredentials.put(homeToken, credentials);
                 return credentials.homeCredentials.homeToken;

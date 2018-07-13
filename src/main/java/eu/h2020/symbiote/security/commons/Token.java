@@ -47,7 +47,7 @@ public class Token {
      * @param token compacted signed token string
      */
     public void setToken(String token) throws ValidationException {
-        ValidationStatus validationStatus = JWTEngine.validateJWTString(token);
+        ValidationStatus validationStatus = JWTEngine.validateTokenString(token);
         if (validationStatus != ValidationStatus.VALID) {
             throw new ValidationException("Provided token string is not valid: " + validationStatus);
         }

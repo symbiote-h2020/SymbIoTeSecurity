@@ -55,7 +55,7 @@ public class CryptoHelper {
      * @return String loginRequest
      * @throws SecurityException error during creation of loginRequest
      */
-    public static String buildJWTAcquisitionRequest(HomeCredentials homeCredentials) {
+    public static String buildHomeTokenAcquisitionRequest(HomeCredentials homeCredentials) {
         ECDSAHelper.enableECDSAProvider();
 
         try {

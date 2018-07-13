@@ -95,7 +95,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                         || issuer.getAamCACertificate().getCertificateString().isEmpty()) {
                     throw new SecurityHandlerException("ISSUER platform certificate is not available");
                 }
-                tokenValidationStatus = JWTEngine.validateJWTString(authorizationToken.toString(), issuer.getAamCACertificate().getX509().getPublicKey());
+                tokenValidationStatus = JWTEngine.validateTokenString(authorizationToken.toString(), issuer.getAamCACertificate().getX509().getPublicKey());
                 if (tokenValidationStatus != ValidationStatus.VALID)
                     return tokenValidationStatus;
 
@@ -251,6 +251,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         }
 
         //checking if aam certificate changed during the component runtime
+
         Certificate platformCertificate = securityHandler.getComponentCertificate(SecurityConstants.AAM_COMPONENT_NAME,
                 localAAM.getAamInstanceId());
         if (!platformCertificate.getCertificateString().equals(
@@ -258,11 +259,12 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
             log.error(SecurityHandlerException.AAM_CERTIFICATE_DIFFERENT_THAN_IN_KEYSTORE);
             throw new SecurityHandlerException(SecurityHandlerException.AAM_CERTIFICATE_DIFFERENT_THAN_IN_KEYSTORE);
         }
+
         // check that we have a valid token
         boolean isLocalTokenRefreshNeeded = false;
         try {
             if (localAAMBoundCredentials.homeCredentials.homeToken == null
-                    || JWTEngine.validateJWTString(localAAMBoundCredentials.homeCredentials.homeToken.getToken()) != ValidationStatus.VALID) {
+                    || JWTEngine.validateTokenString(localAAMBoundCredentials.homeCredentials.homeToken.getToken()) != ValidationStatus.VALID) {
                 isLocalTokenRefreshNeeded = true;
             }
         } catch (ValidationException e) {

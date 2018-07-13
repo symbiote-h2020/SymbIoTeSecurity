@@ -26,5 +26,4 @@ public enum CouponValidationStatus {
      */
     UNKNOWN,
 
-
 }

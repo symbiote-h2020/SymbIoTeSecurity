@@ -43,7 +43,7 @@ public class JWTEngine {
     public static Claims getClaims(String jwtString) throws ValidationException {
         try {
             ECDSAHelper.enableECDSAProvider();
-            JWTClaims claims = getClaimsFromJWT(jwtString);
+            JWTClaims claims = getClaimsFromToken(jwtString);
             //Convert IPK claim to publicKey for validation
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(claims.getIpk()));
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
@@ -65,7 +65,7 @@ public class JWTEngine {
      * @return validation status
      * @throws ValidationException on other errors
      */
-    public static ValidationStatus validateJWTString(String jwtString, PublicKey publicKey) throws
+    public static ValidationStatus validateTokenString(String jwtString, PublicKey publicKey) throws
             ValidationException {
         try {
             ECDSAHelper.enableECDSAProvider();
@@ -90,23 +90,23 @@ public class JWTEngine {
      * @return validation status
      * @throws ValidationException on validation error
      */
-    public static ValidationStatus validateJWTString(String jwtString) throws ValidationException {
+    public static ValidationStatus validateTokenString(String jwtString) throws ValidationException {
         try {
             ECDSAHelper.enableECDSAProvider();
-            JWTClaims claims = getClaimsFromJWT(jwtString);
+            JWTClaims claims = getClaimsFromToken(jwtString);
             //Convert IPK claim to publicKey for validation
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(claims.getIpk()));
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
             PublicKey publicKey = keyFactory.generatePublic(keySpec);
 
             // validate the jwt using the claims parser
-            return validateJWTString(jwtString, publicKey);
+            return validateTokenString(jwtString, publicKey);
         } catch (InvalidKeySpecException | MalformedJWTException | NoSuchAlgorithmException e) {
             throw new ValidationException(ValidationException.JSON_WEB_TOKEN_COULD_NOT_BE_VALIDATED + e.getMessage(), e);
         }
     }
 
-    public static JWTClaims getClaimsFromJWT(String jwtString) throws MalformedJWTException {
+    public static JWTClaims getClaimsFromToken(String jwtString) throws MalformedJWTException {
         HashMap<String, Object> retMap = new HashMap<>();
         String[] jwtParts = jwtString.split("\\.");
         if (jwtParts.length < SecurityConstants.JWT_PARTS_COUNT) {

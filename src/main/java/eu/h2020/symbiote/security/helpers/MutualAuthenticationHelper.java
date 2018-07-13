@@ -147,7 +147,7 @@ public class MutualAuthenticationHelper {
 
         // guest token scenario
         if (securityCredentialsSet.size() == 1) {
-            Type tokenType = Type.valueOf(JWTEngine.getClaimsFromJWT(securityCredentialsSet.iterator().next().getToken()).getTtyp());
+            Type tokenType = Type.valueOf(JWTEngine.getClaimsFromToken(securityCredentialsSet.iterator().next().getToken()).getTtyp());
             if (tokenType.equals(Type.GUEST))
                 return true;
         }
@@ -159,14 +159,14 @@ public class MutualAuthenticationHelper {
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
 
             // tokens' sanity check
-            ValidationStatus authorizationTokenValidationStatus = JWTEngine.validateJWTString(securityCredentialsSetElement.getToken());
-            ValidationStatus challengeValidationStatus = JWTEngine.validateJWTString(securityCredentialsSetElement.getAuthenticationChallenge());
+            ValidationStatus authorizationTokenValidationStatus = JWTEngine.validateTokenString(securityCredentialsSetElement.getToken());
+            ValidationStatus challengeValidationStatus = JWTEngine.validateTokenString(securityCredentialsSetElement.getAuthenticationChallenge());
             if (authorizationTokenValidationStatus != ValidationStatus.VALID || challengeValidationStatus != ValidationStatus.VALID)
                 return false;
 
             // claims extraction
-            JWTClaims claimsFromAuthorizationToken = JWTEngine.getClaimsFromJWT(securityCredentialsSetElement.getToken());
-            JWTClaims claimsFromChallengeToken = JWTEngine.getClaimsFromJWT(securityCredentialsSetElement.getAuthenticationChallenge());
+            JWTClaims claimsFromAuthorizationToken = JWTEngine.getClaimsFromToken(securityCredentialsSetElement.getToken());
+            JWTClaims claimsFromChallengeToken = JWTEngine.getClaimsFromToken(securityCredentialsSetElement.getAuthenticationChallenge());
 
             X509EncodedKeySpec keySpecSpk = new X509EncodedKeySpec(Base64.getDecoder().decode(claimsFromAuthorizationToken.getSpk()));
             PublicKey applicationPublicKey = keyFactory.generatePublic(keySpecSpk);
@@ -203,7 +203,7 @@ public class MutualAuthenticationHelper {
             // signature match - token SPK -> challenge IPK & sign
             X509EncodedKeySpec keySpecIpk = new X509EncodedKeySpec(Base64.getDecoder().decode(claimsFromAuthorizationToken.getSpk()));
             PublicKey challengeIssuerPublicKey = keyFactory.generatePublic(keySpecIpk);
-            if (JWTEngine.validateJWTString(challengeJWS, challengeIssuerPublicKey) != ValidationStatus.VALID) {
+            if (JWTEngine.validateTokenString(challengeJWS, challengeIssuerPublicKey) != ValidationStatus.VALID) {
                 return false;
             }
         }
