@@ -230,8 +230,12 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         return securityHandler;
     }
 
-
-    public BoundCredentials getLocalAAMBoundCredentials() throws
+    /**
+     * gets the credentials from the wallet, if missing then issues them and adds to the wallet
+     *
+     * @return required for authorizing operations in the local AAM
+     * @throws SecurityHandlerException on error
+     */
     @Override
     public BoundCredentials getLocalAAMCredentials() throws
             SecurityHandlerException {
@@ -253,22 +257,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
                 localAAMBoundCredentials.homeCredentials.homeAAM.getAamCACertificate().getCertificateString())) {
             log.error(SecurityHandlerException.AAM_CERTIFICATE_DIFFERENT_THAN_IN_KEYSTORE);
             throw new SecurityHandlerException(SecurityHandlerException.AAM_CERTIFICATE_DIFFERENT_THAN_IN_KEYSTORE);
-            //TODO @JT old keys needs to be rememmberd
         }
-        return localAAMBoundCredentials;
-    }
-
-    /**
-     * gets the credentials from the wallet, if missing then issues them and adds to the wallet
-     *
-     * @return required for authorizing operations in the local AAM
-     * @throws SecurityHandlerException on error
-     */
-    private BoundCredentials getLocalAAMCredentials() throws
-            SecurityHandlerException {
-
-        BoundCredentials localAAMBoundCredentials = getLocalAAMBoundCredentials();
-
         // check that we have a valid token
         boolean isLocalTokenRefreshNeeded = false;
         try {
