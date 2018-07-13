@@ -1,8 +1,6 @@
 package eu.h2020.symbiote.security.communication.payloads;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
@@ -18,18 +16,47 @@ import java.util.*;
  * @author Daniele Caldarola (CNIT)
  * @author Mikołaj Dobski (PSNC)
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SecurityRequest {
 
     private static final ObjectMapper om = new ObjectMapper();
     private final Set<SecurityCredentials> securityCredentials;
     private final long timestamp;
+    private final String proprietarySecurityPayload;
 
+
+    /**
+     * Used to generate the security request
+     *
+     * @param securityCredentials        mandatory for all Symbiote Levels (1 through 4)
+     * @param timestamp                  mandatory for all Symbiote Levels (1 through 4)
+     * @param proprietarySecurityPayload (optional) designed for L3/L4 (or any other) resources that need a proprietary security payload that can be checked in RAP plugin.
+     */
     @JsonCreator
     public SecurityRequest(
-            @JsonProperty("securityCredentials") Set<SecurityCredentials> securityCredentials,
-            @JsonProperty("timestamp") long timestamp) {
+            @JsonProperty(value = "securityCredentials", required = true) Set<SecurityCredentials> securityCredentials,
+            @JsonProperty(value = "timestamp", required = true) long timestamp,
+            @JsonProperty(value = "proprietarySecurityPayload") String proprietarySecurityPayload) {
         this.securityCredentials = securityCredentials;
         this.timestamp = timestamp;
+        if (proprietarySecurityPayload != null)
+            this.proprietarySecurityPayload = proprietarySecurityPayload;
+        else
+            this.proprietarySecurityPayload = "";
+    }
+
+    /**
+     * Used to generate the security request for L1/L2 resources access without support for the proprietary security schema.
+     *
+     * @param securityCredentials
+     * @param timestamp
+     */
+    public SecurityRequest(
+            Set<SecurityCredentials> securityCredentials,
+            long timestamp) {
+        this(securityCredentials,
+                timestamp,
+                "");
     }
 
     /**
@@ -43,6 +70,7 @@ public class SecurityRequest {
         this.timestamp = now - now % 1000;
         this.securityCredentials = new HashSet<>();
         securityCredentials.add(new SecurityCredentials(guestToken));
+        this.proprietarySecurityPayload = "";
     }
 
     /**
@@ -58,9 +86,9 @@ public class SecurityRequest {
 
         // SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER
         String timestampString = securityRequestHeaderParams.get(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER);
-        if (timestampString == null )
+        if (timestampString == null)
             throw new InvalidArgumentsException("Missing required header: " + SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER);
-        if(timestampString.isEmpty())
+        if (timestampString.isEmpty())
             throw new InvalidArgumentsException("Header '" + SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER + "' can not be empty.");
         try {
             this.timestamp = Long.parseLong(timestampString);
@@ -72,7 +100,7 @@ public class SecurityRequest {
         String credentialsSetSizeString = securityRequestHeaderParams.get(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER);
         if (credentialsSetSizeString == null)
             throw new InvalidArgumentsException("Missing required header: " + SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER);
-        if(credentialsSetSizeString.isEmpty())
+        if (credentialsSetSizeString.isEmpty())
             throw new InvalidArgumentsException("Header  '" + SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER + "' can not be empty.");
         int credentialsSetSize;
         try {
@@ -81,13 +109,16 @@ public class SecurityRequest {
             throw new InvalidArgumentsException("Malformed required header: " + SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER);
         }
 
+        //SecurityConstrants.PROPRIETARY_SECURITY_PAYLOAD parsing
+        this.proprietarySecurityPayload = securityRequestHeaderParams.getOrDefault(SecurityConstants.PROPRIETARY_SECURITY_PAYLOAD,"");
+
         // deserializing SecurityCredentials Set
         this.securityCredentials = new HashSet<>();
         for (int i = 1; i <= credentialsSetSize; i++) {
             String securityCredentialsString = securityRequestHeaderParams.get(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + i);
             if (securityCredentialsString == null)
                 throw new InvalidArgumentsException("Missing/malformed required header: " + SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + i);
-            if(securityCredentialsString.isEmpty())
+            if (securityCredentialsString.isEmpty())
                 throw new InvalidArgumentsException("Header '" + SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + i + "' can not be empty.");
             try {
                 this.securityCredentials.add(om.readValue(securityCredentialsString, SecurityCredentials.class));
@@ -105,6 +136,11 @@ public class SecurityRequest {
         return timestamp;
     }
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public String getProprietarySecurityPayload() {
+        return proprietarySecurityPayload;
+    }
+
     /**
      * @return HTTP headers containing entries required to rebuild the Security Request on the server side
      * @throws JsonProcessingException on @{@link SecurityCredentials} serialization error
@@ -119,6 +155,9 @@ public class SecurityRequest {
             securityHeaderParams.put(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + headerNumber, om.writeValueAsString(securityCredential));
             headerNumber++;
         }
+        if (!proprietarySecurityPayload.isEmpty())
+            securityHeaderParams.put(SecurityConstants.PROPRIETARY_SECURITY_PAYLOAD, proprietarySecurityPayload);
+
         return securityHeaderParams;
     }
 
@@ -126,17 +165,16 @@ public class SecurityRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         SecurityRequest that = (SecurityRequest) o;
-
-        if (timestamp != that.timestamp) return false;
-        return securityCredentials.equals(that.securityCredentials);
+        return timestamp == that.timestamp &&
+                Objects.equals(securityCredentials, that.securityCredentials) &&
+                Objects.equals(proprietarySecurityPayload, that.proprietarySecurityPayload);
     }
 
     @Override
     public int hashCode() {
-        int result = securityCredentials.hashCode();
-        result = 31 * result + (int) (timestamp ^ (timestamp >>> 32));
-        return result;
+
+        return Objects.hash(securityCredentials, timestamp, proprietarySecurityPayload);
     }
+
 }

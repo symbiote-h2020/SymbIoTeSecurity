@@ -9,8 +9,11 @@ import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.*;
 import eu.h2020.symbiote.security.communication.AAMClient;
+import eu.h2020.symbiote.security.communication.ADMClient;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.CertificateRequest;
+import eu.h2020.symbiote.security.communication.payloads.FailedFederationAuthorizationReport;
+import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 import eu.h2020.symbiote.security.helpers.CryptoHelper;
 import eu.h2020.symbiote.security.helpers.ECDSAHelper;
 import org.apache.commons.logging.Log;
@@ -297,6 +300,22 @@ public class SecurityHandler implements ISecurityHandler {
     @Override
     public AAM getCoreAAMInstance() {
         return coreAAM;
+    }
+
+    @Override
+    public boolean reportFailedFederationAuthorization(SecurityRequest securityRequest,
+                                                       String federationId,
+                                                       String resourcePlatformId,
+                                                       String resourceId,
+                                                       String searchOriginPlatformId) throws
+            ADMException {
+        FailedFederationAuthorizationReport failedFederationAuthorizationReport = new FailedFederationAuthorizationReport(securityRequest,
+                federationId,
+                resourcePlatformId,
+                searchOriginPlatformId,
+                resourceId);
+        ADMClient admClient = new ADMClient(getCoreAAMInstance().getAamAddress() + SecurityConstants.ADM_PREFIX);
+        return admClient.reportFailedFederatedAuthorization(failedFederationAuthorizationReport);
     }
 
     private void cacheCertificate(HomeCredentials credentials) {

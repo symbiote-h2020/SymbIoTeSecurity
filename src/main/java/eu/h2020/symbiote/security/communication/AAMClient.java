@@ -1,5 +1,6 @@
 package eu.h2020.symbiote.security.communication;
 
+import eu.h2020.symbiote.security.commons.ComponentIdentifiers;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.enums.ManagementStatus;
@@ -43,6 +44,7 @@ public class AAMClient implements IAAMClient {
     private static final Log logger = LogFactory.getLog(AAMClient.class);
 
     private static final String AAM_COMMS_ERROR_MESSAGE = "Failed to communicate with the AAM: ";
+    private static final String ACCOUNT_NOT_ACTIVE_MESSAGE = "User account is either not yet activated or blocked due to missing service consent and/or  suspicious actions.";
     private String serverAddress;
     private IFeignAAMClient feignClient;
 
@@ -50,12 +52,12 @@ public class AAMClient implements IAAMClient {
      * @param serverAddress of the AAM server the client wants to interact with.
      */
     public AAMClient(String serverAddress) {
-    		this(serverAddress, new ApacheCommonsLogger4Feign(logger));
+        this(serverAddress, new ApacheCommonsLogger4Feign(logger));
     }
 
     /**
      * @param serverAddress of the AAM server the client wants to interact with.
-     * @param logger feign logger
+     * @param logger        feign logger
      */
     public AAMClient(String serverAddress, Logger logger) {
         this.serverAddress = serverAddress;
@@ -67,16 +69,16 @@ public class AAMClient implements IAAMClient {
      */
     private IFeignAAMClient getJsonClient(Logger logger) {
         return Feign.builder()
-        		.encoder(new JacksonEncoder())
-        		.decoder(new JacksonDecoder())
+                .encoder(new JacksonEncoder())
+                .decoder(new JacksonDecoder())
                 .logger(logger)
-        		.logLevel(Level.FULL)
-            .target(IFeignAAMClient.class, serverAddress);
+                .logLevel(Level.FULL)
+                .target(IFeignAAMClient.class, serverAddress);
     }
 
 
     /**
-     * @param componentIdentifier component identifier or {@link SecurityConstants#AAM_COMPONENT_NAME} for AAM CA certificate
+     * @param componentIdentifier component identifier {@link ComponentIdentifiers} or {@link SecurityConstants#AAM_COMPONENT_NAME} for AAM CA certificate
      * @param platformIdentifier  for a platform component or {@link SecurityConstants#CORE_AAM_INSTANCE_ID} for Symbiote core components
      * @return symbiote component Certificate of the component in PEM format
      */
@@ -137,6 +139,8 @@ public class AAMClient implements IAAMClient {
             case 401:
                 //TODO: Find a way to differentiate ValidationException from WrongCredentialsException since response's body is empty on error
                 throw new ValidationException("Could not validate - Invalid certificate / credentials");
+            case 403:
+                throw new ValidationException(ACCOUNT_NOT_ACTIVE_MESSAGE);
             case 200:
                 if (response.body().toString().isEmpty()) {
                     throw new AAMException("Error occured. Response is empty!");
@@ -176,6 +180,8 @@ public class AAMClient implements IAAMClient {
                 throw new InvalidArgumentsException(response.body().toString());
             case 401:
                 throw new WrongCredentialsException();
+            case 403:
+                throw new WrongCredentialsException(ACCOUNT_NOT_ACTIVE_MESSAGE);
             case 200:
                 if (response.body().toString().isEmpty()) {
                     throw new AAMException("Error occured. Response is empty!");
@@ -237,6 +243,8 @@ public class AAMClient implements IAAMClient {
                 throw new MalformedJWTException("Unable to read malformed token");
             case 401:
                 throw new WrongCredentialsException("Could not validate token with incorrect credentials");
+            case 403:
+                throw new WrongCredentialsException(ACCOUNT_NOT_ACTIVE_MESSAGE);
             case 500:
                 throw new JWTCreationException("Server failed to create a home token");
             case 200:
@@ -276,6 +284,8 @@ public class AAMClient implements IAAMClient {
         switch (response.status()) {
             case 401:
                 throw new ValidationException("Failed to validate homeToken");
+            case 403:
+                throw new ValidationException(ACCOUNT_NOT_ACTIVE_MESSAGE);
             case 500:
                 throw new JWTCreationException("Server failed to create a foreign token");
             case 200:

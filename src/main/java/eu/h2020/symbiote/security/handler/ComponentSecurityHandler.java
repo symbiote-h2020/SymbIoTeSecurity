@@ -1,6 +1,7 @@
 package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
+import eu.h2020.symbiote.security.clients.SymbioteComponentClientFactory;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
@@ -12,11 +13,14 @@ import eu.h2020.symbiote.security.commons.exceptions.custom.MalformedJWTExceptio
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
-import eu.h2020.symbiote.security.communication.payloads.AAM;
-import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
-import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
+import eu.h2020.symbiote.security.communication.interfaces.IFeignADMComponentClient;
+import eu.h2020.symbiote.security.communication.payloads.*;
 import eu.h2020.symbiote.security.helpers.ABACPolicyHelper;
 import eu.h2020.symbiote.security.helpers.MutualAuthenticationHelper;
+import feign.FeignException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.http.HttpStatus;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
@@ -26,9 +30,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.http.HttpStatus;
 
 /**
  * used by SymbIoTe Components to integrate with the security layer
@@ -45,6 +46,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
   private final String componentOwnerUsername;
   private final String componentOwnerPassword;
   private final String combinedClientIdentifier;
+  private IFeignADMComponentClient admComponentClient;
 
   public ComponentSecurityHandler(ISecurityHandler securityHandler, String localAAMAddress,
       String componentOwnerUsername, String componentOwnerPassword, String componentId)
@@ -67,6 +69,9 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
     if (this.localAAM == null) {
       throw new SecurityHandlerException("You are not connected to your local aam");
     }
+
+    // checks if the provided AAM credentials are valid
+    generateServiceResponse();
   }
 
   private ValidationStatus isReceivedSecurityRequestValid(SecurityRequest securityRequest)
@@ -232,7 +237,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
    * @return required for authorizing operations in the local AAM
    * @throws SecurityHandlerException on error
    */
-  private BoundCredentials getLocalAAMCredentials() throws SecurityHandlerException {
+  public BoundCredentials getLocalAAMCredentials() throws SecurityHandlerException {
     BoundCredentials localAAMBoundCredentials =
         securityHandler.getAcquiredCredentials().get(localAAM.getAamInstanceId());
     if (localAAMBoundCredentials == null) {
@@ -294,5 +299,61 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
       }
     }
     return localAAMBoundCredentials;
+  }
+
+  @Override
+  public Map<String, OriginPlatformGroupedPlatformMisdeedsReport> getOriginPlatformGroupedPlatformMisdeedsReports(
+      Optional<String> resourcePlatformFilter, Optional<String> searchOriginPlatformFilter)
+      throws SecurityHandlerException {
+    Map<String, String> params = new HashMap<>();
+    resourcePlatformFilter.ifPresent(value -> params.put("platformId", value));
+    searchOriginPlatformFilter.ifPresent(val -> params.put("searchOriginPlatformId", val));
+    try {
+      return this.getSecurityEnabledADMClient().getMisdeedsGroupedByPlatform(params);
+    } catch (FeignException fe) {
+      throw handleFeignExceptions(fe);
+    }
+  }
+
+  @Override
+  public Map<String, FederationGroupedPlatformMisdeedsReport> getFederationGroupedPlatformMisdeedsReports(
+      Optional<String> resourcePlatformFilter, Optional<String> federationId)
+      throws SecurityHandlerException {
+    Map<String, String> params = new HashMap<>();
+    resourcePlatformFilter.ifPresent(value -> params.put("platformId", value));
+    federationId.ifPresent(v -> params.put("federationId", v));
+    try {
+      return this.getSecurityEnabledADMClient().getMisdeedsGroupedByFederations(params);
+    } catch (FeignException fe) {
+      throw handleFeignExceptions(fe);
+    }
+  }
+
+  private SecurityHandlerException handleFeignExceptions(FeignException fe)
+      throws SecurityHandlerException {
+    switch (fe.status()) {
+      case 400:
+        log.error("Bad request");
+        throw new SecurityHandlerException("Bad/malformed request was sent to the ADM", fe);
+      case 401:
+        log.error("Failed to authorize the request in the core");
+        throw new SecurityHandlerException("Failed to authorize the request", fe);
+      case 500:
+        log.error("Service Error");
+        throw new SecurityHandlerException("ADM Service error", fe);
+      default:
+        throw new SecurityHandlerException("Unexpected happened", fe);
+    }
+  }
+
+  private synchronized IFeignADMComponentClient getSecurityEnabledADMClient()
+      throws SecurityHandlerException {
+    if (admComponentClient == null) {
+      admComponentClient = SymbioteComponentClientFactory.createClient(
+          this.getSecurityHandler().getCoreAAMInstance().getAamAddress()
+              + SecurityConstants.ADM_PREFIX, IFeignADMComponentClient.class, "adm",
+          SecurityConstants.CORE_AAM_INSTANCE_ID, this);
+    }
+    return admComponentClient;
   }
 }

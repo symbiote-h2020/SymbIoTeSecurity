@@ -6,6 +6,7 @@
 * [Access to public resources](#access-to-public-resources) 
 * [Access resources with restricted access](#access-resources-with-restricted-access) 
 * [Offering resources with restricted access](#offering-resources-with-restricted-access) 
+* [Access Policies Examples](#attribute-based-access-control) 
 * [Credentials revocation ](#credentials-revocation) 
 
 # SymbIoTe Security Overview
@@ -125,6 +126,8 @@ To make use of your GUEST token you need to wrap it into our SecurityRequest. Fo
     * "clientCertificate":"",
     * "clientCertificateSigningAAMCertificate":"",
     * "foreignTokenIssuingAAMCertificate":""
+* optional security hash (only L3/L4)
+  * x-auth-hash
 
 **Example:**
  - x-auth-timestamp: 1519652051000
@@ -139,6 +142,7 @@ To make use of your GUEST token you need to wrap it into our SecurityRequest. Fo
        "foreignTokenIssuingAAMCertificate":""
      } 
      ```
+ - x-auth-hash: "secretHash"
 
 3. With such prepared headers you can access SymbIoTe resources offered publicly, e.g. execute search queries or send request to Resource Access Proxy.
 
@@ -155,6 +159,58 @@ The whole path looks as follows:
 5. client gets access to the restricted resource (if he has rights to use it) using Security Request
 
 Note that users credentials (username and password) are used in this process only during registration and acquisition of the certificates. They should not be saved on the clients device!  
+
+### Authorization token structure
+Without loss of generality, a token is a digital object used as a container for security-related information in SymbIoTe. It serves for authentication and/or authorization purposes and generally appears as a list of elements. Each element contains an assertion that further specifies properties assigned to the owner of the token.
+
+The structure and the content of a token in symbIoTe:
+![Authorization token](media/JWT_symbiote.png)
+
+#### JTI
+JTI is an unique identifier for the JWT.
+#### Structure of *iss* and *sub* claim
+The identifier of the token issuer, that is the reference AAM, is inserted in the token within the (“iss”) field.
+
+The identifier of the application (user) for which the token has been issued is inserted within the “sub” field, in the following scheme:
+
+##### GUEST Token
+```
+guest
+```
+##### HOME Token
+* user token
+
+```
+username@clientIdentifier
+```
+* component token
+```
+componentIdentifier
+```
+
+##### FOREIGN Token
+```
+username@clientIdentifier@homeAAMInstanceIdentifier@OriginHomeTokenJTI
+```
+
+#### Time relevant claims IAT, EXP
+
+Issue (“iat”) and expiration date (“exp”) limit the validity of the token.
+
+
+#### Public Keys: IPK & SPK
+Two private claims are introduced to carry information about the public keys of both the issuer and the subject within the token. The “ipk” field (“issuer public key”) carries the public key of the token issuer (that is the reference AAM), while the “spk” field (“subject public key”) includes the information about the public key of the subject.
+The public key of the subject, specifically, can be used to verify that an entity using this token is effectively the entity for which the token has been generated, by performing a challenge-response protocol.
+
+#### Custom Attributes
+Furthermore, we assume that each token embeds multiple attributes.
+
+#### Token type
+Token Type ("ttyp") is used to specify the type of token (Home, Foreign, Guest). If this field is null, the token is invalid. Home means that it was issued for a user that has an account in that issuer (AAM); Foreign means that it was issued using another token, and Guest means that it was issued for a guest user (without credentials).
+
+#### Sign
+Sign certifies token authenticity and integrity. For the sign generation, we use of ECDSA algorithm, by leveraging elliptic curve public keys 256-bits long.
+
 ## Java developers
 This section provides the information about usage of SymbIoTe Security library in the java code. 
 It requires from user its prior registration in the platform, in which he wants to access resources.
@@ -179,6 +235,11 @@ Security handler class is a thin Java client providing methods allowing clients 
 - `getAcquiredCredentials()` - returns all saved credentials bound with a particular AAM.
 - `AAM getCoreAAMInstance()` - returns the Core AAM instance.
 - `void clearCachedTokens()` - clears all acquired tokens from memory (credentialsWallet).
+- `boolean reportFailedFederationAuthorization(SecurityRequest securityRequest,
+                                                   String federationId,
+                                                   String resourcePlatformId,
+                                                   String resourceId,
+                                                   String searchOriginPlatformId)` - method used to notify Anomaly Detection Module about failed federated authorization during getting access to the federated resource
 
 See [SecurityHandler.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/SecurityHandler.java) 
 
@@ -230,17 +291,15 @@ Then after received a business response from a symbiote component we can check i
 MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, clientSH.getComponentCertificate(componentIdentifier, platformIdentifier));
 ```
 <a name="component_table"></a>
-In order to identify the certificate of the component you communicate with, please use the following table:
+All the names of the components, required to properly identify the certificates can be found in 
+[ComponentIdentifiers.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/commons/ComponentIdentifiers.java))
 
-| Component name | Component certificate key in the AAM collection |
-| ------ | ------ |
-| Core search | search |
-| Core registry | registry |
-| Registration handler | reghandler |
-| ResourceAccessProxy | rap |
-| CoreResourceMonitor | crm |
-| CoreResourceAccessMonitor | cram |
-| other might appear | ... |
+In case of failing authorization to the federated resource that should be accessable, such event should be reported to the Anomaly Detection Module in the following way:
+```java
+// Client security handler
+clientSH.reportFailedFederationAuthorization(securityRequest, federationId, resourcePlatformId, resourceId, searchOriginPlatformId);
+//returned true if anomaly was saved and stored
+```
 
 
 #### SecurityRequest and API
@@ -253,6 +312,8 @@ public static final String SECURITY_CREDENTIALS_TIMESTAMP_HEADER = "x-auth-times
 public static final String SECURITY_CREDENTIALS_SIZE_HEADER = "x-auth-size";
 // each SecurityCredentials entry header prefix, they are number 1..size
 public static final String SECURITY_CREDENTIALS_HEADER_PREFIX = "x-auth-";
+// L3/L4 only, containing secret hash needed to access the resource (it's optional)
+public static final String SECURITY_HASH = "x-auth-hash"
 ```
 whereas the ServiceResponseJWS is in contrast just a String and should be transport in the following header:
 ```java
@@ -653,7 +714,20 @@ PAYLOAD:
    
 4. With such prepared headers you can access SymbIoTe resources offered privately, e.g. execute search queries.
 5. After receiving a business response from a symbiote component, you should check if it came from component you are interested in. To do so, please see [Service Response payload](#service_response)
-
+6. In case of failing authorization to the federated resource that should be accessable, such event should be reported to the Anomaly Detection Module using HTTP POST,
+```
+https://<coreInterfaceAdress>/adm/log_failed_federation_authorization
+```
+containing following json (with properly filled fields):
+```
+{"securityRequest":
+    {"securityCredentials":["some credentials"],"timestamp":100},
+    "federationId":"testFederationId",
+    "resourcePlatformId":"testPlatformId",
+    "searchOriginPlatformId":"testLocalPlatformId",
+    "resourceId":"testResourceId"}
+```
+As the response, Anomaly Detection Module will return HttpStatus.OK in case of acceptance and saving the anomaly.
 
 # Offering resources with restricted access 
 The sections below demonstrate the SymbioteSecurity in depth for parties interested in offering resources with limited access.
@@ -665,24 +739,23 @@ This section provides the information about usage of SymbIoTe Security library i
 If you want to manage components, create ComponentSecurityHandler object with  [ComponentSecurityHandlerFactory](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/handler/ComponentSecurityHandler.java) class.
 ```java
 /**
-     * Creates an end-user component security handler
+     * Creates a component security handler
      *
-     * @param coreAAMAddress                 Symbiote Core AAM address which is available 
-     *                                       on the symbiote security webpage
-     * @param keystorePath                   where the keystore will be stored
-     * @param keystorePassword               needed to access security credentials
-     * @param clientId                       name of the component in the form of "componentId@platformId"
-     * @param localAAMAddress                when using only local AAM for SecurityRequest validation
-     * @param alwaysUseLocalAAMForValidation when wanting to use local AAM for SecurityRequest validation
-     * @param componentOwnerUsername         AAMAdmin credentials 
-     * @param componentOwnerPassword         AAMAdmin credentials
+     * @param keystorePath           where the keystore will be stored
+     * @param keystorePassword       needed to access security credentials
+     * @param clientId               name of the component in the form of "componentId@platformId", componentId should be consistent with {@link ComponentIdentifiers}
+     * @param localAAMAddress        needed to acquire the component's authorization credentials
+     * @param componentOwnerUsername local AAM Admin credentials
+     * @param componentOwnerPassword local AAM Admin credentials
      * @return the component security handler ready to talk with Symbiote components
      * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
      */
-ComponentSecurityHandler componentSecurityHandler = 
-    ComponentSecurityHandlerFactory.getComponentSecurityHandler(
-            coreAAMAddress, keystorePath, keystorePassword, clientId, localAAMAddress, 
-            alwaysUseLocalAAMForValidation, componentOwnerUsername, componentOwnerPassword);
+ComponentSecurityHandler componentSecurityHandler = ComponentSecurityHandlerFactory.getComponentSecurityHandler(keystorePath,
+                                                                        keystorePassword,
+                                                                        clientId,
+                                                                        localAAMAddress,
+                                                                        componentOwnerUsername,
+                                                                        componentOwnerPassword)
 ```
 
 Component Security Handler provides following methods:
@@ -695,16 +768,16 @@ Component Security Handler provides following methods:
              so that the service can confirm that the client should posses provided tokens. Returns the required payload for client's authentication and authorization.
  - `String generateServiceResponse()` - returns the required payload that should be attached next to the components API business response so that the client can verify that the service is legitimate.  
  - `ISecurityHandler getSecurityHandler()` - returns Security Handler if the component owner wants to use it directly
+ - `Map<String, OriginPlatformGroupedPlatformMisdeedsReport> getOriginPlatformGroupedPlatformMisdeedsReports(String resourcePlatformFilter, String searchOriginPlatformFilter)` -  - available for Trust Manager, returns the map containing information about platform misdeeds (reported to Anomaly Detection Module) within federations grouped by federations searchOriginPlatforms
+ - `Map<String, FederationGroupedPlatformMisdeedsReport> getFederationGroupedPlatformMisdeedsReports(String resourcePlatformFilter, String federationId)` - available for Trust Manager, returns the map containing information about platform misdeeds (reported to Anomaly Detection Module) within federations grouped by federation ids
 
 To set up component SH, following instructions have to be done. Example for a platform registrationHandler
 ```java
 IComponentSecurityHandler registrationHandlerCSH = ComponentSecurityHandlerFactory.getComponentSecurityHandler(
-                coreAAMAddress,
                 KEY_STORE_PATH,
                 KEY_STORE_PASSWORD,
-                "reghandler" + "@platfom1",
+                ComponentIdentifiers.REGISTRATION_HANDLER + "@platfom1",
                 localAAMAddress,
-                false,
                 componentOwnerUsername,
                 componentOwnerPassword);
 
@@ -718,7 +791,7 @@ SecurityRequest rhSecurityRequest = rhCSH.generateSecurityRequestUsingLocalCrede
 To check validity of a response, if it came from component we are interested in (e.g. from the Core Registry), following operation have to be done: 
 ```java  
 // trying to validate the service response
-registrationHandlerCSH.isReceivedServiceResponseVerified(serviceResponse, "registry", "SymbIoTe_Core_AAM); 
+registrationHandlerCSH.isReceivedServiceResponseVerified(serviceResponse, ComponentIdentifiers.CORE_REGISTRY, "SymbIoTe_Core_AAM"); 
 ```
 
 #### Proxy client for access to AAM Services
@@ -740,8 +813,8 @@ So now, if you want it to manage the security headers automatically, all you hav
 
 IComponentSecurityHandler secHandler = ComponentSecurityHandlerFactory
                                            .getComponentSecurityHandler(
-                                               coreAAMAddress, keystorePath, keystorePassword,
-                                               clientId, localAAMAddress, false,
+                                               keystorePath, keystorePassword,
+                                               clientId, localAAMAddress,
                                                username, password );
 ```
 2. Create an instance of the [SymbioteAuthorizationClient](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/SymbioteAuthorizationClient.java) 
@@ -802,6 +875,108 @@ It checks if the requirements for each ABAC was met and build proper policy (e.g
 
 It's important to know, that creating your own AccessPolicy, it has to implement [IAccessPolicy.java](https://github.com/symbiote-h2020/SymbIoTeSecurity/tree/develop/src/main/java/eu/h2020/symbiote/security/accesspolicies/IAccessPolicy.java). 
 
+JSON structures for the above listed Access Policies:
+
+
+**SLHTAP** - SingleLocalHomeTokenAccessPolicy
+
+Example: Only users from OpenHAB platform can access particular service
+```json
+{
+   "policyType":"SLHTAP",
+   "requiredClaims":{
+      "iss":"OpenHAB"
+   }
+}
+```
+
+
+**SHTIBAP** - SingleLocalHomeTokenIdentityBasedAccessPolicy
+
+Example: Only user from OpenHAB having UID from particular user can access service
+```json
+{
+    "policyType":"SHTIBAP",
+    "requiredClaims":{
+      "iss":"OpenHAB",
+      "sub":"userUID"
+    }
+}
+```
+
+
+**STAP** - SingleTokenAccessPolicy - specifying value for particular attribute which has to be provided during authorization
+
+Example: Only user named "John" can access service
+```json
+{
+   "policyType":"STAP",
+   "requiredClaims":{
+      "SYMBIOTE_name":"John"
+   }
+}
+```  
+
+
+**CHTAP** - ComponentHomeTokenAccessPolicy - specifying list of attributes values that need to be provided to allow symbiote componentes access to services in other platforms, e.g. registrationHandler -> CoreRegistry 
+Note: not for end users as tokens satisfying such policy can only be issued to components knowing the AAM master credentials (in Core, Platform, Enablers) and the specialized platform owner accounts in a SmartSpace AAM.
+
+Example: Identity Based authorization for OpenHAB component to access CoreRegistry
+```json
+{
+    "policyType":"CHTAP",
+    "requiredClaims":{
+      "iss":"OpenHAB",
+      "sub":"reghandler"
+    }
+}
+```  
+
+
+**SFTAP** - SingleFederatedTokenAccessPolicy - Grants access for users of the platform involved in federation
+**SFTAP** can be satisfied in one of the following ways:
+* Using a **HOME** token, which is issued by the local AAM for local users/apps that have claims required to access the resource
+* Using a **HOME** token issued by one of the federation members and containing the federation identifier claim (in case **requireAllLocalTokens** is set to false)
+* Using a **FOREIGN** token issued by the local AAM in exchange for a HOME token from the federation members and containing the federation identifier claim
+
+Example: 
+
+Allow access to the federated resources in OpenHAB instance by user from platforms involved in the fedaration identified by the federationID.
+Note: In this example users with valid HOME token from any federation member (OpenHAB, SomeCustomPlatform1 and SomeOtherPlatform2) can access the resources offered by OpenHAB based on the federationID rules.
+```json
+{
+    "policyType":"SFTAP",
+    "requiredClaims":{
+      "fed_id":"federationID",
+      "fed_h":"OpenHAB",
+      "fed_s" : "3",
+      "req_loc" : "false",
+      "fed_m_1" : "OpenHAB", 
+      "fed_m_2" : "SomeCustomPlatform1",
+      "fed_m_3" : "SomeCustomPlatform2"
+    }
+}
+``` 
+
+A more strict federated access policy comes below. It once again shows access to the federated resources in OpenHAB instance by users from platforms involved in the fedaration identified by the federationID.
+Note:
+This example however requires the foreign/remote platforms' users to exchange their token first in the OpenHAB AAM.
+This is an extension to support situations where the attribute mapping takes place.
+```json
+{
+    "policyType":"SFTAP",
+    "requiredClaims":{
+      "fed_id":"federationID",
+      "fed_h":"OpenHAB",
+      "fed_s" : "2",
+      "req_loc" : "true",
+      "fed_m_1" : "OpenHAB", 
+      "fed_m_2" : "FederatedPlatform"
+    }
+}
+``` 
+Last but not least, the resources shared according to federation should have persisted only the federationID they are offered within and the federation members should be fetched in the symbIoTe RAP component and hence build the access policy per request (possible reasonable caching).
+            
 #### ABAC example
 To generate SingleLocalHomeTokenAccessPolicy, issuer claim has to be provided. 
 ```java
@@ -836,9 +1011,146 @@ new SingleTokenAccessPolicy(null);
 ```
 This will be satisfied by any valid symbiote token.
 
+### Composite Access Policies
+In order to explain usage of Composite Access Policies and how they can be defined, we foresaw scenario with SmartHome platform – *OpenHAB*, three users in system – father, mother, child and three sensors - **S1**,**S2** and **S3**.
+
+All sensors are searchable from symbIoTe core by the people that use the same SmartHome platform. 
+Due to that, filtering policy that is  specifying who can search for such resources would be of type **SLHTAP** (SingleHomeTokenAccessPolicy). 
+
+JSON specification of that policy is:
+```json
+{
+   "policyType":"SLHTAP",
+   "requiredClaims":{
+      "iss":"OpenHAB"
+   }
+}
+```
+
+As for access rights in the SmartHome, we defined 2 scenarios:
+*	**S1** can be accessed by all family members
+*	**S2** and **S3** can be accessed ONLY by father and mother
+
+For definition of access policy which is based on proving someone’s identity, we are using **SLHTIBAP** (SingleHomeTokenIdentityBasedAccessPolicy). 
+
+However, since multiple identities can satisfy single access policy, we are using **CAP**(CompositeAccessPolicy) as wrapper around access policies specifying access grant for single identity. 
+
+Examples of access policy JSON definitions are:
+
+**S1**:
+```json
+{
+   "relationOperator":"OR",
+   "compositeAccessPolicySpecifiers":null,
+   "policyType":"CAP",
+   "singleTokenAccessPolicySpecifiers":[
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"fatherUID"
+         }
+      },
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"motherUID"
+         }
+      },
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"childUID"
+         }
+      }
+   ]
+}
+```
+
+**S2** and **S3**:
+```json
+{
+   "relationOperator":"OR",
+   "compositeAccessPolicySpecifiers":null,
+   "policyType":"CAP",
+   "singleTokenAccessPolicySpecifiers":[
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"fatherUID"
+         }
+      },
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"motherUID"
+         }
+      }
+   ]
+}
+```
+
+It is worth noting that each user can have **multiple clients** (e.g. devices) belonging to her/him (e.g. phone, tablet, computer) and in some scenarios (e.g. S1) it is enough to have just a single account in a particular platform (e.g. OpenHAB) and letting the user to manage access to his resources by setting-up his clients.
+For example the resource owner (end-user) father, can enable sharing of his resources with mom and kid just by configuring their devices for them. He only know the username and password required to configure the clients/devices and can revoke them at any time. 
+In such case the resource admin (on platform side) needs to put a single **SLHTIBAP** (SingleHomeTokenIdentityBasedAccessPolicy) with the father's userIdentifier which would end up satisfied by all 3 devices/clients the user has set up for his account.
+
+
+Please notice that Composite Access Policies can be used to define access policies consisting of:
+* SingleToken Access Policies
+* Other Composite Access Policies
+
+These Access Policies, both SingleToken or Composite are to be provided in **singleTokenAccessPolicySpecifiers** and **compositeAccessPolicySpecifiers** fields of Composite Access Policy Object, respectively.
+While defining Composite Access Policy, developer should provide either **null** value or array containing access policies in these two fields.
+ 
+Example for this nested Composite Access Policies: in the same SmartHome environment described previously, 
+sensor S1 can be accessed by persons which:
+* Can be identified as father in the SmartHome **OR**
+    * Are named John **AND**
+    * Are 20 years old.
+    
+JSON structure for the given example:
+```json
+{
+   "relationOperator":"OR",
+   "policyType":"CAP",
+   "singleTokenAccessPolicySpecifiers":[
+      {
+         "policyType":"SHTIBAP",
+         "requiredClaims":{
+            "iss":"OpenHAB",
+            "sub":"fatherUID"
+         }
+      }
+   ],
+   "compositeAccessPolicySpecifiers":[
+      {
+         "relationOperator":"AND",
+         "policyType":"CAP",         
+         "singleTokenAccessPolicySpecifiers":[
+            {
+               "policyType":"STAP",
+               "requiredClaims":{
+                  "SYMBIOTE_name":"John"
+               }
+            },
+            {
+               "policyType":"STAP",
+               "requiredClaims":{
+                  "SYMBIOTE_age":""
+               }
+            }
+         ],
+         "compositeAccessPolicySpecifiers":null
+      }
+   ]
+}
+```
+
 # Credentials revocation 
-
-
 In case of security breach, there may be need to revoke credentials such as certificates or tokens. 
 
 ## Java developers:

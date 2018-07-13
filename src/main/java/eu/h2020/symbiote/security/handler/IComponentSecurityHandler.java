@@ -2,12 +2,16 @@ package eu.h2020.symbiote.security.handler;
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
+import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
+import eu.h2020.symbiote.security.communication.payloads.FederationGroupedPlatformMisdeedsReport;
+import eu.h2020.symbiote.security.communication.payloads.OriginPlatformGroupedPlatformMisdeedsReport;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -78,4 +82,35 @@ public interface IComponentSecurityHandler {
      * @return if the component owner wants to use the SH directly
      */
     ISecurityHandler getSecurityHandler();
+
+    /**
+     * gets the credentials from the wallet, if missing then issues them and adds to the wallet
+     *
+     * @return required for authorizing operations in the local AAM
+     * @throws SecurityHandlerException on error
+     */
+    BoundCredentials getLocalAAMCredentials() throws
+            SecurityHandlerException;
+
+    /**
+     * gets the map containing information about platform misdeeds within federations grouped by searchOriginPlatforms
+     *
+     * @param resourcePlatformFilter     limits report to only one provided resource platform
+     * @param searchOriginPlatformFilter limits report to only one searchOriginPlatform
+     * @return map containing reports about requested resource platforms
+     */
+    Map<String, OriginPlatformGroupedPlatformMisdeedsReport> getOriginPlatformGroupedPlatformMisdeedsReports(Optional<String> resourcePlatformFilter,
+                                                                                                             Optional<String> searchOriginPlatformFilter) throws
+            SecurityHandlerException;
+
+    /**
+     * gets the map containing information about platform misdeeds within federations grouped by federations
+     *
+     * @param resourcePlatformFilter limits report to only one provided resource platform
+     * @param federationId           limits report to contain information about misdeeds in one federation
+     * @return map containing reports about requested resource platforms
+     */
+    Map<String, FederationGroupedPlatformMisdeedsReport> getFederationGroupedPlatformMisdeedsReports(Optional<String> resourcePlatformFilter,
+                                                                                                     Optional<String> federationId) throws
+            SecurityHandlerException;
 }

@@ -5,9 +5,11 @@ import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.BoundCredentials;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
+import eu.h2020.symbiote.security.commons.exceptions.custom.ADMException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.SecurityHandlerException;
 import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
+import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -121,4 +123,21 @@ public interface ISecurityHandler {
             SecurityHandlerException;
 
     AAM getCoreAAMInstance();
+
+    /**
+     * Function used to notify Anomaly Detection Module about failed federated authorization during getting access to the federated resource
+     *
+     * @param securityRequest        used during failed authorization
+     * @param federationId           according to which resource access should be provided
+     * @param resourcePlatformId     resource's platform
+     * @param resourceId             to which access was not granted
+     * @param searchOriginPlatformId platform from which actor gained information about resource availability
+     * @return true if user/component should have access to the resource and anomaly was saved
+     */
+    boolean reportFailedFederationAuthorization(SecurityRequest securityRequest,
+                                                String federationId,
+                                                String resourcePlatformId,
+                                                String resourceId,
+                                                String searchOriginPlatformId) throws
+            ADMException;
 }

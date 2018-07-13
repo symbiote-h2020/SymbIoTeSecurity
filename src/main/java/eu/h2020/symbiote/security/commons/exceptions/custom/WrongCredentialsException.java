@@ -21,11 +21,17 @@ public class WrongCredentialsException extends SecurityException {
     public static final String USER_OR_CLIENT_NOT_EXIST = "User or client doesn't exist";
     public static final String AAM_CAN_REVOKE_ONLY_LOCAL_COMPONENTS = "AAM can revoke only local components certificates";
     public static final String CERTIFICATE_COMMON_NAME_IS_WRONG = "Certificate common name is wrong";
+    public static final String USER_NOT_ACTIVE = "User account is not in active. It could've have been blocked or still needs to be activated.";
     private static final String errorMessage = "ERR_WRONG_CREDENTIALS";
-    private static final HttpStatus statusCode = HttpStatus.UNAUTHORIZED;
+    private HttpStatus statusCode = HttpStatus.UNAUTHORIZED;
 
     public WrongCredentialsException() {
         super(errorMessage);
+    }
+
+    public WrongCredentialsException(String message, HttpStatus statusCode) {
+        super(message);
+        this.statusCode = statusCode;
     }
 
     public WrongCredentialsException(String message) {

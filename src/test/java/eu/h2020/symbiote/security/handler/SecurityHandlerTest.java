@@ -36,28 +36,25 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ClientFactory.class)
 @PowerMockIgnore({"java.net.ssl", "javax.security.auth.x500.X500Principal"})
 public class SecurityHandlerTest {
 
 
-    private AAMClient aamClient = Mockito.mock(AAMClient.class);
-
     private static Log logger = LogFactory.getLog(SecurityHandlerTest.class);
     SecurityHandler testclient = null;
-
     String localPath = ".";
     String keystorePath = localPath + "/src/test/resources/keystore.jks";
     String keystorePassword = "123456";
-
     String serverkeystorePath = localPath + "/src/test/resources/core.p12";
     String serverkeystorePassword = "1234567";
     String serveralias = "client-core-1";
     String homeAAMId = SecurityConstants.CORE_AAM_INSTANCE_ID;
-    
     String serverCertString = null;
     AAM homeAAM = null;
+    private AAMClient aamClient = Mockito.mock(AAMClient.class);
 
     @Before
     public void prepare() throws
@@ -65,45 +62,44 @@ public class SecurityHandlerTest {
 
 
         PowerMockito.mockStatic(ClientFactory.class);
-        
+
         serverCertString = getCertString(serverkeystorePath, serverkeystorePassword, serveralias);
-    
+
         homeAAM = getHomeAMM(homeAAMId);
-    
+
         //aamClient.signCertificateRequest
         Mockito.when(aamClient.signCertificateRequest(Mockito.any(CertificateRequest.class))).thenReturn(serverCertString);
 
-        Mockito.when(ClientFactory.getAAMClient(Matchers.anyString())).thenReturn(aamClient);
+        Mockito.when(ClientFactory.getAAMClient(Mockito.anyString())).thenReturn(aamClient);
 
         //aamClient.getAvailableAAMs
         Mockito.when(aamClient.getAvailableAAMs()).thenReturn(new AvailableAAMsCollection(getAMMMap()));
 
         //aamClient.getHomeToken
-        Mockito.when(aamClient.getHomeToken(Matchers.anyString())).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
+        Mockito.when(aamClient.getHomeToken(Mockito.anyString())).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
 
         //aamClient.getForeignToken
-        Mockito.when(aamClient.getForeignToken(Matchers.anyString(), Matchers.any(), Matchers.any())).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
+        Mockito.when(aamClient.getForeignToken(Mockito.anyString(), Mockito.any(), Mockito.any())).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
 
         //aamClient.getGuestToken
         Mockito.when(aamClient.getGuestToken()).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
 
         //aamClient.getGuestToken
-        Mockito.when(aamClient.validateCredentials(Matchers.anyString(), Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(ValidationStatus.VALID);
-    
-    
-        
+        Mockito.when(aamClient.validateCredentials(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(ValidationStatus.VALID);
+
+
         createEmptyKeystore();
         testclient = new SecurityHandler(keystorePath, keystorePassword, "http://test");
-    
-    
+
+
     }
-    
+
     @After
     public void clean() {
         deleteKeystore();
     }
-    
-    private void deleteKeystore(){
+
+    private void deleteKeystore() {
         File file = new File(keystorePath);
         file.delete();
     }
@@ -111,9 +107,9 @@ public class SecurityHandlerTest {
     private void createEmptyKeystore() throws
             Exception {
         deleteKeystore();
-    
+
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-    
+
         char[] password = keystorePassword.toCharArray();
         ks.load(null, password);
 
@@ -136,12 +132,12 @@ public class SecurityHandlerTest {
         assert result != null;
 
         assert equalsId(result, getAMMMap());
-    
+
         result = testclient.getAvailableAAMs();
-    
+
         logger.info("TEST RESULT --> Map<String, AAM>: " + result);
         assert result != null;
-    
+
         assert equalsId(result, getAMMMap());
 
 
@@ -153,9 +149,7 @@ public class SecurityHandlerTest {
 
         if (result.size() != ammList.size()) return false;
 
-        Iterator<Entry<String, AAM>> entries = result.entrySet().iterator();
-        while (entries.hasNext()) {
-            Entry<String, AAM> entry = entries.next();
+        for (Entry<String, AAM> entry : result.entrySet()) {
             String key = entry.getKey();
 
             if (ammList.get(key) == null)
@@ -179,7 +173,6 @@ public class SecurityHandlerTest {
         assert cer != null;
         assert (cer.getCertificateString()).equals(serverCertString);
     }
-    
 
 
     @Test
@@ -187,9 +180,9 @@ public class SecurityHandlerTest {
             Throwable {
         logger.info("----------------------------");
         logger.info("testLoginHomeCredentials starts");
-    
+
         testclient.getCertificate(homeAAM, "usu1", "pass1", "clientID");
-    
+
         Token tk = testclient.login(homeAAM);
         String validToken = getTokenString(serverkeystorePath, serverkeystorePassword, serveralias);
 
@@ -208,14 +201,14 @@ public class SecurityHandlerTest {
             Throwable {
         logger.info("----------------------------");
         logger.info("testLoginListOfAAMHomeCredentials starts");
-    
+
         testclient.getCertificate(homeAAM, "usu1", "pass1", "clientID");
-        
+
         Token tk = testclient.login(homeAAM);
         String validToken = tk.getToken();
         //String validToken = getTokenString(serverkeystorePath, serverkeystorePassword, serveralias);
-        List<AAM> ammlist = testclient.getAvailableAAMs(homeAAM).values().stream().collect(Collectors.toList());
-        
+        List<AAM> ammlist = new ArrayList<>(testclient.getAvailableAAMs(homeAAM).values());
+
         Map<AAM, Token> maptk = testclient.login(ammlist, validToken);
 
         logger.info("TEST RESULT --> Map Token from AMM: " + maptk);
@@ -266,7 +259,7 @@ public class SecurityHandlerTest {
 //		java.security.cert.Certificate cert = keystore.getCertificate(serveralias);
 //
 
-        ValidationStatus val = testclient.validate(getHomeAMM(homeAAMId), validToken, null, null, null);
+        ValidationStatus val = testclient.validate(getHomeAMM(homeAAMId), validToken, Optional.empty(), Optional.empty(), Optional.empty());
 
         logger.info("TEST RESULT --> ValidationStatus from AMM and Token: " + val);
         assert val != null;
@@ -274,9 +267,8 @@ public class SecurityHandlerTest {
     }
 
     private AAM getAMMfromList(List<AAM> ammlist, String testaamInstanceId2) {
-        for (int x = 0; x < ammlist.size(); x++) {
+        for (AAM a : ammlist) {
 
-            AAM a = ammlist.get(x);
             if (a.getAamInstanceId().equals(testaamInstanceId2))
                 return a;
         }
@@ -295,9 +287,9 @@ public class SecurityHandlerTest {
 
     public java.security.cert.Certificate getCertificate(String keystoreFilename, String spassword, String alias) throws
             Throwable {
-        
+
         KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-    
+
         //Leer
         keystore.load(new FileInputStream(keystoreFilename), spassword.toCharArray());
         return keystore.getCertificate(alias);
@@ -311,9 +303,9 @@ public class SecurityHandlerTest {
     public Map<String, AAM> getAMMMap() throws
             Throwable {
         Map<String, AAM> aamMap = new HashMap<>();
-        
+
         aamMap.put(homeAAMId, homeAAM);
-        
+
         Certificate certificate = new Certificate(getCertString(serverkeystorePath, serverkeystorePassword, serveralias));
 
         for (int i = 0; i < 3; i++) {
