@@ -63,8 +63,7 @@ String guestToken = restClient.getGuestToken();
 SecurityRequest securityRequest = new SecurityRequest(guestToken);
 
 // converting the prepared request into communication ready HTTP headers.
-Map<String, String> securityHeaders = new HashMap<>();
-securityHeaders = securityRequest.getSecurityRequestHeaderParams();
+Map<String, String> securityHeaders = securityRequest.getSecurityRequestHeaderParams();
 ```
 With these headers containing your GUEST token you can use SymbIoTe APIs to access public resources.
 It can be also acquired in the following way, using end user Java client described [here](#end-user-security-handler):
@@ -73,11 +72,12 @@ It can be also acquired in the following way, using end user Java client describ
 ISecurityHandler clientSH = ClientSecurityHandlerFactory.getSecurityHandler(
          coreAAMServerAddress,
          KEY_STORE_PATH,
-         KEY_STORE_PASSWORD,
-         clientId
-);
+         KEY_STORE_PASSWORD);
+
 // examples how to retrieve AAM instances
+// shortcut for core AAM
 AAM coreAAM = clientSH.getCoreAAMInstance();
+// any platform by its identifier
 AAM platform1 = clientSH.getAvailableAAMs().get(platformId);
 
 // Acquiring GUEST token from platform1
@@ -87,13 +87,12 @@ Token guestToken = clientSH.loginAsGuest(platform1);
 SecurityRequest securityRequest = new SecurityRequest(guestToken);
 
 // converting the prepared request into communication ready HTTP headers.
-Map<String, String> securityHeaders = new HashMap<>();
-securityHeaders = securityRequest.getSecurityRequestHeaderParams();
+Map<String, String> securityHeaders = securityRequest.getSecurityRequestHeaderParams();
 ```
 
-2. Then, after receiving the response from a SymbIoTe component, you should check if it came from component you are interested. To do that you can use the following snippet
-```java 
- // trying to validate the service response
+2. Then, after receiving the response from a SymbIoTe component, you should check if it came from component you are interested. To do that you can use the following snippet:
+```java
+// trying to validate the service response
 MutualAuthenticationHelper.isServiceResponseVerified(serviceResponse, restClient.getComponentCertificate(componentIdentifier, platformIdentifier));
 ``` 
 where the componentIdentifier can be read from the table available [here](#component_table).
@@ -194,7 +193,6 @@ username@clientIdentifier@homeAAMInstanceIdentifier@OriginHomeTokenJTI
 ```
 
 #### Time relevant claims IAT, EXP
-
 Issue (“iat”) and expiration date (“exp”) limit the validity of the token.
 
 
@@ -256,34 +254,46 @@ At the beginning of an integration with SymbIoTe Security Layer as end-user you 
      * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
      */
 SecurityHandler securityHandler = ClientSecurityHandlerFactory.getSecurityHandler(
-        coreAAMAddress, keystorePath, keystorePassword, userId);
+                                coreAAMAddress,
+                                keystorePath,
+                                keystorePassword);
 ```
 
 To acquire access to any of the resources, steps from [2](#access_priv_resources_2) to [4](#access_priv_resources_4) can be achieved easily using SecurityHandler. The following instructions have to be done:
 ```java
-// Initializing application security handler
+// Initializing application (client) security handler
 ISecurityHandler clientSH = ClientSecurityHandlerFactory.getSecurityHandler(
          coreAAMServerAddress,
          KEY_STORE_PATH,
-         KEY_STORE_PASSWORD,
-         clientId
-);
+         KEY_STORE_PASSWORD);
+
 // examples how to retrieve AAM instances
 AAM coreAAM = clientSH.getCoreAAMInstance();
+// any platform registered with that core
 AAM platform1 = clientSH.getAvailableAAMs().get(platformId);
 
-// Acquiring application certificate, this operation needs the user password
+// if this is the first time a user wants to get his token on this device/client from a particular platform, one needs to initialize its client certificate 
+// note: developers MUST NOT persist the user password as this is not needed on daily basis and only on the first operation. 
 Certificate clientCertificate = clientSH.getCertificate(platform1, username, password, clientId);
-
-// Acquiring HOME token from platform1 AAM
-Token token = clientSH.login(platform1);
+// please note that from now on we don't need the password and only the the client certificate and matching private key.
 
 // preparing the security request using the credentials the actor has from platform 1
 Set<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<>();
-// please note that from now on we don't need the password and only the the client certificate and matching private key.
+
+// Acquiring HOME token from platform1 AAM
+// note, this can be done for any number of platforms/enablers/smart spaces, the user has account it.
+Token token = clientSH.login(platform1);
 authorizationCredentialsSet.add(new AuthorizationCredentials(token, platform1, clientSH.getAcquiredCredentials().get(platform1.getAamInstanceId()).homeCredentials));
+
+// building the security request
 SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
+// and converting the prepared request into communication ready HTTP headers.
+Map<String, String> securityHeaders = securityRequest.getSecurityRequestHeaderParams();
+
 ```
+Please note the security request is valid for around a minute, after that time it expires and requires renewal.
+Tokens can have variable expiration time so it's best to renew them also before each request.
+The token can be validated (for expiration reasons) using the JWTEngine class.
 
 Then after received a business response from a symbiote component we can check if it came from component we are interested in with the following operations:
 ```java
