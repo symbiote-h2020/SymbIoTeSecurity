@@ -40,10 +40,13 @@ public class SecurityConstants {
     public static final String AAM_VALIDATE_FOREIGN_TOKEN_ORIGIN_CREDENTIALS = "/validate_foreign_token_origin_credentials";
 
 
-    // tokens
+    // jwt
     public static final String TOKEN_HEADER_NAME = "x-auth-token";
+    public static final String COUPON_HEADER_NAME = "x-auth-coupon";
     public static final int JWT_PARTS_COUNT = 3; //Header, body and signature
     public static final String CLAIM_NAME_TOKEN_TYPE = "ttyp";
+    public static final String CLAIM_NAME_COUPON_VALIDITY = "val";
+    public static final String CLAIM_NAME_FEDERATION_ID = "fedId";
     public static final String SYMBIOTE_ATTRIBUTES_PREFIX = "SYMBIOTE_";
     public static final String FEDERATION_CLAIM_KEY_PREFIX = "federation_";
     public static final String GUEST_NAME = "guest";
@@ -76,6 +79,16 @@ public class SecurityConstants {
     public static final String ACCESS_POLICY_JSON_FIELD_COMPOSITE_AP = "compositeAccessPolicySpecifiers";
 
     public static final String ERROR_DESC_UNSUPPORTED_ACCESS_POLICY_TYPE = "Access policy type not suppoted!";
+
+    //Bartening and Traiding Module REST paths
+    public static final String BTM_GET_COUPON = "/get_coupon";
+    public static final String BTM_AUTHORIZE_BARTERAL_ACCESS = "/authorize_barteral_access";
+    public static final String BTM_REGISTER_COUPON = "/register_coupon";
+    public static final String BTM_IS_COUPON_VALID = "/is_coupon_valid";
+    public static final String BTM_CONSUME_COUPON = "/consume_coupon";
+    public static final String BTM_CLEANUP_COUPONS = "/cleanup_coupons";
+    public static final String BTM_REVOKE_COUPON = "/revoke_coupon";
+
     private SecurityConstants() {
     }
 }

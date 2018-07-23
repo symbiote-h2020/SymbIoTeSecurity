@@ -15,6 +15,7 @@ public class MalformedJWTException extends SecurityException {
     private static final long serialVersionUID = SecurityConstants.serialVersionUID;
     public static final String TOKEN_SUBJECT_HAS_WRONG_STRUCTURE = "Token subject has wrong structure";
     private static final String errorMessage = "UNABLE_MALFORMED_JWT_TOKEN";
+    public static final String UNABLE_TO_READ_MALFORMED_COUPON = "Unable to read malformed coupon";
     private final HttpStatus statusCode = HttpStatus.BAD_REQUEST;
 
     public MalformedJWTException() {

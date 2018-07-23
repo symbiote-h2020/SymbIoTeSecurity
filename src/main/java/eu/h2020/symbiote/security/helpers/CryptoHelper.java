@@ -51,7 +51,7 @@ public class CryptoHelper {
     }
 
     /**
-     * @param homeCredentials users credentials
+     * @param homeCredentials users/component credentials
      * @return String loginRequest
      * @throws SecurityException error during creation of loginRequest
      */
@@ -62,6 +62,28 @@ public class CryptoHelper {
             JwtBuilder jwtBuilder = Jwts.builder();
             jwtBuilder.setIssuer(homeCredentials.username);
             jwtBuilder.setSubject(homeCredentials.clientIdentifier);
+            jwtBuilder.setIssuedAt(new Date());
+            jwtBuilder.setExpiration(new Date(System.currentTimeMillis() + 60000));
+            jwtBuilder.signWith(SignatureAlgorithm.ES256, homeCredentials.privateKey);
+
+            return jwtBuilder.compact();
+        } catch (Exception e) {
+            throw new SecurityException(e.getMessage(), e.getCause());
+        }
+    }
+
+    /**
+     * @param homeCredentials users/component credentials
+     * @return String loginRequest
+     * @throws SecurityException error during creation of loginRequest
+     */
+    public static String buildCouponAcquisitionRequest(HomeCredentials homeCredentials, String platformId) {
+        ECDSAHelper.enableECDSAProvider();
+
+        try {
+            JwtBuilder jwtBuilder = Jwts.builder();
+            jwtBuilder.setIssuer(homeCredentials.username + CryptoHelper.FIELDS_DELIMITER + homeCredentials.clientIdentifier);
+            jwtBuilder.setSubject(platformId);
             jwtBuilder.setIssuedAt(new Date());
             jwtBuilder.setExpiration(new Date(System.currentTimeMillis() + 60000));
             jwtBuilder.signWith(SignatureAlgorithm.ES256, homeCredentials.privateKey);

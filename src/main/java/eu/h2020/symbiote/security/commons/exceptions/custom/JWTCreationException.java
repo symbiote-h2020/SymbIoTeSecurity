@@ -16,6 +16,8 @@ public class JWTCreationException extends SecurityException {
     private final static String errorMessage = "UNABLE_CREATE_JWT_TOKEN";
     private final static HttpStatus statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     private final static long serialVersionUID = SecurityConstants.serialVersionUID;
+    public static final String SERVER_FAILED_USE_COUPON = "Server failed to use the coupon.";
+    public static final String SERVER_FAILED_BUILD_COUPON = "Server failed to build the coupon.";
 
     public JWTCreationException() {
         super(errorMessage);

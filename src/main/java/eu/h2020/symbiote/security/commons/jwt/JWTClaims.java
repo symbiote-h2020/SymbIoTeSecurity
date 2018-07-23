@@ -9,9 +9,11 @@ import java.util.Map;
  * @author Daniele Caldarola (CNIT)
  * @author Nemanja Ignjatov (UNIVIE)
  * @author Mikolaj Dobski (PSNC)
+ * @author Jakub Toczek (PSNC)
  */
 public class JWTClaims {
 
+    private String val;
     private String jti;
     private String alg;
     private String iss;
@@ -27,20 +29,25 @@ public class JWTClaims {
         // used by serializer
     }
 
-    public JWTClaims(Object jti, Object alg, Object iss, Object sub, Object iat, Object exp, Object ipk, Object spk,
-                     Object ttyp, Map<String, String> att) {
-        this.jti = (String) jti;
-        this.alg = (String) alg;
-        this.iss = (String) iss;
-        this.sub = (String) sub;
-        String stringToConvert = String.valueOf(iat);
+    public JWTClaims(Map<String, Object> retMap, Map<String, String> att) {
+
+        this.jti = (String) retMap.get("jti");
+        this.alg = (String) retMap.get("alg");
+        this.iss = (String) retMap.get("iss");
+        this.sub = (String) retMap.get("sub");
+        String stringToConvert = String.valueOf(retMap.get("iat"));
         this.iat = Long.parseLong(stringToConvert) * 1000;
-        stringToConvert = String.valueOf(exp);
-        this.exp = Long.parseLong(stringToConvert) * 1000;
-        this.ipk = (String) ipk;
-        this.spk = (String) spk;
+        if (retMap.containsKey("exp")) {
+            stringToConvert = String.valueOf(retMap.get("exp"));
+            this.exp = Long.parseLong(stringToConvert) * 1000;
+        }
+        if (retMap.containsKey("val")) {
+            this.val = (String) retMap.get("val");
+        }
+        this.ipk = (String) retMap.get("ipk");
+        this.spk = (String) retMap.get("spk");
         this.att = att;
-        this.ttyp = (String) ttyp;
+        this.ttyp = (String) retMap.get("ttyp");
     }
 
     public String getJti() {
@@ -115,6 +122,15 @@ public class JWTClaims {
         this.att = att;
     }
 
+    public String getVal() {
+        return val;
+    }
+
+    public void setVal(String val) {
+        this.val = val;
+    }
+
+
     public String getTtyp() {
         return ttyp;
     }
@@ -132,6 +148,7 @@ public class JWTClaims {
                 ", sub='" + sub + '\'' +
                 ", iat='" + iat + '\'' +
                 ", exp='" + exp + '\'' +
+                ", val='" + val + '\'' +
                 ", ipk='" + ipk + '\'' +
                 ", spk='" + spk + '\'' +
                 ", att='" + att + '\'' +
