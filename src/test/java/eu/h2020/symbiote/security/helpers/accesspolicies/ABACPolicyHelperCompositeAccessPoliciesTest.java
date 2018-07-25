@@ -54,13 +54,9 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
     private final String deploymentId = "deploymentId";
 
     private final String goodResourceID = "goodResourceID";
-    private final String goodResourceID2 = "goodResourceID2";
-    private final String badResourceID = "badResourceID";
-    private final String badResourceID2 = "badResourceID2";
 
     private final String nameAttr = "name";
     private final String ageAttr = "age";
-    private final String missingAttr = "youAreGonnaMissMe";
 
     private final String nameAttrOKValue = "John";
     private final String nameAttrBadValue = "Mike";
