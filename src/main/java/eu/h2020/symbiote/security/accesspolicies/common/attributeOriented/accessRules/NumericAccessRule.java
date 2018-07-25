@@ -18,18 +18,18 @@ import java.util.Set;
  */
 public class NumericAccessRule implements IAccessRule {
 
-    private Number expectedValue;
+    private Number accessRuleValue;
     private String attributeName;
     private NumericRelationalOperator operator;
     private final AccessRuleType accessRuleType = AccessRuleType.NUMERIC;
 
     /**
-     * @param expectedValue - Numeric value that is to be compared
+     * @param accessRuleValue - Numeric value that is to be compared in access rule
      * @param attributeName - Name of the attribute whose value should be compared
      * @param operator      - Comparison operator
      */
-    public NumericAccessRule(Number expectedValue, String attributeName, NumericRelationalOperator operator) {
-        this.expectedValue = expectedValue;
+    public NumericAccessRule(Number accessRuleValue, String attributeName, NumericRelationalOperator operator) {
+        this.accessRuleValue = accessRuleValue;
         this.attributeName = attributeName;
         this.operator = operator;
     }
@@ -44,7 +44,7 @@ public class NumericAccessRule implements IAccessRule {
     public NumericAccessRule(String accessRuleJson) throws IOException {
         ObjectMapper objMapper = new ObjectMapper();
         NumericAccessRule numARObj = objMapper.readValue(accessRuleJson, NumericAccessRule.class);
-        this.expectedValue = numARObj.expectedValue;
+        this.accessRuleValue = numARObj.accessRuleValue;
         this.attributeName = numARObj.attributeName;
         this.operator = numARObj.operator;
     }
@@ -55,11 +55,11 @@ public class NumericAccessRule implements IAccessRule {
         for (Token token : authorizationTokens) {
             try {
                 //Extract value from attribute
-                BigDecimal controlledVal = token.getClaims().get(attributeName, String.class) != null ? new BigDecimal(token.getClaims().get(attributeName, String.class)) : null;
-                BigDecimal expectedVal = new BigDecimal(this.expectedValue.toString());
+                BigDecimal tokenAttributeVal = token.getClaims().get(attributeName, String.class) != null ? new BigDecimal(token.getClaims().get(attributeName, String.class)) : null;
+                BigDecimal accessRuleVal = new BigDecimal(this.accessRuleValue.toString());
                 //Validate if values are present and evaluate the expression
-                if ((expectedVal != null) && (controlledVal != null) &&
-                        evaluateNumericExpression(expectedVal, controlledVal, this.operator)) {
+                if ((accessRuleVal != null) && (tokenAttributeVal != null) &&
+                        evaluateNumericExpression(accessRuleVal, tokenAttributeVal, this.operator)) {
                     validTokens.add(token);
                 }
             } catch (NumberFormatException e) {
@@ -79,8 +79,8 @@ public class NumericAccessRule implements IAccessRule {
         return mapper.writeValueAsString(this);
     }
 
-    public Number getExpectedValue() {
-        return expectedValue;
+    public Number getAccessRuleValue() {
+        return accessRuleValue;
     }
 
     public String getAttributeName() {
@@ -91,20 +91,20 @@ public class NumericAccessRule implements IAccessRule {
         return operator;
     }
 
-    private boolean evaluateNumericExpression(BigDecimal expectedVal, BigDecimal controlledVal, NumericRelationalOperator operator) {
+    private boolean evaluateNumericExpression(BigDecimal accessRuleVal, BigDecimal tokenAttrVal, NumericRelationalOperator operator) {
         switch (operator) {
             case EQUALS:
-                return (expectedVal.compareTo(controlledVal) == 0) ? true : false;
+                return (tokenAttrVal.compareTo(accessRuleVal) == 0) ? true : false;
             case GREATER_OR_EQUAL_THAN:
-                return (expectedVal.compareTo(controlledVal) < 0) ? true : false;
+                return (tokenAttrVal.compareTo(accessRuleVal) >= 0) ? true : false;
             case GREATER_THAN:
-                return (expectedVal.compareTo(controlledVal) <= 0) ? true : false;
+                return (tokenAttrVal.compareTo(accessRuleVal) > 0) ? true : false;
             case LESS_OR_EQUALS_THAN:
-                return (expectedVal.compareTo(controlledVal) > 0) ? true : false;
+                return (tokenAttrVal.compareTo(accessRuleVal) <= 0) ? true : false;
             case LESS_THAN:
-                return (expectedVal.compareTo(controlledVal) >= 0) ? true : false;
+                return (tokenAttrVal.compareTo(accessRuleVal) < 0) ? true : false;
             case NOT_EQUALS:
-                return (expectedVal.compareTo(controlledVal) != 0) ? true : false;
+                return (tokenAttrVal.compareTo(accessRuleVal) != 0) ? true : false;
             default:
                 return false;
         }

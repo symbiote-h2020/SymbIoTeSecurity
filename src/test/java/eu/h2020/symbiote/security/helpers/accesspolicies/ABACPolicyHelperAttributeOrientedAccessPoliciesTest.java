@@ -217,7 +217,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     public void singleNumberAccessRuleGreaterThanCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException{
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
-        //FIXME @Nemanja evaluates to true, when equal
+
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
         NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.GREATER_THAN);
 
@@ -250,7 +250,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        //FIXME @Nemanja less than evalates to true when equal
+
         NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.LESS_THAN);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
@@ -266,7 +266,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        //FIXME @Nemanja evaluates to false, when equal.
+
         NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.GREATER_OR_EQUAL_THAN);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
@@ -298,7 +298,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
-        //FIXME @Nemanja evaluates to false when equal
+
         NumericAccessRule numAccessRule = new NumericAccessRule(ageAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.LESS_OR_EQUALS_THAN);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(numAccessRule)));
@@ -562,7 +562,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
 
-        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrOKValue+" Doe").toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.NOT_CONTAINS);
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrOKValue + " Doe").toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.NOT_CONTAINS_IGNORE_CASE);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
 
@@ -658,7 +658,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
 
-        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrOKValue.substring(nameAttrOKValue.length()-2,nameAttrOKValue.length()-1)), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.ENDS_WITH);
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrOKValue.substring(nameAttrOKValue.length() - 2, nameAttrOKValue.length())), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.ENDS_WITH);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
 
@@ -697,7 +697,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
 
-        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrOKValue.substring(nameAttrOKValue.length()-2,nameAttrOKValue.length()-1)).toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.ENDS_WITH_IGNORE_CASE);
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrOKValue.substring(nameAttrOKValue.length() - 1, nameAttrOKValue.length())).toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.ENDS_WITH_IGNORE_CASE);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
 
@@ -717,7 +717,7 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
 
-        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrBadValue.substring(nameAttrOKValue.length()-2,nameAttrOKValue.length()-1)).toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.ENDS_WITH_IGNORE_CASE);
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrBadValue.substring(nameAttrOKValue.length() - 1, nameAttrOKValue.length())).toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.ENDS_WITH_IGNORE_CASE);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
 
@@ -725,8 +725,6 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
 
         assertFalse(resp.keySet().contains(goodResourceID));
     }
-    //TODO implement REGEXP
-    //TODO Kaspar - add tests(positive and negative) for other String operators : EQUALS_IGNORE_CASE, CONTAINS, CONTAINS_IGNORE_CASE, NOT_CONTAINS, NOT_CONTAINS_IGNORE_CASE, STARTS_WITH, STARTS_WITH_IGNORE_CASE, ENDS_WITH, ENDS_WITH_IGNORE_CASE, REGEXP
 
     @Test
     public void compositeAccessRuleCheckSuccess() throws

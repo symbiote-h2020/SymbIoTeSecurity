@@ -101,15 +101,15 @@ public class StringAccessRule implements IAccessRule {
             case NOT_CONTAINS:
                 return (!expectedVal.contains(controlledVal)) ? true : false;
             case NOT_CONTAINS_IGNORE_CASE:
-                return (!expectedVal.toLowerCase().equals(controlledVal.toLowerCase())) ? true : false; //FIXME EQUALS?!
+                return (!expectedVal.toLowerCase().contains(controlledVal.toLowerCase())) ? true : false;
             case STARTS_WITH:
-                return (expectedVal.startsWith(controlledVal)) ? true : false; //FIXME should policy value start with token value, or other way around? (Same for ENDS_WITH)?
+                return (controlledVal.startsWith(expectedVal)) ? true : false;
             case STARTS_WITH_IGNORE_CASE:
-                return (expectedVal.toLowerCase().startsWith(controlledVal.toLowerCase())) ? true : false;
+                return (controlledVal.toLowerCase().startsWith(expectedVal.toLowerCase())) ? true : false;
             case ENDS_WITH:
-                return (expectedVal.endsWith(controlledVal)) ? true : false;
+                return (controlledVal.endsWith(expectedVal)) ? true : false;
             case ENDS_WITH_IGNORE_CASE:
-                return (expectedVal.toLowerCase().endsWith(controlledVal.toLowerCase())) ? true : false;
+                return (controlledVal.toLowerCase().endsWith(expectedVal.toLowerCase())) ? true : false;
             case REGEXP:
                 return false;//TODO implement
             default:
