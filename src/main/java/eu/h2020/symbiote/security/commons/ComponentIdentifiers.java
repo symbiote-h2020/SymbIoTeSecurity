@@ -20,6 +20,8 @@ public class ComponentIdentifiers {
     public static final String FEDERATION_MANAGER = "fm";
     public static final String SUBSCRIPTION_MANAGER = "subscriptionManager";
     public static final String PLATFORM_REGISTRY = "platformRegistry";
+    public static final String INNKEEPER = "innkeeper";
+
     private ComponentIdentifiers() {
     }
 }
