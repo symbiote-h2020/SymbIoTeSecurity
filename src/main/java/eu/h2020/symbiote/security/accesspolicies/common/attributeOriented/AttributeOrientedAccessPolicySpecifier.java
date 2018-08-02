@@ -2,6 +2,7 @@ package eu.h2020.symbiote.security.accesspolicies.common.attributeOriented;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyType;
@@ -39,19 +40,20 @@ public class AttributeOrientedAccessPolicySpecifier implements IAccessPolicySpec
     public AttributeOrientedAccessPolicySpecifier(String accessRulesJSON) throws IOException {
         ObjectMapper objMapper = new ObjectMapper();
         ObjectNode objNode = objMapper.readValue(accessRulesJSON, ObjectNode.class);
-        String accessRuleType = objNode.get("accessRuleType").asText();
+        JsonNode accessRules = objNode.get("accessRules");
+        String accessRuleType = accessRules.get("accessRuleType").asText();
         switch (AccessRuleType.valueOf(accessRuleType)) {
             case COMPOSITE:
-                this.accessRules = new CompositeAccessRule(accessRulesJSON);
+                this.accessRules = new CompositeAccessRule(accessRules.toString());
                 break;
             case STRING:
-                this.accessRules = new StringAccessRule(accessRulesJSON);
+                this.accessRules = new StringAccessRule(accessRules.toString());
                 break;
             case NUMERIC:
-                this.accessRules = new NumericAccessRule(accessRulesJSON);
+                this.accessRules = new NumericAccessRule(accessRules.toString());
                 break;
             case BOOLEAN:
-                this.accessRules = new BooleanAccessRule(accessRulesJSON);
+                this.accessRules = new BooleanAccessRule(accessRules.toString());
                 break;
             default:
                 this.accessRules = null;

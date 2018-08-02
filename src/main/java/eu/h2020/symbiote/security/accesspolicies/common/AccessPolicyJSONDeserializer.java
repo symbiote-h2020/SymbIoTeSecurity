@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.AttributeOrientedAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.composite.CompositeAccessPolicySpecifier;
+import eu.h2020.symbiote.security.accesspolicies.common.platformAttributeOriented.CompositePlatformAttributeOrientedAccessPolicySpecifier;
+import eu.h2020.symbiote.security.accesspolicies.common.platformAttributeOriented.PlatformAttributeOrientedAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
@@ -40,6 +42,10 @@ public class AccessPolicyJSONDeserializer extends JsonDeserializer<IAccessPolicy
                     return deserializeCompositeAccessPolicyJSON(mapper, node);
                 case AOAP:
                     return deserializeAttributeOrientedAccessPolicyJSON(mapper, node);
+                case PAOAP:
+                    return deserializePlatformAttributeOrientedAccessPolicyJSON(mapper, node);
+                case CPAOAP:
+                    return deserializeCompositePlatformAttributeOrientedAccessPolicyJSON(mapper, node);
                 case SLHTIBAP:
                 case SLHTAP:
                 case SFTAP:
@@ -83,6 +89,17 @@ public class AccessPolicyJSONDeserializer extends JsonDeserializer<IAccessPolicy
     private AttributeOrientedAccessPolicySpecifier deserializeAttributeOrientedAccessPolicyJSON(ObjectMapper mapper, JsonNode node) throws InvalidArgumentsException, IOException {
         return new AttributeOrientedAccessPolicySpecifier(node.toString());
     }
+
+    private PlatformAttributeOrientedAccessPolicySpecifier deserializePlatformAttributeOrientedAccessPolicyJSON(ObjectMapper mapper, JsonNode node) throws InvalidArgumentsException, IOException {
+        //TODO parse PAOAP json
+        return new PlatformAttributeOrientedAccessPolicySpecifier(null, new AttributeOrientedAccessPolicySpecifier(node.toString()));
+    }
+
+    private CompositePlatformAttributeOrientedAccessPolicySpecifier deserializeCompositePlatformAttributeOrientedAccessPolicyJSON(ObjectMapper mapper, JsonNode node) throws InvalidArgumentsException, IOException {
+        //TODO parse CPAOAP json
+        return new CompositePlatformAttributeOrientedAccessPolicySpecifier(null, null, null);
+    }
+
     private SingleTokenAccessPolicySpecifier deserializeSingleTokenAccessPolicyJSON(ObjectMapper mapper, JsonNode node) throws InvalidArgumentsException {
 
         JsonNode policyType = node.get(SecurityConstants.ACCESS_POLICY_JSON_FIELD_TYPE);

@@ -4,6 +4,8 @@ package eu.h2020.symbiote.security.accesspolicies.common;
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.AttributeOrientedAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.AttributeOrientedAccessPolicySpecifier;
+import eu.h2020.symbiote.security.accesspolicies.common.platformAttributeOriented.CompositePlatformAttributeOrientedAccessPolicy;
+import eu.h2020.symbiote.security.accesspolicies.common.platformAttributeOriented.CompositePlatformAttributeOrientedAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.platformAttributeOriented.PlatformAttributeOrientedAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.platformAttributeOriented.PlatformAttributeOrientedAccessPolicySpecifier;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
@@ -43,6 +45,20 @@ public class AttributeOrientedAccessPolicyFactory {
             InvalidArgumentsException {
 
         return new PlatformAttributeOrientedAccessPolicy(specifier.getPlatformIdentifier(), specifier.getAttrOrientedAccessPolicySpecifier().getAccessRules());
+
+    }
+
+    /**
+     * Create the access policy from a {@link CompositePlatformAttributeOrientedAccessPolicySpecifier compositePlatformAttributeOrientedAccessPolicySpecifier}.
+     *
+     * @param specifier the access policy specifier
+     * @return the sample access policy
+     * @throws InvalidArgumentsException
+     */
+    public static IAccessPolicy getCompositePlatformAttributeOrientedAccessPolicy(CompositePlatformAttributeOrientedAccessPolicySpecifier specifier) throws
+            InvalidArgumentsException {
+
+        return new CompositePlatformAttributeOrientedAccessPolicy(specifier.getPoliciesRelationOperator(), specifier.getSinglePlatformAttrOrientedAccessPolicies(), specifier.getCompositePlatformAttrOrientedAccessPolicies());
 
     }
 }

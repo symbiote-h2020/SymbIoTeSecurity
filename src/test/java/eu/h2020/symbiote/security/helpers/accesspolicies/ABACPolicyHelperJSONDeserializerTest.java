@@ -8,6 +8,12 @@ import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyJSONDeserializer;
 import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyType;
 import eu.h2020.symbiote.security.accesspolicies.common.IAccessPolicySpecifier;
+import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.AttributeOrientedAccessPolicySpecifier;
+import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.BooleanAccessRule;
+import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.CompositeAccessRule;
+import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.NumericAccessRule;
+import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.StringAccessRule;
+import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.commons.IAccessRule;
 import eu.h2020.symbiote.security.accesspolicies.common.composite.CompositeAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
@@ -46,6 +52,8 @@ public class ABACPolicyHelperJSONDeserializerTest {
     private final String nameAttrBadValue = "Mike";
     private final String ageAttrOKValue = "20";
     private final String ageAttrBadValue = "33";
+
+    private final String fromEUAttr = "fromEU";
 
     private HashSet<AuthorizationCredentials> authorizationCredentialsSet = new HashSet<>();
     private HashSet<AuthorizationCredentials> authorizationCredentialsMultipleTokensSet = new HashSet<>();
@@ -651,6 +659,43 @@ public class ABACPolicyHelperJSONDeserializerTest {
 
     }
 
+    @Test
+    public void attributeOrientedAPDeserialization() throws
+            IOException, InvalidArgumentsException {
+
+        AccessPolicyType refAPType = AccessPolicyType.PAOAP;
+
+        BooleanAccessRule booleanAccessRule = new BooleanAccessRule(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + fromEUAttr, BooleanAccessRule.BooleanRelationalOperator.IS_TRUE);
+
+        NumericAccessRule numAccessRule = new NumericAccessRule(18, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.GREATER_THAN);
+
+        StringAccessRule stringAccessRule = new StringAccessRule(nameAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.EQUALS);
+
+        Set<IAccessRule> arSet1 = new HashSet<>();
+        arSet1.add(stringAccessRule);
+        arSet1.add(booleanAccessRule);
+
+        CompositeAccessRule compositeAR1 = new CompositeAccessRule(arSet1, CompositeAccessRule.CompositeAccessRulesOperator.OR);
+
+        Set<IAccessRule> arSet2 = new HashSet<>();
+        arSet2.add(compositeAR1);
+        arSet2.add(numAccessRule);
+
+        CompositeAccessRule compositeAR2 = new CompositeAccessRule(arSet2, CompositeAccessRule.CompositeAccessRulesOperator.AND);
+
+        AttributeOrientedAccessPolicySpecifier testPolicySpecifier = new AttributeOrientedAccessPolicySpecifier(
+                compositeAR2
+        );
+
+        String apJson = objMapper.writeValueAsString(testPolicySpecifier);
+
+        JsonParser parser = jsonFactory.createParser(apJson);
+
+        IAccessPolicySpecifier deserializedObj = jsonDeserializer.deserialize(parser, null);
+
+        assertAttributeOrientedAPObjectEquality(testPolicySpecifier, deserializedObj);
+    }
+
     private void assertSingleTokenAPObjectEquality(SingleTokenAccessPolicySpecifier refAPObject, IAccessPolicySpecifier deserializedAPObject) throws InvalidArgumentsException {
 
         if (deserializedAPObject instanceof SingleTokenAccessPolicySpecifier) {
@@ -712,6 +757,25 @@ public class ABACPolicyHelperJSONDeserializerTest {
             }
         } else {
             throw new InvalidArgumentsException("Deserialized object is not instance of SingleTokenAccessPolicySpecifier");
+        }
+    }
+
+    private void assertAttributeOrientedAPObjectEquality(AttributeOrientedAccessPolicySpecifier refAOAPObject, IAccessPolicySpecifier deserializedAPObject) throws InvalidArgumentsException {
+
+        if (deserializedAPObject instanceof AttributeOrientedAccessPolicySpecifier) {
+
+            AttributeOrientedAccessPolicySpecifier attrOrientedAPObject = (AttributeOrientedAccessPolicySpecifier) deserializedAPObject;
+            //Verify that AP is of the same type
+            Assert.assertEquals(attrOrientedAPObject.getPolicyType(), refAOAPObject.getPolicyType());
+            //Verify that required claims are the same
+            if (refAOAPObject.getAccessRules() != null) {
+                Assert.assertNotNull(attrOrientedAPObject.getAccessRules());
+                Assert.assertEquals(attrOrientedAPObject.getAccessRules().getAccessRuleType(), refAOAPObject.getAccessRules().getAccessRuleType());
+
+            }
+
+        } else {
+            throw new InvalidArgumentsException("Deserialized object is not instance of AttributeOrientedAccessPolicySpecifier");
         }
     }
 }
