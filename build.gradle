@@ -7,7 +7,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.2.2'
+        classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.3.1'
         classpath 'org.owasp:dependency-check-gradle:3.2.0'
     }
 }

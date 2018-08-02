@@ -25,6 +25,7 @@ public class SecurityConstants {
     public static final String AAM_COMPONENT_NAME = "aam";
 
     // AAM REST paths
+    public static final String AAM_PATH_PREFIX = "/aam";
     public static final String AAM_GET_AVAILABLE_AAMS = "/get_available_aams";
     public static final String AAM_GET_AAMS_INTERNALLY = "/get_internally_aams";
     public static final String AAM_GET_COMPONENT_CERTIFICATE = "/get_component_certificate";
