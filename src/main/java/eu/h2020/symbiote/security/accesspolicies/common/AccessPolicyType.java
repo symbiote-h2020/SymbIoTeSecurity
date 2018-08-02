@@ -39,6 +39,14 @@ public enum AccessPolicyType {
     /**
      * Attribute-oriented access policy
      */
-    AOAP
+    AOAP,
+    /**
+     * Platform Attribute-oriented access policy
+     */
+    PAOAP,
+    /**
+     * Composite Platform Attribute-oriented access policy
+     */
+    CPAOAP
 
 }
