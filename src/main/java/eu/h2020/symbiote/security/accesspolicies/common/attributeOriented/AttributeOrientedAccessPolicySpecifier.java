@@ -40,8 +40,8 @@ public class AttributeOrientedAccessPolicySpecifier implements IAccessPolicySpec
     public AttributeOrientedAccessPolicySpecifier(String accessRulesJSON) throws IOException {
         ObjectMapper objMapper = new ObjectMapper();
         ObjectNode objNode = objMapper.readValue(accessRulesJSON, ObjectNode.class);
-        JsonNode accessRules = objNode.get("accessRules");
-        String accessRuleType = accessRules.get("accessRuleType").asText();
+        JsonNode accessRules = objNode.get(SecurityConstants.ACCESS_POLICY_JSON_ACCESS_RULES);
+        String accessRuleType = accessRules.get(SecurityConstants.ACCESS_POLICY_JSON_ACCESS_RULE_TYPE).asText();
         switch (AccessRuleType.valueOf(accessRuleType)) {
             case COMPOSITE:
                 this.accessRules = new CompositeAccessRule(accessRules.toString());

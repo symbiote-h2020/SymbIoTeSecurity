@@ -81,6 +81,8 @@ public class SecurityConstants {
 
     //Attribute-oriented AP
     public static final String ACCESS_POLICY_JSON_ACCESS_RULES = "accessRules";
+    public static final String ACCESS_POLICY_JSON_ACCESS_RULE_TYPE = "accessRuleType";
+
     public static final String ERROR_DESC_UNSUPPORTED_ACCESS_POLICY_TYPE = "Access policy type not suppoted!";
 
     //Bartening and Traiding Module REST paths
