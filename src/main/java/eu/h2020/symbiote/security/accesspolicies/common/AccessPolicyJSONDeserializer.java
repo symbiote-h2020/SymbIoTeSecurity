@@ -91,13 +91,31 @@ public class AccessPolicyJSONDeserializer extends JsonDeserializer<IAccessPolicy
     }
 
     private PlatformAttributeOrientedAccessPolicySpecifier deserializePlatformAttributeOrientedAccessPolicyJSON(ObjectMapper mapper, JsonNode node) throws InvalidArgumentsException, IOException {
-        //TODO parse PAOAP json
-        return new PlatformAttributeOrientedAccessPolicySpecifier(null, new AttributeOrientedAccessPolicySpecifier(node.toString()));
+        JsonNode platformIdNode = node.get(SecurityConstants.ACCESS_POLICY_PLATFORM_ID);
+        return new PlatformAttributeOrientedAccessPolicySpecifier(platformIdNode.asText(), new AttributeOrientedAccessPolicySpecifier(node.toString()).getAccessRules());
     }
 
     private CompositePlatformAttributeOrientedAccessPolicySpecifier deserializeCompositePlatformAttributeOrientedAccessPolicyJSON(ObjectMapper mapper, JsonNode node) throws InvalidArgumentsException, IOException {
-        //TODO parse CPAOAP json
-        return new CompositePlatformAttributeOrientedAccessPolicySpecifier(null, null, null);
+        CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator operator = mapper.convertValue(node.get(SecurityConstants.ACCESS_POLICY_PLATFORM_RELATION_OPERATOR), CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.class);
+
+        Set<PlatformAttributeOrientedAccessPolicySpecifier> spaoaps = null;
+        JsonNode spaoapsJsonNode = node.get(SecurityConstants.ACCESS_POLICY_SINGLE_PAOAPS);
+        if ((spaoapsJsonNode != null) && !spaoapsJsonNode.isNull()) {
+            spaoaps = new HashSet<PlatformAttributeOrientedAccessPolicySpecifier>();
+            for (final JsonNode stapNode : spaoapsJsonNode) {
+                spaoaps.add(deserializePlatformAttributeOrientedAccessPolicyJSON(mapper, stapNode));
+            }
+        }
+
+        Set<CompositePlatformAttributeOrientedAccessPolicySpecifier> cpaoaps = null;
+        JsonNode capsJsonNode = node.get(SecurityConstants.ACCESS_POLICY_COMPOSITE_PAOAPS);
+        if ((capsJsonNode != null) && !capsJsonNode.isNull()) {
+            cpaoaps = new HashSet<CompositePlatformAttributeOrientedAccessPolicySpecifier>();
+            for (final JsonNode capNode : capsJsonNode) {
+                cpaoaps.add(deserializeCompositePlatformAttributeOrientedAccessPolicyJSON(mapper, capNode));
+            }
+        }
+        return new CompositePlatformAttributeOrientedAccessPolicySpecifier(operator, spaoaps, cpaoaps);
     }
 
     private SingleTokenAccessPolicySpecifier deserializeSingleTokenAccessPolicyJSON(ObjectMapper mapper, JsonNode node) throws InvalidArgumentsException {

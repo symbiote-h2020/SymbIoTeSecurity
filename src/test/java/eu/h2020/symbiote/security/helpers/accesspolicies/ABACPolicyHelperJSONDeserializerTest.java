@@ -15,6 +15,8 @@ import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.access
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.StringAccessRule;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.commons.IAccessRule;
 import eu.h2020.symbiote.security.accesspolicies.common.composite.CompositeAccessPolicySpecifier;
+import eu.h2020.symbiote.security.accesspolicies.common.platformAttributeOriented.CompositePlatformAttributeOrientedAccessPolicySpecifier;
+import eu.h2020.symbiote.security.accesspolicies.common.platformAttributeOriented.PlatformAttributeOrientedAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.singletoken.SingleTokenAccessPolicySpecifier;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
@@ -35,15 +37,10 @@ import java.util.*;
 
 public class ABACPolicyHelperJSONDeserializerTest {
 
-    private final String username = "testusername";
-    private final String clientId = "testclientid";
-    private final String deploymentId = "deploymentId";
 
-    private final String goodResourceID = "goodResourceID";
-    private final String goodResourceID2 = "goodResourceID2";
-    private final String badResourceID = "badResourceID";
-    private final String badResourceID2 = "badResourceID2";
-
+    private final String platformId = "platformId1";
+    private final String platformId2 = "platformId2";
+    private final String platformId3 = "platformId3";
     private final String nameAttr = "name";
     private final String ageAttr = "age";
     private final String missingAttr = "youAreGonnaMissMe";
@@ -696,6 +693,101 @@ public class ABACPolicyHelperJSONDeserializerTest {
         assertAttributeOrientedAPObjectEquality(testPolicySpecifier, deserializedObj);
     }
 
+    @Test
+    public void platformAttributeOrientedAPDeserialization() throws
+            IOException, InvalidArgumentsException {
+
+        AccessPolicyType refAPType = AccessPolicyType.PAOAP;
+
+        BooleanAccessRule booleanAccessRule = new BooleanAccessRule(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + fromEUAttr, BooleanAccessRule.BooleanRelationalOperator.IS_TRUE);
+
+        NumericAccessRule numAccessRule = new NumericAccessRule(18, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.GREATER_THAN);
+
+        StringAccessRule stringAccessRule = new StringAccessRule(nameAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.EQUALS);
+
+        Set<IAccessRule> arSet1 = new HashSet<>();
+        arSet1.add(stringAccessRule);
+        arSet1.add(booleanAccessRule);
+
+        CompositeAccessRule compositeAR1 = new CompositeAccessRule(arSet1, CompositeAccessRule.CompositeAccessRulesOperator.OR);
+
+        Set<IAccessRule> arSet2 = new HashSet<>();
+        arSet2.add(compositeAR1);
+        arSet2.add(numAccessRule);
+
+        CompositeAccessRule compositeAR2 = new CompositeAccessRule(arSet2, CompositeAccessRule.CompositeAccessRulesOperator.AND);
+
+        PlatformAttributeOrientedAccessPolicySpecifier testPolicySpecifier = new PlatformAttributeOrientedAccessPolicySpecifier(
+                platformId,
+                new AttributeOrientedAccessPolicySpecifier(compositeAR2).getAccessRules()
+        );
+
+        String apJson = objMapper.writeValueAsString(testPolicySpecifier);
+
+        JsonParser parser = jsonFactory.createParser(apJson);
+
+        IAccessPolicySpecifier deserializedObj = jsonDeserializer.deserialize(parser, null);
+
+        assertPlatformAttributeOrientedAPObjectEquality(testPolicySpecifier, deserializedObj);
+    }
+
+    @Test
+    public void compositePlatformAttributeOrientedAPDeserialization() throws
+            IOException, InvalidArgumentsException {
+
+        AccessPolicyType refAPType = AccessPolicyType.CPAOAP;
+
+        BooleanAccessRule booleanAccessRule = new BooleanAccessRule(SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + fromEUAttr, BooleanAccessRule.BooleanRelationalOperator.IS_TRUE);
+
+        NumericAccessRule numAccessRule1 = new NumericAccessRule(18, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.GREATER_THAN);
+        NumericAccessRule numAccessRule2 = new NumericAccessRule(20, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + ageAttr, NumericAccessRule.NumericRelationalOperator.LESS_THAN);
+        StringAccessRule stringAccessRule = new StringAccessRule(nameAttrOKValue, SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.EQUALS);
+
+        Set<IAccessRule> arSet1 = new HashSet<>();
+        arSet1.add(stringAccessRule);
+        arSet1.add(booleanAccessRule);
+
+        CompositeAccessRule compositeAR1 = new CompositeAccessRule(arSet1, CompositeAccessRule.CompositeAccessRulesOperator.OR);
+
+        PlatformAttributeOrientedAccessPolicySpecifier testPolicySpecifier1 = new PlatformAttributeOrientedAccessPolicySpecifier(
+                platformId,
+                new AttributeOrientedAccessPolicySpecifier(compositeAR1).getAccessRules()
+        );
+
+        PlatformAttributeOrientedAccessPolicySpecifier testPolicySpecifier2 = new PlatformAttributeOrientedAccessPolicySpecifier(
+                platformId2,
+                new AttributeOrientedAccessPolicySpecifier(numAccessRule2).getAccessRules()
+        );
+
+        PlatformAttributeOrientedAccessPolicySpecifier testPolicySpecifier3 = new PlatformAttributeOrientedAccessPolicySpecifier(
+                platformId3,
+                new AttributeOrientedAccessPolicySpecifier(numAccessRule1).getAccessRules()
+        );
+
+        Set<PlatformAttributeOrientedAccessPolicySpecifier> singlePAOAPs = new HashSet<>();
+        singlePAOAPs.add(testPolicySpecifier1);
+
+        Set<CompositePlatformAttributeOrientedAccessPolicySpecifier> compositePAOAPs = new HashSet<>();
+        Set<PlatformAttributeOrientedAccessPolicySpecifier> singlePAOAPs2 = new HashSet<>();
+        singlePAOAPs2.add(testPolicySpecifier2);
+        singlePAOAPs2.add(testPolicySpecifier3);
+
+        CompositePlatformAttributeOrientedAccessPolicySpecifier compPAOAP = new CompositePlatformAttributeOrientedAccessPolicySpecifier(CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.OR, singlePAOAPs2, null);
+
+        Set<CompositePlatformAttributeOrientedAccessPolicySpecifier> compositePAOAPsFinal = new HashSet<>();
+        compositePAOAPsFinal.add(compPAOAP);
+
+        CompositePlatformAttributeOrientedAccessPolicySpecifier cpaoapSpecifier = new CompositePlatformAttributeOrientedAccessPolicySpecifier(CompositeAccessPolicySpecifier.CompositeAccessPolicyRelationOperator.AND, singlePAOAPs, compositePAOAPsFinal);
+
+        String apJson = objMapper.writeValueAsString(cpaoapSpecifier);
+
+        JsonParser parser = jsonFactory.createParser(apJson);
+
+        IAccessPolicySpecifier deserializedObj = jsonDeserializer.deserialize(parser, null);
+
+        assertCompositePlatformAttributeOrientedAPObjectEquality(cpaoapSpecifier, deserializedObj);
+    }
+
     private void assertSingleTokenAPObjectEquality(SingleTokenAccessPolicySpecifier refAPObject, IAccessPolicySpecifier deserializedAPObject) throws InvalidArgumentsException {
 
         if (deserializedAPObject instanceof SingleTokenAccessPolicySpecifier) {
@@ -765,9 +857,9 @@ public class ABACPolicyHelperJSONDeserializerTest {
         if (deserializedAPObject instanceof AttributeOrientedAccessPolicySpecifier) {
 
             AttributeOrientedAccessPolicySpecifier attrOrientedAPObject = (AttributeOrientedAccessPolicySpecifier) deserializedAPObject;
-            //Verify that AP is of the same type
+            //Verify that AOAP is of the same type
             Assert.assertEquals(attrOrientedAPObject.getPolicyType(), refAOAPObject.getPolicyType());
-            //Verify that required claims are the same
+            //Verify that access rules are the same
             if (refAOAPObject.getAccessRules() != null) {
                 Assert.assertNotNull(attrOrientedAPObject.getAccessRules());
                 Assert.assertEquals(attrOrientedAPObject.getAccessRules().getAccessRuleType(), refAOAPObject.getAccessRules().getAccessRuleType());
@@ -776,6 +868,68 @@ public class ABACPolicyHelperJSONDeserializerTest {
 
         } else {
             throw new InvalidArgumentsException("Deserialized object is not instance of AttributeOrientedAccessPolicySpecifier");
+        }
+    }
+
+    private void assertPlatformAttributeOrientedAPObjectEquality(PlatformAttributeOrientedAccessPolicySpecifier refAOAPObject, IAccessPolicySpecifier deserializedAPObject) throws InvalidArgumentsException {
+
+        if (deserializedAPObject instanceof PlatformAttributeOrientedAccessPolicySpecifier) {
+
+            PlatformAttributeOrientedAccessPolicySpecifier platformAttrOrientedAPObject = (PlatformAttributeOrientedAccessPolicySpecifier) deserializedAPObject;
+            //Verify that PAOAP is of the same type
+            Assert.assertEquals(platformAttrOrientedAPObject.getPolicyType(), refAOAPObject.getPolicyType());
+            Assert.assertEquals(platformAttrOrientedAPObject.getPlatformIdentifier(), refAOAPObject.getPlatformIdentifier());
+            //Verify that access rules are the same
+            if (refAOAPObject.getAccessRules() != null) {
+                Assert.assertNotNull(platformAttrOrientedAPObject.getAccessRules());
+                Assert.assertEquals(platformAttrOrientedAPObject.getAccessRules().getAccessRuleType(), refAOAPObject.getAccessRules().getAccessRuleType());
+
+            }
+
+        } else {
+            throw new InvalidArgumentsException("Deserialized object is not instance of PlatformAttributeOrientedAccessPolicySpecifier");
+        }
+    }
+
+    private void assertCompositePlatformAttributeOrientedAPObjectEquality(CompositePlatformAttributeOrientedAccessPolicySpecifier refAPObject, IAccessPolicySpecifier deserializedAPObject) throws InvalidArgumentsException {
+
+        if (deserializedAPObject instanceof CompositePlatformAttributeOrientedAccessPolicySpecifier) {
+
+            CompositePlatformAttributeOrientedAccessPolicySpecifier cPAOAPObj = (CompositePlatformAttributeOrientedAccessPolicySpecifier) deserializedAPObject;
+            //Verify that CPAOAP is of the same type
+            Assert.assertEquals(cPAOAPObj.getPolicyType(), refAPObject.getPolicyType());
+            //Verify that CPAOAP has the same logical operator
+            Assert.assertEquals(cPAOAPObj.getPoliciesRelationOperator(), refAPObject.getPoliciesRelationOperator());
+
+            //verify that incorporated SingleTokenAPs PAOAPs are equal
+            if (refAPObject.getSinglePlatformAttrOrientedAccessPolicies() != null) {
+                Assert.assertNotNull(cPAOAPObj.getSinglePlatformAttrOrientedAccessPolicies());
+
+                Assert.assertEquals(cPAOAPObj.getSinglePlatformAttrOrientedAccessPolicies().size(), refAPObject.getSinglePlatformAttrOrientedAccessPolicies().size());
+
+                Iterator iter = cPAOAPObj.getSinglePlatformAttrOrientedAccessPolicies().iterator();
+
+                for (PlatformAttributeOrientedAccessPolicySpecifier spaoapSpecifier : cPAOAPObj.getSinglePlatformAttrOrientedAccessPolicies()) {
+                    PlatformAttributeOrientedAccessPolicySpecifier deserializedStAPObj = (PlatformAttributeOrientedAccessPolicySpecifier) iter.next();
+                    assertPlatformAttributeOrientedAPObjectEquality(spaoapSpecifier, deserializedStAPObj);
+                }
+            }
+
+            //verify that incorporated Composite PAOAPs are equal
+            if (refAPObject.getCompositePlatformAttrOrientedAccessPolicies() != null) {
+                Assert.assertNotNull(cPAOAPObj.getCompositePlatformAttrOrientedAccessPolicies());
+
+                Assert.assertEquals(cPAOAPObj.getCompositePlatformAttrOrientedAccessPolicies().size(), refAPObject.getCompositePlatformAttrOrientedAccessPolicies().size());
+
+                Iterator iter = cPAOAPObj.getCompositePlatformAttrOrientedAccessPolicies().iterator();
+
+                for (CompositePlatformAttributeOrientedAccessPolicySpecifier cpaoapSpecifier : cPAOAPObj.getCompositePlatformAttrOrientedAccessPolicies()) {
+                    CompositePlatformAttributeOrientedAccessPolicySpecifier deserializedStAPObj = (CompositePlatformAttributeOrientedAccessPolicySpecifier) iter.next();
+                    assertCompositePlatformAttributeOrientedAPObjectEquality(cpaoapSpecifier, deserializedStAPObj);
+                }
+            }
+        } else {
+            throw new InvalidArgumentsException("Deserialized object is not instance of CompositePlatformAttributeOrientedAccessPolicySpecifier");
         }
     }
 }

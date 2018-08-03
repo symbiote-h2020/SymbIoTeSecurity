@@ -44,7 +44,7 @@ public class AttributeOrientedAccessPolicyFactory {
     public static IAccessPolicy getPlatformAttributeOrientedAccessPolicy(PlatformAttributeOrientedAccessPolicySpecifier specifier) throws
             InvalidArgumentsException {
 
-        return new PlatformAttributeOrientedAccessPolicy(specifier.getPlatformIdentifier(), specifier.getAttrOrientedAccessPolicySpecifier().getAccessRules());
+        return new PlatformAttributeOrientedAccessPolicy(specifier.getPlatformIdentifier(), specifier.getAccessRules());
 
     }
 

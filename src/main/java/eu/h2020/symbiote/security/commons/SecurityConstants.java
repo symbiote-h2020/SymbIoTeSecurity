@@ -93,6 +93,14 @@ public class SecurityConstants {
     public static final String BTM_REVOKE_COUPON = "/revoke_coupon";
 
 
+    //Platform Attribute-oriented PA
+    public static final String ACCESS_POLICY_PLATFORM_ID = "platformIdentifier";
+
+    // Composite Platform Attribute-oriented PA
+    public static final String ACCESS_POLICY_PLATFORM_RELATION_OPERATOR = "policiesRelationOperator";
+    public static final String ACCESS_POLICY_SINGLE_PAOAPS = "singlePlatformAttrOrientedAccessPolicies";
+    public static final String ACCESS_POLICY_COMPOSITE_PAOAPS = "compositePlatformAttrOrientedAccessPolicies";
+
     public static final String BOOLEAN_STRING_VALUE_TRUE = "true";
     public static final String BOOLEAN_STRING_VALUE_FALSE = "false";
     private SecurityConstants() {

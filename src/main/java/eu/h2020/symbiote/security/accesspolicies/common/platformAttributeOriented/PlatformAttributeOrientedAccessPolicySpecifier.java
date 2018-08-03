@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyType;
 import eu.h2020.symbiote.security.accesspolicies.common.IAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.AttributeOrientedAccessPolicySpecifier;
+import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.commons.IAccessRule;
 import org.springframework.data.annotation.PersistenceConstructor;
 
 import java.io.IOException;
@@ -16,14 +17,14 @@ import java.io.IOException;
  */
 public class PlatformAttributeOrientedAccessPolicySpecifier implements IAccessPolicySpecifier {
 
-    private final AttributeOrientedAccessPolicySpecifier attrOrientedAccessPolicySpecifier;
+    private final IAccessRule accessRules;
     private final String platformIdentifier;
     private final AccessPolicyType accessPolicyType;
 
     @JsonCreator
     @PersistenceConstructor
-    public PlatformAttributeOrientedAccessPolicySpecifier(String platformIdentifier, AttributeOrientedAccessPolicySpecifier attrOrientedAccessPolicySpecifier) {
-        this.attrOrientedAccessPolicySpecifier = attrOrientedAccessPolicySpecifier;
+    public PlatformAttributeOrientedAccessPolicySpecifier(String platformIdentifier, IAccessRule accessRules) {
+        this.accessRules = accessRules;
         this.platformIdentifier = platformIdentifier;
         this.accessPolicyType = AccessPolicyType.PAOAP;
 
@@ -31,13 +32,13 @@ public class PlatformAttributeOrientedAccessPolicySpecifier implements IAccessPo
 
     public PlatformAttributeOrientedAccessPolicySpecifier(String platformIdentifier, String accessRulesJSON) throws IOException {
         this.platformIdentifier = platformIdentifier;
-        this.attrOrientedAccessPolicySpecifier = new AttributeOrientedAccessPolicySpecifier(accessRulesJSON);
+        this.accessRules = new AttributeOrientedAccessPolicySpecifier(accessRulesJSON).getAccessRules();
         this.accessPolicyType = AccessPolicyType.PAOAP;
 
     }
 
-    public AttributeOrientedAccessPolicySpecifier getAttrOrientedAccessPolicySpecifier() {
-        return attrOrientedAccessPolicySpecifier;
+    public IAccessRule getAccessRules() {
+        return accessRules;
     }
 
     public String getPlatformIdentifier() {
