@@ -1159,7 +1159,277 @@ JSON structure for the given example:
    ]
 }
 ```
+### Attribute Oriented Access Policies (AOAP)
+In order to support fine-grained access control with access rules based on generic attributes, JSON-like, attributes oriented access policies definition language has been developed.
+This language incorporates different types of access rules, based on the data type of the attributes and operators:
+* **BooleanAccessRule** - Access rule based on boolean values
+* **NumericAccessRule** - Access rule based on number values(integer, long, double, float)
+* **StringAccessRule** - Access rule based on text values
+* **CompositeAccessRule** - Wrapper for binding previous access rule type into complex logic expressions
 
+Each rule type requires specifying the attribute name, from which attribute value will be extracted and validated against particular access rule.
+
+Further details on Access Rule types are given in following sub-chapters.
+
+#### Boolean Access Rules
+Boolean access rules evaluate whether provided attribute value correspond to the boolean type values : **true** and **false**.
+Therefore, BooleanAccessRule enables two operators:
+* **IS_TRUE**
+* **IS_FALSE**
+
+BooleanAccessRules evaluation of the provided boolean values provided via attributes in JWT tokens is case-insensitive, meaning that values as TRUE,True and true will be handled in the same manner.
+
+Example JSON structure for Boolean Access Rule:
+ ```json
+{  
+   "attributeName":"SYMBIOTE_fromEU",
+   "operator":"IS_FALSE",
+   "accessRuleType":"BOOLEAN"
+}
+ ```
+
+#### Numeric Access Rules
+Numeric access rules evaluate attribute value from the JWT token against against numeric values in the predefined access policy.
+Therefore, NumericAccessRule enables following operators:
+* **EQUALS** - If the attribute value is equals to the value in access policy
+* **GREATER_OR_EQUAL_THAN** - If the attribute value is greater then or equal to the value in access policy
+* **GREATER_THAN** - If the attribute value is greater then the value in access policy
+* **LESS_OR_EQUALS_THAN** - If the attribute value is smaller then or equal to the value in access policy
+* **LESS_THAN** - If the attribute value is smaller then the value in access policy
+* **NOT_EQUALS** - If the attribute value is not equals to the value in access policy
+
+Example JSON structure for Numeric Access Rule:
+ ```json
+{  
+   "accessRuleValue":19,
+   "attributeName":"SYMBIOTE_age",
+   "operator":"GREATER_THAN",
+   "accessRuleType":"NUMERIC"
+}
+ ```
+#### String Access Rules
+String access rules evaluate attribute value from the JWT token against against text values in the predefined access policy.
+Therefore, StringAccessRule enables following operators:
+* **EQUALS** - If the attribute value is equals to the value in access policy
+* **EQUALS_IGNORE_CASE** - If the attribute value is equals to the value in access policy - case-insensitive
+* **CONTAINS** - If the attribute value is contained in the value in access policy
+* **CONTAINS_IGNORE_CASE** - If the attribute value is contained in the value in access policy - case-insensitive
+* **NOT_CONTAINS** - If the attribute value is not contained in the value in the value in access policy
+* **NOT_CONTAINS_IGNORE_CASE** - If the attribute value is not contained in the value in the value in access policy - case-insensitive
+* **STARTS_WITH** - If the attribute value is at the start of the value in access policy
+* **STARTS_WITH_IGNORE_CASE** - If the attribute value is at the start of the value in access policy - case-insensitive
+* **ENDS_WITH** - If the attribute value is at the end of the value in access policy
+* **ENDS_WITH_IGNORE_CASE** - If the attribute value is at the end of the value in access policy - case-insensitive
+
+Example JSON structure for String Access Rule:
+ ```json
+{  
+   "attributeName":"SYMBIOTE_name",
+   "expectedValue":"Mike Doe",
+   "operator":"NOT_CONTAINS",
+   "accessRuleType":"STRING"
+}
+ ```
+#### Composite Access Rules
+Composite access rules enable logical binding of Boolean, Numeric and String access rules into complex, tree-based structures.
+In order to support building of complex logical expressions, following logical operators are supported:
+* **AND**
+* **OR**
+* **NAND** - Negative AND
+* **NOR** - Negative OR
+
+In case that the definition of access policy requires nesting of access rules in multiple tree-layers, Composite access rule can be build by providing other composite access rules that incorporate specific Boolean, Numeric or String access rules.
+
+Example JSON structure for nested Composite Access Rule:
+ ```json
+{  
+   "accessRules":[  
+      {  
+         "accessRules":[  
+            {  
+               "attributeName":"SYMBIOTE_name",
+               "expectedValue":"John",
+               "operator":"EQUALS",
+               "accessRuleType":"STRING"
+            },
+            {  
+               "attributeName":"SYMBIOTE_fromEU",
+               "operator":"IS_TRUE",
+               "accessRuleType":"BOOLEAN"
+            }
+         ],
+         "operator":"OR",
+         "accessRuleType":"COMPOSITE"
+      },
+      {  
+         "accessRuleValue":18,
+         "attributeName":"SYMBIOTE_age",
+         "operator":"GREATER_THAN",
+         "accessRuleType":"NUMERIC"
+      }
+   ],
+   "operator":"AND",
+   "accessRuleType":"COMPOSITE"
+}
+ ```
+#### Attribute Oriented Access Policy Example
+Definition of **AOAP** required following the top-level Access Policy structure, just as in case of Composite Access Policies and Single Token Access Policies.
+
+Due to that reason, JSON defining **AOAP** is required to have:
+* policyType field set to value "AOAP"
+* accessRules field containing Access Rules defined for that **AOAP**
+
+Example of the JSON defining **AOAP** is:
+ ```json
+{  
+   "accessRules":{  
+      "accessRules":[  
+         {  
+            "accessRuleValue":18,
+            "attributeName":"SYMBIOTE_age",
+            "operator":"GREATER_THAN",
+            "accessRuleType":"NUMERIC"
+         },
+         {  
+            "accessRules":[  
+               {  
+                  "attributeName":"SYMBIOTE_name",
+                  "expectedValue":"John",
+                  "operator":"EQUALS",
+                  "accessRuleType":"STRING"
+               },
+               {  
+                  "attributeName":"SYMBIOTE_fromEU",
+                  "operator":"IS_TRUE",
+                  "accessRuleType":"BOOLEAN"
+               }
+            ],
+            "operator":"OR",
+            "accessRuleType":"COMPOSITE"
+         }
+      ],
+      "operator":"AND",
+      "accessRuleType":"COMPOSITE"
+   },
+   "policyType":"AOAP"
+}
+```
+### Platform Attribute Oriented Access Policies (PAOAP)
+Even though **AOAP** enables generic engine for fine-grained access rules validation, limiting attribute value validation based on issuer of the attribute is recognized as mandatory for symbIoTe use-cases, e.g. platform federation.
+
+Due to that reason, Platform Attribute Oriented Access Policies - **PAOAP**, are introduced, enabling specification of single platform issuing Token that includes attributes for validation against particular Access Rules set.
+
+In order to define **PAOAP**, platform owners are required to specify:
+* Identificator of the platform issuing attributes
+* Access Rules set (AOAP-based)
+
+For example, platformA is federated with platformB and wants to allow access to the resource for users that:
+* are older than 18 years **AND**
+* are from EU
+
+JSON Structure for that **PAOAP** is:
+ ```json
+{  
+   "accessRules":{  
+      "accessRules":[  
+         {  
+            "accessRuleValue":18,
+            "attributeName":"SYMBIOTE_age",
+            "operator":"GREATER_THAN",
+            "accessRuleType":"NUMERIC"
+         },
+         {  
+            "attributeName":"SYMBIOTE_fromEU",
+            "operator":"IS_TRUE",
+            "accessRuleType":"BOOLEAN"
+         }
+      ],
+      "operator":"AND",
+      "accessRuleType":"COMPOSITE"
+   },
+   "platformIdentifier":"platformB",
+   "policyType":"PAOAP"
+} 
+ ```
+ 
+### Composite Platform Attribute Oriented Access Policies (CPAOAP)
+In order to support use-cases, where granting access to a resource requires validation of attributes from multiple Tokens, issued by multiple platforms, wrapper for **PAOAP**, named **CPAOAP** is introduced.
+
+Using **CPAOAP**, platform owners can specify **AOAP-based** Access policy that:
+* validates Access Rules against attributes issued by multiple platforms
+* defines logical relationships between these Access Rules
+
+**CPAOAP** are implemented as wrapper around **PAOAP** with additional logical operators:
+* **AND**
+* **OR**
+
+As in case of Composite Access Policies(**CAP**), CAOAP allows nesting of **PAOAP** in tree-based structures.
+ 
+Example - Access to the resource should be granted to the users that posses attributes stating that:
+* Issued by **PlatformA** (name is John **OR** user is from EU) **AND**
+    * Issued by **PlatformB** (user is older than **18**) **OR**
+    * Issued by **PlatformC** (user is younger than **20**)
+
+
+ ```json
+{  
+   "policiesRelationOperator":"AND",
+   "singlePlatformAttrOrientedAccessPolicies":[  
+      {  
+         "accessRules":{  
+            "accessRules":[  
+               {  
+                  "attributeName":"SYMBIOTE_name",
+                  "expectedValue":"John",
+                  "operator":"EQUALS",
+                  "accessRuleType":"STRING"
+               },
+               {  
+                  "attributeName":"SYMBIOTE_fromEU",
+                  "operator":"IS_TRUE",
+                  "accessRuleType":"BOOLEAN"
+               }
+            ],
+            "operator":"OR",
+            "accessRuleType":"COMPOSITE"
+         },
+         "platformIdentifier":"platformA",
+         "policyType":"PAOAP"
+      }
+   ],
+   "compositePlatformAttrOrientedAccessPolicies":[  
+      {  
+         "policiesRelationOperator":"OR",
+         "singlePlatformAttrOrientedAccessPolicies":[  
+            {  
+               "accessRules":{  
+                  "accessRuleValue":20,
+                  "attributeName":"SYMBIOTE_age",
+                  "operator":"LESS_THAN",
+                  "accessRuleType":"NUMERIC"
+               },
+               "platformIdentifier":"platformB",
+               "policyType":"PAOAP"
+            },
+            {  
+               "accessRules":{  
+                  "accessRuleValue":18,
+                  "attributeName":"SYMBIOTE_age",
+                  "operator":"GREATER_THAN",
+                  "accessRuleType":"NUMERIC"
+               },
+               "platformIdentifier":"platformC",
+               "policyType":"PAOAP"
+            }
+         ],
+         "compositePlatformAttrOrientedAccessPolicies":null,
+         "policyType":"CPAOAP"
+      }
+   ],
+   "policyType":"CPAOAP"
+}  
+ ```
+ 
 # Credentials revocation 
 In case of security breach, there may be need to revoke credentials such as certificates or tokens. 
 

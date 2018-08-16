@@ -110,8 +110,6 @@ public class StringAccessRule implements IAccessRule {
                 return (controlledVal.endsWith(expectedVal)) ? true : false;
             case ENDS_WITH_IGNORE_CASE:
                 return (controlledVal.toLowerCase().endsWith(expectedVal.toLowerCase())) ? true : false;
-            case REGEXP:
-                return false;//TODO implement
             default:
                 return false;
         }

@@ -1,26 +1,3 @@
-/*
- * ---------------------------------------------------------------------
- * Kiwi Remote Instrumentation Platform
- * http://kiwi.man.poznan.pl
- * Copyright (C) 2010-2013
- * ---------------------------------------------------------------------
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Contributors:
- *
- */
 package eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -134,7 +111,7 @@ public class CompositeAccessRule implements IAccessRule {
         return operator;
     }
 
-    public Set<Token> validateAndRelatedAccessRules(Set<Token> authorizationTokens) {
+    private Set<Token> validateAndRelatedAccessRules(Set<Token> authorizationTokens) {
         Set<Token> validTokens = new HashSet<>();
         if (this.accessRules != null) {
             int validAccessRules = 0;
@@ -153,7 +130,7 @@ public class CompositeAccessRule implements IAccessRule {
         return validTokens;
     }
 
-    public Set<Token> validateOrRelatedAccessRules(Set<Token> authorizationTokens) {
+    private Set<Token> validateOrRelatedAccessRules(Set<Token> authorizationTokens) {
         Set<Token> validTokens = new HashSet<>();
         if (this.accessRules != null) {
             for (IAccessRule accessRule : this.accessRules) {
@@ -162,8 +139,8 @@ public class CompositeAccessRule implements IAccessRule {
         }
         return validTokens;
     }
-    //FIXME @Nemanja maybe not entirely correct (especially returned set of Tokens)
-    public Set<Token> validateNandRelatedAccessRules(Set<Token> authorizationTokens) {
+
+    private Set<Token> validateNandRelatedAccessRules(Set<Token> authorizationTokens) {
         Set<Token> validTokens = new HashSet<>();
         if (this.accessRules != null){
             int validAccessRules = 0;
@@ -180,8 +157,8 @@ public class CompositeAccessRule implements IAccessRule {
         }
         return validTokens;
     }
-    //FIXME @Nemanja returns full set of tokens if zero rules met, empty otherwise
-    public Set<Token>validateNorRelatedAccessRules(Set<Token> authorizationTokens) {
+
+    private Set<Token> validateNorRelatedAccessRules(Set<Token> authorizationTokens) {
         Set<Token> validTokens = new HashSet<>();
         if(this.accessRules != null){
             int validAccessRules = 0;

@@ -164,7 +164,6 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
         assertTrue(resp.keySet().contains(goodResourceID));
     }
 
-    //TODO - Kaspar - add tests(positive and negative) for other numeric operators : NOT_EQUALS, GREATER_THAN, LESS_THAN, GREATER_OR_EQUAL_THAN, LESS_OR_EQUALS_THAN
     @Test
     public void singleNumberAccessRuleNotEqualsCheckSuccess() throws NoSuchAlgorithmException, InvalidArgumentsException{
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
