@@ -100,11 +100,11 @@ where the componentIdentifier can be read from the table available [here](#compo
 ## Non java developers
 1. To acquire a GUEST Token, send empty HTTP POST request on:
 ```
-https://<coreInterfaceAdress>/get_guest_token
+https://<coreInterfaceAdress>/aam/get_guest_token
 ```
 or
 ```
-https://<platformInterworkingInterface>/paam/get_guest_token
+https://<platformInterworkingInterface>/aam/get_guest_token
 ```
 depending which platform you want to acquire the GUEST token from. Please be aware that either of them has the same authorization power.
 In return you will get empty response which header *x-auth-token* contains your GUEST token.
@@ -359,11 +359,11 @@ The following image depicts in general how to get a symbIoTe authentication cert
      - CSR's format in REGEX: ^(CN=)(([\w-])+)$
 3. submit the CSR along with other credentials to your HOME AAM on the following REST endpoint, to receive your signed Certificate:
 ```
-https://<coreInterfaceAdress>/sign_certificate_request
+https://<coreInterfaceAdress>/aam/sign_certificate_request
 ```
 or
 ```
-https://<platformInterworkingInterface>/paam/sign_certificate_request
+https://<platformInterworkingInterface>/aam/sign_certificate_request
 ```
 
 CSR is located in body of the request, sent with POST method.
@@ -406,7 +406,7 @@ Actor needs to know **coreInterfaceAdress**.
 In case of acquiring tokens from other platform, their **platformInterworkingInterfaces** 
 can be accessed, sending GET request on:
 ```
-https://<coreInterfaceAdress>/get_available_aams
+https://<coreInterfaceAdress>/aam/get_available_aams
 ```
 In return, response with json containing [AvailableAAMsCollection](https://github.com/symbiote-h2020/SymbIoTeSecurity/blob/develop/src/main/java/eu/h2020/symbiote/security/communication/payloads/AvailableAAMsCollection.java) should be received.
 
@@ -416,11 +416,11 @@ However, it can give access only to public resources.
 
 To acquire such token, empty HTTP POST request has to be sent on:
 ```
-https://<coreInterfaceAdress>/get_guest_token
+https://<coreInterfaceAdress>/aam/get_guest_token
 ```
 or
 ```
-https://<platformInterworkingInterface>/paam/get_guest_token
+https://<platformInterworkingInterface>/aam/get_guest_token
 ```
 depending from which platform we want to acquire Guest Token.
 In return, headers with *x-auth-token* containing Guest Token should be received.
@@ -441,11 +441,11 @@ Required request should look like this:
  where {token} is Login Request.
  Request should be send on:
 ```
-https://<coreInterfaceAdress>/get_home_token
+https://<coreInterfaceAdress>/aam/get_home_token
 ```
 or
 ```
-https://<platformInterworkingInterface>/paam/get_home_token
+https://<platformInterworkingInterface>/aam/get_home_token
 ```
 depending from which platform we want to acquire Home Token.
 In return, headers with *x-auth-token* containing Home Token should be received.
@@ -595,11 +595,11 @@ Claims description:
 
 The client can verify that the response was generated recently and is signed with the desired service private key by checking the tokens signature against the component's exposed certificate available in its platform AAM using a GET request.
 ```
-https://<coreInterfaceAdress>/get_component_certificate/platform/SymbIoTe_Core_AAM/component/<componentID>
+https://<coreInterfaceAdress>/aam/get_component_certificate/platform/SymbIoTe_Core_AAM/component/<componentID>
 ```
 or
 ```
-https://<platformInterworkingInterface>/paam/get_component_certificate/platform/<platformID>/component/<componentID>
+https://<platformInterworkingInterface>/aam/get_component_certificate/platform/<platformID>/component/<componentID>
 ```
 The certificate is returned in the body in PEM format.
 
@@ -1487,11 +1487,11 @@ Payload should be sent to the issuer of the certificate (CoreAAM in case of plat
 ## Non java developers:
 To revoke credentials, proper payload, Revocation Request, should be sent on following urls:
 ```
-https://<coreInterfaceAdress>/revoke_credentials 
+https://<coreInterfaceAdress>/aam/revoke_credentials 
 ```
 or
 ```
-https://<platformInterworkingInterface>/paam/revoke_credentials
+https://<platformInterworkingInterface>/aam/revoke_credentials
 ```
 depending on the issuer of that credentials.
 ### Revocation Request
