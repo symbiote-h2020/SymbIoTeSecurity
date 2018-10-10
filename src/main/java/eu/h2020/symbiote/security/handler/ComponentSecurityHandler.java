@@ -206,7 +206,7 @@ public class ComponentSecurityHandler implements IComponentSecurityHandler {
         authorizationCredentials.add(new AuthorizationCredentials(coreCredentials.homeToken, coreCredentials.homeAAM, coreCredentials));
         try {
             return MutualAuthenticationHelper.getSecurityRequest(authorizationCredentials, false);
-        } catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException | ValidationException e) {
             log.error(e);
             throw new SecurityHandlerException("Failed to generate security request: " + e.getMessage());
         }

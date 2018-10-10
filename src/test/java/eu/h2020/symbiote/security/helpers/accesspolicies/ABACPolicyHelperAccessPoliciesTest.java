@@ -13,6 +13,7 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -142,7 +143,8 @@ public class ABACPolicyHelperAccessPoliciesTest {
     @Test
     public void compositeSpecifierBasedAccessPolicyCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -183,7 +185,8 @@ public class ABACPolicyHelperAccessPoliciesTest {
     @Test
     public void compositeSpecifierBasedAccessPolicyCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -224,7 +227,8 @@ public class ABACPolicyHelperAccessPoliciesTest {
     @Test
     public void singleTokenSpecifierBasedAccessPolicyCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -249,7 +253,8 @@ public class ABACPolicyHelperAccessPoliciesTest {
     @Test
     public void singleTokenSpecifierBasedAccessPolicyCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());

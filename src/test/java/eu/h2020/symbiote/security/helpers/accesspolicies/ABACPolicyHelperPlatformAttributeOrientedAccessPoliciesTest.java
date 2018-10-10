@@ -3,7 +3,6 @@ package eu.h2020.symbiote.security.helpers.accesspolicies;
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyFactory;
-import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.AttributeOrientedAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.BooleanAccessRule;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.CompositeAccessRule;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.NumericAccessRule;
@@ -11,7 +10,6 @@ import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.access
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.commons.IAccessRule;
 import eu.h2020.symbiote.security.accesspolicies.common.composite.CompositeAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.platformAttributeOriented.CompositePlatformAttributeOrientedAccessPolicySpecifier;
-import eu.h2020.symbiote.security.accesspolicies.common.platformAttributeOriented.PlatformAttributeOrientedAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.platformAttributeOriented.PlatformAttributeOrientedAccessPolicySpecifier;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
@@ -19,6 +17,7 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -158,7 +157,8 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     @Test
     public void singlePAOAPNumberAccessRuleEqualsCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -175,7 +175,10 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singlePAOAPNumberAccessRuleNotEqualsCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException{
+    public void singlePAOAPNumberAccessRuleNotEqualsCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -191,7 +194,10 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singlePAOAPNumberAccessRuleWrongPlatformCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException{
+    public void singlePAOAPNumberAccessRuleWrongPlatformCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -207,7 +213,10 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singlePAOAPStringAccessRuleEqualsCheckSuccess() throws NoSuchAlgorithmException, InvalidArgumentsException {
+    public void singlePAOAPStringAccessRuleEqualsCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -222,7 +231,10 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singlePAOAPStringAccessRuleNotContainsCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException {
+    public void singlePAOAPStringAccessRuleNotContainsCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -237,7 +249,10 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singlePAOAPStringAccessRuleWrongPlatformCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException {
+    public void singlePAOAPStringAccessRuleWrongPlatformCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -252,7 +267,10 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singlePAOAPBooleanAccessRuleIsTrueCheckSuccess() throws NoSuchAlgorithmException, InvalidArgumentsException {
+    public void singlePAOAPBooleanAccessRuleIsTrueCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -267,7 +285,10 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singlePAOAPBooleanAccessRuleIsTrueCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException {
+    public void singlePAOAPBooleanAccessRuleIsTrueCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -282,7 +303,10 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singlePAOAPBooleanAccessRuleWrongPlatformCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException {
+    public void singlePAOAPBooleanAccessRuleWrongPlatformCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -297,7 +321,10 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singlePAOAPCompositeAccessRuleCheckSuccess() throws NoSuchAlgorithmException, InvalidArgumentsException {
+    public void singlePAOAPCompositeAccessRuleCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -317,7 +344,10 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singlePAOAPCompositeAccessRuleCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException {
+    public void singlePAOAPCompositeAccessRuleCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -337,7 +367,10 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singlePAOAPCompositeAccessRuleWrongPlatformCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException {
+    public void singlePAOAPCompositeAccessRuleWrongPlatformCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -359,7 +392,8 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     @Test
     public void compositePAOAPSinglePAOPAsANDOperatorCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -385,7 +419,8 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     @Test
     public void compositePAOAPSinglePAOPAsANDOperatorCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -411,7 +446,8 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     @Test
     public void compositePAOAPSinglePAOPAsOROperatorCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -437,7 +473,8 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     @Test
     public void compositePAOAPSinglePAOPAsOROperatorCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -463,7 +500,8 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     @Test
     public void compositePAOAPCompositePAOPAsANDOperatorCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -505,7 +543,8 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     @Test
     public void compositePAOAPCompositePAOPAsANDOperatorCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -546,7 +585,8 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     @Test
     public void compositePAOAPCompositePAOPAsOROperatorCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -587,7 +627,8 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     @Test
     public void compositePAOAPCompositePAOPAsOROperatorCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -628,7 +669,8 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     @Test
     public void compositePAOAPSingleAndCompositePAOPAsANDOperatorCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -672,7 +714,8 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     @Test
     public void compositePAOAPSingleAndCompositePAOPAsANDOperatorCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -717,7 +760,8 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     @Test
     public void compositePAOAPSingleAndCompositePAOPAsOROperatorCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -761,7 +805,8 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
     @Test
     public void compositePAOAPSingleAndCompositePAOPAsOROperatorCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsMultipleTokensSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());

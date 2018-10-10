@@ -9,6 +9,7 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -123,7 +124,8 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
     @Test
     public void federatedResourceSingleTokenCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         Set<String> federationMembers = new HashSet<>();
         federationMembers.add(federatedPlatformId);
@@ -151,7 +153,8 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
     @Test
     public void federatedResourceSingleTokenCheckFailWrongFederationId() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         Set<String> federationMembers = new HashSet<>();
         federationMembers.add(deploymentId);
@@ -172,7 +175,8 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
     @Test
     public void federatedResourceSingleHomeTokenCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         Set<String> federationMembers = new HashSet<>();
         federationMembers.add(federatedPlatformId);
@@ -194,7 +198,8 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
     @Test
     public void federatedResourceSingleHomeTokenCheckFailWrongFederationId() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         Set<String> federationMembers = new HashSet<>();
         federationMembers.add(deploymentId);
@@ -215,7 +220,8 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
     @Test
     public void federatedResourceSingleHomeTokenSuccessForLocallyIssuedFederatedToken() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         Set<String> federationMembers = new HashSet<>();
         federationMembers.add(federatedPlatformId);

@@ -24,6 +24,7 @@ public class ValidationException extends SecurityException {
     public static final String USER_NOT_FOUND_IN_DB = "User not found in db";
     public static final String ISSUING_FOREIGN_TOKEN_ERROR = "Someone tried issuing a foreign token using a home token";
     public static final String INVALID_TOKEN = "Invalid token";
+    public static final String INVALID_AUTHENTICATION_CHALLENGE = "Invalid authentication challenge";
     public static final String NO_RIGHTS_TO_TOKEN = "You have no rights to this token";
     public static final String FOREIGN_TOKEN_NOT_MATCH_REMOTE_HOME_TOKEN = "Foreign token is invalid and does not mach remote Home Token";
     public static final String CERTIFICATE_MISMATCH = "Core AAM certificate does not match certificate known to us, possibly malicious core";

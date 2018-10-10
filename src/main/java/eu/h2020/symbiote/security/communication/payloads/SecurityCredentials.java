@@ -3,6 +3,9 @@ package eu.h2020.symbiote.security.communication.payloads;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.h2020.symbiote.security.commons.Token.Type;
+import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
+import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
+import eu.h2020.symbiote.security.commons.jwt.JWTEngine;
 
 import java.util.Optional;
 
@@ -34,8 +37,16 @@ public class SecurityCredentials {
                                Optional<String> authenticationChallenge,
                                Optional<String> clientCertificate,
                                Optional<String> clientCertificateSigningAAMCertificate,
-                               Optional<String> foreignTokenIssuingAAMCertificate) {
+                               Optional<String> foreignTokenIssuingAAMCertificate) throws
+            ValidationException {
+        if (!JWTEngine.validateTokenString(token).equals(ValidationStatus.VALID))
+            throw new ValidationException(ValidationException.INVALID_TOKEN);
         this.token = token;
+        if (authenticationChallenge.isPresent()
+                && !authenticationChallenge.get().isEmpty()
+                && !JWTEngine.validateTokenString(authenticationChallenge.orElse("")).equals(ValidationStatus.VALID)) {
+            throw new ValidationException(ValidationException.INVALID_AUTHENTICATION_CHALLENGE);
+        }
         this.authenticationChallenge = authenticationChallenge.orElse("");
         this.clientCertificate = clientCertificate.orElse("");
         this.clientCertificateSigningAAMCertificate = clientCertificateSigningAAMCertificate.orElse("");
@@ -54,7 +65,8 @@ public class SecurityCredentials {
                                @JsonProperty("authenticationChallenge") String authenticationChallenge,
                                @JsonProperty("clientCertificate") String clientCertificate,
                                @JsonProperty("clientCertificateSigningAAMCertificate") String clientCertificateSigningAAMCertificate,
-                               @JsonProperty("foreignTokenIssuingAAMCertificate") String foreignTokenIssuingAAMCertificate) {
+                               @JsonProperty("foreignTokenIssuingAAMCertificate") String foreignTokenIssuingAAMCertificate) throws
+            ValidationException {
         this(token, Optional.of(authenticationChallenge), Optional.of(clientCertificate),
                 Optional.of(clientCertificateSigningAAMCertificate),
                 Optional.of(foreignTokenIssuingAAMCertificate));

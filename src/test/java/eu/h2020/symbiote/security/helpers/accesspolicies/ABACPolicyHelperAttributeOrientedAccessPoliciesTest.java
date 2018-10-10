@@ -15,6 +15,7 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -148,7 +149,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleNumberAccessRuleEqualsCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -165,7 +167,10 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singleNumberAccessRuleNotEqualsCheckSuccess() throws NoSuchAlgorithmException, InvalidArgumentsException{
+    public void singleNumberAccessRuleNotEqualsCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -181,7 +186,10 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singleNumberAccessRuleNotEqualsCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException{
+    public void singleNumberAccessRuleNotEqualsCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -197,7 +205,10 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singleNumberAccessRuleGreaterThanCheckSuccess() throws NoSuchAlgorithmException, InvalidArgumentsException{
+    public void singleNumberAccessRuleGreaterThanCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -213,7 +224,10 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singleNumberAccessRuleGreaterThanCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException{
+    public void singleNumberAccessRuleGreaterThanCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -228,7 +242,10 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singleNumberAccessRuleLessThanCheckSuccess() throws NoSuchAlgorithmException, InvalidArgumentsException{
+    public void singleNumberAccessRuleLessThanCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -244,7 +261,10 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singleNumberAccessRuleLessThanCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException{
+    public void singleNumberAccessRuleLessThanCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -260,7 +280,10 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singleNumberAccessRuleGreaterOrEqualsCheckSuccess() throws NoSuchAlgorithmException, InvalidArgumentsException{
+    public void singleNumberAccessRuleGreaterOrEqualsCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -276,7 +299,10 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singleNumberAccessRuleGreaterOrEqualsCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException{
+    public void singleNumberAccessRuleGreaterOrEqualsCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -292,7 +318,10 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singleNumberAccessRuleLessOrEqualsCheckSuccess() throws NoSuchAlgorithmException, InvalidArgumentsException{
+    public void singleNumberAccessRuleLessOrEqualsCheckSuccess() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -308,7 +337,10 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     }
 
     @Test
-    public void singleNumberAccessRuleLessOrEqualsCheckFailure() throws NoSuchAlgorithmException, InvalidArgumentsException{
+    public void singleNumberAccessRuleLessOrEqualsCheckFailure() throws
+            NoSuchAlgorithmException,
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -327,7 +359,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleBooleanAccessRuleFalseValueCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -346,7 +379,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleBooleanAccessRuleFalseValueCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -366,7 +400,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -385,7 +420,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleEqualsIgnoreCaseCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -404,7 +440,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleEqualsIgnoreCaseCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -422,7 +459,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleContainsCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -441,7 +479,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleContainsCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -460,7 +499,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleContainsIgnoreCaseCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -478,7 +518,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleContainsIgnoreCaseCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
@@ -497,7 +538,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleNotContainsCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -516,7 +558,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleNotContainsCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -535,7 +578,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleNotContainsIgnoreCaseCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -554,7 +598,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleNotContainsIgnoreCaseCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -573,7 +618,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleStartsWithCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -592,7 +638,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleStartsWithCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -612,7 +659,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleStartsWithIgnoreCaseCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -631,7 +679,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleStartsWithIgnoreCaseCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -650,14 +699,15 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleEndsWithCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
 
-        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrOKValue.substring(nameAttrOKValue.length() - 2, nameAttrOKValue.length())), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.ENDS_WITH);
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrOKValue.substring(nameAttrOKValue.length() - 2)), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.ENDS_WITH);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
 
@@ -669,7 +719,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleEndsWithCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -689,14 +740,15 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleEndsWithIgnoreCaseCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
 
         Map<String, IAccessPolicy> resourceAccessPolicyMap = new HashMap<>();
 
-        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrOKValue.substring(nameAttrOKValue.length() - 1, nameAttrOKValue.length())).toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.ENDS_WITH_IGNORE_CASE);
+        StringAccessRule stringAccessRule = new StringAccessRule((nameAttrOKValue.substring(nameAttrOKValue.length() - 1)).toUpperCase(), SecurityConstants.SYMBIOTE_ATTRIBUTES_PREFIX + nameAttr, StringAccessRule.StringRelationalOperator.ENDS_WITH_IGNORE_CASE);
 
         resourceAccessPolicyMap.put(goodResourceID, AccessPolicyFactory.getAccessPolicy(new AttributeOrientedAccessPolicySpecifier(stringAccessRule)));
 
@@ -709,7 +761,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void singleStringAccessRuleEndsWithIgnoreCaseCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -728,7 +781,8 @@ public class ABACPolicyHelperAttributeOrientedAccessPoliciesTest {
     @Test
     public void compositeAccessRuleCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());

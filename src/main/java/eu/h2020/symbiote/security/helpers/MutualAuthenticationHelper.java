@@ -71,7 +71,8 @@ public class MutualAuthenticationHelper {
      */
     public static SecurityRequest getSecurityRequest(Set<AuthorizationCredentials> authorizationCredentials,
                                                      boolean attachCertificates) throws
-            NoSuchAlgorithmException {
+            NoSuchAlgorithmException,
+            ValidationException {
 
         Date timestampDate = new Date();
         // JWT rounds to seconds

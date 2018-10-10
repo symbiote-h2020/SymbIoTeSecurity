@@ -96,7 +96,8 @@ public class MutualAuthenticationHelperTest {
 
     @Test
     public void getSecurityRequestSuccess() throws
-            NoSuchAlgorithmException {
+            NoSuchAlgorithmException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
         // check online request
@@ -138,7 +139,8 @@ public class MutualAuthenticationHelperTest {
             CertificateException,
             NoSuchProviderException,
             KeyStoreException,
-            IOException {
+            IOException,
+            ValidationException {
 
         KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
         ks.load(new FileInputStream(SERVICE_CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
@@ -157,7 +159,8 @@ public class MutualAuthenticationHelperTest {
             IOException,
             CertificateException,
             NoSuchAlgorithmException,
-            UnrecoverableKeyException {
+            UnrecoverableKeyException,
+            ValidationException {
 
         KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
         ks.load(new FileInputStream(SERVICE_CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
@@ -201,7 +204,8 @@ public class MutualAuthenticationHelperTest {
             IOException,
             CertificateException,
             NoSuchAlgorithmException,
-            UnrecoverableKeyException {
+            UnrecoverableKeyException,
+            ValidationException {
 
         KeyStore ks = KeyStore.getInstance("PKCS12", "BC");
         ks.load(new FileInputStream(SERVICE_CERTIFICATE_LOCATION), CERTIFICATE_PASSWORD.toCharArray());
@@ -339,7 +343,8 @@ public class MutualAuthenticationHelperTest {
     public void serializeAndDeserializeSecurityRequest() throws
             NoSuchAlgorithmException,
             JsonProcessingException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
         // generate
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
         // adding second token
@@ -351,7 +356,6 @@ public class MutualAuthenticationHelperTest {
         assertTrue(securityRequestHeaderParams.containsKey(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER));
         assertEquals(2, Integer.valueOf(securityRequestHeaderParams.get(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER)).intValue());
         assertTrue(securityRequestHeaderParams.containsKey(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + 1));
-
         // deserialize
         SecurityRequest deserializedSecurityRequest = new SecurityRequest(securityRequestHeaderParams);
         assertEquals(securityRequest, deserializedSecurityRequest);
@@ -401,7 +405,8 @@ public class MutualAuthenticationHelperTest {
     @Test
     public void serializeAndDeserializeSecurityRequestFailForMissingArgs() throws
             NoSuchAlgorithmException,
-            JsonProcessingException {
+            JsonProcessingException,
+            ValidationException {
         // generate
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(authorizationCredentialsSet, false);
         // serialize

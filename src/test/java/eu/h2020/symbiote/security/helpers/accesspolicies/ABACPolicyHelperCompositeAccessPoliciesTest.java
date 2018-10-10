@@ -12,6 +12,7 @@ import eu.h2020.symbiote.security.commons.Token;
 import eu.h2020.symbiote.security.commons.credentials.AuthorizationCredentials;
 import eu.h2020.symbiote.security.commons.credentials.HomeCredentials;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
+import eu.h2020.symbiote.security.commons.exceptions.custom.ValidationException;
 import eu.h2020.symbiote.security.communication.payloads.AAM;
 import eu.h2020.symbiote.security.communication.payloads.SecurityCredentials;
 import eu.h2020.symbiote.security.communication.payloads.SecurityRequest;
@@ -137,7 +138,8 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
     @Test
     public void singleResourceMultipleTokensOrOperatorCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -178,7 +180,8 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
     @Test
     public void singleResourceMultipleTokensOrOperatorOneBadArgumentCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -219,7 +222,8 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
     @Test
     public void singleResourceMultipleTokensOrOperatorBadArgumentsCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -261,7 +265,8 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
     @Test
     public void singleResourceMultipleTokensAndOperatorCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -302,7 +307,8 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
     @Test
     public void singleResourceMultipleTokensAndOperatorOneBadArgumentCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -343,7 +349,8 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
     @Test
     public void singleResourceMultipleTokensAndOperatorBadArgumentsCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -381,9 +388,10 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
         assertFalse(resp.keySet().contains(goodResourceID));
     }
     @Test
-    public  void singleResourceMultipleTokensCompositeAndSingleAndOperatorCheckSuccess()throws
+    public void singleResourceMultipleTokensCompositeAndSingleAndOperatorCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -441,9 +449,10 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
     }
 
     @Test
-    public  void singleResourceMultipleTokensCompositeAndSingleAndOperatorOneBadArgumentCheckFailure()throws
+    public void singleResourceMultipleTokensCompositeAndSingleAndOperatorOneBadArgumentCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -500,9 +509,10 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
     }
 
     @Test
-    public  void singleResourceMultipleTokensCompositeAndSingleAndOperatorTwoBadArgumentsCheckFailure()throws
+    public void singleResourceMultipleTokensCompositeAndSingleAndOperatorTwoBadArgumentsCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -559,9 +569,10 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
     }
 
     @Test
-    public  void singleResourceMultipleTokensCompositeAndCompositeAndOperatorCheckSuccess()throws
+    public void singleResourceMultipleTokensCompositeAndCompositeAndOperatorCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -637,9 +648,10 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
 
 
     @Test
-    public  void singleResourceMultipleTokensCompositeAndCompositeAndOperatorOneBadArgumentCheckFailure()throws
+    public void singleResourceMultipleTokensCompositeAndCompositeAndOperatorOneBadArgumentCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -717,7 +729,8 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
     @Test
     public void singleResourceThreeTokensAndOperatorCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -768,7 +781,8 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
     @Test
     public void singleResourceThreeTokensAndOperatorOneBadArgumentCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -818,7 +832,8 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
     @Test
     public void singleResourceThreeTokensOROperatorTwoBadArgumentsCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -868,7 +883,8 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
     @Test
     public void singleResourceThreeTokensOROperatorThreeBadArgumentsCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -916,9 +932,10 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
     }
 
     @Test
-    public  void singleResourceMultipleTokensCompositeAndCompositeAndSingleAndOperatorCheckSuccess()throws
+    public void singleResourceMultipleTokensCompositeAndCompositeAndSingleAndOperatorCheckSuccess() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -1005,9 +1022,10 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
     }
 
     @Test
-    public  void singleResourceMultipleTokensCompositeAndCompositeAndSingleAndOperatorBadArgumentInSingleCheckFailure()throws
+    public void singleResourceMultipleTokensCompositeAndCompositeAndSingleAndOperatorBadArgumentInSingleCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
@@ -1095,9 +1113,10 @@ public class ABACPolicyHelperCompositeAccessPoliciesTest {
 
 
     @Test
-    public  void singleResourceMultipleTokensCompositeAndCompositeAndSingleAndOperatorOneBadArgumentInFirstCompositeCheckFailure()throws
+    public void singleResourceMultipleTokensCompositeAndCompositeAndSingleAndOperatorOneBadArgumentInFirstCompositeCheckFailure() throws
             NoSuchAlgorithmException,
-            InvalidArgumentsException {
+            InvalidArgumentsException,
+            ValidationException {
 
         SecurityRequest securityRequest = MutualAuthenticationHelper.getSecurityRequest(this.authorizationCredentialsSet, false);
         assertFalse(securityRequest.getSecurityCredentials().isEmpty());
