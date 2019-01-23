@@ -15,6 +15,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.util.Map;
+import eu.h2020.symbiote.security.handler.*;
+
+import java.util.Optional;
 
 /**
  * Builds a component security Handler
@@ -40,7 +43,8 @@ public class ComponentSecurityHandlerFactory {
      * @param componentOwnerPassword         local AAM Admin credentials
      * @return the component security handler ready to talk with Symbiote components
      * @throws SecurityHandlerException on creation error (e.g. problem with the wallet)
-     * @deprecated use {@link #getComponentSecurityHandler(String, String, String, String, String, String)}
+     *
+     * @deprecated use {@link #getComponentSecurityHandler(String, String, String, String, String, String, Optional)}
      */
     @Deprecated
     public static IComponentSecurityHandler getComponentSecurityHandler(String coreAAMAddress,
@@ -58,8 +62,8 @@ public class ComponentSecurityHandlerFactory {
                 clientId,
                 localAAMAddress,
                 componentOwnerUsername,
-                componentOwnerPassword
-        );
+                componentOwnerPassword,
+                Optional.of(new NullAnomalyListenerSecurity()));
     }
 
     /**
@@ -79,7 +83,8 @@ public class ComponentSecurityHandlerFactory {
                                                                         String clientId,
                                                                         String localAAMAddress,
                                                                         String componentOwnerUsername,
-                                                                        String componentOwnerPassword) throws
+                                                                        String componentOwnerPassword,
+                                                                        Optional<IAnomalyListenerSecurity> anomalyListenerSecurity) throws
             SecurityHandlerException {
         if (clientId.split("@").length != 2) {
             throw new SecurityHandlerException("Component Id has bad form, must be componentId@platformId");
@@ -105,6 +110,7 @@ public class ComponentSecurityHandlerFactory {
                 localAAMAddress,
                 componentOwnerUsername,
                 componentOwnerPassword,
-                clientId);
+                clientId,
+                anomalyListenerSecurity);
     }
 }

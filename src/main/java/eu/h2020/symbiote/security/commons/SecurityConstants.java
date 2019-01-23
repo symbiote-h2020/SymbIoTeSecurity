@@ -65,9 +65,18 @@ public class SecurityConstants {
     // L3/L4 access hash (optional)
     public static final String PROPRIETARY_SECURITY_PAYLOAD = "x-auth-hash";
 
+
+    // General Anomaly Detection
+    public static final long ANOMALY_DETECTION_DELTA = 6000L;
+    public static final String ADM_PREFIX = "/adm";
+    public static final String LOG_ANOMALY_EVENT = "/log_anomaly_event";
+    public static final String LOW_PLATFORM_REPUTATION = "/low_platform_reputation";
+    public static final String ANOMALY_DETECTION_MESSAGE = "/anomaly_detection_message";
+    public static final String ANOMALY_SOURCE_AAM_NOTIFICATION = "/anomaly_source_aam_notification";
+
+    // Federated (L2) ADM
     public static final String ADM_LOG_FAILED_FEDERATION_AUTHORIZATION = "/log_failed_federation_authorization";
     public static final String ADM_GET_FEDERATED_MISDEEDS = "/federated_misdeeds";
-    public static final String ADM_PREFIX = "/adm";
 
     //Access Policy JSON fields
     //Single Token
@@ -95,7 +104,7 @@ public class SecurityConstants {
     public static final String BTM_REVOKE_COUPON = "/revoke_coupon";
 
 
-    //Platform Attribute-oriented PA
+    //Platform Attribute-oriented AP
     public static final String ACCESS_POLICY_PLATFORM_ID = "platformIdentifier";
 
     // Composite Platform Attribute-oriented PA
@@ -105,6 +114,7 @@ public class SecurityConstants {
 
     public static final String BOOLEAN_STRING_VALUE_TRUE = "true";
     public static final String BOOLEAN_STRING_VALUE_FALSE = "false";
+
     private SecurityConstants() {
     }
 }

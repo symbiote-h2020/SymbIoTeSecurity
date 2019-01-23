@@ -52,6 +52,14 @@ public interface IAAMClient {
             AAMException;
 
     /**
+     * Sends information about event to Anomaly Detection Module
+     *
+     * @param eventLogRequest contains information about event
+     * @return true/false depending on event report status
+     */
+    String logAnomalyEvent(EventLogRequest eventLogRequest);
+
+    /**
      * @return GUEST token used to access public resources offered in SymbIoTe
      */
     String getGuestToken() throws JWTCreationException, AAMException;
@@ -65,7 +73,8 @@ public interface IAAMClient {
             WrongCredentialsException,
             JWTCreationException,
             MalformedJWTException,
-            AAMException;
+            AAMException,
+            BlockedUserException;
 
     /**
      * @param remoteHomeToken   that an actor wants to exchange in this AAM for a FOREIGN token
@@ -112,5 +121,6 @@ public interface IAAMClient {
      */
     UserDetails getUserDetails(Credentials credentials) throws
             UserManagementException,
-            AAMException;
+            AAMException,
+            BlockedUserException;
 }

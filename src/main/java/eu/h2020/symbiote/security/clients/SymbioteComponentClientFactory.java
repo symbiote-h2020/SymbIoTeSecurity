@@ -13,6 +13,8 @@ import feign.jackson.JacksonEncoder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.Optional;
+
 /**
  * Used to create a Feign client wrapped with Symbiote Security checks
  *
@@ -65,7 +67,8 @@ public class SymbioteComponentClientFactory {
                             finalClientId,
                             securityConfiguration.getLocalAAMAddress(),
                             securityConfiguration.getComponentOwnerUsername(),
-                            securityConfiguration.getComponentOwnerPassword()
+                            securityConfiguration.getComponentOwnerPassword(),
+                            Optional.empty() // TODO should pass AnomalyListener
                     );
         } else {
             return null;

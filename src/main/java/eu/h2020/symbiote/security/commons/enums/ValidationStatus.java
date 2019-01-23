@@ -59,6 +59,10 @@ public enum ValidationStatus {
      * when the validation procedure failed for whatever reason (e.g. internal server error)
      */
     UNKNOWN,
+    /**
+     * when anomaly detection module found suspicious behaviour.
+     */
+    BLOCKED,
 
     /**
      * when issuer of the token under validation is unreachable
