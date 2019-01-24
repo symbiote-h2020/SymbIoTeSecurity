@@ -212,8 +212,8 @@ public class ComponentSecurityHandlerTest {
     public void testComponentSecurityHandlerSuccess() throws Throwable {
 
         IComponentSecurityHandler a = ComponentSecurityHandlerFactory.getComponentSecurityHandler(
-                serverkeystorePath,
-                serverkeystorePassword,
+                "irrelevant",
+                "irrelevant",
                 goodComponentId + "@" + goodPlatformId,
                 "http://test",
                 username,
@@ -230,7 +230,7 @@ public class ComponentSecurityHandlerTest {
         ISecurityHandler c = a.getSecurityHandler();
         assertEquals(c.getAvailableAAMs().size(), 2);
 
-        Token d = c.login(getHomeAMM(homeAAMId, getCertString("./src/test/resources/core.p12", serverkeystorePassword, "aamid1")));
+        Token d = c.login(getHomeAMM("aamid1", getCertString("./src/test/resources/core.p12", serverkeystorePassword, "aamid1")));
         assertNotNull(d.getToken());
     }
 
@@ -238,8 +238,8 @@ public class ComponentSecurityHandlerTest {
     public void testComponentSecurityHandlerNonExistingCert() throws SecurityHandlerException {
 
         IComponentSecurityHandler a = ComponentSecurityHandlerFactory.getComponentSecurityHandler(
-                serverkeystorePath,
-                serverkeystorePassword,
+                "irrelevant",
+                "irrelevant",
                 goodComponentId + "@" + badPlatformId,
                 "http://test",
                 "testUser",

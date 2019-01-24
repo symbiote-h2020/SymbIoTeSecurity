@@ -181,13 +181,13 @@ public class SecurityHandler implements ISecurityHandler {
         }
     }
 
-    public Token login(AAM homeAAMId) throws SecurityHandlerException, ValidationException {
-        BoundCredentials credentials = credentialsWallet.get(homeAAMId.getAamInstanceId());
+    public Token login(AAM homeAAM) throws SecurityHandlerException, ValidationException {
+        BoundCredentials credentials = credentialsWallet.get(homeAAM.getAamInstanceId());
 
         if (credentials != null && credentials.homeCredentials != null &&
                 credentials.homeCredentials.privateKey != null) {
             try {
-                String homeToken = ClientFactory.getAAMClient(homeAAMId.getAamAddress()).getHomeToken(
+                String homeToken = ClientFactory.getAAMClient(homeAAM.getAamAddress()).getHomeToken(
                         CryptoHelper.buildHomeTokenAcquisitionRequest(credentials.homeCredentials));
                 credentials.homeCredentials.homeToken = new Token(homeToken);
                 tokenCredentials.put(homeToken, credentials);
@@ -204,7 +204,7 @@ public class SecurityHandler implements ISecurityHandler {
                 throw new SecurityHandlerException("User was blocked. Try again in 60s", e);
             }
         } else {
-            throw new SecurityHandlerException("Can't find certificate for AAM " + homeAAMId.getAamInstanceId());
+            throw new SecurityHandlerException("Can't find certificate for AAM " + homeAAM.getAamInstanceId());
         }
     }
 
