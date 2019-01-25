@@ -30,7 +30,6 @@ public class AAMClient implements IAAMClient {
     private static final Log logger = LogFactory.getLog(AAMClient.class);
 
     private static final String AAM_COMMS_ERROR_MESSAGE = "Failed to communicate with the AAM: ";
-    private static final String ACCOUNT_NOT_ACTIVE_MESSAGE = "User account is either not yet activated or blocked due to missing service consent and/or  suspicious actions.";
     private String serverAddress;
     private IFeignAAMClient feignClient;
 
@@ -102,9 +101,10 @@ public class AAMClient implements IAAMClient {
     @Override
     public String signCertificateRequest(CertificateRequest certificateRequest) throws
             NotExistingUserException,
-            ValidationException,
             InvalidArgumentsException,
-            AAMException {
+            AAMException,
+            BlockedUserException,
+            WrongCredentialsException {
         Response response;
         try {
             response = feignClient.signCertificateRequest(certificateRequest);
@@ -117,10 +117,9 @@ public class AAMClient implements IAAMClient {
                     throw new InvalidArgumentsException(response.body().toString());
                 throw new NotExistingUserException(response.body().toString());
             case 401:
-                //TODO: Find a way to differentiate ValidationException from WrongCredentialsException since response's body is empty on error
-                throw new ValidationException("Could not validate - Invalid certificate / credentials");
+                throw new WrongCredentialsException("Could not validate - Invalid certificate / credentials");
             case 403:
-                throw new ValidationException(ACCOUNT_NOT_ACTIVE_MESSAGE);
+                throw new BlockedUserException();
             case 200:
                 if (response.body().toString().isEmpty()) {
                     throw new AAMException("Error occured. Response is empty!");
@@ -142,7 +141,8 @@ public class AAMClient implements IAAMClient {
     public String revokeCredentials(RevocationRequest revocationRequest) throws
             InvalidArgumentsException,
             WrongCredentialsException,
-            AAMException {
+            AAMException,
+            BlockedUserException {
         Response response;
         try {
             response = feignClient.revokeCredentials(revocationRequest);
@@ -155,7 +155,7 @@ public class AAMClient implements IAAMClient {
             case 401:
                 throw new WrongCredentialsException();
             case 403:
-                throw new WrongCredentialsException(ACCOUNT_NOT_ACTIVE_MESSAGE);
+                throw new BlockedUserException();
             case 200:
                 if (response.body().toString().isEmpty()) {
                     throw new AAMException("Error occured. Response is empty!");
@@ -175,7 +175,7 @@ public class AAMClient implements IAAMClient {
      */
     @Override
     public String logAnomalyEvent(EventLogRequest eventLogRequest) {
-        if(eventLogRequest == null)
+        if (eventLogRequest == null)
             return "";
         Response response = feignClient.logAnomalyEvent(eventLogRequest);
         return response.body().toString();
@@ -233,9 +233,7 @@ public class AAMClient implements IAAMClient {
             case 401:
                 throw new WrongCredentialsException("Could not validate token with incorrect credentials");
             case 403:
-                throw new WrongCredentialsException(ACCOUNT_NOT_ACTIVE_MESSAGE);
-                // TODO fix as this was used also for anomaly block
-                //throw new BlockedUserException("User was blocked due to incorrect credentials. Please, try again after 60s.");
+                throw new BlockedUserException();
             case 500:
                 throw new JWTCreationException("Server failed to create a home token");
             case 200:
@@ -262,7 +260,8 @@ public class AAMClient implements IAAMClient {
                                   Optional<String> aamCertificate) throws
             ValidationException,
             JWTCreationException,
-            AAMException {
+            AAMException,
+            BlockedUserException {
         Response response;
         try {
             response = feignClient.getForeignToken(
@@ -276,7 +275,7 @@ public class AAMClient implements IAAMClient {
             case 401:
                 throw new ValidationException("Failed to validate homeToken");
             case 403:
-                throw new ValidationException(ACCOUNT_NOT_ACTIVE_MESSAGE);
+                throw new BlockedUserException();
             case 500:
                 throw new JWTCreationException("Server failed to create a foreign token");
             case 200:

@@ -156,6 +156,7 @@ public class SecurityHandler implements ISecurityHandler {
         }
         return availableAAMsCollection;
     }
+
     public Map<String, AAM> getAvailableAAMs(String aamAddress) throws SecurityHandlerException {
         // end-client
         if (platformId.isEmpty()) {
@@ -223,14 +224,14 @@ public class SecurityHandler implements ISecurityHandler {
                             Optional.ofNullable(credentials.homeCredentials.homeAAM.getAamCACertificate().getCertificateString())));
                 } catch (ValidationException e) {
                     logger.error("Invalid token returned for AAM " + aam.getAamInstanceId(), e);
-                    return null;
                 } catch (JWTCreationException e) {
                     logger.error("Error creating log in token", e);
-                    return null;
                 } catch (AAMException e) {
                     logger.error("Other error when communicating with the AAM occured" + e.getMessage(), e);
-                    return null;
+                } catch (BlockedUserException e) {
+                    logger.error("AAM refused to issue token for reason: " + e.getMessage(), e);
                 }
+                return null;
             }));
 
             credentials.foreignTokens = result;
@@ -374,7 +375,7 @@ public class SecurityHandler implements ISecurityHandler {
             try {
                 certificateValue = ClientFactory.getAAMClient(homeAAM.getAamAddress())
                         .signCertificateRequest(request);
-            } catch (AAMException e) { // communication fail with the AAM
+            } catch (AAMException | BlockedUserException | WrongCredentialsException e) { // communication fail with the AAM
                 throw new SecurityHandlerException(e.getMessage(), e);
             }
 
@@ -397,7 +398,7 @@ public class SecurityHandler implements ISecurityHandler {
 
             return certificate;
 
-        } catch (CertificateException | NotExistingUserException | ValidationException | InvalidArgumentsException e) {
+        } catch (CertificateException | NotExistingUserException | InvalidArgumentsException e) {
             throw new SecurityHandlerException(e.getMessage(), e);
         } catch (IOException e) {
             throw new SecurityHandlerException("Error signing certificate request", e);

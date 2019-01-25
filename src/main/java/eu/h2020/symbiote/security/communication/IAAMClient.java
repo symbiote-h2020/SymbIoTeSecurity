@@ -38,7 +38,8 @@ public interface IAAMClient {
             NotExistingUserException,
             ValidationException,
             InvalidArgumentsException,
-            AAMException;
+            AAMException,
+            BlockedUserException;
 
     /**
      * Allows the user to revoke their credentials
@@ -49,7 +50,8 @@ public interface IAAMClient {
     String revokeCredentials(RevocationRequest revocationRequest) throws
             InvalidArgumentsException,
             WrongCredentialsException,
-            AAMException;
+            AAMException,
+            BlockedUserException;
 
     /**
      * Sends information about event to Anomaly Detection Module
@@ -85,7 +87,8 @@ public interface IAAMClient {
     String getForeignToken(String remoteHomeToken, Optional<String> clientCertificate, Optional<String> aamCertificate) throws
             ValidationException,
             JWTCreationException,
-            AAMException;
+            AAMException,
+            BlockedUserException;
 
     /**
      * @return collection of AAMs available in the SymbIoTe ecosystem
