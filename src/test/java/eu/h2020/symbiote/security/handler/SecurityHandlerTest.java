@@ -17,7 +17,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -34,7 +33,6 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 
 @RunWith(PowerMockRunner.class)

@@ -27,7 +27,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -132,16 +132,16 @@ public class ComponentSecurityHandlerTest {
         //aamClient.signCertificateRequest
         Mockito.when(aamClient.signCertificateRequest(Mockito.any(CertificateRequest.class))).thenReturn(getCertString(serverkeystorePath, serverkeystorePassword, serveralias));
 
-        Mockito.when(ClientFactory.getAAMClient(Matchers.anyString())).thenReturn(aamClient);
+        Mockito.when(ClientFactory.getAAMClient(ArgumentMatchers.anyString())).thenReturn(aamClient);
 
         //aamClient.getAvailableAAMs
         Mockito.when(aamClient.getAvailableAAMs()).thenReturn(new AvailableAAMsCollection(getAMMMap(issuingAAM)));
         Mockito.when(aamClient.getAAMsInternally()).thenReturn(new AvailableAAMsCollection(getAMMMap(issuingAAM)));
 
         //aamClient.getHomeToken
-        Mockito.when(aamClient.getHomeToken(Matchers.anyString())).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
+        Mockito.when(aamClient.getHomeToken(ArgumentMatchers.anyString())).thenReturn(getTokenString(serverkeystorePath, serverkeystorePassword, serveralias));
 
-        Mockito.when(aamClient.validateCredentials(Matchers.anyString(), Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(ValidationStatus.VALID);
+        Mockito.when(aamClient.validateCredentials(ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(ValidationStatus.VALID);
 
     }
 
