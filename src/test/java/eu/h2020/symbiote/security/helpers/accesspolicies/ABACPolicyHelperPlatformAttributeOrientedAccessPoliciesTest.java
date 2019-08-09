@@ -3,7 +3,6 @@ package eu.h2020.symbiote.security.helpers.accesspolicies;
 
 import eu.h2020.symbiote.security.accesspolicies.IAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.AccessPolicyFactory;
-import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.AttributeOrientedAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.BooleanAccessRule;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.CompositeAccessRule;
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.NumericAccessRule;
@@ -11,7 +10,6 @@ import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.access
 import eu.h2020.symbiote.security.accesspolicies.common.attributeOriented.accessRules.commons.IAccessRule;
 import eu.h2020.symbiote.security.accesspolicies.common.composite.CompositeAccessPolicySpecifier;
 import eu.h2020.symbiote.security.accesspolicies.common.platformAttributeOriented.CompositePlatformAttributeOrientedAccessPolicySpecifier;
-import eu.h2020.symbiote.security.accesspolicies.common.platformAttributeOriented.PlatformAttributeOrientedAccessPolicy;
 import eu.h2020.symbiote.security.accesspolicies.common.platformAttributeOriented.PlatformAttributeOrientedAccessPolicySpecifier;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
@@ -117,7 +115,7 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
                 (long) (36000000),
                 deploymentId,
                 issuingAAMPublicKey,
-                issuingAAMPrivateKey);
+                issuingAAMPrivateKey, DummyTokenIssuer.SignatureType.PROPER);
 
         AuthorizationCredentials authorizationCredentials = new AuthorizationCredentials(new Token(authorizationToken), homeCredentials.homeAAM, homeCredentials);
         this.authorizationCredentialsSet.add(authorizationCredentials);
@@ -138,7 +136,7 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
                 (long) (36000000),
                 deploymentId,
                 issuingAAMPublicKey,
-                issuingAAMPrivateKey);
+                issuingAAMPrivateKey, DummyTokenIssuer.SignatureType.PROPER);
 
         String authorizationTokenTwo = DummyTokenIssuer.buildAuthorizationToken(clientId,
                 attributesSecond,
@@ -147,7 +145,7 @@ public class ABACPolicyHelperPlatformAttributeOrientedAccessPoliciesTest {
                 (long) (36000000),
                 deploymentId2,
                 issuingAAMPublicKey,
-                issuingAAMPrivateKey);
+                issuingAAMPrivateKey, DummyTokenIssuer.SignatureType.PROPER);
 
         AuthorizationCredentials authorizationCredentialsFirst = new AuthorizationCredentials(new Token(authorizationTokenOne), homeCredentials.homeAAM, homeCredentials);
         AuthorizationCredentials authorizationCredentialsSecond = new AuthorizationCredentials(new Token(authorizationTokenTwo), homeCredentials.homeAAM, homeCredentials);

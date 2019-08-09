@@ -102,7 +102,7 @@ public class ABACPolicyHelperLocalHomeTokenTest {
                 (long) (36000000),
                 deploymentId,
                 issuingAAMPublicKey,
-                issuingAAMPrivateKey);
+                issuingAAMPrivateKey, DummyTokenIssuer.SignatureType.PROPER);
 
         AuthorizationCredentials authorizationCredentials = new AuthorizationCredentials(new Token(authorizationToken), homeCredentials.homeAAM, homeCredentials);
         this.homePlatformAuthorizationCredentialsSet.add(authorizationCredentials);
@@ -120,7 +120,7 @@ public class ABACPolicyHelperLocalHomeTokenTest {
                 (long) (36000000),
                 "",
                 issuingAAMPublicKey,
-                issuingAAMPrivateKey);
+                issuingAAMPrivateKey, DummyTokenIssuer.SignatureType.PROPER);
 
         AuthorizationCredentials authorizationCredentialsGuest = new AuthorizationCredentials(new Token(authorizationTokenGuest), homeCredentials.homeAAM, homeCredentials);
         this.guestAuthorizationCredentialsSet.add(authorizationCredentialsGuest);
@@ -132,7 +132,7 @@ public class ABACPolicyHelperLocalHomeTokenTest {
                 (long) (36000000),
                 deploymentIdForeign,
                 issuingAAMPublicKey,
-                issuingAAMPrivateKey);
+                issuingAAMPrivateKey, DummyTokenIssuer.SignatureType.PROPER);
 
         AuthorizationCredentials authorizationCredentialsForeign = new AuthorizationCredentials(new Token(authorizationTokenForeign), homeCredentials.homeAAM, homeCredentials);
         this.foreignPlatformAuthorizationCredentialsSet.add(authorizationCredentialsForeign);

@@ -98,7 +98,7 @@ public class ABACPolicyHelperSingleTokenTest {
                 (long) (36000000),
                 deploymentId,
                 issuingAAMPublicKey,
-                issuingAAMPrivateKey);
+                issuingAAMPrivateKey, DummyTokenIssuer.SignatureType.PROPER);
 
         AuthorizationCredentials authorizationCredentials = new AuthorizationCredentials(new Token(authorizationToken), homeCredentials.homeAAM, homeCredentials);
         this.authorizationCredentialsSet.add(authorizationCredentials);
@@ -117,7 +117,7 @@ public class ABACPolicyHelperSingleTokenTest {
                 (long) (36000000),
                 deploymentId,
                 issuingAAMPublicKey,
-                issuingAAMPrivateKey);
+                issuingAAMPrivateKey, DummyTokenIssuer.SignatureType.PROPER);
 
         String authorizationTokenTwo = DummyTokenIssuer.buildAuthorizationToken(clientId,
                 attributesSecond,
@@ -126,7 +126,7 @@ public class ABACPolicyHelperSingleTokenTest {
                 (long) (36000000),
                 deploymentId,
                 issuingAAMPublicKey,
-                issuingAAMPrivateKey);
+                issuingAAMPrivateKey, DummyTokenIssuer.SignatureType.PROPER);
 
         AuthorizationCredentials authorizationCredentialsFirst = new AuthorizationCredentials(new Token(authorizationTokenOne), homeCredentials.homeAAM, homeCredentials);
         AuthorizationCredentials authorizationCredentialsSecond = new AuthorizationCredentials(new Token(authorizationTokenTwo), homeCredentials.homeAAM, homeCredentials);

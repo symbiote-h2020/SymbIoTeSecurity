@@ -1,5 +1,7 @@
 package eu.h2020.symbiote.security.commons;
 
+import io.jsonwebtoken.SignatureAlgorithm;
+
 /**
  * Constants related to SH-AAM communication
  * <p>
@@ -12,6 +14,7 @@ public class SecurityConstants {
 
     // Security GLOBAL
     public static final String CURVE_NAME = "secp256r1";
+    public static final String JWT_SIGNATURE_ALGORITHM_NAME = SignatureAlgorithm.ES256.getValue();
     public static final String KEY_PAIR_GEN_ALGORITHM = "ECDSA";
     public static final String SIGNATURE_ALGORITHM = "SHA256withECDSA";
 

@@ -24,7 +24,7 @@ public class DummyTokenIssuer {
 
     public static String buildAuthorizationToken(String userId, Map<String, String> attributes, byte[] userPublicKey,
                                                  Token.Type tokenType, Long tokenValidity, String
-                                                         deploymentID, PublicKey aamPublicKey, PrivateKey aamPrivateKey) {
+                                                         deploymentID, PublicKey aamPublicKey, PrivateKey aamPrivateKey, SignatureType signatureType) {
         ECDSAHelper.enableECDSAProvider();
 
         String jti = String.valueOf(random.nextInt());
@@ -53,8 +53,32 @@ public class DummyTokenIssuer {
         jwtBuilder.setSubject(userId);
         jwtBuilder.setIssuedAt(new Date());
         jwtBuilder.setExpiration(new Date(System.currentTimeMillis() + tokenValidity));
-        jwtBuilder.signWith(SignatureAlgorithm.ES256, aamPrivateKey);
-
+        switch (signatureType) {
+            case PROPER:
+                jwtBuilder.signWith(SignatureAlgorithm.ES256, aamPrivateKey);
+                break;
+            case ABUSING:
+                jwtBuilder.signWith(SignatureAlgorithm.HS256, aamPublicKey.getEncoded());
+                break;
+            case NONE:
+                // no signature
+                break;
+        }
         return jwtBuilder.compact();
+    }
+
+    public enum SignatureType {
+        /**
+         * ES256
+         */
+        PROPER,
+        /**
+         * using know public key as secret
+         */
+        ABUSING,
+        /**
+         * hacking by JWT spec
+         */
+        NONE
     }
 }

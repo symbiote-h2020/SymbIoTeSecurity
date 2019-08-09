@@ -92,7 +92,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
                 (long) (36000000),
                 deploymentId,
                 issuingAAMPublicKey,
-                issuingAAMPrivateKey);
+                issuingAAMPrivateKey, DummyTokenIssuer.SignatureType.PROPER);
 
         String authorizationTokenTwo = DummyTokenIssuer.buildAuthorizationToken(clientId,
                 attributesSecond,
@@ -101,7 +101,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
                 (long) (36000000),
                 deploymentId,
                 issuingAAMPublicKey,
-                issuingAAMPrivateKey);
+                issuingAAMPrivateKey, DummyTokenIssuer.SignatureType.PROPER);
 
         String authorizationTokenThree = DummyTokenIssuer.buildAuthorizationToken(clientId,
                 attributesSecond,
@@ -110,7 +110,7 @@ public class ABACPolicyHelperSingleFederatedTokenTest {
                 (long) (36000000),
                 federatedPlatformId,
                 issuingAAMPublicKey,
-                issuingAAMPrivateKey);
+                issuingAAMPrivateKey, DummyTokenIssuer.SignatureType.PROPER);
 
         AuthorizationCredentials authorizationCredentialsFirst = new AuthorizationCredentials(new Token(authorizationTokenOne), homeCredentials.homeAAM, homeCredentials);
         AuthorizationCredentials authorizationCredentialsSecond = new AuthorizationCredentials(new Token(authorizationTokenTwo), homeCredentials.homeAAM, homeCredentials);

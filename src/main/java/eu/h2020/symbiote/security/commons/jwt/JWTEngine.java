@@ -57,11 +57,17 @@ public class JWTEngine {
         }
     }
 
+    private static void verifyTokenSignatureAlgorithm(String jwtAlgorithmClaim) throws ValidationException {
+        // checking that the token is signed using our desired algorithm
+        if (!jwtAlgorithmClaim.equals(SecurityConstants.JWT_SIGNATURE_ALGORITHM_NAME))
+            throw new ValidationException("Token signature algorithm was " + jwtAlgorithmClaim + " instead of required " + SecurityConstants.JWT_SIGNATURE_ALGORITHM_NAME);
+    }
+
     /**
      * Validates the jwt string using a given public key
      *
      * @param jwtString JSON Web Token to be validated and initialized
-     * @param publicKey   issuer's public key
+     * @param publicKey issuer's public key
      * @return validation status
      * @throws ValidationException on other errors
      */
@@ -69,6 +75,9 @@ public class JWTEngine {
             ValidationException {
         try {
             ECDSAHelper.enableECDSAProvider();
+
+            JWTClaims claims = getClaimsFromToken(jwtString);
+            verifyTokenSignatureAlgorithm(claims.getAlg());
 
             Jwts.parser()
                     .setSigningKey(publicKey)
@@ -78,7 +87,7 @@ public class JWTEngine {
             return ValidationStatus.EXPIRED_TOKEN;
         } catch (SignatureException e) {
             return ValidationStatus.INVALID_TRUST_CHAIN;
-        } catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
+        } catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException | MalformedJWTException e) {
             throw new ValidationException(ValidationException.JSON_WEB_TOKEN_COULD_NOT_BE_VALIDATED + e.getMessage(), e);
         }
     }
@@ -94,6 +103,8 @@ public class JWTEngine {
         try {
             ECDSAHelper.enableECDSAProvider();
             JWTClaims claims = getClaimsFromToken(jwtString);
+            verifyTokenSignatureAlgorithm(claims.getAlg());
+
             //Convert IPK claim to publicKey for validation
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(claims.getIpk()));
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
@@ -108,16 +119,22 @@ public class JWTEngine {
 
     public static JWTClaims getClaimsFromToken(String jwtString) throws MalformedJWTException {
         HashMap<String, Object> retMap = new HashMap<>();
+        ObjectMapper mapper = new ObjectMapper();
         String[] jwtParts = jwtString.split("\\.");
         if (jwtParts.length < SecurityConstants.JWT_PARTS_COUNT) {
             throw new MalformedJWTException();
         }
+        // fetch header claims
+        try {
+            retMap.putAll(mapper.readValue(new String(Base64.getDecoder().decode(jwtParts[0])), new TypeReference<Map<String, String>>() {
+            }));
+        } catch (IOException e) {
+            throw new MalformedJWTException(e);
+        }
+
         //Get second part of the JWT
         String jwtBody = jwtParts[1];
-
         String claimsString = new String(Base64.getDecoder().decode(jwtBody));
-
-        ObjectMapper mapper = new ObjectMapper();
 
         Map<String, Object> claimsMap;
 

@@ -17,7 +17,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -34,12 +33,11 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ClientFactory.class)
-@PowerMockIgnore({"java.net.ssl", "javax.security.auth.x500.X500Principal"})
+@PowerMockIgnore({"java.net.ssl", "javax.security.auth.x500.X500Principal", "javax.crypto.*"})
 public class SecurityHandlerTest {
 
 
@@ -353,7 +351,7 @@ public class SecurityHandlerTest {
         key = keystore.getKey(alias, spassword.toCharArray());
 
 
-        result = DummyTokenIssuer.buildAuthorizationToken(userId, attributes, userPublicKey, Token.Type.HOME, tokenValidity, deploymentID, aamPublicKey, (PrivateKey) key);
+        result = DummyTokenIssuer.buildAuthorizationToken(userId, attributes, userPublicKey, Token.Type.HOME, tokenValidity, deploymentID, aamPublicKey, (PrivateKey) key, DummyTokenIssuer.SignatureType.PROPER);
 
 
         return result;

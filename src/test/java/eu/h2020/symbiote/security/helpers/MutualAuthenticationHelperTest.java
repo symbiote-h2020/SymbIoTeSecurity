@@ -78,7 +78,7 @@ public class MutualAuthenticationHelperTest {
                 (long) (36000000),
                 "",
                 issuingAAMPublicKey,
-                issuingAAMPrivateKey);
+                issuingAAMPrivateKey, DummyTokenIssuer.SignatureType.PROPER);
 
         this.guestToken = new Token(DummyTokenIssuer.buildAuthorizationToken(clientId,
                 null,
@@ -87,7 +87,7 @@ public class MutualAuthenticationHelperTest {
                 (long) (36000000),
                 "",
                 issuingAAMPublicKey,
-                issuingAAMPrivateKey));
+                issuingAAMPrivateKey, DummyTokenIssuer.SignatureType.PROPER));
 
         AuthorizationCredentials authorizationCredentials = new AuthorizationCredentials(new Token(authorizationToken), homeCredentials.homeAAM, homeCredentials);
         authorizationCredentialsSet = new HashSet<>();
@@ -249,7 +249,7 @@ public class MutualAuthenticationHelperTest {
                 (long) (3600000),
                 "",
                 issuingAAMPublicKey,
-                issuingAAMPrivateKey);
+                issuingAAMPrivateKey, DummyTokenIssuer.SignatureType.PROPER);
         Token authToken = new Token(authorizationToken);
         String hexHash = hashSHA256("wrongHash");
 
@@ -306,7 +306,7 @@ public class MutualAuthenticationHelperTest {
                 (long) (5000),
                 "",
                 issuingAAMPublicKey,
-                issuingAAMPrivateKey);
+                issuingAAMPrivateKey, DummyTokenIssuer.SignatureType.PROPER);
 
         AuthorizationCredentials authorizationCredentials = new AuthorizationCredentials(new Token(wrongAuthorizationToken), homeCredentials.homeAAM, homeCredentials);
         Set<AuthorizationCredentials> wrongAuthorizationCredentialsSet = new HashSet<>();
