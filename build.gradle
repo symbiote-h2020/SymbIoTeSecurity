@@ -1,3 +1,4 @@
+/*
 buildscript {
 
     repositories {
@@ -11,20 +12,27 @@ buildscript {
         classpath 'org.owasp:dependency-check-gradle:3.2.0'
     }
 }
-// code
-apply plugin: 'java'
+*/
 
-// code quality
-apply plugin: 'jacoco'
-apply plugin: 'org.owasp.dependencycheck'
+plugins {
+	// code
+	id 'java'
 
-// IDEs
-apply plugin: 'eclipse'
-apply plugin: 'idea'
+	// code quality
+	id 'jacoco'
+	id "org.owasp.dependencycheck" version "5.3.2.1"
 
-// publishing
-apply plugin: 'com.cinnober.gradle.semver-git'
-apply plugin: 'maven-publish'
+	// IDEs
+	id 'eclipse'
+	id 'idea'
+
+	// publishing
+	id "com.cinnober.gradle.semver-git" version "3.0.0"
+	id 'maven-publish'
+
+	// detecting new dependency versions
+    id 'com.github.ben-manes.versions' version '0.28.0' // find new versions of dependency task: dependencyUpdates
+}
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -43,16 +51,17 @@ configurations {
 }
 
 dependencies {
-    compile('io.jsonwebtoken:jjwt:[0.9.1, 0.9.999]')
+    compile('io.jsonwebtoken:jjwt-api:0.11.1')
+    compile('io.jsonwebtoken:jjwt-impl:0.11.1')
+    compile('io.jsonwebtoken:jjwt-jackson:0.11.1')
     compile('org.bouncycastle:bcprov-jdk15on:[1.60, 1.999]')
     compile('org.bouncycastle:bcpkix-jdk15on:[1.60, 1.999]')
     compile('io.github.openfeign:feign-jackson:[9.7.0, 9.999]')
     compile('commons-logging:commons-logging:[1.2, 1.999]')
 
-    // JDK 9+ runtime fixes
-    if(JavaVersion.current() > JavaVersion.VERSION_1_8){
-        runtime('javax.xml.bind:jaxb-api:[2.3.0, 2.3.999]')
-    }
+    // JDK 11 runtime fixes
+    compile('javax.xml.bind:jaxb-api:[2.3.0, 2.3.999]')
+    runtime('org.glassfish.jaxb:jaxb-runtime:[2.3.0, 2.3.999]')
 
     // common testing
     testCompile('junit:junit:[4.12, 4.999]')
@@ -127,7 +136,7 @@ publishing {
 
 // jacoco configuration section
 jacoco {
-    toolVersion = "0.7.9"
+    toolVersion = "0.8.5"
 }
 
 jacocoTestReport {
