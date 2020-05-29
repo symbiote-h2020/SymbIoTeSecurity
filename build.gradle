@@ -63,11 +63,16 @@ dependencies {
     compile('javax.xml.bind:jaxb-api:[2.3.0, 2.3.999]')
     runtime('org.glassfish.jaxb:jaxb-runtime:[2.3.0, 2.3.999]')
 
+    // spring dependencies
+    compile('org.springframework.data:spring-data-commons:2.2.7.RELEASE')
+    compile('org.springframework:spring-web:5.2.6.RELEASE')
+    
     // common testing
     testCompile('junit:junit:[4.12, 4.999]')
     testCompile('org.powermock:powermock-api-mockito2:[2.0, 2.999]')
     testCompile('org.powermock:powermock-core:[2.0, 2.999]')
     testCompile('org.powermock:powermock-module-junit4:[2.0, 2.999]')
+    
 }
 
 // sources and javadocs
